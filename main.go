@@ -1,51 +1,70 @@
 package main
 
 import (
+	_ "embed"
 	"log"
 	"net/http"
 	_ "net/http/pprof"
 
-	"github.com/aiyengar2/prometheus-federator/pkg/controllers"
-	"github.com/aiyengar2/prometheus-federator/pkg/crd"
+	"github.com/aiyengar2/helm-project-operator/pkg/controllers/common"
+	"github.com/aiyengar2/helm-project-operator/pkg/operator"
 	"github.com/aiyengar2/prometheus-federator/pkg/version"
 	command "github.com/rancher/wrangler-cli"
 	_ "github.com/rancher/wrangler/pkg/generated/controllers/apiextensions.k8s.io"
 	_ "github.com/rancher/wrangler/pkg/generated/controllers/networking.k8s.io"
 	"github.com/rancher/wrangler/pkg/kubeconfig"
-	"github.com/rancher/wrangler/pkg/ratelimit"
 	"github.com/spf13/cobra"
 )
 
+const (
+	HelmApiVersion = "monitoring.cattle.io/v1alpha1"
+	ReleaseName    = "monitoring"
+)
+
 var (
+	SystemNamespaces = []string{"kube-system", "cattle-monitoring-system", "cattle-dashboards"}
+
+	//go:embed bin/rancher-project-monitoring/rancher-project-monitoring.tgz.base64
+	base64TgzChart string
+
 	debugConfig command.DebugConfig
 )
 
-type PrometheusFederator struct {
-	Kubeconfig                 string `usage:"Kubeconfig file"`
-	Namespace                  string `usage:"Namespace to watch for Projects" default:"cattle-project-monitoring-system" env:"NAMESPACE"`
-	ClusterPrometheusName      string `usage:"Name of Cluster Prometheus" default:"rancher-monitoring-prometheus" env:"CLUSTER_PROMETHEUS_NAME"`
-	ClusterPrometheusNamespace string `usage:"Namespace containing Cluster Prometheus" default:"cattle-monitoring-system" env:"CLUSTER_PROMETHEUS_NAMESPACE"`
+type ProjectMonitoringValues struct {
 }
 
-func (p *PrometheusFederator) Run(cmd *cobra.Command, args []string) error {
+type PrometheusFederator struct {
+	// Note: all Project Operator are expected to provide these RuntimeOptions
+	common.RuntimeOptions
+
+	Kubeconfig string `usage:"Kubeconfig file"`
+}
+
+func (f *PrometheusFederator) Run(cmd *cobra.Command, args []string) error {
 	go func() {
 		log.Println(http.ListenAndServe("localhost:6060", nil))
 	}()
 	debugConfig.MustSetupDebug()
 
-	cfg := kubeconfig.GetNonInteractiveClientConfig(p.Kubeconfig)
-	clientConfig, err := cfg.ClientConfig()
-	if err != nil {
-		return err
-	}
-	clientConfig.RateLimiter = ratelimit.None
+	cfg := kubeconfig.GetNonInteractiveClientConfig(f.Kubeconfig)
 
 	ctx := cmd.Context()
-	if err := crd.Create(ctx, clientConfig); err != nil {
-		return err
-	}
 
-	if err := controllers.Register(ctx, p.Namespace, p.ClusterPrometheusName, p.ClusterPrometheusNamespace, cfg); err != nil {
+	if err := operator.Init(ctx, f.Namespace, cfg, common.Options{
+		// These fields are provided by the Project Operator
+		HelmApiVersion:   HelmApiVersion,
+		ReleaseName:      ReleaseName,
+		SystemNamespaces: SystemNamespaces,
+		ChartContent:     base64TgzChart,
+
+		// These fields are provided on runtime for all project operators
+		ProjectLabel:            f.ProjectLabel,
+		SystemProjectLabelValue: f.SystemProjectLabelValue,
+		SystemDefaultRegistry:   f.SystemDefaultRegistry,
+		CattleURL:               f.CattleURL,
+		ClusterID:               f.ClusterID,
+		NodeName:                f.NodeName,
+	}); err != nil {
 		return err
 	}
 
