@@ -8,6 +8,6 @@ cd $(dirname $0)/..
 CHART=rancher-project-monitoring
 VERSION=0.0.1
 
-helm package charts/${CHART} --destination bin/${CHART}
+helm package charts/${CHART}/${VERSION} --destination bin/${CHART}
 base64 bin/${CHART}/${CHART}-${VERSION}.tgz > bin/${CHART}/${CHART}.tgz.base64
 rm bin/${CHART}/${CHART}-${VERSION}.tgz

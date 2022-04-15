@@ -5,3 +5,4 @@
 *.swp
 .idea
 /prometheus-federator
+/.charts-build-scripts
