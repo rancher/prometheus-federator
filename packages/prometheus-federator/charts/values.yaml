@@ -1,0 +1,69 @@
+# Default values for helm-project-operator.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# Prometheus Federator Configuration
+
+global:
+  cattle:
+    systemDefaultRegistry: ""
+    projectLabel: field.cattle.io/projectId
+    clusterId: ""
+    systemProjectId: ""
+  rbac:
+    pspEnabled: true
+    pspAnnotations: {}
+      ## Specify pod annotations
+      ## Ref: https://kubernetes.io/docs/concepts/policy/pod-security-policy/#apparmor
+      ## Ref: https://kubernetes.io/docs/concepts/policy/pod-security-policy/#seccomp
+      ## Ref: https://kubernetes.io/docs/concepts/policy/pod-security-policy/#sysctl
+      ##
+      # seccomp.security.alpha.kubernetes.io/allowedProfileNames: '*'
+      # seccomp.security.alpha.kubernetes.io/defaultProfileName: 'docker/default'
+      # apparmor.security.beta.kubernetes.io/defaultProfileName: 'runtime/default'
+
+  ## Reference to one or more secrets to be used when pulling images
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+  ##
+  imagePullSecrets: []
+  # - name: "image-pull-secret"
+
+helmProjectOperator:
+  enabled: true
+
+  image:
+    repository: arvindiyengar/prometheus-federator # TODO: modify to rancher/prometheus-federator
+    tag: dev
+    pullPolicy: Always # TODO: modify to IfNotPresent
+
+  # Additional arguments to be passed into the Prometheus Federator image
+  additionalArgs: []
+
+  ## Define which Nodes the Pods are scheduled on.
+  ## ref: https://kubernetes.io/docs/user-guide/node-selection/
+  ##
+  nodeSelector: {}
+
+  ## Tolerations for use with node taints
+  ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+  ##
+  tolerations: []
+  # - key: "key"
+  #   operator: "Equal"
+  #   value: "value"
+  #   effect: "NoSchedule"
+
+  resources: {}
+    # limits:
+    #   memory: 500Mi
+    #   cpu: 1000m
+    # requests:
+    #   memory: 100Mi
+    #   cpu: 100m
+
+  securityContext: {}
+    # allowPrivilegeEscalation: false
+    # readOnlyRootFilesystem: true
+    
+  debug: false
+  debugLevel: 0

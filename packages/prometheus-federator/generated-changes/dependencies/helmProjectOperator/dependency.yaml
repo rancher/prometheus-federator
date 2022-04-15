@@ -1,0 +1,3 @@
+url: https://github.com/aiyengar2/helm-project-operator.git
+subdirectory: charts/helm-project-operator
+commit: 1f301380d58ab3854036bb7914530283adc30a1c
