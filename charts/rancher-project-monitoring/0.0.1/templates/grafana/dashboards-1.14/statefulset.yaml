@@ -8,7 +8,7 @@ https://github.com/prometheus-community/helm-charts/tree/main/charts/project-pro
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  namespace: {{ .Values.grafana.defaultDashboards.namespace }}
+  namespace: {{ template "project-prometheus-stack.namespace" . }}
   name: {{ printf "%s-%s" (include "project-prometheus-stack.fullname" $) "statefulset" | trunc 63 | trimSuffix "-" }}
   annotations:
 {{ toYaml .Values.grafana.sidecar.dashboards.annotations | indent 4 }}

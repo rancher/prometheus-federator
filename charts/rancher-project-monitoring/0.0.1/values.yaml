@@ -611,11 +611,6 @@ grafana:
   ##
   defaultDashboardsEnabled: true
 
-  # Additional options for defaultDashboards
-  defaultDashboards:
-    # The default namespace to place defaultDashboards within
-    namespace: ""
-
   ## Timezone for the default dashboards
   ## Other options are: browser or a specific timezone, i.e. Europe/Luxembourg
   ##
