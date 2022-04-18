@@ -215,6 +215,9 @@ spec:
   imagePullSecrets:
 {{ toYaml .Values.global.imagePullSecrets | indent 4 }}
 {{- end }}
+  additionalScrapeConfigs:
+    name: {{ template "project-prometheus-stack.fullname" . }}-federate
+    key: federate-scrape-config.yaml
 {{- if .Values.prometheus.prometheusSpec.containers }}
   containers:
 {{ tpl .Values.prometheus.prometheusSpec.containers $ | indent 4 }}
