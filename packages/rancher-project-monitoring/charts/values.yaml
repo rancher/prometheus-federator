@@ -60,8 +60,6 @@ defaultRules:
 global:
   cattle:
     systemDefaultRegistry: ""
-    url: ""
-    clusterId: ""
     projectNamespaceSelector: {}
   kubectl:
      repository: rancher/kubectl
