@@ -5,7 +5,7 @@
 
   params:
     'match[]':
-      - '{namespace=~"{{ .Values.global.cattle.projectNamespaces | join "|" }}"}'
+      - '{namespace=~"{{ .Values.global.cattle.projectNamespaces | join "|" }}", job=~"kube-state-metrics|kubelet"}'
 
   static_configs:
     - targets:
