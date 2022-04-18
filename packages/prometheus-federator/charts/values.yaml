@@ -10,6 +10,7 @@ global:
     projectLabel: field.cattle.io/projectId
     clusterId: ""
     systemProjectId: ""
+    url: ""
   rbac:
     pspEnabled: true
     pspAnnotations: {}
@@ -30,6 +31,9 @@ global:
 
 helmProjectOperator:
   enabled: true
+
+  # ensures that all resources created by subchart show up as prometheus-federator
+  nameOverride: prometheus-federator
 
   image:
     repository: arvindiyengar/prometheus-federator # TODO: modify to rancher/prometheus-federator
