@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "helm-project-operator.name" . }}
+  namespace: {{ template "helm-project-operator.namespace" . }}
+  labels: {{ include "helm-project-operator.labels" . | nindent 4 }}
+    app: {{ template "helm-project-operator.name" . }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ template "helm-project-operator.name" . }}
+      release: {{ $.Release.Name | quote }}
+  template:
+    metadata:
+      labels: {{ include "helm-project-operator.labels" . | nindent 8 }}
+        app: {{ template "helm-project-operator.name" . }}
+    spec:
+      containers:
+        - name: {{ template "helm-project-operator.name" . }}
+          image: "{{ template "system_default_registry" . }}{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: "{{ .Values.image.pullPolicy }}"
+          args:
+          - {{ template "helm-project-operator.name" . }}
+          - --namespace={{ template "helm-project-operator.namespace" . }}
+          - --helm-job-image={{ template "system_default_registry" . }}{{ .Values.helmcontroller.job.image.repository }}:{{ .Values.helmcontroller.job.image.tag }}
+{{- if .Values.global.cattle.systemDefaultRegistry }}
+          - --system-default-registry={{ .Values.global.cattle.systemDefaultRegistry }}
+{{- end }}
+{{- if .Values.global.cattle.url }}
+          - --cattle-url={{ .Values.global.cattle.url }}
+{{- end }}
+{{- if .Values.global.cattle.projectLabel }}
+          - --project-label={{ .Values.global.cattle.projectLabel }}
+{{- end }}
+{{- if .Values.global.cattle.systemProjectId }}
+          - --system-project-label-value={{ .Values.global.cattle.systemProjectId }}
+{{- end }}
+{{- if .Values.global.cattle.clusterId }}
+          - --cluster-id={{ .Values.global.cattle.clusterId }}
+{{- end }}
+{{- if .Values.debug }}
+          - --debug
+          - --debug-level={{ .Values.debugLevel }}
+{{- end }}
+{{- if .Values.additionalArgs }}
+{{- toYaml .Values.additionalArgs | nindent 10 }}
+{{- end }}
+          env:
+          - name: NODE_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: spec.nodeName
+{{- if .Values.resources }}
+          resources: {{ toYaml .Values.resources | nindent 12 }}
+{{- end }}
+      serviceAccountName: {{ template "helm-project-operator.name" . }}
+{{- if .Values.securityContext }}
+      securityContext: {{ toYaml .Values.securityContext | indent 8 }}
+{{- end }}
+      nodeSelector: {{ include "linux-node-selector" . | nindent 8 }} 
+{{- if .Values.nodeSelector }}
+{{- toYaml .Values.nodeSelector | nindent 8 }}
+{{- end }}
+      tolerations: {{ include "linux-node-tolerations" . | nindent 8 }} 
+{{- if .Values.tolerations }}
+{{- toYaml .Values.tolerations | nindent 8 }}
+{{- end }}

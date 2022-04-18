@@ -1,0 +1,102 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: projecthelmcharts.helm.cattle.io
+spec:
+  group: helm.cattle.io
+  names:
+    kind: ProjectHelmChart
+    plural: projecthelmcharts
+    singular: projecthelmchart
+  preserveUnknownFields: false
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .status.projectHelmChartStatus
+      name: Status
+      type: string
+    - jsonPath: .status.projectSystemNamespace
+      name: System Namespace
+      type: string
+    - jsonPath: .status.projectReleaseNamespace
+      name: Release Namespace
+      type: string
+    - jsonPath: .status.projectNamespaces
+      name: Namespaces
+      type: string
+    name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        properties:
+          spec:
+            properties:
+              helmApiVersion:
+                nullable: true
+                type: string
+              projectNamespaceSelector:
+                nullable: true
+                properties:
+                  matchExpressions:
+                    items:
+                      properties:
+                        key:
+                          nullable: true
+                          type: string
+                        operator:
+                          nullable: true
+                          type: string
+                        values:
+                          items:
+                            nullable: true
+                            type: string
+                          nullable: true
+                          type: array
+                      type: object
+                    nullable: true
+                    type: array
+                  matchLabels:
+                    additionalProperties:
+                      nullable: true
+                      type: string
+                    nullable: true
+                    type: object
+                type: object
+              values:
+                nullable: true
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+            type: object
+          status:
+            properties:
+              dashboardValues:
+                nullable: true
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              projectHelmChartStatus:
+                nullable: true
+                type: string
+              projectHelmChartStatusMessage:
+                nullable: true
+                type: string
+              projectNamespaces:
+                items:
+                  nullable: true
+                  type: string
+                nullable: true
+                type: array
+              projectReleaseNamespace:
+                nullable: true
+                type: string
+              projectSystemNamespace:
+                nullable: true
+                type: string
+              rancherValues:
+                nullable: true
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
