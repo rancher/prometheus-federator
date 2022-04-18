@@ -61,6 +61,7 @@ global:
   cattle:
     systemDefaultRegistry: ""
     projectNamespaceSelector: {}
+    projectNamespaces: []
   kubectl:
      repository: rancher/kubectl
      tag: v1.20.2
@@ -90,6 +91,15 @@ global:
   ##
   imagePullSecrets: []
   # - name: "image-pull-secret"
+
+clusterPrometheus:
+  # Change this to point at your Cluster Prometheus's URL
+  # By default, this matches the default deployment of Rancher Monitoring
+  url: http://rancher-monitoring-prometheus.cattle-monitoring-system.svc
+  port: 9090
+
+  ## Scrape interval
+  interval: "15s"
 
 ## Configuration for alertmanager
 ## ref: https://prometheus.io/docs/alerting/alertmanager/

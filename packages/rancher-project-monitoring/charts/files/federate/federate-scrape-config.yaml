@@ -1,0 +1,12 @@
+- job_name: 'federate'
+  scrape_interval: {{ .Values.clusterPrometheus.interval }}
+  honor_labels: true
+  metrics_path: '/federate'
+
+  params:
+    'match[]':
+      - '{namespace=~"{{ .Values.global.cattle.projectNamespaces | join "|" }}"}'
+
+  static_configs:
+    - targets:
+      - "{{ .Values.clusterPrometheus.url }}:{{ .Values.clusterPrometheus.port }}"
