@@ -9,4 +9,4 @@
 
   static_configs:
     - targets:
-      - "{{ .Values.clusterPrometheus.url }}:{{ .Values.clusterPrometheus.port }}"
+      - "{{ .Values.clusterPrometheus.host }}:{{ .Values.clusterPrometheus.port }}"
