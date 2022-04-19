@@ -1,0 +1,38 @@
+--- charts-original/templates/_pod.tpl
++++ charts/templates/_pod.tpl
+@@ -106,10 +106,8 @@
+       - name: UNIQUE_FILENAMES
+         value: "{{ .Values.sidecar.enableUniqueFilenames }}"
+       {{- end }}
+-      {{- if .Values.sidecar.datasources.searchNamespace }}
+       - name: NAMESPACE
+-        value: "{{ .Values.sidecar.datasources.searchNamespace | join "," }}"
+-      {{- end }}
++        value: "{{ .Values.global.cattle.projectNamespaces | join "," }}"
+       {{- if .Values.sidecar.skipTlsVerify }}
+       - name: SKIP_TLS_VERIFY
+         value: "{{ .Values.sidecar.skipTlsVerify }}"
+@@ -141,10 +139,8 @@
+       - name: UNIQUE_FILENAMES
+         value: "{{ .Values.sidecar.enableUniqueFilenames }}"
+       {{- end }}
+-      {{- if .Values.sidecar.notifiers.searchNamespace }}
+       - name: NAMESPACE
+-        value: "{{ .Values.sidecar.notifiers.searchNamespace | join "," }}"
+-      {{- end }}
++        value: "{{ .Values.global.cattle.projectNamespaces | join "," }}"
+       {{- if .Values.sidecar.skipTlsVerify }}
+       - name: SKIP_TLS_VERIFY
+         value: "{{ .Values.sidecar.skipTlsVerify }}"
+@@ -191,10 +187,8 @@
+       - name: UNIQUE_FILENAMES
+         value: "{{ .Values.sidecar.enableUniqueFilenames }}"
+       {{- end }}
+-      {{- if .Values.sidecar.dashboards.searchNamespace }}
+       - name: NAMESPACE
+-        value: "{{ .Values.sidecar.dashboards.searchNamespace | join "," }}"
+-      {{- end }}
++        value: "{{ .Values.global.cattle.projectNamespaces | join "," }}"
+       {{- if .Values.sidecar.skipTlsVerify }}
+       - name: SKIP_TLS_VERIFY
+         value: "{{ .Values.sidecar.skipTlsVerify }}"
