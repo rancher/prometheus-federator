@@ -95,7 +95,7 @@ global:
 clusterPrometheus:
   # Change this to point at your Cluster Prometheus's URL
   # By default, this matches the default deployment of Rancher Monitoring
-  url: http://rancher-monitoring-prometheus.cattle-monitoring-system.svc
+  host: rancher-monitoring-prometheus.cattle-monitoring-system.svc
   port: 9090
 
   ## Scrape interval
