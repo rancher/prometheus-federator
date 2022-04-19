@@ -655,7 +655,6 @@ grafana:
     dashboards:
       enabled: true
       label: grafana_dashboard
-      searchNamespace: ""
 
       ## Annotations for Grafana dashboard configmaps
       ##
