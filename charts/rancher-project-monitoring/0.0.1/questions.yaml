@@ -1,0 +1,13 @@
+questions:
+  - variable: alertmanager.enabled
+    label: Enable Alertmanager
+    default: true
+    type: boolean
+    required: true
+    group: Alertmanager
+  - variable: grafana.enabled
+    label: Enable Grafana
+    default: true
+    type: boolean
+    required: true
+    group: Grafana

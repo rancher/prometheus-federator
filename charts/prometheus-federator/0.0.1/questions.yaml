@@ -1,0 +1,7 @@
+questions:
+  - variable: global.cattle.systemProjectId
+    label: System Project ID
+    description: Project ID of the System Project (e.g. p-RANCH)
+    type: string
+    required: true
+    group: Global

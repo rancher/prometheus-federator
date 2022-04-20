@@ -10,9 +10,9 @@ entries:
       catalog.cattle.io/release-name: helm-project-operator-crd
     apiVersion: v2
     appVersion: 0.0.1
-    created: "2022-04-18T09:57:34.931123-07:00"
+    created: "2022-04-20T10:34:51.390375-07:00"
     description: Helm Project Operator CustomResourceDefinitions
-    digest: d8bfe19f282dddf385553ed3c1b32ec7a601141c55e6262754b580d13ae7bd7a
+    digest: 0f2fb42786086eec686ecc486118fc132d079d819d5caad9da641e82e19e6603
     name: helm-project-operator-crd
     urls:
     - assets/helm-project-operator-crd/helm-project-operator-crd-0.0.1.tgz
@@ -31,13 +31,13 @@ entries:
       catalog.cattle.io/release-name: prometheus-federator
     apiVersion: v2
     appVersion: 0.0.1
-    created: "2022-04-18T09:57:34.987045-07:00"
+    created: "2022-04-20T12:01:40.236373-07:00"
     dependencies:
     - condition: helmProjectOperator.enabled
       name: helmProjectOperator
       repository: file://./charts/helmProjectOperator
     description: Prometheus Federator
-    digest: cb3e9da1295a522b6905c8f3cb419b4c1ea254891da16e5a53c1e4dddbe98714
+    digest: 1a7312d4ad1b7aa4df8443958e0a7128d16f4cb643b16b77a08291b2ad87ab46
     name: prometheus-federator
     urls:
     - assets/prometheus-federator/prometheus-federator-0.0.1.tgz
@@ -55,7 +55,7 @@ entries:
       catalog.cattle.io/release-name: rancher-project-monitoring
     apiVersion: v2
     appVersion: 0.0.1
-    created: "2022-04-19T09:35:51.74527-07:00"
+    created: "2022-04-20T11:40:48.748696-07:00"
     dependencies:
     - condition: grafana.enabled
       name: grafana
@@ -64,7 +64,7 @@ entries:
       rules combined with documentation and scripts to provide easy to operate end-to-end
       Kubernetes cluster monitoring with Prometheus. Depends on the existence of a
       Cluster Prometheus deployed via Prometheus Operator
-    digest: 86e8cd81fe66b1f9c19b4a02346fe1aa6f07495a1ed1c87748b92d3a0c10e560
+    digest: 1aec3d3674222a7d238e0d5886d4e79ccb16badce2bbaa33ffe40d089a51abb0
     home: https://github.com/prometheus-operator/kube-prometheus
     icon: https://raw.githubusercontent.com/prometheus/prometheus.github.io/master/assets/prometheus_logo-cb55bb5c346.png
     keywords:

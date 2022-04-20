@@ -33,6 +33,8 @@ helmProjectOperator:
   enabled: true
 
   # ensures that all resources created by subchart show up as prometheus-federator
+  helmApiVersion: monitoring.cattle.io/v1alpha1
+
   nameOverride: prometheus-federator
 
   image:

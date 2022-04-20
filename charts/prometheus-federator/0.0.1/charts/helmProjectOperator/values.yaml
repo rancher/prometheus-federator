@@ -29,6 +29,8 @@ global:
   imagePullSecrets: []
   # - name: "image-pull-secret"
 
+helmApiVersion: dummy.cattle.io/v1alpha1
+
 nameOverride: ""
 
 namespaceOverride: ""
