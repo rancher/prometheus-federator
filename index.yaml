@@ -55,7 +55,7 @@ entries:
       catalog.cattle.io/release-name: rancher-project-monitoring
     apiVersion: v2
     appVersion: 0.0.1
-    created: "2022-04-20T11:40:48.748696-07:00"
+    created: "2022-04-21T21:05:19.020937-07:00"
     dependencies:
     - condition: grafana.enabled
       name: grafana
@@ -64,7 +64,7 @@ entries:
       rules combined with documentation and scripts to provide easy to operate end-to-end
       Kubernetes cluster monitoring with Prometheus. Depends on the existence of a
       Cluster Prometheus deployed via Prometheus Operator
-    digest: 1aec3d3674222a7d238e0d5886d4e79ccb16badce2bbaa33ffe40d089a51abb0
+    digest: 66c9a5b66f9775ba6e436a009146919bc202dda02822655d6d33aad7f2f0a487
     home: https://github.com/prometheus-operator/kube-prometheus
     icon: https://raw.githubusercontent.com/prometheus/prometheus.github.io/master/assets/prometheus_logo-cb55bb5c346.png
     keywords:
