@@ -12,6 +12,16 @@ global:
     systemProjectId: ""
     url: ""
   rbac:
+    ## Create RBAC resources for ServiceAccounts and users
+    ##
+    create: true
+
+    userRoles:
+      ## Create default user ClusterRoles to allow users to interact with ProjectHelmCharts
+      create: true
+      ## Aggregate default user ClusterRoles into default k8s ClusterRoles
+      aggregateToDefaultRoles: true
+
     pspEnabled: true
     pspAnnotations: {}
       ## Specify pod annotations
@@ -30,6 +40,26 @@ global:
   # - name: "image-pull-secret"
 
 helmApiVersion: dummy.cattle.io/v1alpha1
+
+## releaseRoleBindings configures RoleBindings automatically created by the Helm Project Operator
+## in Project Release Namespaces where underlying Helm charts are deployed
+releaseRoleBindings:
+  ## aggregate enables creating these RoleBindings off aggregating RoleBindings in the
+  ## Project Registration Namespace or ClusterRoleBindings that bind users to the ClusterRoles
+  ## specified under clusterRoleRefs
+  aggregate: true
+
+  ## clusterRoleRefs are the ClusterRoles whose RoleBinding or ClusterRoleBindings should determine
+  ## the RoleBindings created in the Project Release Namespace
+  ## 
+  ## By default, these are set to create RoleBindings based on the RoleBindings / ClusterRoleBindings
+  ## attached to the default K8s user-facing ClusterRoles of admin, edit, and view.
+  ## ref: https://kubernetes.io/docs/reference/access-authn-authz/rbac/#user-facing-roles
+  ##
+  clusterRoleRefs:
+    admin: admin
+    edit: edit
+    view: view
 
 nameOverride: ""
 

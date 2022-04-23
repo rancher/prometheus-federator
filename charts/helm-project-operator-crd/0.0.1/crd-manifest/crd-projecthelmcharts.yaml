@@ -12,17 +12,20 @@ spec:
   scope: Namespaced
   versions:
   - additionalPrinterColumns:
-    - jsonPath: .status.projectHelmChartStatus
+    - jsonPath: .status.status
       name: Status
       type: string
-    - jsonPath: .status.projectSystemNamespace
+    - jsonPath: .status.systemNamespace
       name: System Namespace
       type: string
-    - jsonPath: .status.projectReleaseNamespace
+    - jsonPath: .status.releaseNamespace
       name: Release Namespace
       type: string
-    - jsonPath: .status.projectNamespaces
-      name: Namespaces
+    - jsonPath: .status.releaseName
+      name: Release Name
+      type: string
+    - jsonPath: .status.targetNamespaces
+      name: Target Namespaces
       type: string
     name: v1alpha1
     schema:
@@ -72,24 +75,27 @@ spec:
                 nullable: true
                 type: object
                 x-kubernetes-preserve-unknown-fields: true
-              projectHelmChartStatus:
+              releaseName:
                 nullable: true
                 type: string
-              projectHelmChartStatusMessage:
+              releaseNamespace:
                 nullable: true
                 type: string
-              projectNamespaces:
+              status:
+                nullable: true
+                type: string
+              statusMessage:
+                nullable: true
+                type: string
+              systemNamespace:
+                nullable: true
+                type: string
+              targetNamespaces:
                 items:
                   nullable: true
                   type: string
                 nullable: true
                 type: array
-              projectReleaseNamespace:
-                nullable: true
-                type: string
-              projectSystemNamespace:
-                nullable: true
-                type: string
             type: object
         type: object
     served: true
