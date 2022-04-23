@@ -42,7 +42,8 @@ type PrometheusFederator struct {
 
 func (f *PrometheusFederator) Run(cmd *cobra.Command, args []string) error {
 	go func() {
-		log.Println(http.ListenAndServe("localhost:6060", nil))
+		// required to set up healthz and pprof handlers
+		log.Println(http.ListenAndServe("localhost:80", nil))
 	}()
 	debugConfig.MustSetupDebug()
 
@@ -56,6 +57,7 @@ func (f *PrometheusFederator) Run(cmd *cobra.Command, args []string) error {
 		ReleaseName:      ReleaseName,
 		SystemNamespaces: SystemNamespaces,
 		ChartContent:     base64TgzChart,
+		Singleton:        true, // indicates only one HelmChart can be registered per project defined
 
 		// These fields are provided on runtime for all project operators
 		ProjectLabel:            f.ProjectLabel,
@@ -64,6 +66,10 @@ func (f *PrometheusFederator) Run(cmd *cobra.Command, args []string) error {
 		CattleURL:               f.CattleURL,
 		ClusterID:               f.ClusterID,
 		NodeName:                f.NodeName,
+		HelmJobImage:            f.HelmJobImage,
+		AdminClusterRole:        f.AdminClusterRole,
+		EditClusterRole:         f.EditClusterRole,
+		ViewClusterRole:         f.ViewClusterRole,
 	}); err != nil {
 		return err
 	}

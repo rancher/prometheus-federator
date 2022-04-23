@@ -119,8 +119,8 @@ github.com/aiyengar2/helm-controller v0.0.0-20220412194545-e1edf86768d3 h1:fsmBT
 github.com/aiyengar2/helm-controller v0.0.0-20220412194545-e1edf86768d3/go.mod h1:ZmIZBP7FigARnQfS7da0X6hPQEqYdmbOl5V/e397ZLc=
 github.com/aiyengar2/helm-locker v0.0.0-20220412032807-79bebdaff112 h1:JJxJOecI5xV/N8yaNFMl1MaOk5gExVCXXztk5DY8Sew=
 github.com/aiyengar2/helm-locker v0.0.0-20220412032807-79bebdaff112/go.mod h1:NvPSCK70yosgQHoj9Sdj4d+SUd+WakSN/lmUyTlP9vw=
-github.com/aiyengar2/helm-project-operator v0.0.0-20220420185950-427c8c2a4fc0 h1:WYbk2ItYKXIcqR5F3kSOO6HGRWDeS89Ul7tT66uwAGg=
-github.com/aiyengar2/helm-project-operator v0.0.0-20220420185950-427c8c2a4fc0/go.mod h1:cB3aZHAr7bbnKpqBQho565b7goyuEbXTzVMF5E2OsrI=
+github.com/aiyengar2/helm-project-operator v0.0.0-20220426042502-403cb1b2563c h1:ugKlqXJ8qRd9jlMcD37JXkQJj2NZ4yAg+4IOHLEwhVo=
+github.com/aiyengar2/helm-project-operator v0.0.0-20220426042502-403cb1b2563c/go.mod h1:cB3aZHAr7bbnKpqBQho565b7goyuEbXTzVMF5E2OsrI=
 github.com/alecthomas/template v0.0.0-20160405071501-a0175ee3bccc/go.mod h1:LOuyumcjzFXgccqObfd/Ljyb9UuFJ6TxHnclSeseNhc=
 github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751/go.mod h1:LOuyumcjzFXgccqObfd/Ljyb9UuFJ6TxHnclSeseNhc=
 github.com/alecthomas/units v0.0.0-20151022065526-2efee857e7cf/go.mod h1:ybxpYRFXyAe+OPACYpWeL0wqObRcbAqCMya13uyzqw0=

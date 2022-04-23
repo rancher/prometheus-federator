@@ -13,7 +13,7 @@ replace (
 )
 
 require (
-	github.com/aiyengar2/helm-project-operator v0.0.0-20220420185950-427c8c2a4fc0
+	github.com/aiyengar2/helm-project-operator v0.0.0-20220426042502-403cb1b2563c
 	github.com/rancher/wrangler v0.8.11-0.20220217210408-3ecd23dfea3b
 	github.com/rancher/wrangler-cli v0.0.0-20211112052728-f172e9bf59af
 	github.com/spf13/cobra v1.4.0
