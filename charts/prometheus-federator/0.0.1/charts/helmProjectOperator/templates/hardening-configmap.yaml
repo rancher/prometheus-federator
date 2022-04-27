@@ -1,0 +1,11 @@
+{{- if .Values.hardenedNamespaces.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "helm-project-operator.name" . }}-hardened
+  namespace: {{ template "helm-project-operator.namespace" . }}
+  labels: {{ include "helm-project-operator.labels" . | nindent 4 }}
+data:
+  hardened.yaml: |-
+{{ .Values.hardenedNamespaces.configuration | toYaml | indent 4 }}
+{{- end }}

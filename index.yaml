@@ -10,9 +10,9 @@ entries:
       catalog.cattle.io/release-name: helm-project-operator-crd
     apiVersion: v2
     appVersion: 0.0.1
-    created: "2022-04-22T17:24:08.499799-07:00"
+    created: "2022-04-27T13:14:34.342937-07:00"
     description: Helm Project Operator CustomResourceDefinitions
-    digest: 2e0dfd0fc66e6f9fc1cf664a105a172fcc523a10947cebdfd632938b8fc0659e
+    digest: 2406c7482185f4862385cdb6e43c912be49bb4e40f97ad63cdb41d3a954b50dd
     name: helm-project-operator-crd
     urls:
     - assets/helm-project-operator-crd/helm-project-operator-crd-0.0.1.tgz
@@ -29,16 +29,15 @@ entries:
       catalog.cattle.io/provides-gvr: helm.cattle.io.projecthelmchart/v1alpha1
       catalog.cattle.io/rancher-version: '>= 2.6.0-0 <=2.6.99-0'
       catalog.cattle.io/release-name: prometheus-federator
-      catalog.cattle.io/scope: downstream
     apiVersion: v2
     appVersion: 0.0.1
-    created: "2022-04-25T18:12:06.851177-07:00"
+    created: "2022-04-27T13:19:15.684996-07:00"
     dependencies:
     - condition: helmProjectOperator.enabled
       name: helmProjectOperator
       repository: file://./charts/helmProjectOperator
     description: Prometheus Federator
-    digest: ad5387b4ff6e21bd42051bbe4fd4c8c355e8cfcd2118f283d524654842b7012e
+    digest: f560127efa415dd6293cfff9c1d759b76ed2ffff3c863de2f105e63136fbb1a2
     name: prometheus-federator
     urls:
     - assets/prometheus-federator/prometheus-federator-0.0.1.tgz
@@ -56,7 +55,7 @@ entries:
       catalog.cattle.io/release-name: rancher-project-monitoring
     apiVersion: v2
     appVersion: 0.0.1
-    created: "2022-04-25T21:31:41.312581-07:00"
+    created: "2022-04-27T13:13:20.840088-07:00"
     dependencies:
     - condition: grafana.enabled
       name: grafana
@@ -65,7 +64,7 @@ entries:
       rules combined with documentation and scripts to provide easy to operate end-to-end
       Kubernetes cluster monitoring with Prometheus. Depends on the existence of a
       Cluster Prometheus deployed via Prometheus Operator
-    digest: e90cc45c2759e1abcd98f97dacc930ae648d8af36d737f16a894d727b3db0498
+    digest: 17c3075813aaf88b1bf23b5d0721b103b14e364cab7694591c131d1393b8fd18
     home: https://github.com/prometheus-operator/kube-prometheus
     icon: https://raw.githubusercontent.com/prometheus/prometheus.github.io/master/assets/prometheus_logo-cb55bb5c346.png
     keywords:

@@ -41,6 +41,22 @@ global:
 
 helmApiVersion: dummy.cattle.io/v1alpha1
 
+## projectReleaseNamespaces are auto-generated namespaces that are created to host Helm Releases
+## managed by this operator on behalf of a ProjectHelmChart
+projectReleaseNamespaces:
+  ## Enabled determines whether Project Release Namespaces should be created. If false, the underlying
+  ## Helm release will be deployed in the Project Registration Namespace
+  enabled: true
+  ## labelValue is the value of the Project that the projectReleaseNamespace should be created within
+  ## If empty, this will be set to the value of global.cattle.systemProjectId
+  ## If global.cattle.systemProjectId is also empty, project release namespaces will be disabled
+  labelValue: ""
+
+## otherSystemProjectLabelValues are project labels that identify namespaces as those that should be treated as system projects
+## i.e. they will be entirely ignored by the operator
+## By default, the global.cattle.systemProjectId will be in this list
+otherSystemProjectLabelValues: []
+
 ## releaseRoleBindings configures RoleBindings automatically created by the Helm Project Operator
 ## in Project Release Namespaces where underlying Helm charts are deployed
 releaseRoleBindings:
@@ -60,6 +76,24 @@ releaseRoleBindings:
     admin: admin
     edit: edit
     view: view
+
+hardenedNamespaces:
+  # Whether to automatically manage the configuration of the default ServiceAccount and
+  # auto-create a NetworkPolicy for each namespace created by this operator
+  enabled: true
+
+  configuration:
+    # Values to be applied to each default ServiceAccount created in a managed namespace
+    serviceAccountSpec:
+      secrets: []
+      imagePullSecrets: []
+      automountServiceAccountToken: false
+    # Values to be applied to each default generated NetworkPolicy created in a managed namespace
+    networkPolicySpec:
+      podSelector: {}
+      egress: []
+      ingress: []
+      policyTypes: ["Ingress", "Egress"]
 
 nameOverride: ""
 

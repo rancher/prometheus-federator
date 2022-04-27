@@ -33,8 +33,19 @@ spec:
 {{- if .Values.global.cattle.projectLabel }}
           - --project-label={{ .Values.global.cattle.projectLabel }}
 {{- end }}
-{{- if .Values.global.cattle.systemProjectId }}
-          - --system-project-label-value={{ .Values.global.cattle.systemProjectId }}
+{{- if not .Values.projectReleaseNamespaces.enabled }}
+          - --system-project-label-values={{ join "," (append .Values.otherSystemProjectLabelValues .Values.global.cattle.systemProjectId) }}
+{{- else if and (ne (len .Values.global.cattle.systemProjectId) 0) (ne (len .Values.projectReleaseNamespaces.labelValue) 0) (ne .Values.projectReleaseNamespaces.labelValue .Values.global.cattle.systemProjectId) }}
+          - --system-project-label-values={{ join "," (append .Values.otherSystemProjectLabelValues .Values.global.cattle.systemProjectId) }}
+{{- else if len .Values.otherSystemProjectLabelValues }}
+          - --system-project-label-values={{ join "," .Values.otherSystemProjectLabelValues }}
+{{- end }}
+{{- if .Values.projectReleaseNamespaces.enabled }}
+{{- if .Values.projectReleaseNamespaces.labelValue }}
+          - --project-release-label-value={{ .Values.projectReleaseNamespaces.labelValue }}
+{{- else if .Values.global.cattle.systemProjectId }}
+          - --project-release-label-value={{ .Values.global.cattle.systemProjectId }}
+{{- end }}
 {{- end }}
 {{- if .Values.global.cattle.clusterId }}
           - --cluster-id={{ .Values.global.cattle.clusterId }}
@@ -52,6 +63,11 @@ spec:
 {{- end }}
 {{- end }}
 {{- end }}
+{{- if .Values.hardenedNamespaces.enabled }}
+          - --hardening-options-file=/etc/helmprojectoperator/config/hardening.yaml
+{{- else }}
+          - --disable-hardening
+{{- end }}
 {{- if .Values.debug }}
           - --debug
           - --debug-level={{ .Values.debugLevel }}
@@ -67,6 +83,11 @@ spec:
 {{- if .Values.resources }}
           resources: {{ toYaml .Values.resources | nindent 12 }}
 {{- end }}
+{{- if .Values.hardenedNamespaces.enabled }}
+          volumeMounts:
+          - name: config
+            mountPath: "/etc/helmprojectoperator/config"
+{{- end }}
       serviceAccountName: {{ template "helm-project-operator.name" . }}
 {{- if .Values.securityContext }}
       securityContext: {{ toYaml .Values.securityContext | indent 8 }}
@@ -78,4 +99,10 @@ spec:
       tolerations: {{ include "linux-node-tolerations" . | nindent 8 }} 
 {{- if .Values.tolerations }}
 {{- toYaml .Values.tolerations | nindent 8 }}
+{{- end }}
+{{- if .Values.hardenedNamespaces.enabled }}
+      volumes:
+      - name: config
+        configMap:
+          name: {{ template "helm-project-operator.name" . }}-hardened
 {{- end }}
