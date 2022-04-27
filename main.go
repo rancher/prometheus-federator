@@ -52,24 +52,14 @@ func (f *PrometheusFederator) Run(cmd *cobra.Command, args []string) error {
 	ctx := cmd.Context()
 
 	if err := operator.Init(ctx, f.Namespace, cfg, common.Options{
-		// These fields are provided by the Project Operator
-		HelmApiVersion:   HelmApiVersion,
-		ReleaseName:      ReleaseName,
-		SystemNamespaces: SystemNamespaces,
-		ChartContent:     base64TgzChart,
-		Singleton:        true, // indicates only one HelmChart can be registered per project defined
-
-		// These fields are provided on runtime for all project operators
-		ProjectLabel:            f.ProjectLabel,
-		SystemProjectLabelValue: f.SystemProjectLabelValue,
-		SystemDefaultRegistry:   f.SystemDefaultRegistry,
-		CattleURL:               f.CattleURL,
-		ClusterID:               f.ClusterID,
-		NodeName:                f.NodeName,
-		HelmJobImage:            f.HelmJobImage,
-		AdminClusterRole:        f.AdminClusterRole,
-		EditClusterRole:         f.EditClusterRole,
-		ViewClusterRole:         f.ViewClusterRole,
+		OperatorOptions: common.OperatorOptions{
+			HelmApiVersion:   HelmApiVersion,
+			ReleaseName:      ReleaseName,
+			SystemNamespaces: SystemNamespaces,
+			ChartContent:     base64TgzChart,
+			Singleton:        true, // indicates only one HelmChart can be registered per project defined
+		},
+		RuntimeOptions: f.RuntimeOptions,
 	}); err != nil {
 		return err
 	}
