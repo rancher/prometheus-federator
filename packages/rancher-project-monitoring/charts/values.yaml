@@ -106,11 +106,15 @@ global:
   imagePullSecrets: []
   # - name: "image-pull-secret"
 
-clusterPrometheus:
-  # Change this to point at your Cluster Prometheus's URL
+federate:
+  ## enabled indicates whether to add federation to any Project Prometheus Stacks by default
+  ## If not enabled, no federation will be turned on
+  enabled: true
+
+  # Change this to point at all Prometheuses you want all your Project Prometheus Stacks to federate from
   # By default, this matches the default deployment of Rancher Monitoring
-  host: rancher-monitoring-prometheus.cattle-monitoring-system.svc
-  port: 9090
+  targets:
+  - rancher-monitoring-prometheus.cattle-monitoring-system.svc:9090
 
   ## Scrape interval
   interval: "15s"
@@ -411,11 +415,6 @@ alertmanager:
           operator: NotIn
           values:
             - rancher-monitoring
-    #
-    ## Example which selects all alertmanagerConfig resources with label "role" set to "example-config"
-    # alertmanagerConfigSelector:
-    #   matchLabels:
-    #     role: example-config
 
     ## Define Log Format
     # Use logfmt (default) or json logging
