@@ -13,7 +13,7 @@ replace (
 )
 
 require (
-	github.com/aiyengar2/helm-project-operator v0.0.0-20220428012622-477c306070bc
+	github.com/aiyengar2/helm-project-operator v0.0.0-20220428194020-d1ea3f1e508a
 	github.com/rancher/wrangler v0.8.11-0.20220217210408-3ecd23dfea3b
 	github.com/rancher/wrangler-cli v0.0.0-20211112052728-f172e9bf59af
 	github.com/spf13/cobra v1.4.0
@@ -22,7 +22,7 @@ require (
 require (
 	github.com/Masterminds/semver/v3 v3.1.1 // indirect
 	github.com/Masterminds/squirrel v1.5.2 // indirect
-	github.com/aiyengar2/helm-locker v0.0.0-20220426162702-0076bacfa71f // indirect
+	github.com/aiyengar2/helm-locker v0.0.0-20220428185851-b6b31459da49 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/cyphar/filepath-securejoin v0.2.3 // indirect

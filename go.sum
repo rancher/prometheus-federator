@@ -117,10 +117,10 @@ github.com/Shopify/logrus-bugsnag v0.0.0-20171204204709-577dee27f20d/go.mod h1:H
 github.com/agnivade/levenshtein v1.0.1/go.mod h1:CURSv5d9Uaml+FovSIICkLbAUZ9S4RqaHDIsdSBg7lM=
 github.com/aiyengar2/helm-controller v0.0.0-20220426061707-235e97b6ea23 h1:xSgyR8cA+4ccP6geloTYY6MYNcrB/Q6cMyw3f1yYDqY=
 github.com/aiyengar2/helm-controller v0.0.0-20220426061707-235e97b6ea23/go.mod h1:ZmIZBP7FigARnQfS7da0X6hPQEqYdmbOl5V/e397ZLc=
-github.com/aiyengar2/helm-locker v0.0.0-20220426162702-0076bacfa71f h1:B8eB/6i6wqXLhTiQxTwY5S0VGcjxB4jfWJKPmJCT/WQ=
-github.com/aiyengar2/helm-locker v0.0.0-20220426162702-0076bacfa71f/go.mod h1:NvPSCK70yosgQHoj9Sdj4d+SUd+WakSN/lmUyTlP9vw=
-github.com/aiyengar2/helm-project-operator v0.0.0-20220428012622-477c306070bc h1:MqJcuiynqHIyeyxrteQpoNoWNDDifKjIZftIk7KlE7E=
-github.com/aiyengar2/helm-project-operator v0.0.0-20220428012622-477c306070bc/go.mod h1:qhAgZz3XH9bYYDI3fFBicoIKfAjY/PHQTgijVfonITo=
+github.com/aiyengar2/helm-locker v0.0.0-20220428185851-b6b31459da49 h1:Tw8rE1lbC8kQAYjTQeF57fzNDQiKIVdwSJsaPv03KmY=
+github.com/aiyengar2/helm-locker v0.0.0-20220428185851-b6b31459da49/go.mod h1:NvPSCK70yosgQHoj9Sdj4d+SUd+WakSN/lmUyTlP9vw=
+github.com/aiyengar2/helm-project-operator v0.0.0-20220428194020-d1ea3f1e508a h1:2DiRb47MSOE4a8rFGBVY5qwa2hMotXW+JcPOLT2xGoE=
+github.com/aiyengar2/helm-project-operator v0.0.0-20220428194020-d1ea3f1e508a/go.mod h1:Oh+DB0Rw5YZcYSGJoMpxVPTJRrt07gwuLZ3t2T6FiMA=
 github.com/alecthomas/template v0.0.0-20160405071501-a0175ee3bccc/go.mod h1:LOuyumcjzFXgccqObfd/Ljyb9UuFJ6TxHnclSeseNhc=
 github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751/go.mod h1:LOuyumcjzFXgccqObfd/Ljyb9UuFJ6TxHnclSeseNhc=
 github.com/alecthomas/units v0.0.0-20151022065526-2efee857e7cf/go.mod h1:ybxpYRFXyAe+OPACYpWeL0wqObRcbAqCMya13uyzqw0=
