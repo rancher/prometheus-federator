@@ -404,16 +404,13 @@ alertmanager:
 
     ## AlertmanagerConfigs to be selected to merge and configure Alertmanager with.
     ##
-    alertmanagerConfigSelector: {}
-    ## Example which selects all alertmanagerConfig resources
-    ## with label "alertconfig" with values any of "example-config" or "example-config-2"
-    # alertmanagerConfigSelector:
-    #   matchExpressions:
-    #     - key: alertconfig
-    #       operator: In
-    #       values:
-    #         - example-config
-    #         - example-config-2
+    alertmanagerConfigSelector:
+      # default ignores resources created by Rancher Monitoring
+      matchExpressions:
+        - key: release
+          operator: NotIn
+          values:
+            - rancher-monitoring
     #
     ## Example which selects all alertmanagerConfig resources with label "role" set to "example-config"
     # alertmanagerConfigSelector:
@@ -1094,21 +1091,13 @@ prometheus:
     ## PrometheusRules to be selected for target discovery.
     ## If {}, select all PrometheusRules
     ##
-    ruleSelector: {}
-    ## Example which select all PrometheusRules resources
-    ## with label "prometheus" with values any of "example-rules" or "example-rules-2"
-    # ruleSelector:
-    #   matchExpressions:
-    #     - key: prometheus
-    #       operator: In
-    #       values:
-    #         - example-rules
-    #         - example-rules-2
-    #
-    ## Example which select all PrometheusRules resources with label "role" set to "example-rules"
-    # ruleSelector:
-    #   matchLabels:
-    #     role: example-rules
+    ruleSelector:
+      # default ignores resources created by Rancher Monitoring
+      matchExpressions:
+        - key: release
+          operator: NotIn
+          values:
+            - rancher-monitoring
 
     ## If true, a nil or {} value for prometheus.prometheusSpec.serviceMonitorSelector will cause the
     ## prometheus resource to be created with selectors based on values in the helm deployment,
@@ -1119,11 +1108,13 @@ prometheus:
     ## ServiceMonitors to be selected for target discovery.
     ## If {}, select all ServiceMonitors
     ##
-    serviceMonitorSelector: {}
-    ## Example which selects ServiceMonitors with label "prometheus" set to "somelabel"
-    # serviceMonitorSelector:
-    #   matchLabels:
-    #     prometheus: somelabel
+    serviceMonitorSelector:
+      # default ignores resources created by Rancher Monitoring
+      matchExpressions:
+        - key: release
+          operator: NotIn
+          values:
+            - rancher-monitoring
 
     ## If true, a nil or {} value for prometheus.prometheusSpec.podMonitorSelector will cause the
     ## prometheus resource to be created with selectors based on values in the helm deployment,
@@ -1134,11 +1125,13 @@ prometheus:
     ## PodMonitors to be selected for target discovery.
     ## If {}, select all PodMonitors
     ##
-    podMonitorSelector: {}
-    ## Example which selects PodMonitors with label "prometheus" set to "somelabel"
-    # podMonitorSelector:
-    #   matchLabels:
-    #     prometheus: somelabel
+    podMonitorSelector:
+      # default ignores resources created by Rancher Monitoring
+      matchExpressions:
+        - key: release
+          operator: NotIn
+          values:
+            - rancher-monitoring
 
     ## If true, a nil or {} value for prometheus.prometheusSpec.probeSelector will cause the
     ## prometheus resource to be created with selectors based on values in the helm deployment,
@@ -1149,11 +1142,13 @@ prometheus:
     ## Probes to be selected for target discovery.
     ## If {}, select all Probes
     ##
-    probeSelector: {}
-    ## Example which selects Probes with label "prometheus" set to "somelabel"
-    # probeSelector:
-    #   matchLabels:
-    #     prometheus: somelabel
+    probeSelector:
+      # default ignores resources created by Rancher Monitoring
+      matchExpressions:
+        - key: release
+          operator: NotIn
+          values:
+            - rancher-monitoring
 
     ## How long to retain metrics
     ##
