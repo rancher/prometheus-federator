@@ -41,6 +41,10 @@ global:
 
 helmApiVersion: dummy.cattle.io/v1alpha1
 
+## valuesOverride overrides values that are set on each ProjectHelmChart deployment on an operator-level
+## User-provided values will be overwritten based on the values provided here
+valuesOverride: {}
+
 ## projectReleaseNamespaces are auto-generated namespaces that are created to host Helm Releases
 ## managed by this operator on behalf of a ProjectHelmChart
 projectReleaseNamespaces:
@@ -94,6 +98,28 @@ hardenedNamespaces:
       egress: []
       ingress: []
       policyTypes: ["Ingress", "Egress"]
+
+## systemNamespacesConfigMap is a ConfigMap created to allow users to see valid entries
+## for registering a ProjectHelmChart for a given Project on the Rancher Dashboard UI.
+## It does not need to be enabled for a non-Rancher use case.
+systemNamespacesConfigMap:
+  ## Create indicates whether the system namespaces configmap should be created
+  ## This is a required value for integration with Rancher Dashboard
+  create: true
+
+  ## RBAC provides options around the RBAC created to allow users to be able to view
+  ## the systemNamespacesConfigMap; if not specified, only users with the ability to
+  ## view ConfigMaps in the namespace where this chart is deployed will be able to
+  ## properly view the system namespaces on the Rancher Dashboard UI
+  rbac:
+    ## enabled indicates that we should deploy a RoleBinding and Role to view this ConfigMap
+    enabled: true
+    ## subjects are the subjects that should be boudn to this default RoleBinding
+    ## By default, we allow anyone who is authenticated to the system to be able to view
+    ## this ConfigMap in the deployment namespace
+    subjects:
+    - kind: Group
+      name: system:authenticated
 
 nameOverride: ""
 

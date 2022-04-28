@@ -2,10 +2,12 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ template "helm-project-operator.name" . }}-hardened
+  name: {{ template "helm-project-operator.name" . }}-config
   namespace: {{ template "helm-project-operator.namespace" . }}
   labels: {{ include "helm-project-operator.labels" . | nindent 4 }}
 data:
   hardened.yaml: |-
 {{ .Values.hardenedNamespaces.configuration | toYaml | indent 4 }}
+  values.yaml: |-
+{{ .Values.valuesOverride | toYaml | indent 4 }}
 {{- end }}

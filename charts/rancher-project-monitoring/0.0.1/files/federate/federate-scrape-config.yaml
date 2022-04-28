@@ -1,5 +1,5 @@
 - job_name: 'federate'
-  scrape_interval: {{ .Values.clusterPrometheus.interval }}
+  scrape_interval: {{ .Values.federate.interval }}
   honor_labels: true
   metrics_path: '/federate'
 
@@ -9,5 +9,4 @@
       - '{namespace=~"{{ .Values.global.cattle.projectNamespaces | join "|" }}", job=""}'
 
   static_configs:
-    - targets:
-      - "{{ .Values.clusterPrometheus.host }}:{{ .Values.clusterPrometheus.port }}"
+    - targets: {{ .Values.federate.targets | toYaml | nindent 6 }}

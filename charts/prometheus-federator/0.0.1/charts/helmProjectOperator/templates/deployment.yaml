@@ -24,6 +24,7 @@ spec:
           - {{ template "helm-project-operator.name" . }}
           - --namespace={{ template "helm-project-operator.namespace" . }}
           - --helm-job-image={{ template "system_default_registry" . }}{{ .Values.helmcontroller.job.image.repository }}:{{ .Values.helmcontroller.job.image.tag }}
+          - --values-override-file=/etc/helmprojectoperator/config/values.yaml
 {{- if .Values.global.cattle.systemDefaultRegistry }}
           - --system-default-registry={{ .Values.global.cattle.systemDefaultRegistry }}
 {{- end }}
@@ -83,11 +84,9 @@ spec:
 {{- if .Values.resources }}
           resources: {{ toYaml .Values.resources | nindent 12 }}
 {{- end }}
-{{- if .Values.hardenedNamespaces.enabled }}
           volumeMounts:
           - name: config
             mountPath: "/etc/helmprojectoperator/config"
-{{- end }}
       serviceAccountName: {{ template "helm-project-operator.name" . }}
 {{- if .Values.securityContext }}
       securityContext: {{ toYaml .Values.securityContext | indent 8 }}
@@ -100,9 +99,7 @@ spec:
 {{- if .Values.tolerations }}
 {{- toYaml .Values.tolerations | nindent 8 }}
 {{- end }}
-{{- if .Values.hardenedNamespaces.enabled }}
       volumes:
       - name: config
         configMap:
-          name: {{ template "helm-project-operator.name" . }}-hardened
-{{- end }}
+          name: {{ template "helm-project-operator.name" . }}-config
