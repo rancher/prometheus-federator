@@ -37,6 +37,16 @@ helmProjectOperator:
 
   nameOverride: prometheus-federator
 
+  ## valuesOverride overrides values that are set on each Project Prometheus Stack Helm Chart deployment on an operator level
+  ## all values provided here will override any user-provided values automatically
+  valuesOverride:
+
+    federate:
+      # Change this to point at all Prometheuses you want all your Project Prometheus Stacks to federate from
+      # By default, this matches the default deployment of Rancher Monitoring
+      targets:
+      - rancher-monitoring-prometheus.cattle-monitoring-system.svc:9090
+
   image:
     repository: arvindiyengar/prometheus-federator # TODO: modify to rancher/prometheus-federator
     tag: dev
