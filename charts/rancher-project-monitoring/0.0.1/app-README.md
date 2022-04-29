@@ -1,10 +1,10 @@
 # Rancher Project Monitoring and Alerting
 
-The chart installs the following components:
+The chart installs a Project Monitoring Stack, which contains:
+- [Prometheus](https://prometheus.io/) (managed externally by [Prometheus Operator](https://github.com/prometheus-operator/prometheus-operator))
+- [Alertmanager](https://prometheus.io/docs/alerting/latest/alertmanager/) (managed externally by [Prometheus Operator](https://github.com/prometheus-operator/prometheus-operator))
+- [Grafana](https://github.com/helm/charts/tree/master/stable/grafana) (deployed via an embedded Helm chart)
+- Default PrometheusRules and Grafana dashboards based on the collection of community-curated resources from [kube-prometheus](https://github.com/prometheus-operator/kube-prometheus/)
+- Default ServiceMonitors that watch the deployed resources
 
-- [Project Prometheus]() - Prometheus is a time series database that collects metrics federated from a Cluster Prometheus
-- [Project Alertmanager]() - Alertmanager allows a user to send alerts to configured notification providers
-- [Project Grafana](https://github.com/helm/charts/tree/master/stable/grafana) - Grafana allows a user to create / view dashboards based on the cluster metrics collected by Prometheus.
-- [A subset of kube-prometheus](https://github.com/prometheus-operator/kube-prometheus/) - A collection of community-curated Kubernetes manifests, Grafana Dashboards, and PrometheusRules that deploy a default end-to-end cluster monitoring configuration.
-
-
+Note: This chart is not intended for standalone use; it's intended to be deployed via [Prometheus Federator](https://github.com/rancher/prometheus-federator).

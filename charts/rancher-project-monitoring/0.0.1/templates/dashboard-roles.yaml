@@ -25,14 +25,27 @@ rules:
   - 'get'
 - apiGroups:
   - ""
+  resources:
+  - endpoints
   resourceNames:
   - {{ template "project-prometheus-stack.fullname" . }}-prometheus
   - {{ template "project-prometheus-stack.fullname" . }}-alertmanager
   - {{ include "call-nested" (list . "grafana" "grafana.fullname") }}
-  resources:
-  - endpoints
   verbs:
   - list
+- apiGroups:
+  - ""
+  resources:
+  - "secrets"
+  resourceNames:
+  - {{ printf "%s-alertmanager-secret" (include "project-prometheus-stack.fullname" .) }}
+  verbs:
+  - get
+  - list
+  - watch
+  - update
+  - patch
+  - delete
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
@@ -60,14 +73,26 @@ rules:
   - 'get'
 - apiGroups:
   - ""
+  resources:
+  - endpoints
   resourceNames:
   - {{ template "project-prometheus-stack.fullname" . }}-prometheus
   - {{ template "project-prometheus-stack.fullname" . }}-alertmanager
   - {{ include "call-nested" (list . "grafana" "grafana.fullname") }}
-  resources:
-  - endpoints
   verbs:
   - list
+- apiGroups:
+  - ""
+  resources:
+  - "secrets"
+  resourceNames:
+  - {{ printf "%s-alertmanager-secret" (include "project-prometheus-stack.fullname" .) }}
+  verbs:
+  - get
+  - list
+  - watch
+  - update
+  - patch
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
@@ -95,12 +120,22 @@ rules:
   - 'get'
 - apiGroups:
   - ""
+  resources:
+  - endpoints
   resourceNames:
   - {{ template "project-prometheus-stack.fullname" . }}-prometheus
   - {{ template "project-prometheus-stack.fullname" . }}-alertmanager
   - {{ include "call-nested" (list . "grafana" "grafana.fullname") }}
-  resources:
-  - endpoints
   verbs:
   - list
+- apiGroups:
+  - ""
+  resources:
+  - "secrets"
+  resourceNames:
+  - {{ printf "%s-alertmanager-secret" (include "project-prometheus-stack.fullname" .) }}
+  verbs:
+  - get
+  - list
+  - watch
 {{- end }}
