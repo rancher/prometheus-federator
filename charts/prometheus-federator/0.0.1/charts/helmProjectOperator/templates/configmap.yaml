@@ -1,4 +1,3 @@
-{{- if .Values.hardenedNamespaces.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -10,4 +9,3 @@ data:
 {{ .Values.hardenedNamespaces.configuration | toYaml | indent 4 }}
   values.yaml: |-
 {{ .Values.valuesOverride | toYaml | indent 4 }}
-{{- end }}

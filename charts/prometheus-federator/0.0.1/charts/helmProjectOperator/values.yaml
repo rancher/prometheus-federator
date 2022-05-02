@@ -126,9 +126,9 @@ nameOverride: ""
 namespaceOverride: ""
 
 image:
-  repository: arvindiyengar/helm-project-operator # TODO: modify to rancher/helm-project-operator
-  tag: dev
-  pullPolicy: Always # TODO: modify to IfNotPresent
+  repository: rancher/helm-project-operator
+  tag: 0.0.1-rc1
+  pullPolicy: IfNotPresent
 
 helmcontroller:
   job:
