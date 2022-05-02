@@ -1,4 +1,4 @@
-module github.com/aiyengar2/prometheus-federator
+module github.com/rancher/prometheus-federator
 
 go 1.17
 
@@ -13,7 +13,7 @@ replace (
 )
 
 require (
-	github.com/aiyengar2/helm-project-operator v0.0.0-20220428194020-d1ea3f1e508a
+	github.com/rancher/helm-project-operator v0.0.0-20220502231222-6cb8f0f3020e
 	github.com/rancher/wrangler v0.8.11-0.20220217210408-3ecd23dfea3b
 	github.com/rancher/wrangler-cli v0.0.0-20211112052728-f172e9bf59af
 	github.com/spf13/cobra v1.4.0
@@ -22,7 +22,6 @@ require (
 require (
 	github.com/Masterminds/semver/v3 v3.1.1 // indirect
 	github.com/Masterminds/squirrel v1.5.2 // indirect
-	github.com/aiyengar2/helm-locker v0.0.0-20220428185851-b6b31459da49 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/cyphar/filepath-securejoin v0.2.3 // indirect
@@ -57,6 +56,7 @@ require (
 	github.com/prometheus/client_model v0.2.0 // indirect
 	github.com/prometheus/common v0.32.1 // indirect
 	github.com/prometheus/procfs v0.7.3 // indirect
+	github.com/rancher/helm-locker v0.0.0-20220502205359-41afb37c0c59 // indirect
 	github.com/rancher/lasso v0.0.0-20220303220127-8cf5555ec03c // indirect
 	github.com/rubenv/sql-migrate v0.0.0-20210614095031-55d5740dbbcc // indirect
 	github.com/sirupsen/logrus v1.8.1 // indirect

@@ -38,7 +38,7 @@ entries:
       repository: file://./charts/helmProjectOperator
     description: Prometheus Federator
     digest: b12d7875d03de55055d9533faa064740d2a0895a6bf4470e797f18bcc988ecc2
-    icon: https://raw.githubusercontent.com/aiyengar2/prometheus-federator.github.io/main/assets/logos/prometheus-federator.svg
+    icon: https://raw.githubusercontent.com/rancher/prometheus-federator.github.io/main/assets/logos/prometheus-federator.svg
     name: prometheus-federator
     urls:
     - assets/prometheus-federator/prometheus-federator-0.0.1.tgz

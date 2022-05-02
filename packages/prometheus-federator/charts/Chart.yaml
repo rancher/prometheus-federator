@@ -16,6 +16,6 @@ dependencies:
   name: helmProjectOperator
   repository: file://./charts/helmProjectOperator
 description: Prometheus Federator
-icon: https://raw.githubusercontent.com/aiyengar2/prometheus-federator.github.io/main/assets/logos/prometheus-federator.svg
+icon: https://raw.githubusercontent.com/rancher/prometheus-federator.github.io/main/assets/logos/prometheus-federator.svg
 name: prometheus-federator
 version: 0.0.1

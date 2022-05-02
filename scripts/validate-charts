@@ -1,0 +1,9 @@
+#!/bin/bash
+set -e
+
+cd $(dirname $0)/..
+
+echo Running chart validation
+
+./scripts/charts-build-scripts/pull-scripts
+./bin/charts-build-scripts validate --local

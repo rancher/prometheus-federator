@@ -1,33 +1,37 @@
 prometheus-federator
 ========
 
-The Prometheus Federator is intended to be deployed in a Kubernetes cluster running an instance of [Prometheus Operator](https://github.com/prometheus-operator/prometheus-operator) and a cluster-wide instance of a [Prometheus](https://prometheus.io) CR deployed through [kube-prometheus-stack](https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack).
+Prometheus Federator is an operator (powered by [`rancher/helm-project-operator`](https://github.com/rancher/helm-project-operator) and [`rancher/charts-build-scripts](https://github.com/rancher/charts-build-scripts)) that manages deploying one or more Project Monitoring Stacks composed of the following set of resources that are scoped to project namespaces:
+- [Prometheus](https://prometheus.io/) (managed externally by [Prometheus Operator](https://github.com/prometheus-operator/prometheus-operator))
+- [Alertmanager](https://prometheus.io/docs/alerting/latest/alertmanager/) (managed externally by [Prometheus Operator](https://github.com/prometheus-operator/prometheus-operator))
+- [Grafana](https://github.com/helm/charts/tree/master/stable/grafana) (deployed via an embedded Helm chart)
+- Default PrometheusRules and Grafana dashboards based on the collection of community-curated resources from [kube-prometheus](https://github.com/prometheus-operator/kube-prometheus/)
+- Default ServiceMonitors that watch the deployed Prometheus, Grafana, and Alertmanager
 
-The primary purpose of this operator is to allow users to create `Projects`, groups of namespaces (selected via label selectors) that should be tracked and monitored by independent instances of Prometheus, Alertmanager, and Grafana.
+A user can specify that they would like to deploy a Project Monitoring Stack by creating a `ProjectHelmChart` CR in a Project Registration Namespace (`cattle-project-<id>`) with `spec.helmApiVersion: monitoring.cattle.io/v1alpha1`, which will deploy the Project Monitoring Stack in a Project Release Namespace (`cattle-project-<id>-monitoring`). 
 
-Instead of having each Prometheus independently scrape a set of exporters, each Project Prometheus utilizes [federation](https://prometheus.io/docs/prometheus/latest/federation/) to scrape a pre-configured and pre-existing Cluster Prometheus that will be responsible for collecting metrics from the following exporters:
-- [node_exporter](https://github.com/prometheus/node_exporter)
-- [windows_exporter](https://github.com/prometheus-community/windows_exporter)
-- [kube-state-metrics](https://github.com/kubernetes/kube-state-metrics)
+> Note: Since this Project Monitoring Stack deploys Prometheus Operator CRs, an existing Prometheus Operator instance must already be deployed in the cluster for Prometheus Federator to successfully be able to deploy Project Monitoring Stacks. It is recommended to use [`rancher-monitoring`](https://rancher.com/docs/rancher/v2.6/en/monitoring-alerting/) for this. For more information on how the chart works or advanced configurations, please read the [`README.md` on the chart](packages/prometheus-federator/README.md).
 
-On starting Prometheus Federator, users will need to provide the name and namespace containing the Cluster Prometheus CR that will serve as the cluster-level aggregator of metrics.
+For more information on ProjectHelmCharts and how to configure the underlying operator, please read the [`README.md` on the chart](packages/prometheus-federator/README.md) or check out the general docs on Helm Project Operators in [`rancher/helm-project-operator`](https://github.com/rancher/helm-project-operator).
 
-In addition, Prometheus Federator is expected to be deployed alongside a Federator PrometheusRule CR, which will create a set of default recording rules on the cluster Prometheus to group together metrics by namespaces in the cluster. This will be packaged in the Helm chart used to deploy the Prometheus Federator.
+For more information on how to configure the underlying Project Monitoring Stack, please read the [`README.md` of the underlying chart](packages/rancher-project-monitoring/README.md) (`rancher-project-monitoring`).
 
-On initialization, Prometheus Federator will watch the designated Cluster Prometheus CR that will serve as the cluster-level aggregator of metrics; it will identify any namespaces that are selected by the Cluster Prometheus CR and automatically prevent `Projects` from selecting any namespaces that are already targeted by the Cluster Prometheus (note: if a `Project` cannot target any namespaces as a result, a status will be updated on the resource to indicate this. `Projects` will also be limited from selecting other `Project` namespaces by default).
 
-Once it is up and running, users can define `Projects` in the project registration namespace, which by default will be the namespace that Prometheus Federator is deployed within.
+## Getting Started
 
-When a Project is created, Prometheus Federator will automatically create and manage the following resources per CR:
-- A Project Namespace, created to host resources for a given project
-- A Project Prometheus CR, which will be configured to [federate](https://prometheus.io/docs/prometheus/latest/federation) namespace-scoped metrics generated from the Federator PrometheusRule on the Cluster Prometheus via a PodMonitor. A PrometheusRule CR will also be created in the Project namespace that will aggregate these namespace-scoped metrics into project-scoped metrics via recording rules and set up alerting rules to send out alerts.
-- A Project Alertmanager CR (optional, defined in the Project CR) that the Prometheus CR will be configured to send alerts to
-- A Deployment of Project Grafana, which will pull data from Prometheus to generate Grafana dashboards visualizing project-scoped and namespace-scoped metrics
+For more information, see the [Getting Started guide](docs/gettingstarted.md).
+
+## Developing
+
+### Which branch do I make changes on?
+
+Prometheus Federator is built and released off the contents of the `main` branch. To make a contribution, open up a PR to the `main` branch.
+
+For more information, see the [Developing guide](docs/developing.md).
 
 ## Building
 
 `make`
-
 
 ## Running
 

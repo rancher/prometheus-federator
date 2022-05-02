@@ -17,7 +17,7 @@ RUN if [ "${ARCH}" == "amd64" ]; then \
 COPY --from=helm ./helm/bin/helm /usr/local/bin/
 
 ENV DAPPER_ENV REPO TAG DRONE_TAG CROSS
-ENV DAPPER_SOURCE /go/src/github.com/aiyengar2/prometheus-federator/
+ENV DAPPER_SOURCE /go/src/github.com/rancher/prometheus-federator/
 ENV DAPPER_OUTPUT ./bin ./dist
 ENV DAPPER_DOCKER_SOCKET true
 ENV GOPATH /go

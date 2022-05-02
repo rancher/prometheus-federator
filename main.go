@@ -6,9 +6,9 @@ import (
 	"net/http"
 	_ "net/http/pprof"
 
-	"github.com/aiyengar2/helm-project-operator/pkg/controllers/common"
-	"github.com/aiyengar2/helm-project-operator/pkg/operator"
-	"github.com/aiyengar2/prometheus-federator/pkg/version"
+	"github.com/rancher/helm-project-operator/pkg/controllers/common"
+	"github.com/rancher/helm-project-operator/pkg/operator"
+	"github.com/rancher/prometheus-federator/pkg/version"
 	command "github.com/rancher/wrangler-cli"
 	_ "github.com/rancher/wrangler/pkg/generated/controllers/apiextensions.k8s.io"
 	_ "github.com/rancher/wrangler/pkg/generated/controllers/networking.k8s.io"
@@ -17,7 +17,7 @@ import (
 )
 
 const (
-	HelmApiVersion = "monitoring.cattle.io/v1alpha1"
+	HelmAPIVersion = "monitoring.cattle.io/v1alpha1"
 	ReleaseName    = "monitoring"
 )
 
@@ -53,7 +53,7 @@ func (f *PrometheusFederator) Run(cmd *cobra.Command, args []string) error {
 
 	if err := operator.Init(ctx, f.Namespace, cfg, common.Options{
 		OperatorOptions: common.OperatorOptions{
-			HelmApiVersion:   HelmApiVersion,
+			HelmAPIVersion:   HelmAPIVersion,
 			ReleaseName:      ReleaseName,
 			SystemNamespaces: SystemNamespaces,
 			ChartContent:     base64TgzChart,
