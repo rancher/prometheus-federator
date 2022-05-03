@@ -23,6 +23,7 @@ spec:
           args:
           - {{ template "helm-project-operator.name" . }}
           - --namespace={{ template "helm-project-operator.namespace" . }}
+          - --controller-name={{ template "helm-project-operator.name" . }}
           - --helm-job-image={{ template "system_default_registry" . }}{{ .Values.helmcontroller.job.image.repository }}:{{ .Values.helmcontroller.job.image.tag }}
           - --values-override-file=/etc/helmprojectoperator/config/values.yaml
 {{- if .Values.global.cattle.systemDefaultRegistry }}

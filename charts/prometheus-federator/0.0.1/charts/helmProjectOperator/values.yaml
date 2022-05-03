@@ -114,7 +114,7 @@ systemNamespacesConfigMap:
   rbac:
     ## enabled indicates that we should deploy a RoleBinding and Role to view this ConfigMap
     enabled: true
-    ## subjects are the subjects that should be boudn to this default RoleBinding
+    ## subjects are the subjects that should be bound to this default RoleBinding
     ## By default, we allow anyone who is authenticated to the system to be able to view
     ## this ConfigMap in the deployment namespace
     subjects:
@@ -127,7 +127,7 @@ namespaceOverride: ""
 
 image:
   repository: rancher/helm-project-operator
-  tag: 0.0.1-rc1
+  tag: v0.0.1-rc2
   pullPolicy: IfNotPresent
 
 helmcontroller:
