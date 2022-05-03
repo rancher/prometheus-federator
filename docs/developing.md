@@ -19,7 +19,6 @@ packages/
 ## IMPORTANT: You should never modify the contents of this directory directly; you should always modify `packages` since that will 
 ## overwrite the changes that are observed in this directory on running a `make charts`.
 ##
-## By default, you should always install the Helm Project Operator CRD chart before installing the main Prometheus Federator chart.
 assets/
 
 ## This file is an **auto-generated** Helm index.yaml identifying this repository as a valid Helm repository that contains Helm charts.
@@ -35,19 +34,9 @@ index.yaml
 ##
 ## IMPORTANT: You should never modify the contents of this directory directly; you should always modify `packages` since that will 
 ## overwrite the changes that are observed in this directory on running a `make charts`.
-##
-## By default, you should always install the Helm Project Operator CRD chart before installing the main Prometheus Federator chart.
 charts/
-  
-  ## The CRD chart that installs the HelmRelease CRD, HelmChart CRD, and ProjectHelmChart CRD. This must be installed before installing all other charts.
-  ## By default, this chart will only ever install the HelmChart CRD / the HelmRelease CRD; it will never upgrade or delete those CRDs to avoid 
-  ## unintentionally impacting other applications installed onto your cluster that use those CRDs (e.g. RKE2 clusters use the HelmChart CRD to manage
-  ## internal k8s components, so deleting that CRD would destroy an RKE2 cluster).
-  helm-project-operator-crd/*
 
   ## The main chart that deploys Prometheus Federator in the cluster.
-  ##
-  ## Depends on 'helm-project-operator-crd' being deployed onto the cluster first.
   prometheus-federator/*
   
   ## A chart based on https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack that deploys a Project
@@ -77,9 +66,9 @@ Dockerfile.dapper
 
 ## Making changes to the Helm Charts (`packages/`)
 
-In most situations, the changes made to this repository will primarily be fixes to the Helm charts that either deploy the operator (`helm-project-operator-crd`, `prometheus-federator`) or those that are deployed on behalf of the operator (`rancher-project-monitoring`, which embeds `rancher-project-grafana` within it as a subchart).
+In most situations, the changes made to this repository will primarily be fixes to the Helm charts that either deploy the operator (`prometheus-federator`) or those that are deployed on behalf of the operator (`rancher-project-monitoring`, which embeds `rancher-project-grafana` within it as a subchart).
 
-If you need to bump the version of Helm Project Operator embedded into the charts or binaries, generally you will need to bump the version of the Helm Project Operator in the `go.mod` and update the commit hash in `packages/helm-project-operator-crd/package.yaml` and `packages/prometheus-federator/generated-changes/dependencies/helmProjectOperator/dependency.yaml`; once done, run `go mod tidy` and make one commit with your changes entitled `Bump Helm Project Operator` followed by one commit with the output of running `unset PACKAGE; make charts` with the commit message `make charts`.
+If you need to bump the version of Helm Project Operator embedded into the charts or binaries, generally you will need to bump the version of the Helm Project Operator in the `go.mod` and update the commit hash in `packages/prometheus-federator/generated-changes/dependencies/helmProjectOperator/dependency.yaml`; once done, run `go mod tidy` and make one commit with your changes entitled `Bump Helm Project Operator` followed by one commit with the output of running `unset PACKAGE; make charts` with the commit message `make charts`.
 
 If you need to make changes to the Prometheus Federator chart itself, make the changes directly in the `packages/prometheus-federator/charts`; once done, make one or more commits that only contain your changes to the `packages/prometheus-federator/charts` directory with proper commit messages describing what you changed and make one commit at the end with the output of running `unset PACKAGE; make charts` with the commit message `make charts`.
 
@@ -120,7 +109,7 @@ Once the image is successfully packaged, simply run `docker push ${REPO}/prometh
 
 ## Testing a custom Docker image build
 
-1. Deploy the Helm Project Operator CRD chart as a Helm 3 chart onto your cluster: ensure that your `KUBECONFIG` environment variable is pointing to your cluster (e.g. `export KUBECONFIG=<path-to-kubeconfig>; kubectl get nodes` should show the nodes of your cluster), pull in this repository locally, and from the root of this repository run `helm upgrade --install helm-project-operator-crd -n cattle-helm-system charts/helm-project-operator-crd`
-2. Deploy the Prometheus Federator chart as a Helm 3 chart onto your cluster after overriding the image and tag values with your Docker repository and tag: run `helm upgrade --install --set image.repository="${REPO}/prometheus-federator" --set image.tag="${TAG}" --set image.pullPolicy=Always prometheus-federator -n cattle-monitoring-system charts/prometheus-federator`
+1. Ensure that your `KUBECONFIG` environment variable is pointing to your cluster (e.g. `export KUBECONFIG=<path-to-kubeconfig>; kubectl get nodes` should show the nodes of your cluster) and pull in this repository locally
+2. Go to the root of your local copy of this repository and deploy the Prometheus Federator chart as a Helm 3 chart onto your cluster after overriding the image and tag values with your Docker repository and tag: run `helm upgrade --install --set image.repository="${REPO}/prometheus-federator" --set image.tag="${TAG}" --set image.pullPolicy=Always prometheus-federator -n cattle-monitoring-system charts/prometheus-federator`
 > Note: Why do we set the Image Pull Policy to `Always`? If you update the Docker image on your fork, setting the Image Pull Policy to `Always` ensures that running `kubectl rollout restart -n cattle-monitoring-system deployment/prometheus-federator` is all you need to do to update your running deployment to the new image, since this would ensure redeploying a deployment triggers a image pull that uses your most up-to-date Docker image. Also, since the underlying Helm chart deployed by the operator (e.g. `example-chart`) is directly embedded into the Helm Project Operator image, you also do not need to update the Deployment object itself to see all the HelmCharts in your cluster automatically be updated to the latest embedded version of the chart.
 3. Profit!

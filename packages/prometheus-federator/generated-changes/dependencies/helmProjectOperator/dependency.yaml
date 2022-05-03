@@ -1,3 +1,3 @@
 url: https://github.com/rancher/helm-project-operator.git
 subdirectory: charts/helm-project-operator
-commit: 6cb8f0f3020ee72b4238c558118970071cbf0ff7
+commit: d8ece36d1c3b2c39be5aaa3f50a62133a509f4ee

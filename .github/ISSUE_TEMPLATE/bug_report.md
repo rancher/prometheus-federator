@@ -10,9 +10,6 @@ assignees: ''
 **Cluster Setup**
 - Kubernetes version: 
 - Type of Cluster (RKE1, RKE2, k3s, EKS, GKE, AKS, OKE, etc):
-- CRD Installation option (Helm Chart / Custom Installation):
-   - If Helm Chart, did you supply any non-default values? If so, what values did you supply:
-   - If Custom Installation, how did you install it (kustomize, k8s manifest, etc.):
 - Installation option (Helm Chart / Custom Installation):
    - If Helm Chart, did you supply any non-default values? If so, what values did you supply:
    - If Custom Installation, how did you install it (kustomize, k8s manifest, etc.):
