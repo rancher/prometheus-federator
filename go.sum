@@ -949,8 +949,8 @@ github.com/rancher/client-go v1.22.3-rancher.1 h1:aNVLaIY5YGah1i9wRVXLOGRbLyekoh
 github.com/rancher/client-go v1.22.3-rancher.1/go.mod h1:ElDjYf8gvZsKDYexmsmnMQ0DYO8W9RwBjfQ1PI53yow=
 github.com/rancher/helm-locker v0.0.0-20220503191037-34be7c69a715 h1:6UmnTax7gIFBgBLdG+GKvWwCaWzS8f/PkKHmgsiKjOk=
 github.com/rancher/helm-locker v0.0.0-20220503191037-34be7c69a715/go.mod h1:PRThM9wL4o7MXJwUDeAk/+9s1vpmbRbacnGm+HoGqbY=
-github.com/rancher/helm-project-operator v0.0.0-20220504154847-1e2f4bf41775 h1:kxid7o3L2h9zx67iQ0u3ETe5DjztmiMSRjkJiTOVtG0=
-github.com/rancher/helm-project-operator v0.0.0-20220504154847-1e2f4bf41775/go.mod h1:MYKWoqZ5/fDZURFtnNHqX7GQ6J76yVEfzHgolR7lsM4=
+github.com/rancher/helm-project-operator v0.0.0-20220504174235-6315b2674aaf h1:e02pB7PmI7AUHkwGd7DJXyumcEGAsd8lj61qQLI4nng=
+github.com/rancher/helm-project-operator v0.0.0-20220504174235-6315b2674aaf/go.mod h1:MYKWoqZ5/fDZURFtnNHqX7GQ6J76yVEfzHgolR7lsM4=
 github.com/rancher/lasso v0.0.0-20210616224652-fc3ebd901c08/go.mod h1:9qZd/S8DqWzfKtjKGgSoHqGEByYmUE3qRaBaaAHwfEM=
 github.com/rancher/lasso v0.0.0-20220303220127-8cf5555ec03c h1:TyDYClPPCN2rWM97gd1jkvzlEy6ByYEN9IMK6nUY3dY=
 github.com/rancher/lasso v0.0.0-20220303220127-8cf5555ec03c/go.mod h1:T6WoUopOHBWTGjnphruTJAgoZ+dpm6llvn6GDYaa7Kw=
