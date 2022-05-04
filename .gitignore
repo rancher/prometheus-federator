@@ -7,3 +7,4 @@
 /prometheus-federator
 /.charts-build-scripts
 *.DS_Store
+/Dockerfile.dapper*
