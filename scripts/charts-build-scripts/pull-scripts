@@ -18,19 +18,23 @@ echo "Pulling in charts-build-scripts version ${CHARTS_BUILD_SCRIPTS_REPO}@${CHA
 cd ../..
 
 mkdir -p bin
-ARCH=$(go version | cut -d' ' -f4 | cut -d'/' -f1)
-if [[ ${ARCH} == "linux" ]]; then
+OS=$(go version | cut -d' ' -f4 | cut -d'/' -f1)
+ARCH=$(go version | cut -d' ' -f4 | cut -d'/' -f2)
+if [[ ${OS} == "linux" ]]; then
     BINARY_NAME=charts-build-scripts
 else
-    BINARY_NAME=charts-build-scripts-${ARCH}
+    BINARY_NAME=charts-build-scripts-${OS}
 fi
-curl -s -L ${CHARTS_BUILD_SCRIPTS_REPO%.git}/releases/download/${CHARTS_BUILD_SCRIPT_VERSION}/${BINARY_NAME} --output bin/charts-build-scripts
+if [[ ${ARCH} == "amd64" ]]; then
+    # skip non-amd64 builds since rancher/charts-build-scripts does not support it yet
+    curl -s -L ${CHARTS_BUILD_SCRIPTS_REPO%.git}/releases/download/${CHARTS_BUILD_SCRIPT_VERSION}/${BINARY_NAME} --output bin/charts-build-scripts
+fi
 if ! [[ -f bin/charts-build-scripts ]] || [[ $(cat bin/charts-build-scripts) == "Not Found" ]]; then 
-    rm bin/charts-build-scripts; 
+    [[ -f bin/charts-build-scripts ]] && rm bin/charts-build-scripts; 
     
     # Fall back to old process
     echo "Building binary locally..."
-    rm -rf charts-build-scripts
+    [[ -d charts-build-scripts ]] && rm -rf charts-build-scripts
     git clone --depth 1 --branch $CHARTS_BUILD_SCRIPT_VERSION $CHARTS_BUILD_SCRIPTS_REPO 2>/dev/null
 
     cd charts-build-scripts
