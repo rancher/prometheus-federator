@@ -17,11 +17,16 @@ import (
 )
 
 const (
+	// HelmAPIVersion is the spec.helmApiVersion corresponding to the embedded monitoring chart (rancher-project-monitoring)
 	HelmAPIVersion = "monitoring.cattle.io/v1alpha1"
-	ReleaseName    = "monitoring"
+
+	// ReleaseName is the release name this operator uses to prefix releases and project release namespaces created on
+	// deploying the embedded monitoring chart (rancher-project-monitoring)
+	ReleaseName = "monitoring"
 )
 
 var (
+	// SystemNamespaces is the system namespaces scoped for the embedded monitoring chart (rancher-project-monitoring)
 	SystemNamespaces = []string{"kube-system", "cattle-monitoring-system", "cattle-dashboards"}
 
 	//go:embed bin/rancher-project-monitoring/rancher-project-monitoring.tgz.base64
@@ -29,9 +34,6 @@ var (
 
 	debugConfig command.DebugConfig
 )
-
-type ProjectMonitoringValues struct {
-}
 
 type PrometheusFederator struct {
 	// Note: all Project Operator are expected to provide these RuntimeOptions
