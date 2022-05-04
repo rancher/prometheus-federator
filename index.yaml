@@ -13,13 +13,13 @@ entries:
       catalog.cattle.io/release-name: prometheus-federator
     apiVersion: v2
     appVersion: 0.0.1
-    created: "2022-05-03T13:11:32.377926-07:00"
+    created: "2022-05-04T10:40:20.661345-07:00"
     dependencies:
     - condition: helmProjectOperator.enabled
       name: helmProjectOperator
       repository: file://./charts/helmProjectOperator
     description: Prometheus Federator
-    digest: 2af2d95027759a1e0f547a88339b5b39acdd51ad9e9ef285a16ed1e3e117e9bf
+    digest: ce6307d32886e871d44e5431098c5c4b26ab0628ee1bb78d9c734c8e2d21587e
     icon: https://raw.githubusercontent.com/rancher/prometheus-federator.github.io/main/assets/logos/prometheus-federator.svg
     name: prometheus-federator
     urls:
@@ -27,18 +27,16 @@ entries:
     version: 0.0.1
   rancher-project-monitoring:
   - annotations:
-      catalog.cattle.io/auto-install: helm-project-operator-crd=match
       catalog.cattle.io/certified: rancher
       catalog.cattle.io/display-name: Project Monitoring
       catalog.cattle.io/hidden: "true"
       catalog.cattle.io/kube-version: '>=1.16.0-0'
       catalog.cattle.io/permits-os: linux,windows
-      catalog.cattle.io/provides-gvr: helm.cattle.io.projecthelmchart/v1alpha1
       catalog.cattle.io/rancher-version: '>= 2.6.0-0 <=2.6.99-0'
       catalog.cattle.io/release-name: rancher-project-monitoring
     apiVersion: v2
     appVersion: 0.0.1
-    created: "2022-04-28T23:24:31.137321-07:00"
+    created: "2022-05-04T10:40:21.017058-07:00"
     dependencies:
     - condition: grafana.enabled
       name: grafana
@@ -47,7 +45,7 @@ entries:
       rules combined with documentation and scripts to provide easy to operate end-to-end
       Kubernetes cluster monitoring with Prometheus. Depends on the existence of a
       Cluster Prometheus deployed via Prometheus Operator
-    digest: 8690077e7db697702b382c091afcad0641f9272aad11514101f8db54240b51a9
+    digest: dda5dce4aa2423b954a4929abb52bfda18ee2288e54fe9c65c034eb3d75cba31
     home: https://github.com/prometheus-operator/kube-prometheus
     icon: https://raw.githubusercontent.com/prometheus/prometheus.github.io/master/assets/prometheus_logo-cb55bb5c346.png
     keywords:

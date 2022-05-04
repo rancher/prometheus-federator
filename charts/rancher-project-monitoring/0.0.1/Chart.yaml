@@ -1,11 +1,9 @@
 annotations:
-  catalog.cattle.io/auto-install: helm-project-operator-crd=match
   catalog.cattle.io/certified: rancher
   catalog.cattle.io/display-name: Project Monitoring
   catalog.cattle.io/hidden: "true"
   catalog.cattle.io/kube-version: '>=1.16.0-0'
   catalog.cattle.io/permits-os: linux,windows
-  catalog.cattle.io/provides-gvr: helm.cattle.io.projecthelmchart/v1alpha1
   catalog.cattle.io/rancher-version: '>= 2.6.0-0 <=2.6.99-0'
   catalog.cattle.io/release-name: rancher-project-monitoring
 apiVersion: v2
