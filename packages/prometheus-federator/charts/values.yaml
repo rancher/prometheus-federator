@@ -48,9 +48,9 @@ helmProjectOperator:
       - rancher-monitoring-prometheus.cattle-monitoring-system.svc:9090
 
   image:
-    repository: arvindiyengar/prometheus-federator # TODO: modify to rancher/prometheus-federator
-    tag: dev
-    pullPolicy: Always # TODO: modify to IfNotPresent
+    repository: rancher/prometheus-federator
+    tag: 0.0.1-rc1
+    pullPolicy: IfNotPresent
 
   # Additional arguments to be passed into the Prometheus Federator image
   additionalArgs: []
