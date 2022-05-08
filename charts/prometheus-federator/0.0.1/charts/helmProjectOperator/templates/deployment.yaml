@@ -82,6 +82,14 @@ spec:
             valueFrom:
               fieldRef:
                 fieldPath: spec.nodeName
+          ## Note: The below two values only exist to force Helm to upgrade the deployment on
+          ## a change to the contents of the ConfigMap during an upgrade. Neither serve
+          ## any practical purpose and can be removed and replaced with a configmap reloader
+          ## in a future change if dynamic updates are required.
+          - name: VALUES_OVERRIDE_SHA_256_HASH
+            value: {{ .Values.hardenedNamespaces.configuration | toYaml | sha256sum }}
+          - name: HARDENING_OPTIONS_SHA_256_HASH
+            value: {{ .Values.valuesOverride | toYaml | sha256sum }}
 {{- if .Values.resources }}
           resources: {{ toYaml .Values.resources | nindent 12 }}
 {{- end }}

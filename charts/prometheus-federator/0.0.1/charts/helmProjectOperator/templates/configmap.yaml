@@ -1,3 +1,6 @@
+## Note: If you add another entry to this ConfigMap, make sure a corresponding env var is set
+## in the deployment of the operator to ensure that a Helm upgrade will force the operator
+## to reload the values in the ConfigMap and redeploy
 apiVersion: v1
 kind: ConfigMap
 metadata:

@@ -127,7 +127,7 @@ namespaceOverride: ""
 
 image:
   repository: rancher/helm-project-operator
-  tag: v0.0.1-rc3
+  tag: v0.0.1-rc4
   pullPolicy: IfNotPresent
 
 helmcontroller:
