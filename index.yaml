@@ -13,13 +13,13 @@ entries:
       catalog.cattle.io/release-name: prometheus-federator
     apiVersion: v2
     appVersion: 0.0.1
-    created: "2022-05-08T10:42:28.253577-07:00"
+    created: "2022-05-09T00:35:42.052056-07:00"
     dependencies:
     - condition: helmProjectOperator.enabled
       name: helmProjectOperator
       repository: file://./charts/helmProjectOperator
     description: Prometheus Federator
-    digest: ce6f0e866a89bdb4a238046b82ae9940b78ff749f0c606aca160cd0b07b37b76
+    digest: 6e314d68544e3b00b343a2d6cfdeb46dfd15af895be641b19c8feac9440e5725
     icon: https://raw.githubusercontent.com/rancher/prometheus-federator/main/assets/logos/prometheus-federator.svg
     name: prometheus-federator
     urls:
@@ -36,7 +36,7 @@ entries:
       catalog.cattle.io/release-name: rancher-project-monitoring
     apiVersion: v2
     appVersion: 0.0.1
-    created: "2022-05-04T10:40:21.017058-07:00"
+    created: "2022-05-09T00:35:42.348443-07:00"
     dependencies:
     - condition: grafana.enabled
       name: grafana
@@ -45,7 +45,7 @@ entries:
       rules combined with documentation and scripts to provide easy to operate end-to-end
       Kubernetes cluster monitoring with Prometheus. Depends on the existence of a
       Cluster Prometheus deployed via Prometheus Operator
-    digest: dda5dce4aa2423b954a4929abb52bfda18ee2288e54fe9c65c034eb3d75cba31
+    digest: 219a8f7fbcabcd3f2f2d59f9aec468fcc114fe6caf7f0beed4e561b87bd7c0ea
     home: https://github.com/prometheus-operator/kube-prometheus
     icon: https://raw.githubusercontent.com/prometheus/prometheus.github.io/master/assets/prometheus_logo-cb55bb5c346.png
     keywords:
