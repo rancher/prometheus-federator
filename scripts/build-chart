@@ -6,7 +6,7 @@ source $(dirname $0)/version
 cd $(dirname $0)/..
 
 CHART=rancher-project-monitoring
-VERSION=0.0.1
+VERSION=0.1.0
 
 helm package charts/${CHART}/${VERSION} --destination bin/${CHART}
 base64 bin/${CHART}/${CHART}-${VERSION}.tgz > bin/${CHART}/${CHART}.tgz.base64
