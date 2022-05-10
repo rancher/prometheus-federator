@@ -2957,7 +2957,7 @@ data:
                     "refresh": 1,
                     "regex": "",
                     "type": "datasource"
-                },
+                }
             ]
         },
         "time": {
@@ -2990,7 +2990,7 @@ data:
             ]
         },
         "timezone": "{{ .Values.grafana.defaultDashboardsTimezone }}",
-        "title": "Kubernetes / Compute Resources / Cluster",
+        "title": "Kubernetes / Compute Resources / Project",
         "uid": "efa86fd1d0c121a26444b636a3f509a8",
         "version": 0
     }

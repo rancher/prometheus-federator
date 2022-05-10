@@ -1816,7 +1816,7 @@ data:
                     "refresh": 1,
                     "regex": "",
                     "type": "datasource"
-                },
+                }
             ]
         },
         "time": {
@@ -1849,7 +1849,7 @@ data:
             ]
         },
         "timezone": "{{ .Values.grafana.defaultDashboardsTimezone }}",
-        "title": "Kubernetes / Networking / Cluster",
+        "title": "Kubernetes / Networking / Project",
         "uid": "ff635a025bcfea7bc3dd4f508990a3e9",
         "version": 0
     }
