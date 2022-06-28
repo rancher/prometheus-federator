@@ -76,7 +76,7 @@ spec:
 {{- if not .Values.helmController.enabled }}
           - --disable-embedded-helm-controller
 {{- else }}
-           - --helm-job-image={{ template "system_default_registry" . }}{{ .Values.helmController.job.image.repository }}:{{ .Values.helmController.job.image.tag }}
+          - --helm-job-image={{ template "system_default_registry" . }}{{ .Values.helmController.job.image.repository }}:{{ .Values.helmController.job.image.tag }}
 {{- end }}
 {{- if not .Values.helmLocker.enabled }}
           - --disable-embedded-helm-locker
