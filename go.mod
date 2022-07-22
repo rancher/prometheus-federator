@@ -14,7 +14,7 @@ replace (
 )
 
 require (
-	github.com/rancher/helm-project-operator v0.0.2-0.20220706133254-d05777ee4239
+	github.com/rancher/helm-project-operator v0.0.2-0.20220722172000-0e5105fe81b1
 	github.com/rancher/wrangler v0.8.11-0.20220217210408-3ecd23dfea3b
 	github.com/rancher/wrangler-cli v0.0.0-20211112052728-f172e9bf59af
 	github.com/spf13/cobra v1.4.0
