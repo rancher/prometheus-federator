@@ -33,6 +33,8 @@ For more information, see the [Developing guide](docs/developing.md).
 
 `make`
 
+> **Note:** For a more in-depth explanation of how Prometheus Federator is built (intended for anyone who would like to fork this repo to create a new Project Operator!), see the [Build guide](docs/build.md).
+
 ## Running
 
 `./bin/prometheus-federator`
