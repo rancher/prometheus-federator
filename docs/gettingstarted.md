@@ -53,7 +53,7 @@ kubectl delete crds helmreleases.helm.cattle.io
 
 ## Helm Controller CRDs
 ##
-## IMPORTANT NOTE: Do NOT delete if you are running in a k3s/RKE2 cluster since these CRDs are used to also manage internal k8s components
+## IMPORTANT NOTE: Do NOT delete if you are running in a RKE2/K3s cluster since these CRDs are used to also manage internal k8s components
 kubectl delete crds helmcharts.helm.cattle.io
 kubectl delete crds helmchartconfigs.helm.cattle.io
 ```
