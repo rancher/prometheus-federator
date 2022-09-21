@@ -13,6 +13,30 @@ entries:
       catalog.cattle.io/release-name: prometheus-federator
     apiVersion: v2
     appVersion: 0.1.0
+    created: "2022-09-21T11:20:41.987287-07:00"
+    dependencies:
+    - condition: helmProjectOperator.enabled
+      name: helmProjectOperator
+      repository: file://./charts/helmProjectOperator
+    description: Prometheus Federator
+    digest: e58babc32854b9b9f8ffbcd6999e2cbf2471e9e59f37d670ea1af56146cfd408
+    icon: https://raw.githubusercontent.com/rancher/prometheus-federator/main/assets/logos/prometheus-federator.svg
+    name: prometheus-federator
+    urls:
+    - assets/prometheus-federator/prometheus-federator-0.1.2-rc1.tgz
+    version: 0.1.2-rc1
+  - annotations:
+      catalog.cattle.io/certified: rancher
+      catalog.cattle.io/display-name: Prometheus Federator
+      catalog.cattle.io/kube-version: '>=1.16.0-0'
+      catalog.cattle.io/namespace: cattle-monitoring-system
+      catalog.cattle.io/os: linux,windows
+      catalog.cattle.io/permits-os: linux,windows
+      catalog.cattle.io/provides-gvr: helm.cattle.io.projecthelmchart/v1alpha1
+      catalog.cattle.io/rancher-version: '>= 2.6.5-0 <= 2.6.100-0'
+      catalog.cattle.io/release-name: prometheus-federator
+    apiVersion: v2
+    appVersion: 0.1.0
     created: "2022-08-16T12:50:12.670836417-04:00"
     dependencies:
     - condition: helmProjectOperator.enabled
@@ -61,13 +85,13 @@ entries:
       catalog.cattle.io/release-name: prometheus-federator
     apiVersion: v2
     appVersion: 0.0.1
-    created: "2022-05-11T12:19:16.45146-07:00"
+    created: "2022-09-21T11:37:00.403132-07:00"
     dependencies:
     - condition: helmProjectOperator.enabled
       name: helmProjectOperator
       repository: file://./charts/helmProjectOperator
     description: Prometheus Federator
-    digest: 47a8ad9e5b0cd6b773080db01559476be0379158b2399c63f35f73a56c4fe80c
+    digest: a3efa0626ca41603b8c5984c97e897ac44ae533ecbebf184aae9c2e78c9dd023
     icon: https://raw.githubusercontent.com/rancher/prometheus-federator/main/assets/logos/prometheus-federator.svg
     name: prometheus-federator
     urls:
