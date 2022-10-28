@@ -1,0 +1,485 @@
+#!/bin/bash
+
+set -e
+
+cd $(dirname $0)
+cd ..
+cd ..
+
+if [[ -z ${PACKAGE} ]] || [[ -z ${TO_COMMIT} ]] ; then
+    echo "USAGE: PACKAGE=<package-name> [TO_DIR=<path>] TO_COMMIT=<hash> [TO_REMOTE=<git-repo-url>] ./scripts/rebase"
+    exit 1
+fi
+
+# Basic environment variables
+STAGING_BRANCH=staging-${RANDOM}
+
+FROM_REMOTE_NAME=from-remote-${RANDOM}
+FROM_BRANCH=from-${RANDOM}
+TO_REMOTE_NAME=to-remote-${RANDOM}
+TO_BRANCH=to-${RANDOM}
+
+GC_DIRECTORY=packages/${PACKAGE}/generated-changes
+EXCLUDE_DIRECTORY=${GC_DIRECTORY}/exclude
+CHARTS_ORIGINAL_DIRECTORY=packages/${PACKAGE}/charts-original
+CRD_CHART_DIRECTORY=packages/${PACKAGE}/charts-crd # TODO: get from package.yaml
+CRDS_DIRECTORY=crd-manifest # TODO: get from package.yaml
+PACKAGE_YAML_PATH=packages/${PACKAGE}/package.yaml
+
+# Grab environment variables from package.yaml
+FROM_REMOTE=$(yq e '.url' ${PACKAGE_YAML_PATH})
+if [[ "${FROM_REMOTE}" != *.git ]]; then
+    echo "./scripts/rebase can only be done on Git-based packages, found url: ${FROM_REMOTE}"
+    exit 1
+fi
+if [[ -z "${TO_REMOTE}" ]]; then
+    TO_REMOTE=${FROM_REMOTE}
+fi
+FROM_COMMIT=$(yq e '.commit' ${PACKAGE_YAML_PATH})
+if [[ -z ${FROM_COMMIT} ]]; then
+    echo "Unable to find 'commit' in ${PACKAGE_YAML_PATH}"
+fi
+FROM_DIR=$(yq e '.subdirectory' ${PACKAGE_YAML_PATH})
+if [[ -z ${FROM_DIR} ]]; then
+    FROM_DIR="."
+fi
+if [[ -z "${TO_DIR}" ]]; then
+    TO_DIR=${FROM_DIR}
+fi
+
+CHARTS_WORKING_DIRECTORY=$(yq e '.workingDir' ${PACKAGE_YAML_PATH})
+if [ -z "${CHARTS_WORKING_DIRECTORY}" ] || [ "${CHARTS_WORKING_DIRECTORY}" == "null" ]; then
+    DEST_DIRECTORY=packages/${PACKAGE}/charts
+else
+    DEST_DIRECTORY=packages/${PACKAGE}/${CHARTS_WORKING_DIRECTORY}
+fi
+
+IGNORE_DEPS=$(yq e '.ignoreDependencies' ${PACKAGE_YAML_PATH} -o p | cut -d ' ' -f3)
+
+# Start rebase process
+if [ -z "${FROM_DIR}" ] && [ -z "${TO_DIR}" ]; then
+    echo "Attempting to rebase ${PACKAGE} from commit ${FROM_COMMIT} to ${TO_DIR}"
+elif [ -z "${FROM_DIR}" ] && [ -n "${TO_DIR}" ]; then
+    echo "Attempting to rebase ${PACKAGE} from commit ${FROM_COMMIT} to ${TO_DIR} at subdirectory ${TO_DIR}"
+elif [ -n "${FROM_DIR}" ] && [ -z "${TO_DIR}" ]; then
+    echo "Attempting to rebase ${PACKAGE} from commit ${FROM_COMMIT} at subdirectory ${FROM_DIR} to ${TO_DIR}"
+else
+    echo "Attempting to rebase ${PACKAGE} from commit ${FROM_COMMIT} at subdirectory ${FROM_DIR} to ${TO_DIR} at subdirectory ${TO_DIR}"
+fi
+echo ""
+
+# Pre-rebase checks
+
+echo "Running pre-flight checks..."
+
+echo "> Checking if Git is clean..."
+if [[ -n "$(git status --porcelain)" ]]; then
+    echo "Cannot run rebase on unclean repository:"
+    git status --porcelain
+    exit 1
+fi
+
+echo "> Checking if ${DEST_DIRECTORY} exists..."
+if [ -d "${DEST_DIRECTORY}" ]; then
+    echo "Destination directory ${DEST_DIRECTORY} already exists"
+    exit 1
+fi
+
+remotes=$(git remote)
+echo "> Checking if ${FROM_REMOTE_NAME} exists..."
+if echo ${remotes} | grep -q ${FROM_REMOTE_NAME}; then
+    echo "Remote ${FROM_REMOTE_NAME} already exists"
+    exit 1
+fi
+
+echo "> Checking if ${TO_REMOTE_NAME} exists..."
+if echo ${remotes} | grep -q ${TO_REMOTE_NAME}; then
+    echo "Remote ${TO_REMOTE_NAME} already exists"
+    exit 1
+fi
+
+# Ensure branches doesn't already exist
+echo "> Checking if sandbox branches (${STAGING_BRANCH}, ${FROM_BRANCH}, ${TO_BRANCH}) exist..."
+branches=$(git show-ref --heads | cut -d/ -f3-)
+if echo ${branches} | grep -q ${STAGING_BRANCH}; then
+    echo "Branch ${STAGING_BRANCH} already exists"
+    exit 1
+elif echo ${branches} | grep -q ${FROM_BRANCH}; then
+    echo "Branch ${FROM_BRANCH} already exists"
+    exit 1
+elif echo ${branches} | grep -q ${TO_BRANCH}; then
+    echo "Branch ${TO_BRANCH} already exists"
+    exit 1
+fi
+
+CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+
+# Cleanup logic
+
+trap 'cleanup' EXIT
+
+cleanup() {
+    # Execute all cleanup even if there is failures
+    echo ""
+    echo "Cleaning up Git remotes and branches created by this script..."
+    set +e
+    git remote rm ${FROM_REMOTE_NAME} 2>/dev/null
+    git remote rm ${TO_REMOTE_NAME} 2>/dev/null
+    git clean -df 1>/dev/null 2>/dev/null
+    git reset --hard 1>/dev/null 2>/dev/null
+    git checkout ${CURRENT_BRANCH} 2>/dev/null
+    git branch -D ${STAGING_BRANCH} 2>/dev/null
+    git branch -D ${FROM_BRANCH} 2>/dev/null
+    git branch -D ${TO_BRANCH} 2>/dev/null
+}
+
+echo ""
+echo "Preparing Git for rebase..."
+
+# Start rebase
+echo "> Checking out a new branch at ${STAGING_BRANCH} to sandbox changes..."
+git checkout -b ${STAGING_BRANCH} 1>/dev/null 2>/dev/null
+
+# Add provided remotes to git
+echo "> Adding ${FROM_REMOTE} as a remote ${FROM_REMOTE_NAME} on Git"
+git remote add ${FROM_REMOTE_NAME} ${FROM_REMOTE} 1>/dev/null 2>/dev/null
+echo "> Fetching ${FROM_COMMIT} from ${FROM_REMOTE_NAME} on Git"
+git fetch --depth=1 ${FROM_REMOTE_NAME} ${FROM_COMMIT}
+echo "> Adding ${TO_REMOTE} as a remote ${TO_REMOTE_NAME} on Git"
+git remote add ${TO_REMOTE_NAME} ${TO_REMOTE} 1>/dev/null 2>/dev/null
+echo "> Fetching ${TO_COMMIT} from ${TO_REMOTE_NAME} on Git"
+git fetch --depth=1 ${TO_REMOTE_NAME} ${TO_COMMIT}
+
+# Checkout the provided tag from that remote into the FROM_BRANCH
+echo "> Checking out a new branch at ${FROM_BRANCH} tracking ${FROM_REMOTE} at ${FROM_COMMIT}..."
+git checkout ${FROM_COMMIT} -b ${FROM_BRANCH} 1>/dev/null 2>/dev/null
+
+# Fail if subdirectory specified does not exist on remote
+echo "> Checking if ${FROM_REMOTE} at ${FROM_COMMIT} has subdirectory '${FROM_DIR}'..."
+if [ ! -d "${FROM_DIR}" ]; then
+    echo "${FROM_REMOTE} at ${FROM_COMMIT} does not contain subdirectory ${FROM_DIR}"
+    exit 1
+fi
+
+# Copy subdirectory into a special folder
+mkdir -p .rebase/from
+cp -R ${FROM_DIR}/* .rebase/from
+git add .rebase/from 1>/dev/null 2>/dev/null
+git commit -m "Temporarily moving ${FROM_DIR} to .rebase/from" 1>/dev/null 2>/dev/null
+
+# Checkout the provided tag from that remote into the TO_BRANCH
+echo "> Checking out a new branch at ${TO_BRANCH} tracking ${TO_REMOTE} at ${TO_COMMIT}..."
+git checkout ${TO_COMMIT} -b ${TO_BRANCH} 1>/dev/null 2>/dev/null
+
+# Fail if subdirectory specified does not exist on remote
+echo "> Checking if ${TO_REMOTE} at ${TO_COMMIT} has subdirectory '${TO_DIR}'..."
+if [ ! -d "${TO_DIR}" ]; then
+    echo "${TO_REMOTE} at ${TO_COMMIT} does not contain subdirectory ${TO_DIR}"
+    exit 1
+fi
+
+# Copy subdirectory into a special folder
+mkdir -p .rebase/to
+cp -R ${TO_DIR}/* .rebase/to
+git add .rebase/to 1>/dev/null 2>/dev/null
+git commit -m "Temporarily moving ${TO_DIR} to .rebase/to" 1>/dev/null 2>/dev/null
+
+# Pull charts into directory in order
+git checkout ${STAGING_BRANCH} 1>/dev/null 2>/dev/null
+PACKAGE=${PACKAGE} USE_CACHE=${USE_CACHE} make prepare 1>/dev/null 2>/dev/null
+chmod 644 $(find ${DEST_DIRECTORY} -type f | xargs)
+
+# Save changes added by developer
+if [ -d "${CRD_CHART_DIRECTORY}" ]; then
+    git add ${DEST_DIRECTORY} ${CRD_CHART_DIRECTORY}
+else
+    git add ${DEST_DIRECTORY}
+fi
+git commit -m "Add changes saved in generated-changes" 1>/dev/null 2>/dev/null
+
+# Keep track of commits that need to be dropped entirely
+GC_COMMIT=$(git rev-parse --short HEAD)
+
+if [ -d "${CRD_CHART_DIRECTORY}" ]; then
+    # Move CRDs back into main chart so that you can rebase changes to CRDs as well
+    mv ${CRD_CHART_DIRECTORY}/${CRDS_DIRECTORY} ${DEST_DIRECTORY}/crds
+    git add ${CRD_CHART_DIRECTORY}/${CRDS_DIRECTORY} ${DEST_DIRECTORY}/crds
+    git commit -m "Move CRDs back into main chart" 1>/dev/null 2>/dev/null
+fi
+
+if [ -d "${EXCLUDE_DIRECTORY}" ]; then
+    # Calculate excluded files and directories
+    EXCLUDE_DIRECTORIES=$(find ${EXCLUDE_DIRECTORY}/* -type d | sed "s/${EXCLUDE_DIRECTORY//\//\\/}\///")
+    EXCLUDE_FILES=$(find ${EXCLUDE_DIRECTORY}/* -type f | sed "s/${EXCLUDE_DIRECTORY//\//\\/}\///")
+fi
+
+git checkout ${FROM_BRANCH} -- .rebase/from 1>/dev/null 2>/dev/null
+git checkout ${TO_BRANCH} -- .rebase/to 1>/dev/null 2>/dev/null
+
+ADDED_PATHS=$(diff -rq .rebase/to .rebase/from | grep 'Only in .rebase/to' | cut -d ' ' -f3- | sed 's/: /\//g' || true)
+REMOVED_PATHS=$(diff -rq .rebase/to .rebase/from | grep 'Only in .rebase/from' | cut -d ' ' -f3- | sed 's/: /\//g' || true)
+
+git reset HEAD 1>/dev/null 2>/dev/null
+git add .rebase/from 1>/dev/null 2>/dev/null
+git commit -m "Add .rebase/from" 1>/dev/null 2>/dev/null
+mv .rebase/from .rebase/from-copy
+mv .rebase/to .rebase/from
+
+if [[ -n ${IGNORE_DEPS} ]]; then
+    IGNORE_DEPS_DIFF_ARGS=$(echo "${IGNORE_DEPS}" | tr ' ' '\n' | sed 's:\(.*\):\:!.rebase/from/charts/\1/*:g' | xargs)
+else
+    unset IGNORE_DEPS_DIFF_ARGS
+fi
+if [[ -n ${EXCLUDE_FILES} ]]; then
+    EXCLUDE_FILES_DIFF_ARGS=$(echo "${EXCLUDE_FILES}" | tr ' ' '\n' | sed 's:\(.*\):\:!.rebase/from/\1:g' | xargs)
+else
+    unset EXCLUDE_FILES_DIFF_ARGS
+fi
+git diff -- ${IGNORE_DEPS_DIFF_ARGS} ${EXCLUDE_FILES_DIFF_ARGS} > diff.patch
+
+git reset HEAD~1
+git checkout -- .
+
+sed -i.bak -e  "s:diff \(.*\) a/.rebase/from/\(.*\) b/.rebase/from/\(.*\):diff \1 a/${DEST_DIRECTORY}/\2 b/${DEST_DIRECTORY}/\3 :g" diff.patch
+sed -i.bak "s:--- a/.rebase/from/\(.*\):--- a/${DEST_DIRECTORY}/\1:g" diff.patch
+sed -i.bak "s:+++ b/.rebase/from/\(.*\):+++ b/${DEST_DIRECTORY}/\1:g" diff.patch
+sed -i.bak "s:index \(.*\) \(.*\):index \1 100644:g" diff.patch
+rm diff.patch.bak
+
+echo "> Applying difference in three-way merge..."
+git apply --reject diff.patch 1>/dev/null 2>/dev/null || true
+for to_path in ${ADDED_PATHS}; do
+    from_paths=$(echo ${to_path} | sed "s:.rebase/to:.rebase/from:g")
+    [[ -d ${from_paths} ]] && from_paths=$(find ${from_paths} -type f)
+    for from_path in ${from_paths}; do
+        unset should_continue
+        for ignored_dep in ${IGNORE_DEPS}; do
+            if echo ${from_path} | grep ".rebase/from/charts/${ignored_dep}" 1>/dev/null 2>/dev/null; then
+                should_continue=1;
+                break
+            fi
+        done
+        [[ -n ${should_continue} ]] && continue
+        chart_path=$(echo ${from_path} | sed "s:.rebase/from:${DEST_DIRECTORY}:g")
+        mkdir -p $(dirname ${chart_path})
+        cp ${from_path} ${chart_path}
+    done
+done
+
+for to_path in ${REMOVED_PATHS}; do
+    from_paths=$(echo ${to_path} | sed "s:.rebase/to:.rebase/from:g")
+    [[ -d ${from_paths} ]] && from_paths=$(find ${from_paths} -type f)
+    for from_path in ${from_paths}; do
+        unset should_continue
+        for ignored_dep in ${IGNORE_DEPS}; do
+            if echo ${from_path} | grep ".rebase/from/charts/${ignored_dep}" 1>/dev/null 2>/dev/null; then
+                should_continue=1;
+                break
+            fi
+        done
+        [[ -n ${should_continue} ]] && continue
+        chart_path=$(echo ${from_path} | sed "s:.rebase/from/::g")
+        rm ${DEST_DIRECTORY}/${chart_path} 1>/dev/null 2>/dev/null || true
+    done
+done
+
+
+if [ -d "${EXCLUDE_DIRECTORY}" ]; then
+    # Move modified excluded files into excludes directory
+    for d in ${EXCLUDE_DIRECTORIES}; do
+        mkdir -p ${EXCLUDE_DIRECTORY}/${d}
+    done
+    for f in ${EXCLUDE_FILES}; do
+        # the file might be removed in upstream
+        if [ -f .rebase/from-copy/${f} ]; then
+            mv .rebase/from-copy/${f} ${EXCLUDE_DIRECTORY}/${f}
+        fi
+    done
+    unset EXCLUDE_DIRECTORIES
+    unset EXCLUDE_FILES
+fi
+if [ -d "${CRD_CHART_DIRECTORY}" ]; then
+    # Move CRDs back back into CRD chart since changes would have been tracked there
+    git reset HEAD~1 1>/dev/null 2>/dev/null
+    mv ${DEST_DIRECTORY}/crds ${CRD_CHART_DIRECTORY}/${CRDS_DIRECTORY}
+fi
+
+rm diff.patch
+rm -rf .rebase
+
+# Clean up empty directories from the merge
+find ${DEST_DIRECTORY} -type d -empty -delete 1>/dev/null 2>/dev/null
+
+echo ""
+echo "INTERACTIVE REBASE SHELL"
+echo "==="
+echo ""
+echo "The changes have been loaded into your working directory."
+echo ""
+echo "Please look through each file that was changed and remove .rej files using an editor of your choice."
+echo ""
+echo "Once you have manually resolved the .rej files or added any additonal necessary changes, do the following:"
+if [ -d "${CRD_CHART_DIRECTORY}" ]; then
+    echo "1) Add all changes to ${DEST_DIRECTORY}, ${EXCLUDE_DIRECTORY}, and ${CRD_CHART_DIRECTORY} to staging (e.g. git add)"
+else
+    echo "1) Add all changes to ${DEST_DIRECTORY} and ${EXCLUDE_DIRECTORY} to staging (e.g. git add)"
+fi
+echo "2) Commit all other changes to save them (e.g. 'git add <changes>; git commit -m \"message\"')"
+echo "Note: Any additional commits you make will show up in your branch at the end of the rebase, so committing changes from 'make patch' could be helpful"
+echo ""
+if [ -d "${CRD_CHART_DIRECTORY}" ]; then
+    echo "Once you have added all changes to ${DEST_DIRECTORY}, ${EXCLUDE_DIRECTORY} or ${CRD_CHART_DIRECTORY}, exit out of the shell to move to the next commit."
+else
+    echo "Once you have added all changes to ${DEST_DIRECTORY} or ${EXCLUDE_DIRECTORY}, exit out of the shell to move to the next commit."
+fi
+echo ""
+echo "To force abort the rebase and discard your changes at any time, run 'abort'"
+set +e
+CURR_DIR=$(pwd)
+bash --rcfile <(echo "PS1='(interactive-rebase-shell) '; alias abort='touch .abort_rebase; exit'") -i
+set -e
+cd ${CURR_DIR} 1>/dev/null 2>/dev/null
+
+# Ensure additional commits do not contain changes to DEST_DIRECTORY, EXCLUDE_DIRECTORY, or CRD_CHART_DIRECTORY
+BAD_COMMITS=$(git log --first-parent --oneline ${GC_COMMIT}..HEAD -- ${DEST_DIRECTORY} ${EXCLUDE_DIRECTORY} ${CRD_CHART_DIRECTORY})
+# Ensure that changes are only added or modified to DEST_DIRECTORY, EXCLUDE_DIRECTORY, or CRD_CHART_DIRECTORY
+BAD_CHANGES=$(
+    git status --porcelain \
+    | grep -v "A  ${DEST_DIRECTORY}" \
+    | grep -v "M  ${DEST_DIRECTORY}" \
+    | grep -v "R  ${DEST_DIRECTORY}" \
+    | grep -v "D  ${DEST_DIRECTORY}" \
+    | grep -v "A  ${EXCLUDE_DIRECTORY}" \
+    | grep -v "M  ${EXCLUDE_DIRECTORY}" \
+    | grep -v "R  ${EXCLUDE_DIRECTORY}" \
+    | grep -v "D  ${EXCLUDE_DIRECTORY}" \
+    | grep -v "A  ${CRD_CHART_DIRECTORY}" \
+    | grep -v "M  ${CRD_CHART_DIRECTORY}" \
+    | grep -v "R  ${CRD_CHART_DIRECTORY}" \
+    | grep -v "D  ${CRD_CHART_DIRECTORY}" \
+    | tee
+)
+
+set +e
+GIT_REJ_CHECK=$(git diff --staged --name-only | grep ".rej")
+if [[ -n ${GIT_REJ_CHECK} ]]; then
+    GIT_REJ_CHECK_DIFF_ARGS=$(echo "${GIT_REJ_CHECK}" | tr ' ' '\n' | sed "s:\(.*\):\:!\1:g" | xargs)
+else
+    unset GIT_REJ_CHECK_DIFF_ARGS
+fi
+GIT_DIFF_CHECK=$(git diff --staged --check -- ${GIT_REJ_CHECK_DIFF_ARGS} ${EXCLUDE_FILES_DIFF_ARGS} || true)
+set -e
+
+# Loop back through shell until the developer resolves all conflicts
+while [ -n "${BAD_COMMITS}" ] || [ -n "${BAD_CHANGES}" ] || [[ -n "${GIT_DIFF_CHECK}" ]]; do
+    echo ""
+    if [ -f .abort_rebase ]; then
+        rm .abort_rebase
+        echo "Detected ABORT_REBASE has been set. Exiting..."
+        exit 1
+    fi
+    if [ -n "${BAD_COMMITS}" ]; then
+        echo "ERROR: Detected the following commits that violate rebase guidelines:"
+        echo "${BAD_COMMITS}"
+        echo ""
+    fi
+    if [ -n "${BAD_CHANGES}" ]; then
+        echo "ERROR: Detected the following changes that violate rebase guidelines:"
+        echo "${BAD_CHANGES}"
+        echo ""
+    fi
+    if [ -n "${GIT_DIFF_CHECK}" ]; then
+        echo "ERROR: Detected unresolved issues in git diff --staged --check:"
+        echo "${GIT_DIFF_CHECK}"
+        echo ""
+    fi
+     if [ -n "${GIT_REJ_CHECK}" ]; then
+        echo "ERROR: Detected unresolved .rej files in staging:"
+        echo "${GIT_REJ_CHECK}"
+        echo ""
+    fi
+    echo "Only changes to ${DEST_DIRECTORY}, ${EXCLUDE_DIRECTORY}, or ${CRD_CHART_DIRECTORY} should be in staging. All other changes should be committed."
+    echo ""
+    echo "Please modify the commits and try again."
+    echo ""
+    echo "To force abort the rebase and discard your changes at any time, run 'abort'"
+    set +e
+    bash --rcfile <(echo "PS1='(interactive-rebase-shell) '; alias abort='touch .abort_rebase; exit'") -i
+    set -e
+    # Ensure additional commits do not contain changes to DEST_DIRECTORY, EXCLUDE_DIRECTORY, or CRD_CHART_DIRECTORY
+    BAD_COMMITS=$(git log --first-parent --oneline ${GC_COMMIT}..HEAD -- ${DEST_DIRECTORY} ${EXCLUDE_DIRECTORY} ${CRD_CHART_DIRECTORY})
+    # Ensure that changes are only added or modified to DEST_DIRECTORY, EXCLUDE_DIRECTORY, or CRD_CHART_DIRECTORY
+    BAD_CHANGES=$(
+        git status --porcelain \
+        | grep -v "A  ${DEST_DIRECTORY}" \
+        | grep -v "M  ${DEST_DIRECTORY}" \
+        | grep -v "R  ${DEST_DIRECTORY}" \
+        | grep -v "D  ${DEST_DIRECTORY}" \
+        | grep -v "A  ${EXCLUDE_DIRECTORY}" \
+        | grep -v "M  ${EXCLUDE_DIRECTORY}" \
+        | grep -v "R  ${EXCLUDE_DIRECTORY}" \
+        | grep -v "D  ${EXCLUDE_DIRECTORY}" \
+        | grep -v "A  ${CRD_CHART_DIRECTORY}" \
+        | grep -v "M  ${CRD_CHART_DIRECTORY}" \
+        | grep -v "R  ${CRD_CHART_DIRECTORY}" \
+        | grep -v "D  ${CRD_CHART_DIRECTORY}" \
+        | tee
+    )
+    set +e
+    GIT_REJ_CHECK=$(git diff --staged --name-only | grep ".rej")
+    if [[ -n ${GIT_REJ_CHECK} ]]; then
+        GIT_REJ_CHECK_DIFF_ARGS=$(echo "${GIT_REJ_CHECK}" | tr ' ' '\n' | sed "s:\(.*\):\:!\1:g" | xargs)
+    else
+        unset GIT_REJ_CHECK_DIFF_ARGS
+    fi
+    GIT_DIFF_CHECK=$(git diff --staged --check -- ${GIT_REJ_CHECK_DIFF_ARGS} ${EXCLUDE_FILES_DIFF_ARGS} || true)
+    set -e
+done
+
+# Merge current staged changes into the GC_COMMIT directly, ignoring any other commits added by the user
+# Then set the GC_COMMIT once more since the commit hash has changed
+NUM_USER_COMMITS=$(git rev-list --count ${GC_COMMIT}..HEAD)
+git commit --fixup "${GC_COMMIT}" 1>/dev/null 2>/dev/null && GIT_SEQUENCE_EDITOR=true git rebase --interactive --autosquash "${GC_COMMIT}^" 1>/dev/null 2>/dev/null
+GC_COMMIT=$(git rev-parse --short HEAD~${NUM_USER_COMMITS})
+
+# Run make patch and save all changes that were added to the working directory throughout the rebase
+rm ${CHARTS_ORIGINAL_DIRECTORY} 1>/dev/null 2>/dev/null || true
+PACKAGE=${PACKAGE} USE_CACHE=${USE_CACHE} make patch 1>/dev/null 2>/dev/null
+git add ${GC_DIRECTORY}
+git commit --allow-empty -m "Rebase ${PACKAGE} to ${TO_COMMIT}" 1>/dev/null 2>/dev/null
+
+
+# Ensure Git is clean
+if [ -n "$(git status --porcelain)" ]; then
+    echo "Found unexpected changes after generating final patch post-rebase"
+    git status --porcelain
+    exit 1
+fi
+
+# Cherry pick all changes to the current branch
+COMMITS=$(git log --first-parent --oneline ${GC_COMMIT}..HEAD | cut -d' ' -f1 | tail -r)
+echo ""
+echo "Applying the following commits to your current branch:"
+echo ""
+echo "$(git log --first-parent --oneline ${GC_COMMIT}..HEAD)"
+
+git checkout ${CURRENT_BRANCH} 1>/dev/null 2>/dev/null
+for commit in ${COMMITS}; do
+    git cherry-pick --allow-empty -m 1 ${commit} 1>/dev/null 2>/dev/null || git commit --allow-empty 1>/dev/null 2>/dev/null
+done
+
+echo ""
+echo ">> Modifying the package.yaml and finishing up rebase..."
+PACKAGE=${PACKAGE} USE_CACHE=${USE_CACHE} make prepare 1>/dev/null 2>/dev/null
+yq e -i ".url = \"${TO_REMOTE}\"" ${PACKAGE_YAML_PATH} 1>/dev/null 2>/dev/null
+yq e -i ".commit = \"${TO_COMMIT}\"" ${PACKAGE_YAML_PATH} 1>/dev/null 2>/dev/null
+if [[ ${TO_DIR} != "." ]]; then
+    yq e -i ".subdirectory = \"${TO_DIR}\"" ${PACKAGE_YAML_PATH} 1>/dev/null 2>/dev/null
+fi
+PACKAGE=${PACKAGE} USE_CACHE=${USE_CACHE} make patch 1>/dev/null 2>/dev/null
+PACKAGE=${PACKAGE} USE_CACHE=${USE_CACHE}  make clean 1>/dev/null 2>/dev/null
+git add ${GC_DIRECTORY} ${PACKAGE_YAML_PATH}
+git commit --allow-empty -m "Update ${PACKAGE} to new base ${TO_COMMIT}" 1>/dev/null 2>/dev/null
+
+echo ""
+echo "Hooray! The rebase is complete."
