@@ -17,6 +17,9 @@ $(TARGETS): .dapper
 pull-scripts:
 	./scripts/charts-build-scripts/pull-scripts
 
+rebase:
+	./scripts/charts-build-scripts/rebase
+
 CHARTS_BUILD_SCRIPTS_TARGETS := prepare patch clean clean-cache charts list index unzip zip standardize template
 
 $(CHARTS_BUILD_SCRIPTS_TARGETS):
