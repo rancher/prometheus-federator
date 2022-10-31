@@ -19,9 +19,6 @@ base64 bin/${CHART}/${CHART}-${VERSION}.tgz > bin/${CHART}/${CHART}.tgz.base64
 rm bin/${CHART}/${CHART}-${VERSION}.tgz
 ```
 
-Therefore, as a whole, the build process of Underlying Helm Chart looks as follows:
-
-
 ## The Project Operator Image
 
 To implement a Project Operator, Helm Project Operator expects a user to run the `operator.Init` command, which appears in Prometheus Federator's [`main.go`](../main.go) as follows:
