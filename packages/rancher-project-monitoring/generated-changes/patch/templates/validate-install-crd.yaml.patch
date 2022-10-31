@@ -1,0 +1,12 @@
+--- charts-original/templates/validate-install-crd.yaml
++++ charts/templates/validate-install-crd.yaml
+@@ -15,7 +15,7 @@
+ # {{- end -}}
+ # {{- range $_, $exists := $found -}}
+ # {{- if (eq $exists false) -}}
+-# 	{{- required "Required CRDs are missing. Please install the corresponding CRD chart before installing this chart." "" -}}
++# 	{{- required "Required Prometheus Operator CRDs are missing. Please install Prometheus Operator (e.g. rancher-monitoring) before installing this chart." "" -}}
+ # {{- end -}}
+ # {{- end -}}
+ #{{- end -}}
+\ No newline at end of file

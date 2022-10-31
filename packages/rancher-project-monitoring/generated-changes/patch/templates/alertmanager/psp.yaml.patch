@@ -1,0 +1,20 @@
+--- charts-original/templates/alertmanager/psp.yaml
++++ charts/templates/alertmanager/psp.yaml
+@@ -2,14 +2,14 @@
+ apiVersion: policy/v1beta1
+ kind: PodSecurityPolicy
+ metadata:
+-  name: {{ template "kube-prometheus-stack.fullname" . }}-alertmanager
++  name: {{ template "project-prometheus-stack.fullname" . }}-alertmanager
+   labels:
+-    app: {{ template "kube-prometheus-stack.name" . }}-alertmanager
++    app: {{ template "project-prometheus-stack.name" . }}-alertmanager
+ {{- if .Values.global.rbac.pspAnnotations }}
+   annotations:
+ {{ toYaml .Values.global.rbac.pspAnnotations | indent 4 }}
+ {{- end }}
+-{{ include "kube-prometheus-stack.labels" . | indent 4 }}
++{{ include "project-prometheus-stack.labels" . | indent 4 }}
+ spec:
+   privileged: false
+   # Required to prevent escalations to root.
