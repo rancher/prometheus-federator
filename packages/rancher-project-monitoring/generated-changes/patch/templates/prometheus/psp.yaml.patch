@@ -1,0 +1,30 @@
+--- charts-original/templates/prometheus/psp.yaml
++++ charts/templates/prometheus/psp.yaml
+@@ -2,14 +2,14 @@
+ apiVersion: policy/v1beta1
+ kind: PodSecurityPolicy
+ metadata:
+-  name: {{ template "kube-prometheus-stack.fullname" . }}-prometheus
++  name: {{ template "project-prometheus-stack.fullname" . }}-prometheus
+   labels:
+-    app: {{ template "kube-prometheus-stack.name" . }}-prometheus
++    app: {{ template "project-prometheus-stack.name" . }}-prometheus
+ {{- if .Values.global.rbac.pspAnnotations }}
+   annotations:
+ {{ toYaml .Values.global.rbac.pspAnnotations | indent 4 }}
+ {{- end }}
+-{{ include "kube-prometheus-stack.labels" . | indent 4 }}
++{{ include "project-prometheus-stack.labels" . | indent 4 }}
+ spec:
+   privileged: false
+   # Required to prevent escalations to root.
+@@ -54,9 +54,5 @@
+ {{- if .Values.prometheus.podSecurityPolicy.allowedCapabilities }}
+   allowedCapabilities:
+ {{ toYaml .Values.prometheus.podSecurityPolicy.allowedCapabilities | indent 4 }}
+-{{- end }}
+-{{- if .Values.prometheus.podSecurityPolicy.allowedHostPaths }}
+-  allowedHostPaths:
+-{{ toYaml .Values.prometheus.podSecurityPolicy.allowedHostPaths | indent 4 }}
+ {{- end }}
+ {{- end }}
