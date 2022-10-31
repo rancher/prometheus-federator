@@ -25,3 +25,6 @@ ignoreDependencies:
 - rkeProxy
 - rkeScheduler
 - windowsExporter
+replacePaths:
+- README.md
+- app-README.md
