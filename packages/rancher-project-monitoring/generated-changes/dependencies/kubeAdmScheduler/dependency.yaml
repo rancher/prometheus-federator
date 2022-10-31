@@ -1,4 +1,0 @@
-workingDir: ""
-url: https://github.com/rancher/charts.git
-subdirectory: charts/rancher-monitoring/100.1.2+up19.0.3/charts/kubeAdmScheduler
-commit: 6e498bb86c9ed5d67021cc0569eca21c035d9067
