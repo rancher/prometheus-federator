@@ -1,0 +1,32 @@
+--- charts-original/templates/grafana/dashboards-1.14/alertmanager-overview.yaml
++++ charts/templates/grafana/dashboards-1.14/alertmanager-overview.yaml
+@@ -1,7 +1,7 @@
+ {{- /*
+ Generated from 'alertmanager-overview' from https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/main/manifests/grafana-dashboardDefinitions.yaml
+ Do not change in-place! In order to change this file first read following link:
+-https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack/hack
++https://github.com/prometheus-community/helm-charts/tree/main/charts/project-prometheus-stack/hack
+ */ -}}
+ {{- $kubeTargetVersion := default .Capabilities.KubeVersion.GitVersion .Values.kubeTargetVersionOverride }}
+ {{- if and (or .Values.grafana.enabled .Values.grafana.forceDeployDashboards) (semverCompare ">=1.14.0-0" $kubeTargetVersion) (semverCompare "<9.9.9-9" $kubeTargetVersion) .Values.grafana.defaultDashboardsEnabled }}
+@@ -9,16 +9,16 @@
+ apiVersion: v1
+ kind: ConfigMap
+ metadata:
+-  namespace: {{ .Values.grafana.defaultDashboards.namespace }}
+-  name: {{ printf "%s-%s" (include "kube-prometheus-stack.fullname" $) "alertmanager-overview" | trunc 63 | trimSuffix "-" }}
++  namespace: {{ template "project-prometheus-stack.namespace" . }}
++  name: {{ printf "%s-%s" (include "project-prometheus-stack.fullname" $) "alertmanager-overview" | trunc 63 | trimSuffix "-" }}
+   annotations:
+ {{ toYaml .Values.grafana.sidecar.dashboards.annotations | indent 4 }}
+   labels:
+     {{- if $.Values.grafana.sidecar.dashboards.label }}
+     {{ $.Values.grafana.sidecar.dashboards.label }}: "1"
+     {{- end }}
+-    app: {{ template "kube-prometheus-stack.name" $ }}-grafana
+-{{ include "kube-prometheus-stack.labels" $ | indent 4 }}
++    app: {{ template "project-prometheus-stack.name" $ }}-grafana
++{{ include "project-prometheus-stack.labels" $ | indent 4 }}
+ data:
+   alertmanager-overview.json: |-
+     {
