@@ -42,6 +42,7 @@ Once this setting is turned on, you can always create ServiceMonitors or PodMoni
 In addition, if you modified the default `.Values.grafana.sidecar.*.searchNamespace` values on the Grafana Helm subchart for Monitoring V2, it is also recommended to remove the overrides or ensure that your defaults are scoped to only system namespaces for the following values:
 - `.Values.grafana.sidecar.dashboards.searchNamespace` (default `cattle-dashboards`)
 - `.Values.grafana.sidecar.datasources.searchNamespace` (default `null`, which means it uses the release namespace `cattle-monitoring-system`)
+- `.Values.grafana.sidecar.plugins.searchNamespace` (default `null`, which means it uses the release namespace `cattle-monitoring-system`)
 - `.Values.grafana.sidecar.notifiers.searchNamespace` (default `null`, which means it uses the release namespace `cattle-monitoring-system`)
 
 ### Increase the CPU / memory limits of the Cluster Prometheus
