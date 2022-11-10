@@ -1,6 +1,6 @@
 --- charts-original/templates/grafana/configmaps-datasources.yaml
 +++ charts/templates/grafana/configmaps-datasources.yaml
-@@ -2,16 +2,16 @@
+@@ -2,43 +2,42 @@
  apiVersion: v1
  kind: ConfigMap
  metadata:
@@ -21,7 +21,16 @@
  data:
    datasource.yaml: |-
      apiVersion: 1
-@@ -23,23 +23,12 @@
++{{- if .Values.grafana.deleteDatasources }}
++    deleteDatasources:
++{{ tpl (toYaml .Values.grafana.deleteDatasources | indent 6) . }}
++{{- end }}
+     datasources:
+ {{- $scrapeInterval := .Values.grafana.sidecar.datasources.defaultDatasourceScrapeInterval | default .Values.prometheus.prometheusSpec.scrapeInterval | default "30s" }}
+ {{- if .Values.grafana.sidecar.datasources.defaultDatasourceEnabled }}
+     - name: Prometheus
+       type: prometheus
++      uid: {{ .Values.grafana.sidecar.datasources.uid }}
        {{- if .Values.grafana.sidecar.datasources.url }}
        url: {{ .Values.grafana.sidecar.datasources.url }}
        {{- else }}
@@ -42,7 +51,10 @@
 -      jsonData:
 -        timeInterval: {{ $scrapeInterval }}
 -{{- end }}
--{{- end }}
++{{- if .Values.grafana.sidecar.datasources.exemplarTraceIdDestinations }}
++        exemplarTraceIdDestinations:
++        - datasourceUid: {{ .Values.grafana.sidecar.datasources.exemplarTraceIdDestinations.datasourceUid }}
++          name: {{ .Values.grafana.sidecar.datasources.exemplarTraceIdDestinations.traceIdLabelName }}
+ {{- end }}
  {{- end }}
  {{- if .Values.grafana.additionalDataSources }}
- {{ tpl (toYaml .Values.grafana.additionalDataSources | indent 4) . }}

@@ -20,7 +20,8 @@
  {{ toYaml .Values.grafana.sidecar.dashboards.annotations | indent 4 }}
    labels:
      {{- if $.Values.grafana.sidecar.dashboards.label }}
-     {{ $.Values.grafana.sidecar.dashboards.label }}: "1"
+-    {{ $.Values.grafana.sidecar.dashboards.label }}: "1"
++    {{ $.Values.grafana.sidecar.dashboards.label }}: {{ ternary $.Values.grafana.sidecar.dashboards.labelValue "1" (not (empty $.Values.grafana.sidecar.dashboards.labelValue)) | quote }}
      {{- end }}
 -    app: {{ template "kube-prometheus-stack.name" $ }}-grafana
 -{{ include "kube-prometheus-stack.labels" $ | indent 4 }}
@@ -155,6 +156,21 @@
                                  "format": "time_series",
                                  "intervalFactor": 1,
                                  "legendFormat": "{{`{{`}}pod{{`}}`}}",
+@@ -1273,11 +1273,11 @@
+             "list": [
+                 {
+                     "current": {
+-                        "text": "default",
+-                        "value": "default"
++                        "text": "Prometheus",
++                        "value": "Prometheus"
+                     },
+                     "hide": 0,
+-                    "label": null,
++                    "label": "Data Source",
+                     "name": "datasource",
+                     "options": [
+ 
 @@ -1288,32 +1288,6 @@
                      "type": "datasource"
                  },
