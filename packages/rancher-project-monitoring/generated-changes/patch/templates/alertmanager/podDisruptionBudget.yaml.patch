@@ -18,12 +18,10 @@
  spec:
    {{- if .Values.alertmanager.podDisruptionBudget.minAvailable }}
    minAvailable: {{ .Values.alertmanager.podDisruptionBudget.minAvailable }}
-@@ -16,6 +16,6 @@
-   {{- end }}
+@@ -17,5 +17,5 @@
    selector:
      matchLabels:
--      app: alertmanager
--      alertmanager: {{ template "kube-prometheus-stack.fullname" . }}-alertmanager
-+      app.kubernetes.io/name: alertmanager
+       app.kubernetes.io/name: alertmanager
+-      alertmanager: {{ template "kube-prometheus-stack.alertmanager.crname" . }}
 +      alertmanager: {{ template "project-prometheus-stack.alertmanager.crname" . }}
  {{- end }}
