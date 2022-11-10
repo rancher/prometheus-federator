@@ -20,8 +20,7 @@
  {{ toYaml .Values.grafana.sidecar.dashboards.annotations | indent 4 }}
    labels:
      {{- if $.Values.grafana.sidecar.dashboards.label }}
--    {{ $.Values.grafana.sidecar.dashboards.label }}: "1"
-+    {{ $.Values.grafana.sidecar.dashboards.label }}: {{ ternary $.Values.grafana.sidecar.dashboards.labelValue "1" (not (empty $.Values.grafana.sidecar.dashboards.labelValue)) | quote }}
+     {{ $.Values.grafana.sidecar.dashboards.label }}: {{ ternary $.Values.grafana.sidecar.dashboards.labelValue "1" (not (empty $.Values.grafana.sidecar.dashboards.labelValue)) | quote }}
      {{- end }}
 -    app: {{ template "kube-prometheus-stack.name" $ }}-grafana
 -{{ include "kube-prometheus-stack.labels" $ | indent 4 }}
@@ -34,7 +33,7 @@
                  "steppedLine": false,
                  "targets": [
                      {
--                        "expr": "sort_desc(sum(irate(container_network_receive_bytes_total{cluster=\"$cluster\",namespace=~\"$namespace\"}[$interval:$resolution])\n* on (namespace,pod)\ngroup_left(workload,workload_type) namespace_workload_pod:kube_pod_owner:relabel{cluster=\"$cluster\",namespace=~\"$namespace\", workload=~\"$workload\", workload_type=\"$type\"}) by (pod))\n",
+-                        "expr": "sort_desc(sum(irate(container_network_receive_bytes_total{job=\"{{ include "exporter.kubelet.jobName" . }}\", metrics_path=\"/metrics/cadvisor\", cluster=\"$cluster\",namespace=~\"$namespace\"}[$interval:$resolution])\n* on (namespace,pod)\ngroup_left(workload,workload_type) namespace_workload_pod:kube_pod_owner:relabel{cluster=\"$cluster\",namespace=~\"$namespace\", workload=~\"$workload\", workload_type=\"$type\"}) by (pod))\n",
 +                        "expr": "sort_desc(sum(irate(container_network_receive_bytes_total{namespace=~\"$namespace\"}[$interval:$resolution])\n* on (namespace,pod)\ngroup_left(workload,workload_type) namespace_workload_pod:kube_pod_owner:relabel{namespace=~\"$namespace\", workload=~\"$workload\", workload_type=\"$type\"}) by (pod))\n",
                          "format": "time_series",
                          "intervalFactor": 1,
@@ -43,7 +42,7 @@
                  "steppedLine": false,
                  "targets": [
                      {
--                        "expr": "sort_desc(sum(irate(container_network_transmit_bytes_total{cluster=\"$cluster\",namespace=~\"$namespace\"}[$interval:$resolution])\n* on (namespace,pod)\ngroup_left(workload,workload_type) namespace_workload_pod:kube_pod_owner:relabel{cluster=\"$cluster\",namespace=~\"$namespace\", workload=~\"$workload\", workload_type=\"$type\"}) by (pod))\n",
+-                        "expr": "sort_desc(sum(irate(container_network_transmit_bytes_total{job=\"{{ include "exporter.kubelet.jobName" . }}\", metrics_path=\"/metrics/cadvisor\", cluster=\"$cluster\",namespace=~\"$namespace\"}[$interval:$resolution])\n* on (namespace,pod)\ngroup_left(workload,workload_type) namespace_workload_pod:kube_pod_owner:relabel{cluster=\"$cluster\",namespace=~\"$namespace\", workload=~\"$workload\", workload_type=\"$type\"}) by (pod))\n",
 +                        "expr": "sort_desc(sum(irate(container_network_transmit_bytes_total{namespace=~\"$namespace\"}[$interval:$resolution])\n* on (namespace,pod)\ngroup_left(workload,workload_type) namespace_workload_pod:kube_pod_owner:relabel{namespace=~\"$namespace\", workload=~\"$workload\", workload_type=\"$type\"}) by (pod))\n",
                          "format": "time_series",
                          "intervalFactor": 1,
@@ -52,7 +51,7 @@
                          "steppedLine": false,
                          "targets": [
                              {
--                                "expr": "sort_desc(avg(irate(container_network_receive_bytes_total{cluster=\"$cluster\",namespace=~\"$namespace\"}[$interval:$resolution])\n* on (namespace,pod)\ngroup_left(workload,workload_type) namespace_workload_pod:kube_pod_owner:relabel{cluster=\"$cluster\",namespace=~\"$namespace\", workload=~\"$workload\", workload_type=\"$type\"}) by (pod))\n",
+-                                "expr": "sort_desc(avg(irate(container_network_receive_bytes_total{job=\"{{ include "exporter.kubelet.jobName" . }}\", metrics_path=\"/metrics/cadvisor\", cluster=\"$cluster\",namespace=~\"$namespace\"}[$interval:$resolution])\n* on (namespace,pod)\ngroup_left(workload,workload_type) namespace_workload_pod:kube_pod_owner:relabel{cluster=\"$cluster\",namespace=~\"$namespace\", workload=~\"$workload\", workload_type=\"$type\"}) by (pod))\n",
 +                                "expr": "sort_desc(avg(irate(container_network_receive_bytes_total{namespace=~\"$namespace\"}[$interval:$resolution])\n* on (namespace,pod)\ngroup_left(workload,workload_type) namespace_workload_pod:kube_pod_owner:relabel{namespace=~\"$namespace\", workload=~\"$workload\", workload_type=\"$type\"}) by (pod))\n",
                                  "format": "time_series",
                                  "intervalFactor": 1,
@@ -61,7 +60,7 @@
                          "steppedLine": false,
                          "targets": [
                              {
--                                "expr": "sort_desc(avg(irate(container_network_transmit_bytes_total{cluster=\"$cluster\",namespace=~\"$namespace\"}[$interval:$resolution])\n* on (namespace,pod)\ngroup_left(workload,workload_type) namespace_workload_pod:kube_pod_owner:relabel{cluster=\"$cluster\",namespace=~\"$namespace\", workload=~\"$workload\", workload_type=\"$type\"}) by (pod))\n",
+-                                "expr": "sort_desc(avg(irate(container_network_transmit_bytes_total{job=\"{{ include "exporter.kubelet.jobName" . }}\", metrics_path=\"/metrics/cadvisor\", cluster=\"$cluster\",namespace=~\"$namespace\"}[$interval:$resolution])\n* on (namespace,pod)\ngroup_left(workload,workload_type) namespace_workload_pod:kube_pod_owner:relabel{cluster=\"$cluster\",namespace=~\"$namespace\", workload=~\"$workload\", workload_type=\"$type\"}) by (pod))\n",
 +                                "expr": "sort_desc(avg(irate(container_network_transmit_bytes_total{namespace=~\"$namespace\"}[$interval:$resolution])\n* on (namespace,pod)\ngroup_left(workload,workload_type) namespace_workload_pod:kube_pod_owner:relabel{namespace=~\"$namespace\", workload=~\"$workload\", workload_type=\"$type\"}) by (pod))\n",
                                  "format": "time_series",
                                  "intervalFactor": 1,
@@ -70,7 +69,7 @@
                  "steppedLine": false,
                  "targets": [
                      {
--                        "expr": "sort_desc(sum(irate(container_network_receive_bytes_total{cluster=\"$cluster\",namespace=~\"$namespace\"}[$interval:$resolution])\n* on (namespace,pod)\ngroup_left(workload,workload_type) namespace_workload_pod:kube_pod_owner:relabel{cluster=\"$cluster\",namespace=~\"$namespace\", workload=~\"$workload\", workload_type=\"$type\"}) by (pod))\n",
+-                        "expr": "sort_desc(sum(irate(container_network_receive_bytes_total{job=\"{{ include "exporter.kubelet.jobName" . }}\", metrics_path=\"/metrics/cadvisor\", cluster=\"$cluster\",namespace=~\"$namespace\"}[$interval:$resolution])\n* on (namespace,pod)\ngroup_left(workload,workload_type) namespace_workload_pod:kube_pod_owner:relabel{cluster=\"$cluster\",namespace=~\"$namespace\", workload=~\"$workload\", workload_type=\"$type\"}) by (pod))\n",
 +                        "expr": "sort_desc(sum(irate(container_network_receive_bytes_total{namespace=~\"$namespace\"}[$interval:$resolution])\n* on (namespace,pod)\ngroup_left(workload,workload_type) namespace_workload_pod:kube_pod_owner:relabel{namespace=~\"$namespace\", workload=~\"$workload\", workload_type=\"$type\"}) by (pod))\n",
                          "format": "time_series",
                          "intervalFactor": 1,
@@ -79,7 +78,7 @@
                  "steppedLine": false,
                  "targets": [
                      {
--                        "expr": "sort_desc(sum(irate(container_network_transmit_bytes_total{cluster=\"$cluster\",namespace=~\"$namespace\"}[$interval:$resolution])\n* on (namespace,pod)\ngroup_left(workload,workload_type) namespace_workload_pod:kube_pod_owner:relabel{cluster=\"$cluster\",namespace=~\"$namespace\", workload=~\"$workload\", workload_type=\"$type\"}) by (pod))\n",
+-                        "expr": "sort_desc(sum(irate(container_network_transmit_bytes_total{job=\"{{ include "exporter.kubelet.jobName" . }}\", metrics_path=\"/metrics/cadvisor\", cluster=\"$cluster\",namespace=~\"$namespace\"}[$interval:$resolution])\n* on (namespace,pod)\ngroup_left(workload,workload_type) namespace_workload_pod:kube_pod_owner:relabel{cluster=\"$cluster\",namespace=~\"$namespace\", workload=~\"$workload\", workload_type=\"$type\"}) by (pod))\n",
 +                        "expr": "sort_desc(sum(irate(container_network_transmit_bytes_total{namespace=~\"$namespace\"}[$interval:$resolution])\n* on (namespace,pod)\ngroup_left(workload,workload_type) namespace_workload_pod:kube_pod_owner:relabel{namespace=~\"$namespace\", workload=~\"$workload\", workload_type=\"$type\"}) by (pod))\n",
                          "format": "time_series",
                          "intervalFactor": 1,
@@ -88,7 +87,7 @@
                          "steppedLine": false,
                          "targets": [
                              {
--                                "expr": "sort_desc(sum(irate(container_network_receive_packets_total{cluster=\"$cluster\",namespace=~\"$namespace\"}[$interval:$resolution])\n* on (namespace,pod)\ngroup_left(workload,workload_type) namespace_workload_pod:kube_pod_owner:relabel{cluster=\"$cluster\",namespace=~\"$namespace\", workload=~\"$workload\", workload_type=\"$type\"}) by (pod))\n",
+-                                "expr": "sort_desc(sum(irate(container_network_receive_packets_total{job=\"{{ include "exporter.kubelet.jobName" . }}\", metrics_path=\"/metrics/cadvisor\", cluster=\"$cluster\",namespace=~\"$namespace\"}[$interval:$resolution])\n* on (namespace,pod)\ngroup_left(workload,workload_type) namespace_workload_pod:kube_pod_owner:relabel{cluster=\"$cluster\",namespace=~\"$namespace\", workload=~\"$workload\", workload_type=\"$type\"}) by (pod))\n",
 +                                "expr": "sort_desc(sum(irate(container_network_receive_packets_total{namespace=~\"$namespace\"}[$interval:$resolution])\n* on (namespace,pod)\ngroup_left(workload,workload_type) namespace_workload_pod:kube_pod_owner:relabel{namespace=~\"$namespace\", workload=~\"$workload\", workload_type=\"$type\"}) by (pod))\n",
                                  "format": "time_series",
                                  "intervalFactor": 1,
@@ -97,7 +96,7 @@
                          "steppedLine": false,
                          "targets": [
                              {
--                                "expr": "sort_desc(sum(irate(container_network_transmit_packets_total{cluster=\"$cluster\",namespace=~\"$namespace\"}[$interval:$resolution])\n* on (namespace,pod)\ngroup_left(workload,workload_type) namespace_workload_pod:kube_pod_owner:relabel{cluster=\"$cluster\",namespace=~\"$namespace\", workload=~\"$workload\", workload_type=\"$type\"}) by (pod))\n",
+-                                "expr": "sort_desc(sum(irate(container_network_transmit_packets_total{job=\"{{ include "exporter.kubelet.jobName" . }}\", metrics_path=\"/metrics/cadvisor\", cluster=\"$cluster\",namespace=~\"$namespace\"}[$interval:$resolution])\n* on (namespace,pod)\ngroup_left(workload,workload_type) namespace_workload_pod:kube_pod_owner:relabel{cluster=\"$cluster\",namespace=~\"$namespace\", workload=~\"$workload\", workload_type=\"$type\"}) by (pod))\n",
 +                                "expr": "sort_desc(sum(irate(container_network_transmit_packets_total{namespace=~\"$namespace\"}[$interval:$resolution])\n* on (namespace,pod)\ngroup_left(workload,workload_type) namespace_workload_pod:kube_pod_owner:relabel{namespace=~\"$namespace\", workload=~\"$workload\", workload_type=\"$type\"}) by (pod))\n",
                                  "format": "time_series",
                                  "intervalFactor": 1,
@@ -106,7 +105,7 @@
                          "steppedLine": false,
                          "targets": [
                              {
--                                "expr": "sort_desc(sum(irate(container_network_receive_packets_dropped_total{cluster=\"$cluster\",namespace=~\"$namespace\"}[$interval:$resolution])\n* on (namespace,pod)\ngroup_left(workload,workload_type) namespace_workload_pod:kube_pod_owner:relabel{cluster=\"$cluster\",namespace=~\"$namespace\", workload=~\"$workload\", workload_type=\"$type\"}) by (pod))\n",
+-                                "expr": "sort_desc(sum(irate(container_network_receive_packets_dropped_total{job=\"{{ include "exporter.kubelet.jobName" . }}\", metrics_path=\"/metrics/cadvisor\", cluster=\"$cluster\",namespace=~\"$namespace\"}[$interval:$resolution])\n* on (namespace,pod)\ngroup_left(workload,workload_type) namespace_workload_pod:kube_pod_owner:relabel{cluster=\"$cluster\",namespace=~\"$namespace\", workload=~\"$workload\", workload_type=\"$type\"}) by (pod))\n",
 +                                "expr": "sort_desc(sum(irate(container_network_receive_packets_dropped_total{namespace=~\"$namespace\"}[$interval:$resolution])\n* on (namespace,pod)\ngroup_left(workload,workload_type) namespace_workload_pod:kube_pod_owner:relabel{namespace=~\"$namespace\", workload=~\"$workload\", workload_type=\"$type\"}) by (pod))\n",
                                  "format": "time_series",
                                  "intervalFactor": 1,
@@ -115,26 +114,11 @@
                          "steppedLine": false,
                          "targets": [
                              {
--                                "expr": "sort_desc(sum(irate(container_network_transmit_packets_dropped_total{cluster=\"$cluster\",namespace=~\"$namespace\"}[$interval:$resolution])\n* on (namespace,pod)\ngroup_left(workload,workload_type) namespace_workload_pod:kube_pod_owner:relabel{cluster=\"$cluster\",namespace=~\"$namespace\", workload=~\"$workload\", workload_type=\"$type\"}) by (pod))\n",
+-                                "expr": "sort_desc(sum(irate(container_network_transmit_packets_dropped_total{job=\"{{ include "exporter.kubelet.jobName" . }}\", metrics_path=\"/metrics/cadvisor\", cluster=\"$cluster\",namespace=~\"$namespace\"}[$interval:$resolution])\n* on (namespace,pod)\ngroup_left(workload,workload_type) namespace_workload_pod:kube_pod_owner:relabel{cluster=\"$cluster\",namespace=~\"$namespace\", workload=~\"$workload\", workload_type=\"$type\"}) by (pod))\n",
 +                                "expr": "sort_desc(sum(irate(container_network_transmit_packets_dropped_total{namespace=~\"$namespace\"}[$interval:$resolution])\n* on (namespace,pod)\ngroup_left(workload,workload_type) namespace_workload_pod:kube_pod_owner:relabel{namespace=~\"$namespace\", workload=~\"$workload\", workload_type=\"$type\"}) by (pod))\n",
                                  "format": "time_series",
                                  "intervalFactor": 1,
                                  "legendFormat": "{{`{{`}}pod{{`}}`}}",
-@@ -1183,11 +1183,11 @@
-             "list": [
-                 {
-                     "current": {
--                        "text": "default",
--                        "value": "default"
-+                        "text": "Prometheus",
-+                        "value": "Prometheus"
-                     },
-                     "hide": 0,
--                    "label": null,
-+                    "label": "Data Source",
-                     "name": "datasource",
-                     "options": [
- 
 @@ -1198,32 +1198,6 @@
                      "type": "datasource"
                  },
@@ -152,7 +136,7 @@
 -                    "options": [
 -
 -                    ],
--                    "query": "label_values(kube_pod_info, cluster)",
+-                    "query": "label_values(kube_pod_info{job=\"kube-state-metrics\"}, cluster)",
 -                    "refresh": 2,
 -                    "regex": "",
 -                    "sort": 0,
@@ -172,7 +156,7 @@
                          "value": "kube-system"
                      },
                      "datasource": "$datasource",
--                    "definition": "label_values(container_network_receive_packets_total{cluster=\"$cluster\"}, namespace)",
+-                    "definition": "label_values(container_network_receive_packets_total{job=\"{{ include "exporter.kubelet.jobName" . }}\", metrics_path=\"/metrics/cadvisor\", cluster=\"$cluster\"}, namespace)",
 +                    "definition": "label_values(container_network_receive_packets_total, namespace)",
                      "hide": 0,
                      "includeAll": true,
@@ -181,7 +165,7 @@
                      "options": [
  
                      ],
--                    "query": "label_values(container_network_receive_packets_total{cluster=\"$cluster\"}, namespace)",
+-                    "query": "label_values(container_network_receive_packets_total{job=\"{{ include "exporter.kubelet.jobName" . }}\", metrics_path=\"/metrics/cadvisor\", cluster=\"$cluster\"}, namespace)",
 +                    "query": "label_values(container_network_receive_packets_total, namespace)",
                      "refresh": 2,
                      "regex": "",
