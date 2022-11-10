@@ -1,10 +1,10 @@
 --- charts-original/templates/alertmanager/alertmanager.yaml
 +++ charts/templates/alertmanager/alertmanager.yaml
-@@ -2,18 +2,26 @@
+@@ -2,11 +2,11 @@
  apiVersion: monitoring.coreos.com/v1
  kind: Alertmanager
  metadata:
--  name: {{ template "kube-prometheus-stack.fullname" . }}-alertmanager
+-  name: {{ template "kube-prometheus-stack.alertmanager.crname" . }}
 -  namespace: {{ template "kube-prometheus-stack.namespace" . }}
 +  name: {{ template "project-prometheus-stack.alertmanager.crname" . }}
 +  namespace: {{ template "project-prometheus-stack.namespace" . }}
@@ -16,23 +16,7 @@
  {{- if .Values.alertmanager.annotations }}
    annotations:
  {{ toYaml .Values.alertmanager.annotations | indent 4 }}
- {{- end }}
- spec:
- {{- if .Values.alertmanager.alertmanagerSpec.image }}
--  image: {{ template "system_default_registry" . }}{{ .Values.alertmanager.alertmanagerSpec.image.repository }}:{{ .Values.alertmanager.alertmanagerSpec.image.tag }}
-+  {{- if and .Values.alertmanager.alertmanagerSpec.image.tag .Values.alertmanager.alertmanagerSpec.image.sha }}
-+  image: "{{ template "system_default_registry" . }}{{ .Values.alertmanager.alertmanagerSpec.image.repository }}:{{ .Values.alertmanager.alertmanagerSpec.image.tag }}@sha256:{{ .Values.alertmanager.alertmanagerSpec.image.sha }}"
-+  {{- else if .Values.alertmanager.alertmanagerSpec.image.sha }}
-+  image: "{{ template "system_default_registry" . }}{{ .Values.alertmanager.alertmanagerSpec.image.repository }}@sha256:{{ .Values.alertmanager.alertmanagerSpec.image.sha }}"
-+  {{- else if .Values.alertmanager.alertmanagerSpec.image.tag }}
-+  image: "{{ template "system_default_registry" . }}{{ .Values.alertmanager.alertmanagerSpec.image.repository }}:{{ .Values.alertmanager.alertmanagerSpec.image.tag }}"
-+  {{- else }}
-+  image: "{{ template "system_default_registry" . }}{{ .Values.alertmanager.alertmanagerSpec.image.repository }}"
-+  {{- end }}
-   version: {{ .Values.alertmanager.alertmanagerSpec.image.tag }}
-   {{- if .Values.alertmanager.alertmanagerSpec.image.sha }}
-   sha: {{ .Values.alertmanager.alertmanagerSpec.image.sha }}
-@@ -21,15 +29,15 @@
+@@ -29,15 +29,15 @@
  {{- end }}
    replicas: {{ .Values.alertmanager.alertmanagerSpec.replicas }}
    listenLocal: {{ .Values.alertmanager.alertmanagerSpec.listenLocal }}
@@ -51,7 +35,7 @@
  {{- end }}
    nodeSelector: {{ include "linux-node-selector" . | nindent 4 }}
  {{- if .Values.alertmanager.alertmanagerSpec.nodeSelector }}
-@@ -56,12 +64,15 @@
+@@ -64,12 +64,7 @@
  {{ else }}
    alertmanagerConfigSelector: {}
  {{- end }}
@@ -60,72 +44,31 @@
 -{{ toYaml .Values.alertmanager.alertmanagerSpec.alertmanagerConfigNamespaceSelector | indent 4}}
 -{{ else }}
 -  alertmanagerConfigNamespaceSelector: {}
+-{{- end }}
 +  alertmanagerConfigNamespaceSelector: {{ .Values.global.cattle.projectNamespaceSelector | toYaml | nindent 4 }}
-+{{- if .Values.alertmanager.alertmanagerSpec.web }}
-+  web:
-+{{ toYaml .Values.alertmanager.alertmanagerSpec.web | indent 4 }}
- {{- end }}
-+{{- if .Values.alertmanager.alertmanagerSpec.alertmanagerConfiguration }}
-+  alertmanagerConfiguration:
-+{{ toYaml .Values.alertmanager.alertmanagerSpec.alertmanagerConfiguration | indent 4 }}
-+{{- end }}
- {{- if .Values.alertmanager.alertmanagerSpec.resources }}
-   resources:
- {{ toYaml .Values.alertmanager.alertmanagerSpec.resources | indent 4 }}
-@@ -75,7 +86,7 @@
- {{- end }}
- {{- if .Values.alertmanager.alertmanagerSpec.storage }}
-   storage:
--{{ toYaml .Values.alertmanager.alertmanagerSpec.storage | indent 4 }}
-+{{ tpl (toYaml .Values.alertmanager.alertmanagerSpec.storage | indent 4) . }}
- {{- end }}
- {{- if .Values.alertmanager.alertmanagerSpec.podMetadata }}
-   podMetadata:
-@@ -83,6 +94,7 @@
- {{- end }}
- {{- if or .Values.alertmanager.alertmanagerSpec.podAntiAffinity .Values.alertmanager.alertmanagerSpec.affinity }}
-   affinity:
-+{{- end }}
- {{- if .Values.alertmanager.alertmanagerSpec.affinity }}
- {{ toYaml .Values.alertmanager.alertmanagerSpec.affinity | indent 4 }}
- {{- end }}
-@@ -92,8 +104,8 @@
+ {{- if .Values.alertmanager.alertmanagerSpec.web }}
+   web:
+ {{ toYaml .Values.alertmanager.alertmanagerSpec.web | indent 4 }}
+@@ -109,8 +104,8 @@
        - topologyKey: {{ .Values.alertmanager.alertmanagerSpec.podAntiAffinityTopologyKey }}
          labelSelector:
            matchExpressions:
--            - {key: app, operator: In, values: [alertmanager]}
--            - {key: alertmanager, operator: In, values: [{{ template "kube-prometheus-stack.fullname" . }}-alertmanager]}
+-            - {key: app.kubernetes.io/name, operator: In, values: [alertmanager]}
+-            - {key: alertmanager, operator: In, values: [{{ template "kube-prometheus-stack.alertmanager.crname" . }}]}
 +              - {key: app.kubernetes.io/name, operator: In, values: [alertmanager]}
 +              - {key: alertmanager, operator: In, values: [{{ template "project-prometheus-stack.alertmanager.crname" . }}]}
  {{- else if eq .Values.alertmanager.alertmanagerSpec.podAntiAffinity "soft" }}
      podAntiAffinity:
        preferredDuringSchedulingIgnoredDuringExecution:
-@@ -102,8 +114,8 @@
+@@ -119,8 +114,9 @@
            topologyKey: {{ .Values.alertmanager.alertmanagerSpec.podAntiAffinityTopologyKey }}
            labelSelector:
              matchExpressions:
--              - {key: app, operator: In, values: [alertmanager]}
--              - {key: alertmanager, operator: In, values: [{{ template "kube-prometheus-stack.fullname" . }}-alertmanager]}
+-              - {key: app.kubernetes.io/name, operator: In, values: [alertmanager]}
+-              - {key: alertmanager, operator: In, values: [{{ template "kube-prometheus-stack.alertmanager.crname" . }}]}
 +            - {key: app.kubernetes.io/name, operator: In, values: [alertmanager]}
 +            - {key: alertmanager, operator: In, values: [{{ template "project-prometheus-stack.alertmanager.crname" . }}]}
- {{- end }}
++{{- end }}
  {{- end }}
    tolerations: {{ include "linux-node-tolerations" . | nindent 4 }}
-@@ -116,7 +128,7 @@
- {{- end }}
- {{- if .Values.global.imagePullSecrets }}
-   imagePullSecrets:
--{{ toYaml .Values.global.imagePullSecrets | indent 4 }}
-+{{ include "kube-prometheus-stack.imagePullSecrets" . | trim | indent 4 }}
- {{- end }}
- {{- if .Values.alertmanager.alertmanagerSpec.containers }}
-   containers:
-@@ -147,5 +159,8 @@
- {{- end }}
- {{- if .Values.alertmanager.alertmanagerSpec.forceEnableClusterMode }}
-   forceEnableClusterMode: {{ .Values.alertmanager.alertmanagerSpec.forceEnableClusterMode }}
-+{{- end }}
-+{{- if .Values.alertmanager.alertmanagerSpec.minReadySeconds }}
-+  minReadySeconds: {{ .Values.alertmanager.alertmanagerSpec.minReadySeconds }}
- {{- end }}
- {{- end }}
+ {{- if .Values.alertmanager.alertmanagerSpec.tolerations }}
