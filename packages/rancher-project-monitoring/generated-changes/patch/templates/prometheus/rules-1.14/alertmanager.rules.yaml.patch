@@ -1,11 +1,6 @@
 --- charts-original/templates/prometheus/rules-1.14/alertmanager.rules.yaml
 +++ charts/templates/prometheus/rules-1.14/alertmanager.rules.yaml
-@@ -1,20 +1,21 @@
- {{- /*
- Generated from 'alertmanager.rules' group from https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/main/manifests/alertmanager-prometheusRule.yaml
- Do not change in-place! In order to change this file first read following link:
--https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack/hack
-+https://github.com/prometheus-community/helm-charts/tree/main/charts/project-prometheus-stack/hack
+@@ -5,16 +5,17 @@
  */ -}}
  {{- $kubeTargetVersion := default .Capabilities.KubeVersion.GitVersion .Values.kubeTargetVersionOverride }}
  {{- if and (semverCompare ">=1.14.0-0" $kubeTargetVersion) (semverCompare "<9.9.9-9" $kubeTargetVersion) .Values.defaultRules.create .Values.defaultRules.rules.alertmanager }}
@@ -29,8 +24,11 @@
  {{- if .Values.defaultRules.labels }}
  {{ toYaml .Values.defaultRules.labels | indent 4 }}
  {{- end }}
-@@ -212,4 +213,4 @@
+@@ -210,6 +211,7 @@
+         severity: critical
+ {{- if .Values.defaultRules.additionalRuleLabels }}
  {{ toYaml .Values.defaultRules.additionalRuleLabels | indent 8 }}
++{{- end }}
  {{- end }}
  {{- end }}
 -{{- end }}
