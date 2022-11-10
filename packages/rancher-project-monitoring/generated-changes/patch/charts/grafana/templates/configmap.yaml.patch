@@ -9,7 +9,7 @@
    plugins: {{ join "," .Values.plugins }}
  {{- end }}
    grafana.ini: |
-+{{- range $elem, $elemVal := index .Values "grafana.ini" 100644
++{{- range $elem, $elemVal := index .Values "grafana.ini" }}
 +    {{- if not (kindIs "map" $elemVal) }}
 +    {{- if kindIs "invalid" $elemVal }}
 +    {{ $elem }} =
@@ -72,7 +72,7 @@
 -    {{- if $value.url -}}"{{ $value.url }}"{{- else -}}"https://grafana.com/api/dashboards/{{ $value.gnetId }}/revisions/{{- if $value.revision -}}{{ $value.revision }}{{- else -}}1{{- end -}}/download"{{- end -}}{{ if $value.datasource }} | sed '/-- .* --/! s/"datasource":.*,/"datasource": "{{ $value.datasource }}",/g'{{ end }}{{- if $value.b64content -}} | base64 -d {{- end -}} \
 -    > "/var/lib/grafana/dashboards/{{ $provider }}/{{ $key }}.json"
 +    {{- $dpPath := "" -}}
-+    {{- range $kd := (index $dashboardProviders "dashboardproviders.yaml").providers 100644
++    {{- range $kd := (index $dashboardProviders "dashboardproviders.yaml").providers }}
 +      {{- if eq $kd.name $provider -}}
 +      {{- $dpPath = $kd.options.path -}}
        {{- end -}}

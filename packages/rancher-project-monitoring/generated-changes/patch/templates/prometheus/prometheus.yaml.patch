@@ -231,3 +231,14 @@
  {{- end }}
  {{- if .Values.prometheus.prometheusSpec.prometheusRulesExcludedFromEnforce }}
  {{ toYaml .Values.prometheus.prometheusSpec.prometheusRulesExcludedFromEnforce | indent 4 }}
+@@ -354,8 +276,8 @@
+   excludedFromEnforcement:
+ {{- range $prometheusDefaultRulesExcludedFromEnforce.rules }}
+     - resource: prometheusrules
+-      namespace: "{{ template "kube-prometheus-stack.namespace" $ }}"
+-      name: "{{ printf "%s-%s" (include "kube-prometheus-stack.fullname" $) . | trunc 63 | trimSuffix "-" }}"
++      namespace: "{{ template "project-prometheus-stack.namespace" $ }}"
++      name: "{{ printf "%s-%s" (include "project-prometheus-stack.fullname" $) . | trunc 63 | trimSuffix "-" }}"
+ {{- end }}
+ {{- if .Values.prometheus.prometheusSpec.excludedFromEnforcement }}
+ {{ tpl (toYaml .Values.prometheus.prometheusSpec.excludedFromEnforcement | indent 4) . }}

@@ -1,13 +1,13 @@
---- charts-original/templates/grafana/dashboards-1.14/prometheus.yaml
-+++ charts/templates/grafana/dashboards-1.14/prometheus.yaml
+--- charts-original/templates/grafana/dashboards-1.14/grafana-overview.yaml
++++ charts/templates/grafana/dashboards-1.14/grafana-overview.yaml
 @@ -8,16 +8,16 @@
  apiVersion: v1
  kind: ConfigMap
  metadata:
--  namespace: {{ .Values.grafana.defaultDashboards.namespace }}
--  name: {{ printf "%s-%s" (include "kube-prometheus-stack.fullname" $) "prometheus" | trunc 63 | trimSuffix "-" }}
-+  namespace: {{ template "project-prometheus-stack.namespace" . }}
-+  name: {{ printf "%s-%s" (include "project-prometheus-stack.fullname" $) "prometheus" | trunc 63 | trimSuffix "-" }}
+-  namespace: {{ template "kube-prometheus-stack-grafana.namespace" . }}
+-  name: {{ printf "%s-%s" (include "kube-prometheus-stack.fullname" $) "grafana-overview" | trunc 63 | trimSuffix "-" }}
++  namespace: {{ template "project-prometheus-stack-grafana.namespace" . }}
++  name: {{ printf "%s-%s" (include "project-prometheus-stack.fullname" $) "grafana-overview" | trunc 63 | trimSuffix "-" }}
    annotations:
  {{ toYaml .Values.grafana.sidecar.dashboards.annotations | indent 4 }}
    labels:
@@ -19,5 +19,5 @@
 +    app: {{ template "project-prometheus-stack.name" $ }}-grafana
 +{{ include "project-prometheus-stack.labels" $ | indent 4 }}
  data:
-   prometheus.json: |-
+   grafana-overview.json: |-
      {
