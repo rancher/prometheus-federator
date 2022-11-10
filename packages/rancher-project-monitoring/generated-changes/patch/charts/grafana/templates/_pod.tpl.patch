@@ -173,7 +173,7 @@
        - name: FOLDER
          value: "/etc/grafana/provisioning/notifiers"
        - name: RESOURCE
-@@ -141,30 +176,44 @@
+@@ -141,30 +176,45 @@
        - name: UNIQUE_FILENAMES
          value: "{{ .Values.sidecar.enableUniqueFilenames }}"
        {{- end }}
@@ -213,6 +213,7 @@
  {{- end }}
  {{- if .Values.image.pullSecrets }}
  imagePullSecrets:
++{{- $root := . }}
  {{- range .Values.image.pullSecrets }}
 -  - name: {{ . }}
 -{{- end}}
@@ -225,7 +226,7 @@
  containers:
  {{- if .Values.sidecar.dashboards.enabled }}
    - name: {{ template "grafana.name" . }}-sc-dashboard
-@@ -175,6 +224,14 @@
+@@ -175,6 +225,14 @@
      {{- end }}
      imagePullPolicy: {{ .Values.sidecar.imagePullPolicy }}
      env:
@@ -240,7 +241,7 @@
        - name: METHOD
          value: {{ .Values.sidecar.dashboards.watchMethod }}
        - name: LABEL
-@@ -183,6 +240,10 @@
+@@ -183,6 +241,10 @@
        - name: LABEL_VALUE
          value: {{ quote .Values.sidecar.dashboards.labelValue }}
        {{- end }}
@@ -251,7 +252,7 @@
        - name: FOLDER
          value: "{{ .Values.sidecar.dashboards.folder }}{{- with .Values.sidecar.dashboards.defaultFolderName }}/{{ . }}{{- end }}"
        - name: RESOURCE
-@@ -191,10 +252,8 @@
+@@ -191,10 +253,8 @@
        - name: UNIQUE_FILENAMES
          value: "{{ .Values.sidecar.enableUniqueFilenames }}"
        {{- end }}
@@ -263,7 +264,7 @@
        {{- if .Values.sidecar.skipTlsVerify }}
        - name: SKIP_TLS_VERIFY
          value: "{{ .Values.sidecar.skipTlsVerify }}"
-@@ -203,17 +262,254 @@
+@@ -203,17 +263,254 @@
        - name: FOLDER_ANNOTATION
          value: "{{ .Values.sidecar.dashboards.folderAnnotation }}"
        {{- end }}
@@ -521,7 +522,7 @@
      {{- end }}
      imagePullPolicy: {{ .Values.image.pullPolicy }}
    {{- if .Values.command }}
-@@ -222,10 +518,10 @@
+@@ -222,10 +519,10 @@
        - {{ . }}
      {{- end }}
    {{- end}}
@@ -535,7 +536,7 @@
      volumeMounts:
        - name: config
          mountPath: "/etc/grafana/grafana.ini"
-@@ -235,16 +531,17 @@
+@@ -235,16 +532,17 @@
          mountPath: "/etc/grafana/ldap.toml"
          subPath: ldap.toml
        {{- end }}
@@ -557,7 +558,7 @@
  {{- end }}
  {{- if .Values.dashboards }}
  {{- range $provider, $dashboards := .Values.dashboards }}
-@@ -277,6 +574,13 @@
+@@ -277,6 +575,13 @@
          subPath: {{ . | quote }}
  {{- end }}
  {{- end }}
@@ -571,7 +572,7 @@
  {{- if .Values.dashboardProviders }}
  {{- range (keys .Values.dashboardProviders | sortAlpha) }}
        - name: config
-@@ -297,6 +601,10 @@
+@@ -297,6 +602,10 @@
        - name: sc-datasources-volume
          mountPath: "/etc/grafana/provisioning/datasources"
  {{- end}}
@@ -582,7 +583,7 @@
  {{- if .Values.sidecar.notifiers.enabled }}
        - name: sc-notifiers-volume
          mountPath: "/etc/grafana/provisioning/notifiers"
-@@ -318,25 +626,22 @@
+@@ -318,25 +627,22 @@
          mountPath: {{ .mountPath }}
      {{- end }}
      ports:
@@ -611,7 +612,7 @@
              key: {{ .Values.admin.passwordKey | default "admin-password" }}
        {{- end }}
        {{- if .Values.plugins }}
-@@ -358,12 +663,12 @@
+@@ -358,12 +664,12 @@
              name: {{ .Values.smtp.existingSecret }}
              key: {{ .Values.smtp.passwordKey | default "password" }}
        {{- end }}
@@ -627,7 +628,7 @@
        - name: GF_PATHS_DATA
          value: {{ (get .Values "grafana.ini").paths.data }}
        - name: GF_PATHS_LOGS
-@@ -375,13 +680,13 @@
+@@ -375,13 +681,13 @@
      {{- range $key, $value := .Values.envValueFrom }}
        - name: {{ $key | quote }}
          valueFrom:
@@ -643,7 +644,7 @@
      envFrom:
      {{- if .Values.envFromSecret }}
        - secretRef:
-@@ -393,16 +698,30 @@
+@@ -393,16 +699,30 @@
      {{- end }}
      {{- range .Values.envFromSecrets }}
        - secretRef:
@@ -678,7 +679,7 @@
  {{- with .Values.extraContainers }}
  {{ tpl . $ | indent 2 }}
  {{- end }}
-@@ -410,10 +729,15 @@
+@@ -410,10 +730,15 @@
  {{- if .Values.nodeSelector }}
  {{ toYaml .Values.nodeSelector | indent 2 }}
  {{- end }}
@@ -695,7 +696,7 @@
  tolerations: {{ include "linux-node-tolerations" . | nindent 2 }}
  {{- if .Values.tolerations }}
  {{ toYaml .Values.tolerations | indent 2 }}
-@@ -422,10 +746,14 @@
+@@ -422,10 +747,14 @@
    - name: config
      configMap:
        name: {{ template "grafana.fullname" . }}
@@ -712,7 +713,7 @@
  {{- end }}
    {{- if .Values.dashboards }}
      {{- range (keys .Values.dashboards | sortAlpha) }}
-@@ -457,7 +785,7 @@
+@@ -457,7 +786,7 @@
  {{- if and .Values.persistence.enabled (eq .Values.persistence.type "pvc") }}
    - name: storage
      persistentVolumeClaim:
@@ -721,7 +722,7 @@
  {{- else if and .Values.persistence.enabled (eq .Values.persistence.type "statefulset") }}
  # nothing
  {{- else }}
-@@ -474,7 +802,12 @@
+@@ -474,7 +803,12 @@
  {{- end -}}
  {{- if .Values.sidecar.dashboards.enabled }}
    - name: sc-dashboard-volume
@@ -734,7 +735,7 @@
  {{- if .Values.sidecar.dashboards.SCProvider }}
    - name: sc-dashboard-provider
      configMap:
-@@ -483,18 +816,40 @@
+@@ -483,18 +817,40 @@
  {{- end }}
  {{- if .Values.sidecar.datasources.enabled }}
    - name: sc-datasources-volume
@@ -775,7 +776,7 @@
  {{- else if .projected }}
    - name: {{ .name }}
      projected: {{- toYaml .projected | nindent 6 }}
-@@ -511,6 +866,10 @@
+@@ -511,6 +867,10 @@
      {{- else if .hostPath }}
      hostPath:
        path: {{ .hostPath }}
@@ -786,7 +787,7 @@
      {{- else }}
      emptyDir: {}
      {{- end }}
-@@ -520,6 +879,6 @@
+@@ -520,6 +880,6 @@
      emptyDir: {}
  {{- end -}}
  {{- if .Values.extraContainerVolumes }}
