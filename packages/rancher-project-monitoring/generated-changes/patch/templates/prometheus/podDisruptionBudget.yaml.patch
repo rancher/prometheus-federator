@@ -23,5 +23,5 @@
      matchLabels:
        app.kubernetes.io/name: prometheus
 -      prometheus: {{ template "kube-prometheus-stack.fullname" . }}-prometheus
-+      prometheus: {{ template "project-prometheus-stack.fullname" . }}-prometheus
++      prometheus: {{ template "project-prometheus-stack.prometheus.crname" . }}
  {{- end }}
