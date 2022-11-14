@@ -90,3 +90,5 @@ require (
 	sigs.k8s.io/structured-merge-diff/v4 v4.2.1 // indirect
 	sigs.k8s.io/yaml v1.3.0 // indirect
 )
+
+replace github.com/rancher/helm-project-operator v0.0.2-0.20220816162720-557114ccbc41 => github.com/macedogm/helm-project-operator v0.0.2-0.20221109154426-e7a1cc6a9b41
