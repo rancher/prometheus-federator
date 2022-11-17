@@ -26,8 +26,9 @@
    externalUrl: "{{ tpl .Values.alertmanager.alertmanagerSpec.externalUrl . }}"
  {{- else if and .Values.alertmanager.ingress.enabled .Values.alertmanager.ingress.hosts }}
    externalUrl: "http://{{ tpl (index .Values.alertmanager.ingress.hosts 0) . }}{{ .Values.alertmanager.alertmanagerSpec.routePrefix }}"
- {{- else if not (or (kindIs "invalid" .Values.global.cattle.url) (kindIs "invalid" .Values.global.cattle.clusterId)) }}
+-{{- else if not (or (kindIs "invalid" .Values.global.cattle.url) (kindIs "invalid" .Values.global.cattle.clusterId)) }}
 -  externalUrl: "{{ .Values.global.cattle.url }}/k8s/clusters/{{ .Values.global.cattle.clusterId }}/api/v1/namespaces/{{ .Values.namespaceOverride }}/services/http:{{ template "kube-prometheus-stack.fullname" . }}-alertmanager:{{ .Values.alertmanager.service.port }}/proxy"
++{{- else if not (or (empty .Values.global.cattle.url) (empty .Values.global.cattle.clusterId)) }}
 +  externalUrl: "{{ .Values.global.cattle.url }}/k8s/clusters/{{ .Values.global.cattle.clusterId }}/api/v1/namespaces/{{ template "project-prometheus-stack.namespace" . }}/services/http:{{ template "project-prometheus-stack.fullname" . }}-alertmanager:{{ .Values.alertmanager.service.port }}/proxy"
  {{- else }}
 -  externalUrl: http://{{ template "kube-prometheus-stack.fullname" . }}-alertmanager.{{ template "kube-prometheus-stack.namespace" . }}:{{ .Values.alertmanager.service.port }}
