@@ -2,7 +2,7 @@ apiVersion: helm.cattle.io/v1alpha1
 kind: ProjectHelmChart
 metadata:
   name: project-monitoring
-  namespace: cattle-monitoring-system
+  namespace: cattle-project-p-example
 spec:
   helmApiVersion: monitoring.cattle.io/v1alpha1
   values: {}

@@ -1,0 +1,109 @@
+#!/bin/bash
+set -e
+
+source $(dirname $0)/version
+
+cd $(dirname $0)/..
+
+if ! which yq 2>/dev/null 1>/dev/null; then
+    echo "ERROR: yq must be installed to run this script"
+    exit 1
+fi
+
+# Prompt Confirmation
+unset proceed
+while [[ -z ${proceed} ]]; do
+    if ! kubectl get nodes 2>/dev/null; then
+        echo "ERROR: kubectl must be pointing to valid cluster"
+        exit 1
+    fi
+    echo ""
+    read -p "> Run e2e-scripts on cluster using image ${REPO}/prometheus-federator:${TAG} [y/n]? " -n 1 -r
+    echo
+    if ! [[ $REPLY =~ ^[Yy]$ ]]; then
+        if [[ $REPLY =~ ^[Nn]$ ]]; then
+            exit 0
+        fi
+    else
+        proceed=1
+    fi
+done
+
+echo ""
+echo "> Starting e2e-ci scripts on cluster..."
+
+# Detect Kubernetes distribution type
+if [[ -z "${KUBERNETES_DISTRIBUTION_TYPE}" ]]; then
+    echo ">> KUBERNETES_DISTRIBUTION_TYPE is not set. Attempting to auto-infer from local cluster.management.cattle.io object..."
+    provider=$(kubectl get cluster.management.cattle.io local -o jsonpath={.status.provider})
+    echo "Detected KUBERNETES_DISTRIBUTION_TYPE=${provider}"
+    export KUBERNETES_DISTRIBUTION_TYPE=${provider}
+fi
+
+# Detect if Rancher is proxying the UI, which means kubectl proxy won't work
+echo ">> Detecting if Rancher is proxying the cluster..."
+current_context=$(kubectl config view | yq .current-context -)
+API_SERVER_URL=$(kubectl config view | yq ".clusters[] | select(.name == \"${current_context}\") | .cluster.server" -)
+if [[ ${API_SERVER_URL} =~ ^http[s]://.*/k8s/clusters/.*$ ]]; then
+    echo "Cluster access is being proxied through Rancher, passing in relevant values to e2e scripts to proxy via Rancher as well for checks"
+    RANCHER_URL_AND_CLUSTER=$(echo ${API_SERVER_URL} | sed -e 's:^\(.*\)/k8s/clusters/\(.*\)$:\1 \2:')
+    
+    # Set values for e2e scripts to use
+    export RANCHER_URL=$(echo ${RANCHER_URL_AND_CLUSTER} | cut -d' ' -f1)
+    export RANCHER_CLUSTER=$(echo ${RANCHER_URL_AND_CLUSTER} | cut -d' ' -f2)
+    export RANCHER_TOKEN=$(kubectl config view --raw | yq ".users[] | select(.name == \"${current_context}\") | .user.token" -)
+    
+    unset RANCHER_URL_AND_CLUSTER
+fi
+
+if [[ -n ${STEP_NAME} ]]; then
+    filtered_steps="select(.name == \"${STEP_NAME}\")"
+else
+    exclude_steps=(
+        "Install mikefarah/yq"
+        "Perform CI"
+        "Provision k3d Cluster"
+        "Import Images Into k3d"
+        "Setup kubectl context"
+        "Set Up Tmate Debug Session"
+        "Delete k3d cluster"
+    )
+
+    if [[ ${SKIP_UNINSTALL} == "true" ]]; then
+        exclude_steps+=("Delete Project Prometheus Stack")
+        exclude_steps+=("Uninstall Prometheus Federator")
+    fi
+
+    filtered_steps="select(.name)"
+    for step in "${exclude_steps[@]}"; do
+        filtered_steps="${filtered_steps} | select(.name != \"${step}\")"
+    done
+fi
+
+trap 'final_notes' EXIT
+
+final_notes() {
+    echo ""
+    if [[ -z ${RANCHER_URL} ]]; then
+        API_SERVER_URL=http://localhost:8001
+        echo "> NOTE: If you retained your Project Prometheus Stack, you can access the UIs for your Project Prometheus Stack after running 'kubectl proxy' in another window at the following URLs:"
+    else
+        API_SERVER_URL=${RANCHER_URL}/k8s/clusters/${RANCHER_CLUSTER}
+        echo "> NOTE: If you retained your Project Prometheus Stack, you can access the UIs for your Project Prometheus Stack at the following URLs:"
+    fi
+    echo ">> Project Prometheus: ${API_SERVER_URL}/api/v1/namespaces/cattle-project-p-example/services/http:cattle-project-p-example-m-prometheus:9090/proxy"
+    echo ">> Project Alertmanager: ${API_SERVER_URL}/api/v1/namespaces/cattle-project-p-example/services/http:cattle-project-p-example-m-alertmanager:9093/proxy"
+    echo ">> Project Grafana: ${API_SERVER_URL}/api/v1/namespaces/cattle-project-p-example/services/http:cattle-project-p-example-monitoring-grafana:80/proxy"
+}
+
+old_ifs=${IFS}
+IFS=$'\n'
+for step in $(yq ".jobs.e2e-prometheus-federator.steps[] | ${filtered_steps} | .run" .github/workflows/e2e-ci.yaml); do
+    echo ""
+    echo ">> Running '${step}'..."
+    bash -c "${step}"
+done
+IFS=${old_ifs}
+
+echo ""
+echo "PASS: E2E CI successfully completed!"
