@@ -1,0 +1,26 @@
+#!/bin/bash
+set -e
+
+cd $(dirname $0)/../../../..
+
+DEFAULT_SLEEP_TIMEOUT_SECONDS=${DEFAULT_SLEEP_TIMEOUT_SECONDS:-10}
+KUBECTL_WAIT_TIMEOUT=${KUBECTL_WAIT_TIMEOUT:-120s}
+
+if [[ ${DEBUG} == "true" ]]; then
+    echo "Enabling DEBUG mode..."
+    set -x
+fi
+
+if [[ "${E2E_CI}" == "true" ]]; then
+    KUBERNETES_DISTRIBUTION_TYPE=k3s
+fi
+
+if [[ -n ${RANCHER_URL} ]] && [[ -n ${RANCHER_CLUSTER} ]] && [[ -n ${RANCHER_TOKEN} ]]; then
+    API_SERVER_URL=${RANCHER_URL}/k8s/clusters/${RANCHER_CLUSTER}
+    API_SERVER_CURL_AUTH_HEADERS="-k -H 'Authorization: Bearer ${RANCHER_TOKEN}'"
+    RANCHER_HELM_ARGS="--set global.cattle.url=${RANCHER_URL} --set global.cattle.clusterId=${RANCHER_CLUSTER}"
+else
+    kubectl proxy --port=${APISERVER_PORT:-8001} 2>/dev/null &
+    API_SERVER_URL=http://localhost:${APISERVER_PORT:-8001}
+    sleep 5
+fi
