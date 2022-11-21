@@ -5,8 +5,9 @@
 
   params:
     'match[]':
-      - '{namespace=~"{{ .Values.global.cattle.projectNamespaces | join "|" }}", job=~"kube-state-metrics|kubelet"}'
-      - '{namespace=~"{{ .Values.global.cattle.projectNamespaces | join "|" }}", job=""}'
+      - '{namespace=~"{{ include "project-prometheus-stack.projectNamespaceList" . | replace "," "|" }}", job=~"kube-state-metrics|kubelet"}'
+      - '{namespace=~"{{ include "project-prometheus-stack.projectNamespaceList" . | replace "," "|" }}", job=""}'
 
   static_configs:
     - targets: {{ .Values.federate.targets | toYaml | nindent 6 }}
+
