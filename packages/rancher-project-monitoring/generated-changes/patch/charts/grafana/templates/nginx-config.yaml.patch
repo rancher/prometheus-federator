@@ -27,14 +27,18 @@
          location / {
            proxy_cache         my_zone;
            proxy_cache_valid   200 302 1d;
-@@ -61,9 +74,8 @@
+@@ -61,9 +74,12 @@
            
            proxy_pass     http://localhost:3000/;
  
 -          sub_filter_types text/html;
            sub_filter_once off;
 -          sub_filter '"appSubUrl":""' '"appSubUrl":"."';
++{{- if not (empty .Values.global.cattle.clusterId) }}
 +          sub_filter '"appSubUrl":""' '"appSubUrl":"/k8s/clusters/{{ .Values.global.cattle.clusterId }}/api/v1/namespaces/{{ template "grafana.namespace" . }}/services/http:{{ template "grafana.fullname" . }}:{{ .Values.service.port }}/proxy"';
++{{- else }}
++          sub_filter '"appSubUrl":""' '"appSubUrl":"/api/v1/namespaces/{{ template "grafana.namespace" . }}/services/http:{{ template "grafana.fullname" . }}:{{ .Values.service.port }}/proxy"';
++{{- end }}
            sub_filter '"url":"/' '"url":"./';
            sub_filter ':"/avatar/' ':"avatar/';
  
