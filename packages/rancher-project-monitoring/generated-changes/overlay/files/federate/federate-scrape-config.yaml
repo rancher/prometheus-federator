@@ -5,7 +5,7 @@
 
   params:
     'match[]':
-      - '{namespace=~"{{ include "project-prometheus-stack.projectNamespaceList" . | replace "," "|" }}", job=~"kube-state-metrics|kubelet"}'
+      - '{namespace=~"{{ include "project-prometheus-stack.projectNamespaceList" . | replace "," "|" }}", job=~"kube-state-metrics|kubelet|k3s-server"}'
       - '{namespace=~"{{ include "project-prometheus-stack.projectNamespaceList" . | replace "," "|" }}", job=""}'
 
   static_configs:
