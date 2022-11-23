@@ -1,0 +1,29 @@
+--- charts-original/templates/alertmanager/servicemonitor.yaml
++++ charts/templates/alertmanager/servicemonitor.yaml
+@@ -2,20 +2,20 @@
+ apiVersion: monitoring.coreos.com/v1
+ kind: ServiceMonitor
+ metadata:
+-  name: {{ template "kube-prometheus-stack.fullname" . }}-alertmanager
+-  namespace: {{ template "kube-prometheus-stack.namespace" . }}
++  name: {{ template "project-prometheus-stack.fullname" . }}-alertmanager
++  namespace: {{ template "project-prometheus-stack.namespace" . }}
+   labels:
+-    app: {{ template "kube-prometheus-stack.name" . }}-alertmanager
+-{{ include "kube-prometheus-stack.labels" . | indent 4 }}
++    app: {{ template "project-prometheus-stack.name" . }}-alertmanager
++{{ include "project-prometheus-stack.labels" . | indent 4 }}
+ spec:
+   selector:
+     matchLabels:
+-      app: {{ template "kube-prometheus-stack.name" . }}-alertmanager
++      app: {{ template "project-prometheus-stack.name" . }}-alertmanager
+       release: {{ $.Release.Name | quote }}
+       self-monitor: "true"
+   namespaceSelector:
+     matchNames:
+-      - {{ printf "%s" (include "kube-prometheus-stack.namespace" .) | quote }}
++      - {{ printf "%s" (include "project-prometheus-stack.namespace" .) | quote }}
+   endpoints:
+   - port: {{ .Values.alertmanager.alertmanagerSpec.portName }}
+     {{- if .Values.alertmanager.serviceMonitor.interval }}

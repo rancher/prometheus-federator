@@ -1,0 +1,18 @@
+--- charts-original/templates/prometheus/rules-1.14/kubernetes-apps.yaml
++++ charts/templates/prometheus/rules-1.14/kubernetes-apps.yaml
+@@ -9,11 +9,11 @@
+ apiVersion: monitoring.coreos.com/v1
+ kind: PrometheusRule
+ metadata:
+-  name: {{ printf "%s-%s" (include "kube-prometheus-stack.fullname" .) "kubernetes-apps" | trunc 63 | trimSuffix "-" }}
+-  namespace: {{ template "kube-prometheus-stack.namespace" . }}
++  name: {{ printf "%s-%s" (include "project-prometheus-stack.fullname" .) "kubernetes-apps" | trunc 63 | trimSuffix "-" }}
++  namespace: {{ template "project-prometheus-stack.namespace" . }}
+   labels:
+-    app: {{ template "kube-prometheus-stack.name" . }}
+-{{ include "kube-prometheus-stack.labels" . | indent 4 }}
++    app: {{ template "project-prometheus-stack.name" . }}
++{{ include "project-prometheus-stack.labels" . | indent 4 }}
+ {{- if .Values.defaultRules.labels }}
+ {{ toYaml .Values.defaultRules.labels | indent 4 }}
+ {{- end }}

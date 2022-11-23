@@ -1,0 +1,57 @@
+--- charts-original/templates/grafana/configmaps-datasources.yaml
++++ charts/templates/grafana/configmaps-datasources.yaml
+@@ -2,16 +2,16 @@
+ apiVersion: v1
+ kind: ConfigMap
+ metadata:
+-  name: {{ template "kube-prometheus-stack.fullname" . }}-grafana-datasource
+-  namespace: {{ default .Values.grafana.sidecar.datasources.searchNamespace (include "kube-prometheus-stack.namespace" .) }}
++  name: {{ template "project-prometheus-stack.fullname" . }}-grafana-datasource
++  namespace: {{ include "project-prometheus-stack.namespace" . }}
+ {{- if .Values.grafana.sidecar.datasources.annotations }}
+   annotations:
+ {{ toYaml .Values.grafana.sidecar.datasources.annotations | indent 4 }}
+ {{- end }}
+   labels:
+-    {{ $.Values.grafana.sidecar.datasources.label }}: {{ $.Values.grafana.sidecar.datasources.labelValue | quote }}
+-    app: {{ template "kube-prometheus-stack.name" $ }}-grafana
+-{{ include "kube-prometheus-stack.labels" $ | indent 4 }}
++    {{ $.Values.grafana.sidecar.datasources.label }}: "1"
++    app: {{ template "project-prometheus-stack.name" $ }}-grafana
++{{ include "project-prometheus-stack.labels" $ | indent 4 }}
+ data:
+   datasource.yaml: |-
+     apiVersion: 1
+@@ -28,7 +28,7 @@
+       {{- if .Values.grafana.sidecar.datasources.url }}
+       url: {{ .Values.grafana.sidecar.datasources.url }}
+       {{- else }}
+-      url: http://{{ template "kube-prometheus-stack.fullname" . }}-prometheus.{{ template "kube-prometheus-stack.namespace" . }}:{{ .Values.prometheus.service.port }}/{{ trimPrefix "/" .Values.prometheus.prometheusSpec.routePrefix }}
++      url: http://{{ template "project-prometheus-stack.fullname" . }}-prometheus.{{ template "project-prometheus-stack.namespace" . }}:{{ .Values.prometheus.service.port }}/{{ trimPrefix "/" .Values.prometheus.prometheusSpec.routePrefix }}
+       {{- end }}
+       access: proxy
+       isDefault: true
+@@ -38,23 +38,6 @@
+         exemplarTraceIdDestinations:
+         - datasourceUid: {{ .Values.grafana.sidecar.datasources.exemplarTraceIdDestinations.datasourceUid }}
+           name: {{ .Values.grafana.sidecar.datasources.exemplarTraceIdDestinations.traceIdLabelName }}
+-{{- end }}
+-{{- if .Values.grafana.sidecar.datasources.createPrometheusReplicasDatasources }}
+-{{- range until (int .Values.prometheus.prometheusSpec.replicas) }}
+-    - name: Prometheus-{{ . }}
+-      type: prometheus
+-      uid: {{ $.Values.grafana.sidecar.datasources.uid }}-replica-{{ . }}
+-      url: http://prometheus-{{ template "kube-prometheus-stack.prometheus.crname" $ }}-{{ . }}.prometheus-operated:9090/{{ trimPrefix "/" $.Values.prometheus.prometheusSpec.routePrefix }}
+-      access: proxy
+-      isDefault: false
+-      jsonData:
+-        timeInterval: {{ $scrapeInterval }}
+-{{- if $.Values.grafana.sidecar.datasources.exemplarTraceIdDestinations }}
+-        exemplarTraceIdDestinations:
+-        - datasourceUid: {{ .Values.grafana.sidecar.datasources.exemplarTraceIdDestinations.datasourceUid }}
+-          name: {{ .Values.grafana.sidecar.datasources.exemplarTraceIdDestinations.traceIdLabelName }}
+-{{- end }}
+-{{- end }}
+ {{- end }}
+ {{- end }}
+ {{- if .Values.grafana.additionalDataSources }}

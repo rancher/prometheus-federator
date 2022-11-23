@@ -1,0 +1,17 @@
+apiVersion: helm.cattle.io/v1alpha1
+kind: ProjectHelmChart
+metadata:
+  name: project-monitoring
+  namespace: cattle-project-p-example
+spec:
+  helmApiVersion: monitoring.cattle.io/v1alpha1
+  values:
+    # Do not enforce resource requirements for CI
+    prometheus:
+      prometheusSpec:
+        resources: null
+    alertmanager:
+      alertmanagerSpec:
+        resources: null
+    grafana:
+      resources: null

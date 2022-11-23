@@ -1,0 +1,27 @@
+--- charts-original/templates/alertmanager/psp-rolebinding.yaml
++++ charts/templates/alertmanager/psp-rolebinding.yaml
+@@ -2,17 +2,17 @@
+ apiVersion: rbac.authorization.k8s.io/v1
+ kind: RoleBinding
+ metadata:
+-  name: {{ template "kube-prometheus-stack.fullname" . }}-alertmanager
+-  namespace: {{ template "kube-prometheus-stack.namespace" . }}
++  name: {{ template "project-prometheus-stack.fullname" . }}-alertmanager
++  namespace: {{ template "project-prometheus-stack.namespace" . }}
+   labels:
+-    app: {{ template "kube-prometheus-stack.name" . }}-alertmanager
+-{{ include "kube-prometheus-stack.labels" . | indent 4 }}
++    app: {{ template "project-prometheus-stack.name" . }}-alertmanager
++{{ include "project-prometheus-stack.labels" . | indent 4 }}
+ roleRef:
+   apiGroup: rbac.authorization.k8s.io
+   kind: Role
+-  name: {{ template "kube-prometheus-stack.fullname" . }}-alertmanager
++  name: {{ template "project-prometheus-stack.fullname" . }}-alertmanager
+ subjects:
+   - kind: ServiceAccount
+-    name: {{ template "kube-prometheus-stack.alertmanager.serviceAccountName" . }}
+-    namespace: {{ template "kube-prometheus-stack.namespace" . }}
++    name: {{ template "project-prometheus-stack.alertmanager.serviceAccountName" . }}
++    namespace: {{ template "project-prometheus-stack.namespace" . }}
+ {{- end }}

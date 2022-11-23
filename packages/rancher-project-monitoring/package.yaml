@@ -1,1 +1,30 @@
-url: local
+workingDir: ""
+url: https://github.com/rancher/charts.git
+subdirectory: charts/rancher-monitoring/100.2.0+up40.1.2
+commit: 252143f2d739cd04fd86bd0838910b15e6479b56
+version: 0.2.0
+ignoreDependencies:
+  - hardenedKubelet
+  - hardenedNodeExporter
+  - k3sServer
+  - kube-state-metrics
+  - kubeAdmControllerManager
+  - kubeAdmProxy
+  - kubeAdmScheduler
+  - kubeAdmEtcd
+  - prometheus-adapter
+  - prometheus-node-exporter
+  - rke2ControllerManager
+  - rke2Etcd
+  - rke2IngressNginx
+  - rke2Proxy
+  - rke2Scheduler
+  - rkeControllerManager
+  - rkeEtcd
+  - rkeIngressNginx
+  - rkeProxy
+  - rkeScheduler
+  - windowsExporter
+replacePaths:
+  - README.md
+  - app-README.md

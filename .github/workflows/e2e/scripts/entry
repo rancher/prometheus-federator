@@ -1,0 +1,16 @@
+#!/bin/bash
+set -e
+
+cd $(dirname $0)/../../../..
+
+DEFAULT_SLEEP_TIMEOUT_SECONDS=${DEFAULT_SLEEP_TIMEOUT_SECONDS:-10}
+KUBECTL_WAIT_TIMEOUT=${KUBECTL_WAIT_TIMEOUT:-120s}
+
+kubectl proxy --port=${APISERVER_PORT:-8001} &
+API_SERVER_URL=http://localhost:${APISERVER_PORT:-8001}
+sleep 5;
+
+if [[ ${DEBUG} == "true" ]]; then
+    echo "Enabling DEBUG mode..."
+    set -x
+fi

@@ -1,0 +1,33 @@
+--- charts-original/templates/prometheus/ingress.yaml
++++ charts/templates/prometheus/ingress.yaml
+@@ -1,12 +1,12 @@
+ {{- if and .Values.prometheus.enabled .Values.prometheus.ingress.enabled -}}
+   {{- $pathType := .Values.prometheus.ingress.pathType | default "ImplementationSpecific" -}}
+-  {{- $serviceName := printf "%s-%s" (include "kube-prometheus-stack.fullname" .) "prometheus" -}}
++  {{- $serviceName := printf "%s-%s" (include "project-prometheus-stack.fullname" .) "prometheus" -}}
+   {{- $servicePort := .Values.prometheus.ingress.servicePort | default .Values.prometheus.service.port -}}
+   {{- $routePrefix := list .Values.prometheus.prometheusSpec.routePrefix -}}
+   {{- $paths := .Values.prometheus.ingress.paths | default $routePrefix -}}
+-  {{- $apiIsStable := eq (include "kube-prometheus-stack.ingress.isStable" .) "true" -}}
+-  {{- $ingressSupportsPathType := eq (include "kube-prometheus-stack.ingress.supportsPathType" .) "true" -}}
+-apiVersion: {{ include "kube-prometheus-stack.ingress.apiVersion" . }}
++  {{- $apiIsStable := eq (include "project-prometheus-stack.ingress.isStable" .) "true" -}}
++  {{- $ingressSupportsPathType := eq (include "project-prometheus-stack.ingress.supportsPathType" .) "true" -}}
++apiVersion: {{ include "project-prometheus-stack.ingress.apiVersion" . }}
+ kind: Ingress
+ metadata:
+ {{- if .Values.prometheus.ingress.annotations }}
+@@ -14,10 +14,10 @@
+ {{ toYaml .Values.prometheus.ingress.annotations | indent 4 }}
+ {{- end }}
+   name: {{ $serviceName }}
+-  namespace: {{ template "kube-prometheus-stack.namespace" . }}
++  namespace: {{ template "project-prometheus-stack.namespace" . }}
+   labels:
+-    app: {{ template "kube-prometheus-stack.name" . }}-prometheus
+-{{ include "kube-prometheus-stack.labels" . | indent 4 }}
++    app: {{ template "project-prometheus-stack.name" . }}-prometheus
++{{ include "project-prometheus-stack.labels" . | indent 4 }}
+ {{- if .Values.prometheus.ingress.labels }}
+ {{ toYaml .Values.prometheus.ingress.labels | indent 4 }}
+ {{- end }}

@@ -1,0 +1,88 @@
+--- charts-original/templates/prometheus/rules-1.14/kubernetes-storage.yaml
++++ charts/templates/prometheus/rules-1.14/kubernetes-storage.yaml
+@@ -9,11 +9,11 @@
+ apiVersion: monitoring.coreos.com/v1
+ kind: PrometheusRule
+ metadata:
+-  name: {{ printf "%s-%s" (include "kube-prometheus-stack.fullname" .) "kubernetes-storage" | trunc 63 | trimSuffix "-" }}
+-  namespace: {{ template "kube-prometheus-stack.namespace" . }}
++  name: {{ printf "%s-%s" (include "project-prometheus-stack.fullname" .) "kubernetes-storage" | trunc 63 | trimSuffix "-" }}
++  namespace: {{ template "project-prometheus-stack.namespace" . }}
+   labels:
+-    app: {{ template "kube-prometheus-stack.name" . }}
+-{{ include "kube-prometheus-stack.labels" . | indent 4 }}
++    app: {{ template "project-prometheus-stack.name" . }}
++{{ include "project-prometheus-stack.labels" . | indent 4 }}
+ {{- if .Values.defaultRules.labels }}
+ {{ toYaml .Values.defaultRules.labels | indent 4 }}
+ {{- end }}
+@@ -35,12 +35,12 @@
+         runbook_url: {{ .Values.defaultRules.runbookUrl }}/kubernetes/kubepersistentvolumefillingup
+         summary: PersistentVolume is filling up.
+       expr: |-
+-        kubelet_volume_stats_available_bytes{job="{{ include "exporter.kubelet.jobName" . }}", namespace=~"{{ $targetNamespace }}", metrics_path="/metrics"}
++        kubelet_volume_stats_available_bytes{namespace=~"{{ $targetNamespace }}", metrics_path="/metrics"}
+           /
+-        kubelet_volume_stats_capacity_bytes{job="{{ include "exporter.kubelet.jobName" . }}", namespace=~"{{ $targetNamespace }}", metrics_path="/metrics"}
++        kubelet_volume_stats_capacity_bytes{namespace=~"{{ $targetNamespace }}", metrics_path="/metrics"}
+           < 0.03
+         and
+-        kubelet_volume_stats_used_bytes{job="{{ include "exporter.kubelet.jobName" . }}", namespace=~"{{ $targetNamespace }}", metrics_path="/metrics"} > 0
++        kubelet_volume_stats_used_bytes{namespace=~"{{ $targetNamespace }}", metrics_path="/metrics"} > 0
+         unless on(namespace, persistentvolumeclaim)
+         kube_persistentvolumeclaim_access_mode{ access_mode="ReadOnlyMany"} == 1
+         unless on(namespace, persistentvolumeclaim)
+@@ -63,14 +63,14 @@
+         summary: PersistentVolume is filling up.
+       expr: |-
+         (
+-          kubelet_volume_stats_available_bytes{job="{{ include "exporter.kubelet.jobName" . }}", namespace=~"{{ $targetNamespace }}", metrics_path="/metrics"}
++          kubelet_volume_stats_available_bytes{namespace=~"{{ $targetNamespace }}", metrics_path="/metrics"}
+             /
+-          kubelet_volume_stats_capacity_bytes{job="{{ include "exporter.kubelet.jobName" . }}", namespace=~"{{ $targetNamespace }}", metrics_path="/metrics"}
++          kubelet_volume_stats_capacity_bytes{namespace=~"{{ $targetNamespace }}", metrics_path="/metrics"}
+         ) < 0.15
+         and
+-        kubelet_volume_stats_used_bytes{job="{{ include "exporter.kubelet.jobName" . }}", namespace=~"{{ $targetNamespace }}", metrics_path="/metrics"} > 0
++        kubelet_volume_stats_used_bytes{namespace=~"{{ $targetNamespace }}", metrics_path="/metrics"} > 0
+         and
+-        predict_linear(kubelet_volume_stats_available_bytes{job="{{ include "exporter.kubelet.jobName" . }}", namespace=~"{{ $targetNamespace }}", metrics_path="/metrics"}[6h], 4 * 24 * 3600) < 0
++        predict_linear(kubelet_volume_stats_available_bytes{namespace=~"{{ $targetNamespace }}", metrics_path="/metrics"}[6h], 4 * 24 * 3600) < 0
+         unless on(namespace, persistentvolumeclaim)
+         kube_persistentvolumeclaim_access_mode{ access_mode="ReadOnlyMany"} == 1
+         unless on(namespace, persistentvolumeclaim)
+@@ -93,12 +93,12 @@
+         summary: PersistentVolumeInodes are filling up.
+       expr: |-
+         (
+-          kubelet_volume_stats_inodes_free{job="{{ include "exporter.kubelet.jobName" . }}", namespace=~"{{ $targetNamespace }}", metrics_path="/metrics"}
++          kubelet_volume_stats_inodes_free{namespace=~"{{ $targetNamespace }}", metrics_path="/metrics"}
+             /
+-          kubelet_volume_stats_inodes{job="{{ include "exporter.kubelet.jobName" . }}", namespace=~"{{ $targetNamespace }}", metrics_path="/metrics"}
++          kubelet_volume_stats_inodes{namespace=~"{{ $targetNamespace }}", metrics_path="/metrics"}
+         ) < 0.03
+         and
+-        kubelet_volume_stats_inodes_used{job="{{ include "exporter.kubelet.jobName" . }}", namespace=~"{{ $targetNamespace }}", metrics_path="/metrics"} > 0
++        kubelet_volume_stats_inodes_used{namespace=~"{{ $targetNamespace }}", metrics_path="/metrics"} > 0
+         unless on(namespace, persistentvolumeclaim)
+         kube_persistentvolumeclaim_access_mode{ access_mode="ReadOnlyMany"} == 1
+         unless on(namespace, persistentvolumeclaim)
+@@ -121,14 +121,14 @@
+         summary: PersistentVolumeInodes are filling up.
+       expr: |-
+         (
+-          kubelet_volume_stats_inodes_free{job="{{ include "exporter.kubelet.jobName" . }}", namespace=~"{{ $targetNamespace }}", metrics_path="/metrics"}
++          kubelet_volume_stats_inodes_free{namespace=~"{{ $targetNamespace }}", metrics_path="/metrics"}
+             /
+-          kubelet_volume_stats_inodes{job="{{ include "exporter.kubelet.jobName" . }}", namespace=~"{{ $targetNamespace }}", metrics_path="/metrics"}
++          kubelet_volume_stats_inodes{namespace=~"{{ $targetNamespace }}", metrics_path="/metrics"}
+         ) < 0.15
+         and
+-        kubelet_volume_stats_inodes_used{job="{{ include "exporter.kubelet.jobName" . }}", namespace=~"{{ $targetNamespace }}", metrics_path="/metrics"} > 0
++        kubelet_volume_stats_inodes_used{namespace=~"{{ $targetNamespace }}", metrics_path="/metrics"} > 0
+         and
+-        predict_linear(kubelet_volume_stats_inodes_free{job="{{ include "exporter.kubelet.jobName" . }}", namespace=~"{{ $targetNamespace }}", metrics_path="/metrics"}[6h], 4 * 24 * 3600) < 0
++        predict_linear(kubelet_volume_stats_inodes_free{namespace=~"{{ $targetNamespace }}", metrics_path="/metrics"}[6h], 4 * 24 * 3600) < 0
+         unless on(namespace, persistentvolumeclaim)
+         kube_persistentvolumeclaim_access_mode{ access_mode="ReadOnlyMany"} == 1
+         unless on(namespace, persistentvolumeclaim)
