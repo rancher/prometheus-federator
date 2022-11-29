@@ -7,6 +7,13 @@ on:
         description: 'Enable debugging via tmate'
         required: false
         default: "false"
+      debug:
+        description: "Enable debug logs"
+        required: false
+        default: "false"
+      k3s_version:
+        description: "Version of k3s to use for the underlying cluster, should exist in https://hub.docker.com/r/rancher/k3s/tags"
+        required: false
   pull_request:
     paths-ignore:
       - 'docs/**'
@@ -29,7 +36,7 @@ env:
   APISERVER_PORT: 8001
   DEFAULT_SLEEP_TIMEOUT_SECONDS: 10
   KUBECTL_WAIT_TIMEOUT: 120s
-  DEBUG: false
+  DEBUG: ${{ github.event.inputs.debug || false }}
 
 permissions:
   contents: write
@@ -41,7 +48,7 @@ jobs:
       matrix:
         k3s_version:
           # k3d version list k3s | sed 's/+/-/' | sort -h
-          - v1.20.15-k3s1
+          - ${{ github.event.inputs.k3s_version || 'v1.20.15-k3s1' }}
     steps:
       -
         uses: actions/checkout@v3
