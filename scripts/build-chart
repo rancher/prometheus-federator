@@ -9,5 +9,5 @@ CHART=rancher-project-monitoring
 VERSION=0.1.0
 
 helm package charts/${CHART}/${VERSION} --destination bin/${CHART}
-base64 bin/${CHART}/${CHART}-${VERSION}.tgz > bin/${CHART}/${CHART}.tgz.base64
+base64 -i bin/${CHART}/${CHART}-${VERSION}.tgz > bin/${CHART}/${CHART}.tgz.base64
 rm bin/${CHART}/${CHART}-${VERSION}.tgz
