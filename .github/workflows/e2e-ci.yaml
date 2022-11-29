@@ -103,9 +103,9 @@ jobs:
         name: Check if the Project Prometheus Stack is up
         run: ./.github/workflows/e2e/scripts/validate-project-monitoring.sh;
       - 
-        name: Wait for 5 minutes for enough scraping to be done to continue
+        name: Wait for 8 minutes for enough scraping to be done to continue
         run: |
-          for i in {1..30}; do sleep 10; echo "Waited $((i*10)) seconds for metrics to be populated"...; done;
+          for i in {1..48}; do sleep 10; echo "Waited $((i*10)) seconds for metrics to be populated"...; done;
       -
         name: Validate Project Prometheus Targets
         run: ./.github/workflows/e2e/scripts/validate-project-prometheus-targets.sh;
