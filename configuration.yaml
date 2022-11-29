@@ -1,1 +1,9 @@
-# Note: empty file required for charts-build-scripts
+# Note:
+#
+# We need to omit the build metadata in this repository since the rancher-project-monitoring chart has invalid semver
+# according to the regex in https://github.com/Masterminds/semver/blob/3248ef7640ce4f2c9db8d144a6f277c09749b754/version.go#L42-L44,
+# which is used by Heln upstream, when it ends up with a version like 0.1.0+upx.y.z+upa.b.c (due to both charts-build-scripts adding the +up annotation).
+#
+# Therefore, we omit the build annotation in this repository and manually add it in on releases.
+#
+omitBuildMetadataOnExport: true
