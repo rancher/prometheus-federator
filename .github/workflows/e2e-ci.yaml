@@ -1,0 +1,143 @@
+name: E2E Prometheus Federator
+
+on:
+  workflow_dispatch:
+    inputs:
+      enable_tmate:
+        description: 'Enable debugging via tmate'
+        required: false
+        default: "false"
+      debug:
+        description: "Enable debug logs"
+        required: false
+        default: "false"
+      k3s_version:
+        description: "Version of k3s to use for the underlying cluster, should exist in https://hub.docker.com/r/rancher/k3s/tags"
+        required: false
+  pull_request:
+    paths-ignore:
+      - 'docs/**'
+      - 'scripts/**'
+      - '*.md'
+      - '*.dapper'
+      - '.gitignore'
+      - 'CODEOWNERS'
+      - 'LICENSE'
+      - 'Makefile'
+
+env:
+  GOARCH: amd64
+  CGO_ENABLED: 0
+  SETUP_GO_VERSION: '^1.18'
+  YQ_VERSION: v4.25.1
+  E2E_CI: true
+  REPO: rancher
+  TAG: dev
+  APISERVER_PORT: 8001
+  DEFAULT_SLEEP_TIMEOUT_SECONDS: 10
+  KUBECTL_WAIT_TIMEOUT: 120s
+  DEBUG: ${{ github.event.inputs.debug || false }}
+
+permissions:
+  contents: write
+
+jobs:
+  e2e-prometheus-federator:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        k3s_version:
+          # k3d version list k3s | sed 's/+/-/' | sort -h
+          - ${{ github.event.inputs.k3s_version || 'v1.20.15-k3s1' }}
+    steps:
+      -
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      -
+        name: Install mikefarah/yq
+        run: |
+          sudo wget https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_amd64 -O /usr/bin/yq && sudo chmod +x /usr/bin/yq;
+      -
+        name: Perform CI
+        run: |
+          REPO=${REPO} TAG=${TAG} ./scripts/build;
+          REPO=${REPO} TAG=${TAG} ./scripts/package;
+      -
+        name: Provision k3d Cluster
+        uses: AbsaOSS/k3d-action@v2
+        # k3d will automatically create a network named k3d-test-cluster-1 with the range 172.18.0.0/16
+        with:
+          cluster-name: "e2e-ci-prometheus-federator"
+          args: >-
+            --agents 1
+            --network "nw01"
+            --image docker.io/rancher/k3s:${{matrix.k3s_version}}
+      -
+        name: Import Images Into k3d
+        run: |
+          k3d image import ${REPO}/prometheus-federator:${TAG} -c e2e-ci-prometheus-federator;
+      -
+        name: Setup kubectl context
+        run: |
+          kubectl config use-context k3d-e2e-ci-prometheus-federator;
+      -
+        name: Set Up Tmate Debug Session
+        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.enable_tmate == 'true' }}
+        uses: mxschmitt/action-tmate@v3
+        timeout-minutes: 15
+        with:
+          limit-access-to-actor: true
+      -
+        name: Install Rancher Monitoring
+        run: ./.github/workflows/e2e/scripts/install-monitoring.sh;
+      - 
+        name: Check if Rancher Monitoring is up
+        run: ./.github/workflows/e2e/scripts/validate-monitoring.sh;
+      -
+        name: Install Prometheus Federator
+        run: ./.github/workflows/e2e/scripts/install-federator.sh;
+      - 
+        name: Check if Prometheus Federator is up
+        run: ./.github/workflows/e2e/scripts/validate-federator.sh;
+      -
+        name: Check if Project Registration Namespace is auto-created on namespace detection
+        run: ./.github/workflows/e2e/scripts/create-project-namespace.sh;
+      -
+        name: Create Project Monitoring Stack via ProjectHelmChart CR
+        run: ./.github/workflows/e2e/scripts/create-projecthelmchart.sh;
+      - 
+        name: Check if the Project Prometheus Stack is up
+        run: ./.github/workflows/e2e/scripts/validate-project-monitoring.sh;
+      - 
+        name: Wait for 8 minutes for enough scraping to be done to continue
+        run: |
+          for i in {1..48}; do sleep 10; echo "Waited $((i*10)) seconds for metrics to be populated"...; done;
+      -
+        name: Validate Project Prometheus Targets
+        run: ./.github/workflows/e2e/scripts/validate-project-prometheus-targets.sh;
+      -
+        name: Validate Project Grafana Datasources
+        run: ./.github/workflows/e2e/scripts/validate-project-grafana-datasource.sh;
+      -
+        name: Validate Project Grafana Dashboards
+        run: ./.github/workflows/e2e/scripts/validate-project-grafana-dashboards.sh;
+      -
+        name: Validate Project Grafana Dashboard Data
+        run: ./.github/workflows/e2e/scripts/validate-project-grafana-dashboard-data.sh;
+      -
+        name: Validate Project Prometheus Alerts
+        run: ./.github/workflows/e2e/scripts/validate-project-prometheus-alerts.sh;
+      -
+        name: Validate Project Alertmanager
+        run: ./.github/workflows/e2e/scripts/validate-project-alertmanager.sh;
+      - 
+        name: Delete Project Prometheus Stack
+        run: ./.github/workflows/e2e/scripts/delete-projecthelmchart.sh;
+      - 
+        name: Uninstall Prometheus Federator
+        run: ./.github/workflows/e2e/scripts/uninstall-federator.sh;
+      - 
+        name: Delete k3d cluster
+        if: always()
+        run: k3d cluster delete e2e-ci-prometheus-federator

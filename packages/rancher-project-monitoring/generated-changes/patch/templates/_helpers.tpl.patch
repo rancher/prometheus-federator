@@ -1,6 +1,6 @@
 --- charts-original/templates/_helpers.tpl
 +++ charts/templates/_helpers.tpl
-@@ -21,100 +21,6 @@
+@@ -21,94 +21,6 @@
  {{- include $template (dict "Chart" (dict "Name" (last $subchart)) "Values" $values "Release" $dot.Release "Capabilities" $dot.Capabilities) }}
  {{- end }}
  
@@ -31,12 +31,6 @@
 -
 -{{- define "exporter.kubelet.enabled" -}}
 -{{- if or .Values.kubelet.enabled .Values.hardenedKubelet.enabled .Values.k3sServer.enabled -}}
--"true"
--{{- end -}}
--{{- end }}
--
--{{- define "exporter.kubeletService.enabled" -}}
--{{- if or .Values.hardenedKubelet.enabled .Values.prometheusOperator.kubeletService.enabled .Values.k3sServer.enabled -}}
 -"true"
 -{{- end -}}
 -{{- end }}
@@ -101,8 +95,15 @@
  # Windows Support
  
  {{/*
-@@ -141,7 +47,7 @@
+@@ -133,9 +45,14 @@
  
+ # Prometheus Operator
+ 
++{{/* Comma-delimited list of namespaces that need to be watched to configure Project Prometheus Stack components */}}
++{{- define "project-prometheus-stack.projectNamespaceList" -}}
++{{ append .Values.global.cattle.projectNamespaces .Release.Namespace | uniq | join "," }}
++{{- end }}
++
  {{/* vim: set filetype=mustache: */}}
  {{/* Expand the name of the chart. This is suffixed with -alertmanager, which means subtract 13 from longest 63 available */}}
 -{{- define "kube-prometheus-stack.name" -}}
@@ -110,7 +111,7 @@
  {{- default .Chart.Name .Values.nameOverride | trunc 50 | trimSuffix "-" -}}
  {{- end }}
  
-@@ -152,7 +58,7 @@
+@@ -146,7 +63,7 @@
  The components in this chart create additional resources that expand the longest created name strings.
  The longest name that gets created adds and extra 37 characters, so truncation should be 63-35=26.
  */}}
@@ -119,30 +120,44 @@
  {{- if .Values.fullnameOverride -}}
  {{- .Values.fullnameOverride | trunc 26 | trimSuffix "-" -}}
  {{- else -}}
-@@ -166,32 +72,32 @@
+@@ -159,46 +76,36 @@
+ {{- end -}}
  {{- end -}}
  
- {{/* Fullname suffixed with operator */}}
+-{{/* Fullname suffixed with operator */}}
 -{{- define "kube-prometheus-stack.operator.fullname" -}}
 -{{- printf "%s-operator" (include "kube-prometheus-stack.fullname" .) -}}
-+{{- define "project-prometheus-stack.operator.fullname" -}}
-+{{- printf "%s-operator" (include "project-prometheus-stack.fullname" .) -}}
+-{{- end }}
+-
+ {{/* Prometheus custom resource instance name */}}
+-{{- define "kube-prometheus-stack.prometheus.crname" -}}
++{{- define "project-prometheus-stack.prometheus.crname" -}}
+ {{- if .Values.cleanPrometheusOperatorObjectNames }}
+-{{- include "kube-prometheus-stack.fullname" . }}
++{{- include "project-prometheus-stack.fullname" . }}
+ {{- else }}
+-{{- print (include "kube-prometheus-stack.fullname" .) "-prometheus" }}
++{{- print (include "project-prometheus-stack.fullname" .) "-prometheus" }}
+ {{- end }}
  {{- end }}
  
- {{/* Fullname suffixed with prometheus */}}
--{{- define "kube-prometheus-stack.prometheus.fullname" -}}
--{{- printf "%s-prometheus" (include "kube-prometheus-stack.fullname" .) -}}
-+{{- define "project-prometheus-stack.prometheus.fullname" -}}
-+{{- printf "%s-prometheus" (include "project-prometheus-stack.fullname" .) -}}
+ {{/* Alertmanager custom resource instance name */}}
+-{{- define "kube-prometheus-stack.alertmanager.crname" -}}
++{{- define "project-prometheus-stack.alertmanager.crname" -}}
+ {{- if .Values.cleanPrometheusOperatorObjectNames }}
+-{{- include "kube-prometheus-stack.fullname" . }}
++{{- include "project-prometheus-stack.fullname" . }}
+ {{- else }}
+-{{- print (include "kube-prometheus-stack.fullname" .) "-alertmanager" -}}
++{{- print (include "project-prometheus-stack.fullname" .) "-alertmanager" -}}
+ {{- end }}
  {{- end }}
  
- {{/* Fullname suffixed with alertmanager */}}
--{{- define "kube-prometheus-stack.alertmanager.fullname" -}}
--{{- printf "%s-alertmanager" (include "kube-prometheus-stack.fullname" .) -}}
-+{{- define "project-prometheus-stack.alertmanager.fullname" -}}
-+{{- printf "%s-alertmanager" (include "project-prometheus-stack.fullname" .) -}}
- {{- end }}
- 
+-{{/* Fullname suffixed with thanos-ruler */}}
+-{{- define "kube-prometheus-stack.thanosRuler.fullname" -}}
+-{{- printf "%s-thanos-ruler" (include "kube-prometheus-stack.fullname" .) -}}
+-{{- end }}
+-
  {{/* Create chart name and version as used by the chart label. */}}
 -{{- define "kube-prometheus-stack.chartref" -}}
 +{{- define "project-prometheus-stack.chartref" -}}
@@ -162,28 +177,25 @@
  release: {{ $.Release.Name | quote }}
  heritage: {{ $.Release.Service | quote }}
  {{- if .Values.commonLabels}}
-@@ -199,28 +105,28 @@
+@@ -206,46 +113,28 @@
  {{- end }}
  {{- end }}
  
 -{{/* Create the name of kube-prometheus-stack service account to use */}}
 -{{- define "kube-prometheus-stack.operator.serviceAccountName" -}}
-+{{/* Create the name of project-prometheus-stack service account to use */}}
-+{{- define "project-prometheus-stack.operator.serviceAccountName" -}}
- {{- if .Values.prometheusOperator.serviceAccount.create -}}
+-{{- if .Values.prometheusOperator.serviceAccount.create -}}
 -    {{ default (include "kube-prometheus-stack.operator.fullname" .) .Values.prometheusOperator.serviceAccount.name }}
-+    {{ default (include "project-prometheus-stack.operator.fullname" .) .Values.prometheusOperator.serviceAccount.name }}
- {{- else -}}
-     {{ default "default" .Values.prometheusOperator.serviceAccount.name }}
- {{- end -}}
- {{- end -}}
- 
+-{{- else -}}
+-    {{ default "default" .Values.prometheusOperator.serviceAccount.name }}
+-{{- end -}}
+-{{- end -}}
+-
  {{/* Create the name of prometheus service account to use */}}
 -{{- define "kube-prometheus-stack.prometheus.serviceAccountName" -}}
 +{{- define "project-prometheus-stack.prometheus.serviceAccountName" -}}
  {{- if .Values.prometheus.serviceAccount.create -}}
--    {{ default (include "kube-prometheus-stack.prometheus.fullname" .) .Values.prometheus.serviceAccount.name }}
-+    {{ default (include "project-prometheus-stack.prometheus.fullname" .) .Values.prometheus.serviceAccount.name }}
+-    {{ default (print (include "kube-prometheus-stack.fullname" .) "-prometheus") .Values.prometheus.serviceAccount.name }}
++    {{ default (print (include "project-prometheus-stack.fullname" .) "-prometheus") .Values.prometheus.serviceAccount.name }}
  {{- else -}}
      {{ default "default" .Values.prometheus.serviceAccount.name }}
  {{- end -}}
@@ -193,12 +205,22 @@
 -{{- define "kube-prometheus-stack.alertmanager.serviceAccountName" -}}
 +{{- define "project-prometheus-stack.alertmanager.serviceAccountName" -}}
  {{- if .Values.alertmanager.serviceAccount.create -}}
--    {{ default (include "kube-prometheus-stack.alertmanager.fullname" .) .Values.alertmanager.serviceAccount.name }}
-+    {{ default (include "project-prometheus-stack.alertmanager.fullname" .) .Values.alertmanager.serviceAccount.name }}
+-    {{ default (print (include "kube-prometheus-stack.fullname" .) "-alertmanager") .Values.alertmanager.serviceAccount.name }}
++    {{ default (print (include "project-prometheus-stack.fullname" .) "-alertmanager") .Values.alertmanager.serviceAccount.name }}
  {{- else -}}
      {{ default "default" .Values.alertmanager.serviceAccount.name }}
  {{- end -}}
-@@ -229,7 +135,7 @@
+ {{- end -}}
+ 
+-{{/* Create the name of thanosRuler service account to use */}}
+-{{- define "kube-prometheus-stack.thanosRuler.serviceAccountName" -}}
+-{{- if .Values.thanosRuler.serviceAccount.create -}}
+-    {{ default (include "kube-prometheus-stack.thanosRuler.fullname" .) .Values.thanosRuler.serviceAccount.name }}
+-{{- else -}}
+-    {{ default "default" .Values.thanosRuler.serviceAccount.name }}
+-{{- end -}}
+-{{- end -}}
+-
  {{/*
  Allow the release namespace to be overridden for multi-namespace deployments in combined charts
  */}}
@@ -207,7 +229,7 @@
    {{- if .Values.namespaceOverride -}}
      {{- .Values.namespaceOverride -}}
    {{- else -}}
-@@ -240,7 +146,7 @@
+@@ -256,7 +145,7 @@
  {{/*
  Use the grafana namespace override for multi-namespace deployments in combined charts
  */}}
@@ -216,7 +238,7 @@
    {{- if .Values.grafana.namespaceOverride -}}
      {{- .Values.grafana.namespaceOverride -}}
    {{- else -}}
-@@ -248,36 +154,14 @@
+@@ -264,36 +153,14 @@
    {{- end -}}
  {{- end -}}
  
@@ -256,7 +278,7 @@
        {{- print "networking.k8s.io/v1" -}}
    {{- else if .Capabilities.APIVersions.Has "networking.k8s.io/v1beta1" -}}
      {{- print "networking.k8s.io/v1beta1" -}}
-@@ -287,19 +171,19 @@
+@@ -303,19 +170,19 @@
  {{- end -}}
  
  {{/* Check Ingress stability */}}
@@ -282,3 +304,59 @@
        {{- print "policy/v1" -}}
    {{- else -}}
      {{- print "policy/v1beta1" -}}
+@@ -323,14 +190,14 @@
+   {{- end -}}
+ 
+ {{/* Get value based on current Kubernetes version */}}
+-{{- define "kube-prometheus-stack.kubeVersionDefaultValue" -}}
+-  {{- $values := index . 0 -}}
+-  {{- $kubeVersion := index . 1 -}}
+-  {{- $old := index . 2 -}}
+-  {{- $new := index . 3 -}}
+-  {{- $default := index . 4 -}}
++{{- define "project-prometheus-stack.kubeVersionDefaultValue" -}}
++  {{- $values := index . 0 }}
++  {{- $kubeVersion := index . 1 }}
++  {{- $old := index . 2 }}
++  {{- $new := index . 3 }}
++  {{- $default := index . 4 }}
+   {{- if kindIs "invalid" $default -}}
+-    {{- if semverCompare $kubeVersion (include "kube-prometheus-stack.kubeVersion" $values) -}}
++    {{- if semverCompare $kubeVersion (include "project-prometheus-stack.kubeVersion" $values) -}}
+       {{- print $new -}}
+     {{- else -}}
+       {{- print $old -}}
+@@ -340,24 +207,6 @@
+   {{- end -}}
+ {{- end -}}
+ 
+-{{/* Get value for kube-controller-manager depending on insecure scraping availability */}}
+-{{- define "kube-prometheus-stack.kubeControllerManager.insecureScrape" -}}
+-  {{- $values := index . 0 -}}
+-  {{- $insecure := index . 1 -}}
+-  {{- $secure := index . 2 -}}
+-  {{- $userValue := index . 3 -}}
+-  {{- include "kube-prometheus-stack.kubeVersionDefaultValue" (list $values ">= 1.22-0" $insecure $secure $userValue) -}}
+-{{- end -}}
+-
+-{{/* Get value for kube-scheduler depending on insecure scraping availability */}}
+-{{- define "kube-prometheus-stack.kubeScheduler.insecureScrape" -}}
+-  {{- $values := index . 0 -}}
+-  {{- $insecure := index . 1 -}}
+-  {{- $secure := index . 2 -}}
+-  {{- $userValue := index . 3 -}}
+-  {{- include "kube-prometheus-stack.kubeVersionDefaultValue" (list $values ">= 1.23-0" $insecure $secure $userValue) -}}
+-{{- end -}}
+-
+ {{/*
+ To help compatibility with other charts which use global.imagePullSecrets.
+ Allow either an array of {name: pullSecret} maps (k8s-style), or an array of strings (more common helm-style).
+@@ -373,7 +222,7 @@
+   - pullSecret1
+   - pullSecret2
+ */}}
+-{{- define "kube-prometheus-stack.imagePullSecrets" -}}
++{{- define "project-prometheus-stack.imagePullSecrets" -}}
+ {{- range .Values.global.imagePullSecrets }}
+   {{- if eq (typeOf .) "map[string]interface {}" }}
+ - {{ toYaml . | trim }}

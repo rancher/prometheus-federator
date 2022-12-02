@@ -21,7 +21,7 @@
 @@ -17,5 +17,5 @@
    selector:
      matchLabels:
-       app: alertmanager
--      alertmanager: {{ template "kube-prometheus-stack.fullname" . }}-alertmanager
-+      alertmanager: {{ template "project-prometheus-stack.fullname" . }}-alertmanager
+       app.kubernetes.io/name: alertmanager
+-      alertmanager: {{ template "kube-prometheus-stack.alertmanager.crname" . }}
++      alertmanager: {{ template "project-prometheus-stack.alertmanager.crname" . }}
  {{- end }}

@@ -17,8 +17,8 @@
 +{{ include "project-prometheus-stack.labels" . | indent 4 }}
  spec:
    privileged: false
-   # Required to prevent escalations to root.
-@@ -54,9 +54,5 @@
+   # Allow core volume types.
+@@ -48,9 +48,5 @@
  {{- if .Values.prometheus.podSecurityPolicy.allowedCapabilities }}
    allowedCapabilities:
  {{ toYaml .Values.prometheus.podSecurityPolicy.allowedCapabilities | indent 4 }}

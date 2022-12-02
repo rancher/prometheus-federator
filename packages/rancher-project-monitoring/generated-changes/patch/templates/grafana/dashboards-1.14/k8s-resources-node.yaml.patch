@@ -1,14 +1,6 @@
 --- charts-original/templates/grafana/dashboards-1.14/k8s-resources-node.yaml
 +++ charts/templates/grafana/dashboards-1.14/k8s-resources-node.yaml
-@@ -1,23 +1,23 @@
- {{- /*
- Generated from 'k8s-resources-node' from https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/main/manifests/grafana-dashboardDefinitions.yaml
- Do not change in-place! In order to change this file first read following link:
--https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack/hack
-+https://github.com/prometheus-community/helm-charts/tree/main/charts/project-prometheus-stack/hack
- */ -}}
- {{- $kubeTargetVersion := default .Capabilities.KubeVersion.GitVersion .Values.kubeTargetVersionOverride }}
- {{- if and (or .Values.grafana.enabled .Values.grafana.forceDeployDashboards) (semverCompare ">=1.14.0-0" $kubeTargetVersion) (semverCompare "<9.9.9-9" $kubeTargetVersion) .Values.grafana.defaultDashboardsEnabled }}
+@@ -8,16 +8,16 @@
  apiVersion: v1
  kind: ConfigMap
  metadata:
@@ -20,7 +12,7 @@
  {{ toYaml .Values.grafana.sidecar.dashboards.annotations | indent 4 }}
    labels:
      {{- if $.Values.grafana.sidecar.dashboards.label }}
-     {{ $.Values.grafana.sidecar.dashboards.label }}: "1"
+     {{ $.Values.grafana.sidecar.dashboards.label }}: {{ ternary $.Values.grafana.sidecar.dashboards.labelValue "1" (not (empty $.Values.grafana.sidecar.dashboards.labelValue)) | quote }}
      {{- end }}
 -    app: {{ template "kube-prometheus-stack.name" $ }}-grafana
 -{{ include "kube-prometheus-stack.labels" $ | indent 4 }}
@@ -29,16 +21,45 @@
  data:
    k8s-resources-node.json: |-
      {
-@@ -77,7 +77,7 @@
+@@ -72,17 +72,7 @@
+                         "points": false,
+                         "renderer": "flot",
+                         "seriesOverrides": [
+-                            {
+-                                "alias": "max capacity",
+-                                "color": "#F2495C",
+-                                "dashes": true,
+-                                "fill": 0,
+-                                "hiddenSeries": true,
+-                                "hideTooltip": true,
+-                                "legend": true,
+-                                "linewidth": 2,
+-                                "stack": false
+-                            }
++
+                         ],
+                         "spaceLength": 10,
+                         "span": 12,
+@@ -90,17 +80,9 @@
                          "steppedLine": false,
                          "targets": [
                              {
--                                "expr": "sum(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{cluster=\"$cluster\", node=~\"$node\"}) by (pod)",
+-                                "expr": "sum(kube_node_status_capacity{cluster=\"$cluster\", node=~\"$node\", resource=\"cpu\"})",
 +                                "expr": "sum(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{node=~\"$node\"}) by (pod)",
                                  "format": "time_series",
                                  "intervalFactor": 2,
+-                                "legendFormat": "max capacity",
+-                                "legendLink": null,
+-                                "step": 10
+-                            },
+-                            {
+-                                "expr": "sum(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{cluster=\"$cluster\", node=~\"$node\"}) by (pod)",
+-                                "format": "time_series",
+-                                "intervalFactor": 2,
                                  "legendFormat": "{{`{{`}}pod{{`}}`}}",
-@@ -312,7 +312,7 @@
+                                 "legendLink": null,
+                                 "step": 10
+@@ -336,7 +318,7 @@
                          ],
                          "targets": [
                              {
@@ -47,7 +68,7 @@
                                  "format": "table",
                                  "instant": true,
                                  "intervalFactor": 2,
-@@ -321,7 +321,7 @@
+@@ -345,7 +327,7 @@
                                  "step": 10
                              },
                              {
@@ -56,7 +77,7 @@
                                  "format": "table",
                                  "instant": true,
                                  "intervalFactor": 2,
-@@ -330,7 +330,7 @@
+@@ -354,7 +336,7 @@
                                  "step": 10
                              },
                              {
@@ -65,7 +86,7 @@
                                  "format": "table",
                                  "instant": true,
                                  "intervalFactor": 2,
-@@ -339,7 +339,7 @@
+@@ -363,7 +345,7 @@
                                  "step": 10
                              },
                              {
@@ -74,7 +95,7 @@
                                  "format": "table",
                                  "instant": true,
                                  "intervalFactor": 2,
-@@ -348,7 +348,7 @@
+@@ -372,7 +354,7 @@
                                  "step": 10
                              },
                              {
@@ -83,16 +104,45 @@
                                  "format": "table",
                                  "instant": true,
                                  "intervalFactor": 2,
-@@ -448,7 +448,7 @@
+@@ -467,17 +449,7 @@
+                         "points": false,
+                         "renderer": "flot",
+                         "seriesOverrides": [
+-                            {
+-                                "alias": "max capacity",
+-                                "color": "#F2495C",
+-                                "dashes": true,
+-                                "fill": 0,
+-                                "hiddenSeries": true,
+-                                "hideTooltip": true,
+-                                "legend": true,
+-                                "linewidth": 2,
+-                                "stack": false
+-                            }
++
+                         ],
+                         "spaceLength": 10,
+                         "span": 12,
+@@ -485,17 +457,9 @@
                          "steppedLine": false,
                          "targets": [
                              {
--                                "expr": "sum(node_namespace_pod_container:container_memory_working_set_bytes{cluster=\"$cluster\", node=~\"$node\", container!=\"\"}) by (pod)",
+-                                "expr": "sum(kube_node_status_capacity{cluster=\"$cluster\", node=~\"$node\", resource=\"memory\"})",
 +                                "expr": "sum(node_namespace_pod_container:container_memory_working_set_bytes{node=~\"$node\", container!=\"\"}) by (pod)",
                                  "format": "time_series",
                                  "intervalFactor": 2,
+-                                "legendFormat": "max capacity",
+-                                "legendLink": null,
+-                                "step": 10
+-                            },
+-                            {
+-                                "expr": "sum(node_namespace_pod_container:container_memory_working_set_bytes{cluster=\"$cluster\", node=~\"$node\", container!=\"\"}) by (pod)",
+-                                "format": "time_series",
+-                                "intervalFactor": 2,
                                  "legendFormat": "{{`{{`}}pod{{`}}`}}",
-@@ -740,7 +740,7 @@
+                                 "legendLink": null,
+                                 "step": 10
+@@ -788,7 +752,7 @@
                          ],
                          "targets": [
                              {
@@ -101,7 +151,7 @@
                                  "format": "table",
                                  "instant": true,
                                  "intervalFactor": 2,
-@@ -749,7 +749,7 @@
+@@ -797,7 +761,7 @@
                                  "step": 10
                              },
                              {
@@ -110,7 +160,7 @@
                                  "format": "table",
                                  "instant": true,
                                  "intervalFactor": 2,
-@@ -758,7 +758,7 @@
+@@ -806,7 +770,7 @@
                                  "step": 10
                              },
                              {
@@ -119,7 +169,7 @@
                                  "format": "table",
                                  "instant": true,
                                  "intervalFactor": 2,
-@@ -767,7 +767,7 @@
+@@ -815,7 +779,7 @@
                                  "step": 10
                              },
                              {
@@ -128,7 +178,7 @@
                                  "format": "table",
                                  "instant": true,
                                  "intervalFactor": 2,
-@@ -776,7 +776,7 @@
+@@ -824,7 +788,7 @@
                                  "step": 10
                              },
                              {
@@ -137,7 +187,7 @@
                                  "format": "table",
                                  "instant": true,
                                  "intervalFactor": 2,
-@@ -785,7 +785,7 @@
+@@ -833,7 +797,7 @@
                                  "step": 10
                              },
                              {
@@ -146,7 +196,7 @@
                                  "format": "table",
                                  "instant": true,
                                  "intervalFactor": 2,
-@@ -794,7 +794,7 @@
+@@ -842,7 +806,7 @@
                                  "step": 10
                              },
                              {
@@ -155,7 +205,7 @@
                                  "format": "table",
                                  "instant": true,
                                  "intervalFactor": 2,
-@@ -803,7 +803,7 @@
+@@ -851,7 +815,7 @@
                                  "step": 10
                              },
                              {
@@ -164,7 +214,7 @@
                                  "format": "table",
                                  "instant": true,
                                  "intervalFactor": 2,
-@@ -892,33 +892,6 @@
+@@ -940,33 +904,6 @@
                          "value": ""
                      },
                      "datasource": "$datasource",
@@ -176,7 +226,7 @@
 -                    "options": [
 -
 -                    ],
--                    "query": "label_values(kube_pod_info, cluster)",
+-                    "query": "label_values(up{job=\"kube-state-metrics\"}, cluster)",
 -                    "refresh": 2,
 -                    "regex": "",
 -                    "sort": 1,
@@ -198,11 +248,11 @@
                      "hide": 0,
                      "includeAll": false,
                      "label": null,
-@@ -927,7 +900,7 @@
+@@ -975,7 +912,7 @@
                      "options": [
  
                      ],
--                    "query": "label_values(kube_pod_info{cluster=\"$cluster\"}, node)",
+-                    "query": "label_values(kube_node_info{cluster=\"$cluster\"}, node)",
 +                    "query": "label_values(kube_pod_info, node)",
                      "refresh": 2,
                      "regex": "",

@@ -1,0 +1,53 @@
+--- charts-original/charts/grafana/templates/nginx-config.yaml
++++ charts/charts/grafana/templates/nginx-config.yaml
+@@ -25,6 +25,11 @@
+       proxy_buffering             off;
+       proxy_cache_path            /var/cache/nginx/cache levels=1:2 keys_zone=my_zone:100m inactive=1d max_size=10g;
+ 
++      map $http_upgrade $connection_upgrade {
++        default upgrade;
++        '' close;
++      }
++
+       server {
+         listen          8080;
+         access_log      off;
+@@ -36,7 +41,7 @@
+         gzip_vary       on;
+         gzip_disable    "MSIE [1-6]\.";
+ 
+-        proxy_set_header Host $host;
++        proxy_set_header Host $http_host;
+ 
+         location /api/dashboards {
+           proxy_pass     http://localhost:3000;
+@@ -50,6 +55,14 @@
+           sub_filter '"url":"/d' '"url":"d';
+         }
+ 
++        location /api/live/ {
++          proxy_http_version 1.1;
++          proxy_set_header Upgrade $http_upgrade;
++          proxy_set_header Connection $connection_upgrade;
++          proxy_set_header Host $http_host;
++          proxy_pass http://localhost:3000;
++        }
++
+         location / {
+           proxy_cache         my_zone;
+           proxy_cache_valid   200 302 1d;
+@@ -61,9 +74,12 @@
+           
+           proxy_pass     http://localhost:3000/;
+ 
+-          sub_filter_types text/html;
+           sub_filter_once off;
+-          sub_filter '"appSubUrl":""' '"appSubUrl":"."';
++{{- if not (empty .Values.global.cattle.clusterId) }}
++          sub_filter '"appSubUrl":""' '"appSubUrl":"/k8s/clusters/{{ .Values.global.cattle.clusterId }}/api/v1/namespaces/{{ template "grafana.namespace" . }}/services/http:{{ template "grafana.fullname" . }}:{{ .Values.service.port }}/proxy"';
++{{- else }}
++          sub_filter '"appSubUrl":""' '"appSubUrl":"/api/v1/namespaces/{{ template "grafana.namespace" . }}/services/http:{{ template "grafana.fullname" . }}:{{ .Values.service.port }}/proxy"';
++{{- end }}
+           sub_filter '"url":"/' '"url":"./';
+           sub_filter ':"/avatar/' ':"avatar/';
+ 

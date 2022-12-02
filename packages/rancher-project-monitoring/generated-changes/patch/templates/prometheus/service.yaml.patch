@@ -17,7 +17,7 @@
  {{- if .Values.prometheus.service.labels }}
  {{ toYaml .Values.prometheus.service.labels | indent 4 }}
  {{- end }}
-@@ -39,20 +39,12 @@
+@@ -42,21 +42,13 @@
      {{- end }}
      port: {{ .Values.prometheus.service.port }}
      targetPort: {{ .Values.prometheus.service.targetPort }}
@@ -32,10 +32,11 @@
  {{- if .Values.prometheus.service.additionalPorts }}
  {{ toYaml .Values.prometheus.service.additionalPorts | indent 2 }}
  {{- end }}
+   publishNotReadyAddresses: {{ .Values.prometheus.service.publishNotReadyAddresses }}
    selector:
      app.kubernetes.io/name: prometheus
--    prometheus: {{ template "kube-prometheus-stack.fullname" . }}-prometheus
-+    prometheus: {{ template "project-prometheus-stack.fullname" . }}-prometheus
+-    prometheus: {{ template "kube-prometheus-stack.prometheus.crname" . }}
++    prometheus: {{ template "project-prometheus-stack.prometheus.crname" . }}
  {{- if .Values.prometheus.service.sessionAffinity }}
    sessionAffinity: {{ .Values.prometheus.service.sessionAffinity }}
  {{- end }}

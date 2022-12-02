@@ -42,6 +42,7 @@ Once this setting is turned on, you can always create ServiceMonitors or PodMoni
 In addition, if you modified the default `.Values.grafana.sidecar.*.searchNamespace` values on the Grafana Helm subchart for Monitoring V2, it is also recommended to remove the overrides or ensure that your defaults are scoped to only system namespaces for the following values:
 - `.Values.grafana.sidecar.dashboards.searchNamespace` (default `cattle-dashboards`)
 - `.Values.grafana.sidecar.datasources.searchNamespace` (default `null`, which means it uses the release namespace `cattle-monitoring-system`)
+- `.Values.grafana.sidecar.plugins.searchNamespace` (default `null`, which means it uses the release namespace `cattle-monitoring-system`)
 - `.Values.grafana.sidecar.notifiers.searchNamespace` (default `null`, which means it uses the release namespace `cattle-monitoring-system`)
 
 ### Increase the CPU / memory limits of the Cluster Prometheus
@@ -115,5 +116,5 @@ By default, the `rancher-project-monitoring` (the underlying chart deployed by P
 |`helmProjectOperator.releaseRoleBindings.clusterRoleRefs.<admin\|edit\|view>`| ClusterRoles to reference to discover subjects to create RoleBindings for in the Project Release Namespace for all corresponding Project Release Roles. See RBAC above for more information |
 |`helmProjectOperator.hardenedNamespaces.enabled`| Whether to automatically patch the default ServiceAccount with `automountServiceAccountToken: false` and create a default NetworkPolicy in all managed namespaces in the cluster; the default values ensure that the creation of the namespace does not break a CIS 1.16 hardened scan |
 |`helmProjectOperator.hardenedNamespaces.configuration`| The configuration to be supplied to the default ServiceAccount or auto-generated NetworkPolicy on managing a namespace |
-|`helmProjectOperator.helmController.enabled`| Whether to enable an embedded k3s-io/helm-controller instance within the Helm Project Operator. Should be disabled for RKE2 clusters since RKE2 clusters already run Helm Controller to manage internal Kubernetes components |
+|`helmProjectOperator.helmController.enabled`| Whether to enable an embedded k3s-io/helm-controller instance within the Helm Project Operator. Should be disabled for RKE2/K3s clusters before v1.23.14 / v1.24.8 / v1.25.4 since RKE2/K3s clusters already run Helm Controller at a cluster-wide level to manage internal Kubernetes components |
 |`helmProjectOperator.helmLocker.enabled`| Whether to enable an embedded rancher/helm-locker instance within the Helm Project Operator. |
