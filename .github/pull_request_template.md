@@ -18,7 +18,7 @@ Please checkmark one of the boxes below to indicate you have following the versi
 
 - If you are introducing a change to `packages/rancher-project-monitoring` or `packages/rancher-project-grafana`:
   - [ ] Increment the patch version in the `version` of `packages/rancher-project-monitoring/charts/Chart.yaml` by 1
-- [ ] I am not introducing a change to `package/rancher-project-monitoring`
+  - [ ] I am not introducing a change to `package/rancher-project-monitoring`
 
 > **Note:** We do not use RC versions for `rancher-project-monitoring` since it is hidden anyways and not intended for standalone use
 
@@ -28,8 +28,8 @@ Please checkmark one of the boxes below to indicate that you have followed the v
   - [ ] If `packages/prometheus-federator/charts/Chart.yaml` has a `version` that is a `-rc` version, increment the `-rc` version in this file by one (i.e. `0.1.2-rc1` -> `0.1.2-rc2`). Modify the `appVersion` to match this new `version`. Modify the `helmProjectOperator.image.tag` in `packages/prometheus-federator/charts/values.yaml` to match this `appVersion`.
   - [ ] If `packages/prometheus-federator/charts/Chart.yaml` has a `version` that is **not** a `-rc` version, increment the patch version in this file by 1 and add `-rc1` (i.e. `0.1.1` -> `0.1.2-rc1`). Modify the `appVersion` to match this new `version`. Modify the `helmProjectOperator.image.tag` in `packages/prometheus-federator/charts/values.yaml` to match this `appVersion`.
 - If you are **only** introducing a change to `packages/prometheus-federator`:
-  - [ ] If `packages/prometheus-federator/charts/Chart.yaml` has a `version` that is a `-rc` version, increment the `-rc` version in this file by one (i.e. `0.1.2-rc1` -> `0.1.2-rc2`). **Do not modify the `appVersion` or the `helmProjectOperator.image.tag` in `packages/prometheus-federator/charts/values.yaml`**.
-  - [ ] If `packages/prometheus-federator/charts/Chart.yaml` has a `version` that is **not** a `-rc` version, increment the patch version by 1 in this file and add `-rc1` (i.e. `0.1.1` -> `0.1.2-rc1`). **Do not modify the `appVersion` or the `helmProjectOperator.image.tag` in `packages/prometheus-federator/charts/values.yaml`**.
+  - [ ] If `packages/prometheus-federator/charts/Chart.yaml` has a `version` that is a `-rc` version, increment the `-rc` version in this file by one (i.e. `0.1.2-rc1` -> `0.1.2-rc2`). **Do not modify the `appVersion` in the `Chart.yaml` or the `helmProjectOperator.image.tag` in `packages/prometheus-federator/charts/values.yaml`**.
+  - [ ] If `packages/prometheus-federator/charts/Chart.yaml` has a `version` that is **not** a `-rc` version, increment the patch version by 1 in this file and add `-rc1` (i.e. `0.1.1` -> `0.1.2-rc1`). **Do not modify the `appVersion` in the `Chart.yaml` or the `helmProjectOperator.image.tag` in `packages/prometheus-federator/charts/values.yaml`**.
 
 ### For Maintainers Releasing The Chart On QA Validation
 
