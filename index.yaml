@@ -12,6 +12,30 @@ entries:
       catalog.cattle.io/rancher-version: '>= 2.6.5-0 <= 2.6.100-0'
       catalog.cattle.io/release-name: prometheus-federator
     apiVersion: v2
+    appVersion: 0.2.0-rc2
+    created: "2022-12-16T10:32:15.990479-08:00"
+    dependencies:
+    - condition: helmProjectOperator.enabled
+      name: helmProjectOperator
+      repository: file://./charts/helmProjectOperator
+    description: Prometheus Federator
+    digest: 74809e05fd758b800a9ef9a13d5a3ecaa3f07d79c150ca6cc8b83661004c422e
+    icon: https://raw.githubusercontent.com/rancher/prometheus-federator/main/assets/logos/prometheus-federator.svg
+    name: prometheus-federator
+    urls:
+    - assets/prometheus-federator/prometheus-federator-0.2.0-rc2.tgz
+    version: 0.2.0-rc2
+  - annotations:
+      catalog.cattle.io/certified: rancher
+      catalog.cattle.io/display-name: Prometheus Federator
+      catalog.cattle.io/kube-version: '>=1.16.0-0'
+      catalog.cattle.io/namespace: cattle-monitoring-system
+      catalog.cattle.io/os: linux,windows
+      catalog.cattle.io/permits-os: linux,windows
+      catalog.cattle.io/provides-gvr: helm.cattle.io.projecthelmchart/v1alpha1
+      catalog.cattle.io/rancher-version: '>= 2.6.5-0 <= 2.6.100-0'
+      catalog.cattle.io/release-name: prometheus-federator
+    apiVersion: v2
     appVersion: 0.2.0-rc1
     created: "2022-12-01T10:28:07.173354-08:00"
     dependencies:
@@ -98,6 +122,43 @@ entries:
     - assets/prometheus-federator/prometheus-federator-0.0.1.tgz
     version: 0.0.1
   rancher-project-monitoring:
+  - annotations:
+      catalog.cattle.io/certified: rancher
+      catalog.cattle.io/display-name: Project Monitoring
+      catalog.cattle.io/hidden: "true"
+      catalog.cattle.io/kube-version: '>=1.16.0-0 < 1.25.0-0'
+      catalog.cattle.io/permits-os: linux,windows
+      catalog.cattle.io/rancher-version: '>= 2.6.5-0 <= 2.8.0-0'
+      catalog.cattle.io/release-name: rancher-project-monitoring
+    apiVersion: v2
+    appVersion: 0.59.1
+    created: "2022-12-16T10:32:18.039276-08:00"
+    dependencies:
+    - condition: grafana.enabled
+      name: grafana
+      repository: file://./charts/grafana
+    description: Collects several related Helm charts, Grafana dashboards, and Prometheus
+      rules combined with documentation and scripts to provide easy to operate end-to-end
+      Kubernetes cluster monitoring with Prometheus. Depends on the existence of a
+      Cluster Prometheus deployed via Prometheus Operator
+    digest: 3cd7a59f64117bf3db47eb67b87dc7e72f11c49651546dda5236e0063b9ce91f
+    home: https://github.com/prometheus-operator/kube-prometheus
+    icon: https://raw.githubusercontent.com/prometheus/prometheus.github.io/master/assets/prometheus_logo-cb55bb5c346.png
+    keywords:
+    - prometheus
+    - monitoring
+    kubeVersion: '>=1.16.0-0'
+    maintainers:
+    - email: arvind.iyengar@suse.com
+      name: Arvind
+    - email: amangeet.samra@suse.com
+      name: Geet
+      url: https://github.com/geethub97
+    name: rancher-project-monitoring
+    type: application
+    urls:
+    - assets/rancher-project-monitoring/rancher-project-monitoring-0.2.0-rc2.tgz
+    version: 0.2.0-rc2
   - annotations:
       catalog.cattle.io/certified: rancher
       catalog.cattle.io/display-name: Project Monitoring
