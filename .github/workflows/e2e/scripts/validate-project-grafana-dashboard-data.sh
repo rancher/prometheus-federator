@@ -127,12 +127,14 @@ EOF
         # echo "QUERY: ${query}"
         echo "INTERNAL ERROR: Request to /api/ds/query failed due to malformed request: ${query_response}"
         echo "QUERY BODY: ${query_body}"
+        echo ""
         FAILED=1
         continue
     fi
     if [[ "$(echo ${query_response} | yq '.results.A.frames | length' -)" == "0" ]]; then
         # echo "QUERY: ${query}"
         echo "ERROR: No data was found for query ${query_key}: ${query_response}"
+        echo ""
         FAILED=1
         continue
     fi
