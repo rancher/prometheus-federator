@@ -57,6 +57,22 @@ exclude_queries=(
     "db/kubernetes-persistent-volumes/Volume_inodes_Usage_query0"
     "db/kubernetes-persistent-volumes/Volume_inodes_Usage_query1"
     "db/kubernetes-persistent-volumes/Volume_inodes_Usage_query0"
+
+    # Flakey Tests
+    "db/kubernetes-compute-resources-namespace-pods/IOPS(Reads+Writes)_query0"
+    "db/kubernetes-compute-resources-namespace-pods/Current_Storage_IO_query0"
+    "db/kubernetes-compute-resources-namespace-pods/Current_Storage_IO_query1"
+    "db/kubernetes-compute-resources-namespace-pods/Current_Storage_IO_query2"
+    "db/kubernetes-compute-resources-pod/IOPS_query0"
+    "db/kubernetes-compute-resources-pod/IOPS_query1"
+    "db/kubernetes-compute-resources-pod/IOPS(Reads+Writes)_query0"
+    "db/kubernetes-compute-resources-pod/Current_Storage_IO_query0"
+    "db/kubernetes-compute-resources-pod/Current_Storage_IO_query1"
+    "db/kubernetes-compute-resources-pod/Current_Storage_IO_query2"
+    "db/kubernetes-compute-resources-project/IOPS(Reads+Writes)_query0"
+    "db/kubernetes-compute-resources-project/Current_Storage_IO_query0"
+    "db/kubernetes-compute-resources-project/Current_Storage_IO_query1"
+    "db/kubernetes-compute-resources-project/Current_Storage_IO_query2"
 )
 
 
