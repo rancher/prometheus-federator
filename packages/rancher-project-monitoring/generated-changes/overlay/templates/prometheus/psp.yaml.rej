@@ -1,7 +1,0 @@
-diff a/packages/rancher-project-monitoring/charts/templates/prometheus/psp.yaml b/packages/rancher-project-monitoring/charts/templates/prometheus/psp.yaml	(rejected hunks)
-@@ -54,3 +55,4 @@ spec:
- {{ toYaml .Values.prometheus.podSecurityPolicy.allowedHostPaths | indent 4 }}
- {{- end }}
- {{- end }}
-+{{- end }}
-\ No newline at end of file

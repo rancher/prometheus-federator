@@ -151,7 +151,7 @@
  {{- end }}
  {{- end }}
    tolerations: {{ include "linux-node-tolerations" . | nindent 4 }}
-@@ -264,45 +221,16 @@
+@@ -264,42 +221,13 @@
  {{- end }}
  {{- if .Values.global.imagePullSecrets }}
    imagePullSecrets:
@@ -197,11 +197,7 @@
 -{{- end }}
  {{- if .Values.prometheus.prometheusSpec.containers }}
    containers:
--{{ toYaml .Values.prometheus.prometheusSpec.containers | indent 4 }}
-+{{ tpl .Values.prometheus.prometheusSpec.containers $ | indent 4 }}
- {{- end }}
- {{- if .Values.prometheus.prometheusSpec.initContainers }}
-   initContainers:
+ {{ tpl .Values.prometheus.prometheusSpec.containers $ | indent 4 }}
 @@ -311,10 +239,6 @@
  {{- if .Values.prometheus.prometheusSpec.priorityClassName }}
    priorityClassName: {{ .Values.prometheus.prometheusSpec.priorityClassName }}
