@@ -1,4 +1,4 @@
-FROM registry.suse.com/bci/bci-micro:15.3
+FROM registry.suse.com/bci/bci-micro:15.4
 RUN echo 'prometheus:x:1000:1000::/home/prometheus:/bin/bash' >> /etc/passwd && \
     echo 'prometheus:x:1000:' >> /etc/group && \
     mkdir /home/prometheus && \
