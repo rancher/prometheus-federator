@@ -1,17 +1,17 @@
-FROM registry.suse.com/bci/golang:1.17 AS helm
+FROM registry.suse.com/bci/golang:1.19 AS helm
 RUN zypper -n install git
-RUN git -C / clone --branch release-v3.8.0 --depth=1 https://github.com/rancher/helm
+RUN git -C / clone --branch release-v3.9.0 --depth=1 https://github.com/rancher/helm
 RUN make -C /helm
 
-FROM registry.suse.com/bci/golang:1.17
+FROM registry.suse.com/bci/golang:1.19
 
 ARG DAPPER_HOST_ARCH
 ENV ARCH $DAPPER_HOST_ARCH
 
 RUN zypper -n install git docker vim less file curl wget patch
-RUN go get golang.org/x/tools/cmd/goimports
+RUN go install golang.org/x/tools/cmd/goimports@latest
 RUN if [ "${ARCH}" == "amd64" ]; then \
-        curl -sL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s v1.40.1; \
+        curl -sL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s v1.50.1; \
     fi
 
 COPY --from=helm ./helm/bin/helm /usr/local/bin/
