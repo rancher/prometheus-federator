@@ -1,6 +1,9 @@
 --- charts-original/charts/grafana/templates/hpa.yaml
 +++ charts/charts/grafana/templates/hpa.yaml
-@@ -3,6 +3,7 @@
+@@ -1,8 +1,9 @@
+ {{- if .Values.autoscaling.enabled }}
+-apiVersion: autoscaling/v2beta1
++apiVersion: {{ template "grafana.hpa.apiVersion" . }}
  kind: HorizontalPodAutoscaler
  metadata:
    name: {{ template "grafana.fullname" . }}

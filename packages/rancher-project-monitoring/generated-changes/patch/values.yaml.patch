@@ -2558,55 +2558,24 @@
      proxy:
        image:
          repository: rancher/mirrored-library-nginx
-@@ -3576,27 +1418,27 @@
+@@ -3576,7 +1418,7 @@
  
      ## Containers allows injecting additional containers. This is meant to allow adding an authentication proxy to a Prometheus pod.
      ## if using proxy extraContainer update targetPort with proxy container port
--    containers: 
--    - name: prometheus-proxy
--      args:
--      - nginx
--      - -g
--      - daemon off;
--      - -c
--      - /nginx/nginx.conf
--      image: rancher/mirrored-library-nginx:1.21.1-alpine
--      ports:
--      - containerPort: 8081
--        name: nginx-http
--        protocol: TCP
--      volumeMounts:
--      - mountPath: /nginx
--        name: prometheus-nginx
--      - mountPath: /var/cache/nginx
--        name: nginx-home
--      securityContext:
--        runAsUser: 101
--        runAsGroup: 101
+-    containers:  |
 +    containers: |
-+      - name: prometheus-proxy
-+        args:
-+        - nginx
-+        - -g
-+        - daemon off;
-+        - -c
-+        - /nginx/nginx.conf
+       - name: prometheus-proxy
+         args:
+         - nginx
+@@ -3584,7 +1426,7 @@
+         - daemon off;
+         - -c
+         - /nginx/nginx.conf
+-        image: rancher/mirrored-library-nginx:1.21.1-alpine
 +        image: "{{ template "system_default_registry" . }}{{ .Values.prometheus.prometheusSpec.proxy.image.repository }}:{{ .Values.prometheus.prometheusSpec.proxy.image.tag }}"
-+        ports:
-+        - containerPort: 8081
-+          name: nginx-http
-+          protocol: TCP
-+        volumeMounts:
-+        - mountPath: /nginx
-+          name: prometheus-nginx
-+        - mountPath: /var/cache/nginx
-+          name: nginx-home
-+        securityContext:
-+          runAsUser: 101
-+          runAsGroup: 101
- 
-     ## InitContainers allows injecting additional initContainers. This is meant to allow doing some changes
-     ## (permissions, dir tree) on mounted volumes before starting prometheus
+         ports:
+         - containerPort: 8081
+           name: nginx-http
 @@ -3617,10 +1459,6 @@
      ## OverrideHonorTimestamps allows to globally enforce honoring timestamps in all scrape configs.
      overrideHonorTimestamps: false
