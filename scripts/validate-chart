@@ -1,0 +1,16 @@
+#!/bin/bash
+set -e
+
+cd $(dirname $0)/..
+
+
+CHART=prometheus-federator
+VERSION=$(find ./charts/${CHART} -type d -maxdepth 1 -mindepth 1 | tr - \~ | sort -rV | tr \~ - | head -n1 | cut -d'/' -f4)
+
+app_version="$(yq e '.appVersion' charts/${CHART}/${VERSION}/Chart.yaml)"
+image_tag="$(yq e '.helmProjectOperator.image.tag' charts/${CHART}/${VERSION}/values.yaml)"
+
+if [[ "${image_tag}" != "v${app_version}" ]]; then
+    echo "ERROR: .helmProjectOperator.image.tag in charts/${CHART}/${VERSION}/values.yaml (found: ${image_tag}) must match appVersion in charts/${CHART}/${VERSION}/Chart.yaml (found ${app_version})"
+    exit 1
+fi
