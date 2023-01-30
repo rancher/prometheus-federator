@@ -13,7 +13,7 @@ The source of the [`rancher-project-monitoring` chart](../../charts/rancher-proj
 Therefore, in order to rebase the `rancher-project-monitoring` chart against the latest `rancher-monitoring` chart that will be released, you typically will need to run the following command:
 
 ```bash
-PACKAGE=rancher-monitoring TO_COMMIT=<commit-hash-in-rancher-charts> TO_DIR=charts/rancher-monitoring/<version> make rebase
+PACKAGE=rancher-project-monitoring TO_COMMIT=<commit-hash-in-rancher-charts> TO_DIR=charts/rancher-monitoring/<version> make rebase
 ```
 
 On running this command locally, the script will automatically pull in the `rancher/charts` repository as a Git remote, construct the patch from the current chart base (listed in the [`package.yaml` of `rancher-project-monitoring`](../../packages/rancher-project-monitoring/package.yaml)) to the new chart base (defined from the environment variables provided, namely `TO_REMOTE`, `TO_COMMIT` , `TO_DIR`), and try to `git apply -3` the patches onto the current version of the charts created by running the `make prepare` command.
