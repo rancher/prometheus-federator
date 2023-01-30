@@ -1,12 +1,12 @@
 --- charts-original/charts/grafana/templates/podsecuritypolicy.yaml
 +++ charts/charts/grafana/templates/podsecuritypolicy.yaml
-@@ -1,4 +1,5 @@
- {{- if .Values.rbac.pspEnabled }}
-+{{- if .Capabilities.APIVersions.Has "policy/v1beta1/PodSecurityPolicy" }}
+@@ -1,4 +1,4 @@
+-{{- if .Values.rbac.pspEnabled }}
++{{- if .Values.global.cattle.psp.enabled }}
  apiVersion: policy/v1beta1
  kind: PodSecurityPolicy
  metadata:
-@@ -12,20 +13,8 @@
+@@ -12,20 +12,8 @@
    privileged: false
    allowPrivilegeEscalation: false
    requiredDropCapabilities:
@@ -29,9 +29,3 @@
    volumes:
      - 'configMap'
      - 'emptyDir'
-@@ -54,4 +43,5 @@
-       - min: 1
-         max: 65535
-   readOnlyRootFilesystem: false
-+{{- end }}
- {{- end }}

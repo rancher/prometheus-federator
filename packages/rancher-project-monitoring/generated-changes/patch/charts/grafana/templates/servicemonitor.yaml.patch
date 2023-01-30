@@ -11,7 +11,7 @@
    {{- end }}
    labels:
      {{- include "grafana.labels" . | nindent 4 }}
-@@ -14,12 +16,14 @@
+@@ -14,18 +16,36 @@
      {{- end }}
  spec:
    endpoints:
@@ -30,7 +30,29 @@
      path: {{ .Values.serviceMonitor.path }}
      scheme: {{ .Values.serviceMonitor.scheme }}
      {{- if .Values.serviceMonitor.tlsConfig }}
-@@ -36,5 +40,5 @@
+     tlsConfig:
+     {{- toYaml .Values.serviceMonitor.tlsConfig | nindent 6 }}
+     {{- end }}
++    {{- if .Values.serviceMonitor.metricRelabelings }}
++    metricRelabelings:
++    {{- toYaml .Values.serviceMonitor.metricRelabelings | nindent 6 }}
++    {{ if .Values.global.cattle.clusterId }}
++    - sourceLabels: [__address__]
++      targetLabel: cluster_id
++      replacement: {{ .Values.global.cattle.clusterId }}
++    {{- end }}
++    {{ else }}
++    {{ if .Values.global.cattle.clusterId }}
++    metricRelabelings:
++    - sourceLabels: [__address__]
++      targetLabel: cluster_id
++      replacement: {{ .Values.global.cattle.clusterId }}
++    {{- end }}
++    {{- end }}
+     {{- if .Values.serviceMonitor.relabelings }}
+     relabelings:
+     {{- toYaml .Values.serviceMonitor.relabelings | nindent 4 }}
+@@ -36,5 +56,5 @@
        {{- include "grafana.selectorLabels" . | nindent 8 }}
    namespaceSelector:
      matchNames:

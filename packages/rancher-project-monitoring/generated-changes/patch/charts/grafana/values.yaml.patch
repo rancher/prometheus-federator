@@ -1,14 +1,22 @@
 --- charts-original/charts/grafana/values.yaml
 +++ charts/charts/grafana/values.yaml
-@@ -1,6 +1,7 @@
+@@ -1,12 +1,14 @@
  global:
    cattle:
++    psp:
++      enabled: false
      systemDefaultRegistry: ""
 +    projectNamespaces: []
  
  rbac:
    create: true
-@@ -31,12 +32,16 @@
+   ## Use an existing ClusterRole/Role (depending on rbac.namespaced false/true)
+   # useExistingRole: name-of-some-(cluster)role
+-  pspEnabled: true
+   pspAnnotations: {}
+   ## Specify pod annotations
+   ## Ref: https://kubernetes.io/docs/concepts/policy/pod-security-policy/#apparmor
+@@ -31,12 +33,16 @@
    create: true
    name:
    nameTest:
@@ -25,7 +33,7 @@
  ## Create HorizontalPodAutoscaler object for deployment type
  #
  autoscaling:
-@@ -84,13 +89,15 @@
+@@ -84,13 +90,15 @@
  
  image:
    repository: rancher/mirrored-grafana-grafana
@@ -42,7 +50,7 @@
    ##
    # pullSecrets:
    #   - myRegistrKeySecretName
-@@ -98,7 +105,7 @@
+@@ -98,7 +106,7 @@
  testFramework:
    enabled: false
    image: "rancher/mirrored-bats-bats"
@@ -51,7 +59,7 @@
    imagePullPolicy: IfNotPresent
    securityContext:
      runAsNonRoot: true
-@@ -113,6 +120,11 @@
+@@ -113,6 +121,11 @@
  containerSecurityContext:
    {}
  
@@ -63,7 +71,7 @@
  extraConfigmapMounts: []
    # - name: certs-configmap
    #   mountPath: /etc/grafana/ssl/
-@@ -134,7 +146,7 @@
+@@ -134,7 +147,7 @@
  
  downloadDashboardsImage:
    repository: rancher/mirrored-curlimages-curl
@@ -72,7 +80,7 @@
    sha: ""
    pullPolicy: IfNotPresent
  
-@@ -142,6 +154,7 @@
+@@ -142,6 +155,7 @@
    env: {}
    envFromSecret: ""
    resources: {}
@@ -80,7 +88,7 @@
  
  ## Pod Annotations
  # podAnnotations: {}
-@@ -164,9 +177,12 @@
+@@ -164,9 +178,12 @@
    port: 80
    targetPort: 3000
      # targetPort: 4181 To be used with a proxy extraContainer
@@ -93,7 +101,7 @@
  
  serviceMonitor:
    ## If true, a ServiceMonitor CRD is created for a prometheus operator
-@@ -250,11 +266,19 @@
+@@ -250,11 +267,19 @@
  ##
  tolerations: []
  
@@ -114,7 +122,7 @@
  extraInitContainers: []
  
  ## Enable an Specify container in extraContainers. This is meant to allow adding an authentication proxy to a grafana pod
-@@ -297,7 +321,9 @@
+@@ -297,7 +322,9 @@
    finalizers:
      - kubernetes.io/pvc-protection
    # selectorLabels: {}
@@ -124,7 +132,7 @@
    # existingClaim:
  
    ## If persistence is not enabled, this allows to mount the
-@@ -343,6 +369,7 @@
+@@ -343,6 +370,7 @@
  
  # Use an existing secret for the admin user.
  admin:
@@ -132,7 +140,7 @@
    existingSecret: ""
    userKey: admin-user
    passwordKey: admin-password
-@@ -383,8 +410,8 @@
+@@ -383,8 +411,8 @@
  
  env: {}
  
@@ -143,7 +151,7 @@
  ## Renders in container spec as:
  ##   env:
  ##     ...
-@@ -392,6 +419,10 @@
+@@ -392,6 +420,10 @@
  ##       valueFrom:
  ##         <value rendered as YAML>
  envValueFrom: {}
@@ -154,7 +162,7 @@
  
  ## The name of a secret in the same kubernetes namespace which contain values to be added to the environment
  ## This can be useful for auth tokens, etc. Value is templated.
-@@ -403,10 +434,19 @@
+@@ -403,10 +435,19 @@
  
  ## The names of secrets in the same kubernetes namespace which contain values to be added to the environment
  ## Each entry should contain a name key, and can optionally specify whether the secret must be defined with an optional key.
@@ -174,7 +182,7 @@
  # Inject Kubernetes services as environment variables.
  # See https://kubernetes.io/docs/concepts/services-networking/connect-applications-service/#environment-variables
  enableServiceLinks: true
-@@ -455,7 +495,20 @@
+@@ -455,7 +496,20 @@
    #   mountPath: /mnt/volume1
    #   readOnly: true
    #   hostPath: /usr/shared/
@@ -195,7 +203,7 @@
  ## Pass the plugins you want installed as a list.
  ##
  plugins: []
-@@ -483,6 +536,71 @@
+@@ -483,6 +537,71 @@
  #        authType: default
  #        defaultRegion: us-east-1
  
@@ -267,7 +275,7 @@
  ## Configure notifiers
  ## ref: http://docs.grafana.org/administration/provisioning/#alert-notification-channels
  ##
-@@ -543,6 +661,12 @@
+@@ -543,6 +662,12 @@
    #     url: https://example.com/repository/test-b64.json
    #     token: ''
    #     b64content: true
@@ -280,7 +288,7 @@
  
  ## Reference to external ConfigMap per provider. Use provider name as key and ConfigMap name as value.
  ## A provider dashboards must be defined either by external ConfigMaps or in values.yaml, not in both.
-@@ -571,6 +695,8 @@
+@@ -571,6 +696,8 @@
      mode: console
    grafana_net:
      url: https://grafana.net
@@ -289,7 +297,7 @@
  ## grafana Authentication can be enabled with the following values on grafana.ini
   # server:
        # The full public facing url you use in browser, used for redirects and emails
-@@ -632,7 +758,7 @@
+@@ -632,7 +759,7 @@
  sidecar:
    image:
      repository: rancher/mirrored-kiwigrid-k8s-sidecar
@@ -298,7 +306,7 @@
      sha: ""
    imagePullPolicy: IfNotPresent
    resources: {}
-@@ -642,29 +768,50 @@
+@@ -642,29 +769,50 @@
  #   requests:
  #     cpu: 50m
  #     memory: 50Mi
@@ -354,7 +362,7 @@
      # provider configuration that lets grafana manage the dashboards
      provider:
        # name of the provider, should be unique
-@@ -681,28 +828,98 @@
+@@ -681,28 +829,98 @@
        allowUiUpdates: false
        # allow Grafana to replicate dashboard structure from filesystem
        foldersFromFilesStructure: false
@@ -462,7 +470,7 @@
  
  ## Override the deployment namespace
  ##
-@@ -731,6 +948,7 @@
+@@ -731,6 +949,7 @@
      HTTP_HOST: "0.0.0.0"
      # RENDERING_ARGS: --no-sandbox,--disable-gpu,--window-size=1280x758
      # RENDERING_MODE: clustered
@@ -470,7 +478,7 @@
    # image-renderer deployment serviceAccount
    serviceAccountName: ""
    # image-renderer deployment securityContext
-@@ -747,6 +965,10 @@
+@@ -747,6 +966,10 @@
      # image-renderer service port used by both service and deployment
      port: 8081
      targetPort: 8081
@@ -481,7 +489,7 @@
    # In case a sub_path is used this needs to be added to the image renderer callback
    grafanaSubPath: ""
    # name of the image-renderer port on the pod
-@@ -765,3 +987,75 @@
+@@ -765,3 +988,75 @@
  #   requests:
  #     cpu: 50m
  #     memory: 50Mi

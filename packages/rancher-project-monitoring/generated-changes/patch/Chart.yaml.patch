@@ -16,7 +16,7 @@
 -  catalog.cattle.io/namespace: cattle-monitoring-system
 +  catalog.cattle.io/display-name: Project Monitoring
 +  catalog.cattle.io/hidden: "true"
-+  catalog.cattle.io/kube-version: '>=1.16.0-0 < 1.25.0-0'
++  catalog.cattle.io/kube-version: '>= 1.16.0-0 < 1.26.0-0'
    catalog.cattle.io/permits-os: linux,windows
 -  catalog.cattle.io/provides-gvr: monitoring.coreos.com.prometheus/v1
 -  catalog.cattle.io/rancher-version: '>= 2.7.0-0 < 2.8.0-0'

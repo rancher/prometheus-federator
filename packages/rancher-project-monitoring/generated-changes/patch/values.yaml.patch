@@ -674,7 +674,7 @@
  
    ## Reduce app namespace alert scope
    appNamespacesTarget: ".*"
-@@ -698,44 +62,13 @@
+@@ -698,44 +62,15 @@
  
    ## Disabled PrometheusRule alerts
    disabled: {}
@@ -704,7 +704,7 @@
 -##
  global:
    cattle:
-     systemDefaultRegistry: ""
+-    systemDefaultRegistry: ""
 -    ## Windows Monitoring
 -    ## ref: https://github.com/rancher/charts/tree/dev-v2.5-source/packages/rancher-windows-exporter
 -    ##
@@ -713,15 +713,17 @@
 -    ## To upgrade wins versions on Windows hosts, see https://github.com/rancher/wins/tree/master/charts/rancher-wins-upgrader.
 -    ##
 -    windows:
--      enabled: false
++    psp:
+       enabled: false
 -  seLinux:
 -    enabled: false
++    systemDefaultRegistry: ""
 +    projectNamespaceSelector: {}
 +    projectNamespaces: []
    kubectl:
       repository: rancher/kubectl
       tag: v1.20.2
-@@ -746,9 +79,21 @@
+@@ -746,12 +81,23 @@
      create: true
  
      userRoles:
@@ -744,8 +746,11 @@
 +      ## Add labels to Roles
        aggregateToDefaultRoles: true
  
-     pspEnabled: true
-@@ -770,6 +115,19 @@
+-    pspEnabled: true
+     pspAnnotations: {}
+       ## Specify pod annotations
+       ## Ref: https://kubernetes.io/docs/concepts/policy/pod-security-policy/#apparmor
+@@ -770,6 +116,19 @@
    # or
    # - "image-pull-secret"
  
@@ -765,7 +770,7 @@
  ## Configuration for alertmanager
  ## ref: https://prometheus.io/docs/alerting/alertmanager/
  ##
-@@ -979,50 +337,6 @@
+@@ -979,50 +338,6 @@
    secret:
      annotations: {}
  
@@ -816,7 +821,7 @@
    ## Configuration for Alertmanager service
    ##
    service:
-@@ -1063,36 +377,6 @@
+@@ -1063,36 +378,6 @@
      ##
      type: ClusterIP
  
@@ -853,7 +858,7 @@
    ## If true, create a serviceMonitor for alertmanager
    ##
    serviceMonitor:
-@@ -1149,11 +433,6 @@
+@@ -1149,11 +434,6 @@
        tag: v0.24.0
        sha: ""
  
@@ -865,7 +870,7 @@
      ## Secrets is a list of Secrets in the same namespace as the Alertmanager object, which shall be mounted into the
      ## Alertmanager Pods. The Secrets are mounted into /etc/alertmanager/secrets/.
      ##
-@@ -1175,40 +454,14 @@
+@@ -1175,40 +455,14 @@
  
      ## AlertmanagerConfigs to be selected to merge and configure Alertmanager with.
      ##
@@ -913,7 +918,7 @@
      ## AlermanagerConfig to be used as top level configuration
      ##
      alertmanagerConfiguration: {}
-@@ -1418,9 +671,6 @@
+@@ -1418,9 +672,6 @@
        org_role: Viewer
      auth.basic:
        enabled: false
@@ -923,7 +928,7 @@
      security:
        # Required to embed dashboards in Rancher Cluster Overview Dashboard on Cluster Explorer
        allow_embedding: true
-@@ -1440,18 +690,6 @@
+@@ -1440,18 +691,6 @@
    ##
    defaultDashboardsEnabled: true
  
@@ -942,7 +947,7 @@
    ## Timezone for the default dashboards
    ## Other options are: browser or a specific timezone, i.e. Europe/Luxembourg
    ##
-@@ -1501,17 +739,11 @@
+@@ -1501,17 +740,11 @@
      dashboards:
        enabled: true
        label: grafana_dashboard
@@ -960,7 +965,7 @@
        provider:
          allowUiUpdates: false
      datasources:
-@@ -1531,11 +763,6 @@
+@@ -1531,11 +764,6 @@
        ##
        annotations: {}
  
@@ -972,7 +977,7 @@
        label: grafana_datasource
        labelValue: "1"
  
-@@ -1653,294 +880,10 @@
+@@ -1653,294 +881,10 @@
      tlsConfig: {}
      scrapeTimeout: 30s
  
@@ -1268,7 +1273,7 @@
      # - action: keep
      #   regex: 'kube_(daemonset|deployment|pod|namespace|node|statefulset).+'
      #   sourceLabels: [__name__]
-@@ -1956,735 +899,17 @@
+@@ -1956,735 +900,17 @@
      #   replacement: $1
      #   action: replace
  
@@ -2008,7 +2013,7 @@
  ## Deploy a Prometheus instance
  ##
  prometheus:
-@@ -2703,96 +928,6 @@
+@@ -2703,96 +929,6 @@
      name: ""
      annotations: {}
  
@@ -2105,7 +2110,7 @@
    ## Configuration for Prometheus service
    ##
    service:
-@@ -2843,36 +978,6 @@
+@@ -2843,36 +979,6 @@
  
      sessionAffinity: ""
  
@@ -2142,7 +2147,7 @@
    ## Configure pod disruption budgets for Prometheus
    ## ref: https://kubernetes.io/docs/tasks/run-application/configure-pdb/#specifying-a-poddisruptionbudget
    ## This configuration is immutable once created and will require the PDB to be deleted to be changed
-@@ -2883,46 +988,6 @@
+@@ -2883,46 +989,6 @@
      minAvailable: 1
      maxUnavailable: ""
  
@@ -2189,7 +2194,7 @@
    ## ExtraSecret can be used to store various data in an extra secret
    ## (use it for example to store hashed basic auth credentials)
    extraSecret:
-@@ -2971,55 +1036,10 @@
+@@ -2971,55 +1037,10 @@
        #   hosts:
        #     - prometheus.example.com
  
@@ -2245,7 +2250,7 @@
      volumes: []
  
    serviceMonitor:
-@@ -3032,7 +1052,7 @@
+@@ -3032,7 +1053,7 @@
      scheme: ""
  
      ## tlsConfig: TLS configuration to use when scraping the endpoint. For example if using istio mTLS.
@@ -2254,7 +2259,7 @@
      tlsConfig: {}
  
      bearerTokenFile:
-@@ -3157,14 +1177,6 @@
+@@ -3157,14 +1178,6 @@
      ##
      enableRemoteWriteReceiver: false
  
@@ -2269,7 +2274,7 @@
      ## Name of the external label used to denote Prometheus instance name
      ##
      prometheusExternalLabelName: ""
-@@ -3199,12 +1211,6 @@
+@@ -3199,12 +1212,6 @@
      ##
      query: {}
  
@@ -2282,7 +2287,7 @@
      ## If true, a nil or {} value for prometheus.prometheusSpec.ruleSelector will cause the
      ## prometheus resource to be created with selectors based on values in the helm deployment,
      ## which will also match the PrometheusRule resources created
-@@ -3214,21 +1220,13 @@
+@@ -3214,21 +1221,13 @@
      ## PrometheusRules to be selected for target discovery.
      ## If {}, select all PrometheusRules
      ##
@@ -2311,7 +2316,7 @@
  
      ## If true, a nil or {} value for prometheus.prometheusSpec.serviceMonitorSelector will cause the
      ## prometheus resource to be created with selectors based on values in the helm deployment,
-@@ -3239,20 +1237,14 @@
+@@ -3239,20 +1238,14 @@
      ## ServiceMonitors to be selected for target discovery.
      ## If {}, select all ServiceMonitors
      ##
@@ -2339,7 +2344,7 @@
      ## If true, a nil or {} value for prometheus.prometheusSpec.podMonitorSelector will cause the
      ## prometheus resource to be created with selectors based on values in the helm deployment,
      ## which will also match the podmonitors created
-@@ -3262,17 +1254,14 @@
+@@ -3262,17 +1255,14 @@
      ## PodMonitors to be selected for target discovery.
      ## If {}, select all PodMonitors
      ##
@@ -2364,7 +2369,7 @@
      ## If true, a nil or {} value for prometheus.prometheusSpec.probeSelector will cause the
      ## prometheus resource to be created with selectors based on values in the helm deployment,
      ## which will also match the probes created
-@@ -3282,17 +1271,14 @@
+@@ -3282,17 +1272,14 @@
      ## Probes to be selected for target discovery.
      ## If {}, select all Probes
      ##
@@ -2389,7 +2394,7 @@
      ## How long to retain metrics
      ##
      retention: 10d
-@@ -3369,23 +1355,6 @@
+@@ -3369,23 +1356,6 @@
      #         - e2e-az1
      #         - e2e-az2
  
@@ -2413,7 +2418,7 @@
      ## Resource limits & requests
      ##
      resources:
-@@ -3428,122 +1397,9 @@
+@@ -3428,122 +1398,9 @@
      # Additional VolumeMounts on the output StatefulSet definition.
      volumeMounts: []
  
@@ -2537,7 +2542,7 @@
      ##
      securityContext:
        runAsGroup: 2000
-@@ -3555,20 +1411,6 @@
+@@ -3555,20 +1412,6 @@
      ##
      priorityClassName: ""
  
@@ -2558,7 +2563,7 @@
      proxy:
        image:
          repository: rancher/mirrored-library-nginx
-@@ -3576,7 +1418,7 @@
+@@ -3576,7 +1419,7 @@
  
      ## Containers allows injecting additional containers. This is meant to allow adding an authentication proxy to a Prometheus pod.
      ## if using proxy extraContainer update targetPort with proxy container port
@@ -2567,7 +2572,7 @@
        - name: prometheus-proxy
          args:
          - nginx
-@@ -3584,7 +1426,7 @@
+@@ -3584,7 +1427,7 @@
          - daemon off;
          - -c
          - /nginx/nginx.conf
@@ -2576,7 +2581,7 @@
          ports:
          - containerPort: 8081
            name: nginx-http
-@@ -3617,10 +1459,6 @@
+@@ -3617,10 +1460,6 @@
      ## OverrideHonorTimestamps allows to globally enforce honoring timestamps in all scrape configs.
      overrideHonorTimestamps: false
  
@@ -2587,7 +2592,7 @@
      ## EnforcedNamespaceLabel enforces adding a namespace label of origin for each alert and metric that is user created.
      ## The label value will always be the namespace of the object that is being created.
      ## Disabled by default
-@@ -3677,515 +1515,7 @@
+@@ -3677,515 +1516,7 @@
      ## Minimum number of seconds for which a newly created pod should be ready without any of its container crashing for it to
      ## be considered available. Defaults to 0 (pod will be considered available as soon as it is ready).
      minReadySeconds: 0
