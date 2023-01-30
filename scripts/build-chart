@@ -6,7 +6,7 @@ source $(dirname $0)/version
 cd $(dirname $0)/..
 
 CHART=rancher-project-monitoring
-VERSION=$(find ./charts/prometheus-federator -type d -maxdepth 1 -mindepth 1 | tr - \~ | sort -rV | tr \~ - | head -n1 | cut -d'/' -f4)
+VERSION=$(find ./charts/${CHART} -type d -maxdepth 1 -mindepth 1 | tr - \~ | sort -rV | tr \~ - | head -n1 | cut -d'/' -f4)
 
 helm package charts/${CHART}/${VERSION} --destination bin/${CHART}
 base64 -i bin/${CHART}/${CHART}-${VERSION}.tgz > bin/${CHART}/${CHART}.tgz.base64
