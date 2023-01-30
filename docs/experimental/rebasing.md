@@ -22,7 +22,16 @@ On applying the 3-way merge from the `git apply` command, the script will automa
 
 Once all your conflicts have been resolved (which you can check by running `git diff --check` **before** exiting the `interactive-rebase-shell`), you can simply run `exit` and the script will take care of updating everything else for you by running `make patch` on the new base to produce two new commits.
 
-### Once you have successfully run the scripts
+### Rebasing the Grafana Dependency
+
+Once you have made the changes using the rebase script, you will need to manually rebase the Grafana dependency as well. To do this, take the following steps:
+
+1. Run `export PACKAGE=rancher-project-monitoring; make prepare` to prepare the working directory using your existing base
+2. Modify the `.url`, `.subdirectory`, and `.commit` fields in [packages/rancher-project-monitoring/generated-changes/dependencies/grafana/dependency.yaml](../../packages/rancher-project-monitoring/generated-changes/dependencies/grafana/dependency.yaml) to reflect the contents of [packages/rancher-project-monitoring/package.yaml](../../packages/rancher-project-monitoring/package.yaml). **Note: The subdirectory should be the same as `rancher-project-monitoring` with `charts/grafana` appended after.**
+3. Run `make patch`. This should regenerate [packages/rancher-project-monitoring/generated-changes](../../packages/rancher-project-monitoring/generated-changes).
+4. Add all your changes and create a commit, i.e. `Update grafana dependency to new base ${TO_COMMIT}`
+
+### Once you have successfully run the scripts and rebased Grafana
 
 1. Bump the minor version listed under [`packages/prometheus-federator/charts/Chart.yaml`](../../packages/prometheus-federator/charts/Chart.yaml) under `appVersion` and `version` and reset the patch version (i.e. `0.1.1` -> `0.2.0`); they should both match.
 1. Update the tag in [`packages/prometheus-federator/charts/values.yaml`](../../packages/prometheus-federator/charts/values.yaml) under `helmProjectOperator.image.tag` to `v<VERSION>`, where `<VERSION>` is the version you identified in the previous step (i.e. `0.2.0`)
