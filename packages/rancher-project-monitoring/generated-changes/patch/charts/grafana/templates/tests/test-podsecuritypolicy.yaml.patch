@@ -1,8 +1,0 @@
---- charts-original/charts/grafana/templates/tests/test-podsecuritypolicy.yaml
-+++ charts/charts/grafana/templates/tests/test-podsecuritypolicy.yaml
-@@ -1,4 +1,4 @@
--{{- if and .Values.testFramework.enabled .Values.rbac.pspEnabled }}
-+{{- if and .Values.testFramework.enabled .Values.global.cattle.psp.enabled }}
- apiVersion: policy/v1beta1
- kind: PodSecurityPolicy
- metadata:
