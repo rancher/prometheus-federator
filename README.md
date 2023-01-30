@@ -43,13 +43,7 @@ For more information, see the [Developing guide](docs/developing.md).
 
 While this repository does maintain a standalone Helm repository for vanilla Helm users to consume directly, users of Rancher will see forked versions of these chart releases available on Rancher's Apps & Marketplace; the forked chart releases are maintained in the [`rancher/charts`](https://github.com/rancher/charts) repository on being released from a `dev-vX.X` branch to a `release-vX.X` branch, where `X.X` corresponds to the Rancher `${Major}.${Minor}` version that the users is using (i.e. Rancher `2.7`). 
 
-**The chart in rancher/charts is generally the version that is intended for use in production since that is the chart that will be tested by Rancher's QA team.** Generally, these charts will match the un-RCed charts available in this repository, so non-Rancher users **should** be able to safely use non-RC versions in this repository for production use cases (at their own risk).
-
-In order to facilitate this release cadence, when filing PRs to this repository with changes to the charts, community members will always be expected to bump the version in [packages/prometheus-federator/package.yaml](packages/prometheus-federator/charts/Chart.yaml) and [packages/rancher-project-monitoring/package.yaml](packages/rancher-project-monitoring/charts/Chart.yaml) in a particular fashion.
-
-A checkmark list that can be followed to match these versioning expectations can be found in the [pull request template](.github/pull_request_template.md).
-
-Generally, these rules ensure that the version in this repository will remain an `-rc` version until it has been fully validated for a Rancher release.
+**The chart in rancher/charts is generally the version that is intended for use in production since that is the chart that will be tested by Rancher's QA team.** Generally, these charts will match stable versions of charts available in this repository, so non-Rancher users **should** be able to safely use those versions in this repository for production use cases (at their own risk).
 
 For more information on the process maintainers of this repository use to mirror these charts over to [`rancher/charts`](https://github.com/rancher/charts), see the [Rancher release guide](docs/rancher_release.md).
 

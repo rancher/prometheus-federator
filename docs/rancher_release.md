@@ -1,11 +1,5 @@
 # Making Charts Available on [`rancher/charts`](https://github.com/rancher/charts)
 
-## Removing RC Versions Prior to A Rancher Release
-
-Once QA has validated the contents of the final `-rc` version in the [`rancher/charts`](https://github.com/rancher/charts) branch that contains changes for this release, file a PR to this repository to remove the `-rc` from the `version` in `packages/prometheus-federator/charts/Chart.yaml` and `helmProjectOperator.image.tag` in `packages/prometheus-federator/charts/values.yaml`.
-
-Then follow the steps below to mirror the change into [`rancher/charts`](https://github.com/rancher/charts).
-
 ## On Any PR Merge
 
 Any time a PR is merged into this repository, the chart should be mirrored to the corresponding package in all branches of [`rancher/charts`](https://github.com/rancher/charts) that represent active release lines (i.e. `dev-v2.6`, `dev-v2.7`). To do this, do the following steps:
@@ -13,11 +7,10 @@ Any time a PR is merged into this repository, the chart should be mirrored to th
 Prior to making changes to [`rancher/charts`](https://github.com/rancher/charts), you will need to cut a GitHub tag / release to trigger CI into creating [the Project Operator Image on DockerHub](https://hub.docker.com/r/rancher/prometheus-federator):
 1. Navigate to the page to [`Draft a new release`](https://github.com/rancher/prometheus-federator/releases/new)
 2. On the `Choose a tag` dropdown, carefully type in the version **prefixed with `v`** that corresponds to the version of Prometheus Federator that was just merged in the PR (i.e. the value found on the `version` field of [`packages/prometheus-federator/charts/Chart.yaml`](../packages/prometheus-federator/charts/Chart.yaml)).
-3. Copy the tag name into the Release Name field (i.e. `vX.X.X` or `vX.X.X-rcX`)
+3. Copy the tag name into the Release Name field (i.e. `vX.X.X`)
 4. Click on the button that says `Generate release notes`
-5. If this is an `-rc` release, checkmark the box that says `This is a pre-release`. 
-6. **Review all your changes**; once a tag is created, **it should never be deleted**.
-7. Click on `Publish Release`
+5. **Review all your changes**; once a tag is created, **it should never be deleted**.
+6. Click on `Publish Release`
 
 Once the release has been published, wait till the Drone build successfully finishes and ensure that [the Project Operator Repo on DockerHub](https://hub.docker.com/r/rancher/prometheus-federator) contains the newly built image.
 
