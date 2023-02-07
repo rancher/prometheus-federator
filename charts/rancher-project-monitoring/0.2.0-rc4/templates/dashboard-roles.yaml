@@ -72,7 +72,6 @@ rules:
   - "https:{{ include "call-nested" (list . "grafana" "grafana.fullname") }}:{{ .Values.grafana.service.port }}"
   verbs:
   - 'get'
-  - 'create'
 - apiGroups:
   - ""
   resources:
