@@ -1,6 +1,6 @@
 --- charts-original/templates/prometheus/psp.yaml
 +++ charts/templates/prometheus/psp.yaml
-@@ -3,14 +3,14 @@
+@@ -2,14 +2,14 @@
  apiVersion: policy/v1beta1
  kind: PodSecurityPolicy
  metadata:
@@ -18,7 +18,7 @@
  spec:
    privileged: false
    # Allow core volume types.
-@@ -49,10 +49,6 @@
+@@ -48,9 +48,5 @@
  {{- if .Values.prometheus.podSecurityPolicy.allowedCapabilities }}
    allowedCapabilities:
  {{ toYaml .Values.prometheus.podSecurityPolicy.allowedCapabilities | indent 4 }}
@@ -28,5 +28,3 @@
 -{{ toYaml .Values.prometheus.podSecurityPolicy.allowedHostPaths | indent 4 }}
  {{- end }}
  {{- end }}
- {{- end }}
-\ No newline at end of file

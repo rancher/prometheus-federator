@@ -137,6 +137,16 @@ jobs:
       - 
         name: Uninstall Prometheus Federator
         run: ./.github/workflows/e2e/scripts/uninstall-federator.sh;
+      - name: Generate artifacts on failure
+        if: failure()
+        run: ./.github/workflows/e2e/scripts/generate-artifacts.sh;
+      - name: Upload logs and manifests on failure
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: artifacts
+          path: artifacts/
+          retention-days: 1
       - 
         name: Delete k3d cluster
         if: always()

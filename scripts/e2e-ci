@@ -67,6 +67,8 @@ else
         "Setup kubectl context"
         "Set Up Tmate Debug Session"
         "Delete k3d cluster"
+        "Generate artifacts on failure"
+        "Upload logs and manifests on failure"
     )
 
     if [[ ${SKIP_UNINSTALL} == "true" ]]; then
