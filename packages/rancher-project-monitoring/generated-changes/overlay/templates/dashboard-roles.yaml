@@ -24,6 +24,8 @@ rules:
   verbs:
   - 'get'
   - 'create'
+  - 'update'
+  - 'patch'
 - apiGroups:
   - ""
   resources:
