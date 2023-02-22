@@ -93,3 +93,18 @@
  spec:
    privileged: false
    hostNetwork: false
+@@ -108,6 +105,7 @@
+   readOnlyRootFilesystem: false
+   volumes:
+     - 'secret'
++{{- end }}
+ {{- range $_, $ns := $namespaces }}
+ ---
+ apiVersion: networking.k8s.io/v1
+@@ -124,5 +122,4 @@
+   policyTypes:
+   - Ingress
+   - Egress
+-{{- end }}
+ {{- end }}
+\ No newline at end of file
