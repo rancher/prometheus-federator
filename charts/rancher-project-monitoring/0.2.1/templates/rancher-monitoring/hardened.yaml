@@ -1,25 +1,22 @@
 {{- $namespaces := dict "_0" .Release.Namespace -}}
-{{- if and .Values.grafana.enabled .Values.grafana.defaultDashboardsEnabled (not .Values.grafana.defaultDashboards.useExistingNamespace) -}}
-{{- $_ := set $namespaces "_1" .Values.grafana.defaultDashboards.namespace -}}
-{{- end -}}
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ .Chart.Name }}-patch-sa
+  name: {{ template "project-prometheus-stack.fullname" . }}-patch-sa
   namespace: {{ .Release.Namespace }}
   labels:
-    app: {{ .Chart.Name }}-patch-sa
+    app: {{ template "project-prometheus-stack.fullname" . }}-patch-sa
   annotations:
     "helm.sh/hook": post-install, post-upgrade
     "helm.sh/hook-delete-policy": hook-succeeded, before-hook-creation
 spec:
   template:
     metadata:
-      name: {{ .Chart.Name }}-patch-sa
+      name: {{ template "project-prometheus-stack.fullname" . }}-patch-sa
       labels:
-        app: {{ .Chart.Name }}-patch-sa
+        app: {{ template "project-prometheus-stack.fullname" . }}-patch-sa
     spec:
-      serviceAccountName: {{ .Chart.Name }}-patch-sa
+      serviceAccountName: {{ template "project-prometheus-stack.fullname" . }}-patch-sa
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
@@ -38,9 +35,9 @@ spec:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: {{ .Chart.Name }}-patch-sa
+  name: {{ template "project-prometheus-stack.fullname" . }}-patch-sa
   labels:
-    app: {{ .Chart.Name }}-patch-sa
+    app: {{ template "project-prometheus-stack.fullname" . }}-patch-sa
 rules:
 - apiGroups:
   - ""
@@ -52,40 +49,40 @@ rules:
   resources: ['podsecuritypolicies']
   verbs:     ['use']
   resourceNames:
-  - {{ .Chart.Name }}-patch-sa
+  - {{ template "project-prometheus-stack.fullname" . }}-patch-sa
 {{- end }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: {{ .Chart.Name }}-patch-sa
+  name: {{ template "project-prometheus-stack.fullname" . }}-patch-sa
   labels:
-    app: {{ .Chart.Name }}-patch-sa
+    app: {{ template "project-prometheus-stack.fullname" . }}-patch-sa
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: {{ .Chart.Name }}-patch-sa
+  name: {{ template "project-prometheus-stack.fullname" . }}-patch-sa
 subjects:
 - kind: ServiceAccount
-  name: {{ .Chart.Name }}-patch-sa
+  name: {{ template "project-prometheus-stack.fullname" . }}-patch-sa
   namespace: {{ .Release.Namespace }}
 ---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: {{ .Chart.Name }}-patch-sa
+  name: {{ template "project-prometheus-stack.fullname" . }}-patch-sa
   namespace: {{ .Release.Namespace }}
   labels:
-    app: {{ .Chart.Name }}-patch-sa
+    app: {{ template "project-prometheus-stack.fullname" . }}-patch-sa
 ---
 {{- if .Values.global.cattle.psp.enabled }}
 apiVersion: policy/v1beta1
 kind: PodSecurityPolicy
 metadata:
-  name: {{ .Chart.Name }}-patch-sa
+  name: {{ template "project-prometheus-stack.fullname" . }}-patch-sa
   namespace: {{ .Release.Namespace }}
   labels:
-    app: {{ .Chart.Name }}-patch-sa
+    app: {{ template "project-prometheus-stack.fullname" . }}-patch-sa
 spec:
   privileged: false
   hostNetwork: false
@@ -108,6 +105,7 @@ spec:
   readOnlyRootFilesystem: false
   volumes:
     - 'secret'
+{{- end }}
 {{- range $_, $ns := $namespaces }}
 ---
 apiVersion: networking.k8s.io/v1
@@ -124,5 +122,4 @@ spec:
   policyTypes:
   - Ingress
   - Egress
-{{- end }}
 {{- end }}

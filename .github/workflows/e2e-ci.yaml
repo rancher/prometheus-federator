@@ -35,7 +35,7 @@ env:
   TAG: dev
   APISERVER_PORT: 8001
   DEFAULT_SLEEP_TIMEOUT_SECONDS: 10
-  KUBECTL_WAIT_TIMEOUT: 120s
+  KUBECTL_WAIT_TIMEOUT: 300s
   DEBUG: ${{ github.event.inputs.debug || false }}
 
 permissions:

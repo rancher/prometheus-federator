@@ -58,6 +58,7 @@ kubectl logs deployment/rancher-monitoring-grafana -n cattle-monitoring-system -
 kubectl logs deployment/rancher-monitoring-grafana -n cattle-monitoring-system -c grafana-proxy > ${LOG_DIRECTORY}/rancher-monitoring/grafana_proxy.log || true
 kubectl logs deployment/rancher-monitoring-grafana -n cattle-monitoring-system -c grafana-sc-dashboard > ${LOG_DIRECTORY}/rancher-monitoring/grafana_sc_dashboard.log || true
 kubectl logs deployment/rancher-monitoring-grafana -n cattle-monitoring-system -c grafana-sc-datasources > ${LOG_DIRECTORY}/rancher-monitoring/grafana_sc_datasources.log || true
+kubectl logs deployment/rancher-monitoring-grafana -n cattle-monitoring-system -c grafana-init-sc-datasources > ${LOG_DIRECTORY}/rancher-monitoring/grafana_init_sc_datasources.log || true
 kubectl logs deployment/rancher-monitoring-kube-state-metrics -n cattle-monitoring-system > ${LOG_DIRECTORY}/rancher-monitoring/kube_state_metrics.log || true
 kubectl logs daemonset/rancher-monitoring-prometheus-node-exporter -n cattle-monitoring-system > ${LOG_DIRECTORY}/rancher-monitoring/node_exporter.log || true
 kubectl logs deployment/rancher-monitoring-prometheus-adapter -n cattle-monitoring-system > ${LOG_DIRECTORY}/rancher-monitoring/prometheus_adapter.log || true
@@ -79,3 +80,4 @@ kubectl logs deployment/cattle-project-p-example-monitoring-grafana -n cattle-pr
 kubectl logs deployment/cattle-project-p-example-monitoring-grafana -n cattle-project-p-example -c grafana-proxy > ${LOG_DIRECTORY}/project-monitoring/grafana_proxy.log || true
 kubectl logs deployment/cattle-project-p-example-monitoring-grafana -n cattle-project-p-example -c grafana-sc-dashboard > ${LOG_DIRECTORY}/project-monitoring/grafana_sc_dashboard.log || true
 kubectl logs deployment/cattle-project-p-example-monitoring-grafana -n cattle-project-p-example -c grafana-sc-datasources > ${LOG_DIRECTORY}/project-monitoring/grafana_sc_datasources.log || true
+kubectl logs deployment/cattle-project-p-example-monitoring-grafana -n cattle-project-p-example -c grafana-init-sc-datasources > ${LOG_DIRECTORY}/project-monitoring/grafana_init_sc_datasources.log || true
