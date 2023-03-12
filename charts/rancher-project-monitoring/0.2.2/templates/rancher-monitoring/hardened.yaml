@@ -112,6 +112,8 @@ spec:
   volumes:
     - 'secret'
 {{- end }}
+{{- $root := . }}
+{{- $projectNamespaceSelector := .Values.global.cattle.projectNamespaceSelector }}
 {{- range $_, $ns := $namespaces }}
 ---
 apiVersion: networking.k8s.io/v1
@@ -122,7 +124,11 @@ metadata:
 spec:
   podSelector: {}
   ingress:
-  - {}
+  - from:
+    - namespaceSelector: {{ $projectNamespaceSelector | toYaml | nindent 10 }}
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: {{ $ns }}
   egress:
   - {}
   policyTypes:
