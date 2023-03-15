@@ -114,6 +114,7 @@ spec:
 {{- end }}
 {{- $root := . }}
 {{- $projectNamespaceSelector := .Values.global.cattle.projectNamespaceSelector }}
+{{- $egressPolicy := .Values.global.networkPolicy.egress }}
 {{- range $_, $ns := $namespaces }}
 ---
 apiVersion: networking.k8s.io/v1
@@ -125,12 +126,11 @@ spec:
   podSelector: {}
   ingress:
   - from:
-    - namespaceSelector: {{ $projectNamespaceSelector | toYaml | nindent 10 }}
+    - namespaceSelector: {{ $projectNamespaceSelector | toYaml | nindent 8 }}
     - namespaceSelector:
         matchLabels:
           kubernetes.io/metadata.name: {{ $ns }}
-  egress:
-  - {}
+  egress: {{ $egressPolicy | toYaml | nindent 4 }}
   policyTypes:
   - Ingress
   - Egress

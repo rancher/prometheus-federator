@@ -78,6 +78,9 @@ global:
      securityContext:
        runAsNonRoot: true
        runAsUser: 1000
+  networkPolicy:
+    egress:
+      - {}
   rbac:
     ## Create RBAC resources for ServiceAccounts and users
     ##
