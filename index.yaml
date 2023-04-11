@@ -13,7 +13,7 @@ entries:
       catalog.cattle.io/release-name: prometheus-federator
     apiVersion: v2
     appVersion: 0.3.1
-    created: "2023-05-24T17:57:33.790049-07:00"
+    created: "2023-03-06T14:54:22.216088-08:00"
     dependencies:
     - condition: helmProjectOperator.enabled
       name: helmProjectOperator
@@ -25,6 +25,30 @@ entries:
     urls:
     - assets/prometheus-federator/prometheus-federator-0.3.1.tgz
     version: 0.3.1
+  - annotations:
+      catalog.cattle.io/certified: rancher
+      catalog.cattle.io/display-name: Prometheus Federator
+      catalog.cattle.io/kube-version: '>=1.16.0-0'
+      catalog.cattle.io/namespace: cattle-monitoring-system
+      catalog.cattle.io/os: linux,windows
+      catalog.cattle.io/permits-os: linux,windows
+      catalog.cattle.io/provides-gvr: helm.cattle.io.projecthelmchart/v1alpha1
+      catalog.cattle.io/rancher-version: '>= 2.6.5-0 <= 2.6.100-0'
+      catalog.cattle.io/release-name: prometheus-federator
+    apiVersion: v2
+    appVersion: 0.2.1
+    created: "2023-04-11T10:42:24.963485-07:00"
+    dependencies:
+    - condition: helmProjectOperator.enabled
+      name: helmProjectOperator
+      repository: file://./charts/helmProjectOperator
+    description: Prometheus Federator
+    digest: 3d23e82476fbc962e10867128d4b0b560e451585aa608a77773c4412aede5604
+    icon: https://raw.githubusercontent.com/rancher/prometheus-federator/main/assets/logos/prometheus-federator.svg
+    name: prometheus-federator
+    urls:
+    - assets/prometheus-federator/prometheus-federator-0.2.3.tgz
+    version: 0.2.3
   - annotations:
       catalog.cattle.io/certified: rancher
       catalog.cattle.io/display-name: Prometheus Federator
@@ -252,7 +276,7 @@ entries:
       catalog.cattle.io/release-name: rancher-project-monitoring
     apiVersion: v2
     appVersion: 0.59.1
-    created: "2023-05-24T17:57:34.412514-07:00"
+    created: "2023-05-24T19:14:56.009646-07:00"
     dependencies:
     - condition: grafana.enabled
       name: grafana
@@ -289,7 +313,7 @@ entries:
       catalog.cattle.io/release-name: rancher-project-monitoring
     apiVersion: v2
     appVersion: 0.59.1
-    created: "2023-05-24T17:26:50.11408-07:00"
+    created: "2023-05-24T19:14:56.004034-07:00"
     dependencies:
     - condition: grafana.enabled
       name: grafana
@@ -326,7 +350,7 @@ entries:
       catalog.cattle.io/release-name: rancher-project-monitoring
     apiVersion: v2
     appVersion: 0.59.1
-    created: "2023-05-24T17:26:50.109426-07:00"
+    created: "2023-05-24T19:14:55.998124-07:00"
     dependencies:
     - condition: grafana.enabled
       name: grafana
