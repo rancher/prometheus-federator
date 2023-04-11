@@ -110,29 +110,44 @@
  spec:
    privileged: false
    hostNetwork: false
-@@ -108,6 +111,10 @@
+@@ -108,21 +111,38 @@
    readOnlyRootFilesystem: false
    volumes:
      - 'secret'
 +{{- end }}
 +{{- $root := . }}
 +{{- $projectNamespaceSelector := .Values.global.cattle.projectNamespaceSelector }}
++{{- $limitIngressToProject := .Values.global.networkPolicy.limitIngressToProject }}
 +{{- $egressPolicy := .Values.global.networkPolicy.egress }}
++{{- $ingressPolicy := .Values.global.networkPolicy.ingress }}
  {{- range $_, $ns := $namespaces }}
  ---
  apiVersion: networking.k8s.io/v1
-@@ -118,11 +125,13 @@
+ kind: NetworkPolicy
+ metadata:
+-  name: default-allow-all
++  name: project-monitoring-policy
+   namespace: {{ $ns }}
  spec:
    podSelector: {}
    ingress:
 -  - {}
 -  egress:
 -  - {}
-+  - from:
-+    - namespaceSelector: {{ $projectNamespaceSelector | toYaml | nindent 8 }}
-+    - namespaceSelector:
-+        matchLabels:
-+          kubernetes.io/metadata.name: {{ $ns }}
++{{- if or $ingressPolicy $limitIngressToProject }}
++{{- if $ingressPolicy }}
++{{ $ingressPolicy | toYaml | indent 4 }}
++{{- end }}
++{{- if $limitIngressToProject }}
++    - from:
++      - namespaceSelector: {{ $projectNamespaceSelector | toYaml | nindent 10 }}
++      - namespaceSelector:
++          matchLabels:
++            kubernetes.io/metadata.name: {{ $ns }}
++{{- end }}
++{{- else }}
++    - {}
++{{- end }}
 +  egress: {{ $egressPolicy | toYaml | nindent 4 }}
    policyTypes:
    - Ingress
