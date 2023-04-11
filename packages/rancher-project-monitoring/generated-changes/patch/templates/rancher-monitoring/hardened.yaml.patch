@@ -110,28 +110,30 @@
  spec:
    privileged: false
    hostNetwork: false
-@@ -108,6 +111,9 @@
+@@ -108,6 +111,10 @@
    readOnlyRootFilesystem: false
    volumes:
      - 'secret'
 +{{- end }}
 +{{- $root := . }}
 +{{- $projectNamespaceSelector := .Values.global.cattle.projectNamespaceSelector }}
++{{- $egressPolicy := .Values.global.networkPolicy.egress }}
  {{- range $_, $ns := $namespaces }}
  ---
  apiVersion: networking.k8s.io/v1
-@@ -118,11 +124,14 @@
+@@ -118,11 +125,13 @@
  spec:
    podSelector: {}
    ingress:
 -  - {}
+-  egress:
+-  - {}
 +  - from:
-+    - namespaceSelector: {{ $projectNamespaceSelector | toYaml | nindent 10 }}
++    - namespaceSelector: {{ $projectNamespaceSelector | toYaml | nindent 8 }}
 +    - namespaceSelector:
 +        matchLabels:
 +          kubernetes.io/metadata.name: {{ $ns }}
-   egress:
-   - {}
++  egress: {{ $egressPolicy | toYaml | nindent 4 }}
    policyTypes:
    - Ingress
    - Egress
