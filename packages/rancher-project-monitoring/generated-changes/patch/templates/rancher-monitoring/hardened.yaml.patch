@@ -1,6 +1,6 @@
 --- charts-original/templates/rancher-monitoring/hardened.yaml
 +++ charts/templates/rancher-monitoring/hardened.yaml
-@@ -1,25 +1,22 @@
+@@ -1,28 +1,25 @@
  {{- $namespaces := dict "_0" .Release.Namespace -}}
 -{{- if and .Values.grafana.enabled .Values.grafana.defaultDashboardsEnabled (not .Values.grafana.defaultDashboards.useExistingNamespace) -}}
 -{{- $_ := set $namespaces "_1" .Values.grafana.defaultDashboards.namespace -}}
@@ -27,11 +27,28 @@
 +        app: {{ template "project-prometheus-stack.fullname" . }}-patch-sa
      spec:
 -      serviceAccountName: {{ .Chart.Name }}-patch-sa
+-      securityContext:
+-        runAsNonRoot: true
+-        runAsUser: 1000
 +      serviceAccountName: {{ template "project-prometheus-stack.fullname" . }}-patch-sa
-       securityContext:
-         runAsNonRoot: true
-         runAsUser: 1000
-@@ -38,9 +35,9 @@
++{{- if .Values.global.kubectl.securityContext }}
++      securityContext: {{ toYaml .Values.global.kubectl.securityContext | nindent 8 }}
++{{- end }}
+       restartPolicy: Never
+       nodeSelector: {{ include "linux-node-selector" . | nindent 8 }}
+       tolerations: {{ include "linux-node-tolerations" . | nindent 8 }}
+@@ -33,14 +30,20 @@
+         imagePullPolicy: {{ $.Values.global.kubectl.pullPolicy }}
+         command: ["kubectl", "patch", "serviceaccount", "default", "-p", "{\"automountServiceAccountToken\": false}"]
+         args: ["-n", "{{ $ns }}"]
++{{- if $.Values.global.kubectl.resources }}
++        resources: {{ toYaml $.Values.global.kubectl.resources | nindent 10 }}
++{{- end }}
++{{- if $.Values.global.kubectl.containerSecurityContext }}
++        securityContext: {{ toYaml $.Values.global.kubectl.containerSecurityContext | nindent 10 }}
++{{- end }}
+       {{- end }}
+ ---
  apiVersion: rbac.authorization.k8s.io/v1
  kind: ClusterRole
  metadata:
@@ -43,7 +60,7 @@
  rules:
  - apiGroups:
    - ""
-@@ -52,40 +49,40 @@
+@@ -52,40 +55,40 @@
    resources: ['podsecuritypolicies']
    verbs:     ['use']
    resourceNames:
@@ -93,7 +110,7 @@
  spec:
    privileged: false
    hostNetwork: false
-@@ -108,6 +105,7 @@
+@@ -108,6 +111,7 @@
    readOnlyRootFilesystem: false
    volumes:
      - 'secret'
@@ -101,10 +118,11 @@
  {{- range $_, $ns := $namespaces }}
  ---
  apiVersion: networking.k8s.io/v1
-@@ -124,5 +122,4 @@
+@@ -124,5 +128,4 @@
    policyTypes:
    - Ingress
    - Egress
 -{{- end }}
- {{- end }}
+-{{- end }}
 \ No newline at end of file
++{{- end }}
