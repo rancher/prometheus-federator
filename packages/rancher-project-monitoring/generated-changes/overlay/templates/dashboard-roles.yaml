@@ -19,16 +19,10 @@ rules:
   - "https:{{ template "project-prometheus-stack.fullname" . }}-prometheus:{{ .Values.prometheus.service.port }}"
   - "http:{{ template "project-prometheus-stack.fullname" . }}-alertmanager:{{ .Values.alertmanager.service.port }}"
   - "https:{{ template "project-prometheus-stack.fullname" . }}-alertmanager:{{ .Values.alertmanager.service.port }}"
-{{- if .Values.grafana.enabled }}
   - "http:{{ include "call-nested" (list . "grafana" "grafana.fullname") }}:{{ .Values.grafana.service.port }}"
   - "https:{{ include "call-nested" (list . "grafana" "grafana.fullname") }}:{{ .Values.grafana.service.port }}"
-{{- end }}
   verbs:
   - 'get'
-  - 'create'
-  - 'update'
-  - 'patch'
-  - 'delete'
 - apiGroups:
   - ""
   resources:
@@ -36,9 +30,7 @@ rules:
   resourceNames:
   - {{ template "project-prometheus-stack.fullname" . }}-prometheus
   - {{ template "project-prometheus-stack.fullname" . }}-alertmanager
-{{- if .Values.grafana.enabled }}
   - {{ include "call-nested" (list . "grafana" "grafana.fullname") }}
-{{- end }}
   verbs:
   - list
 - apiGroups:
@@ -75,16 +67,10 @@ rules:
   - "https:{{ template "project-prometheus-stack.fullname" . }}-prometheus:{{ .Values.prometheus.service.port }}"
   - "http:{{ template "project-prometheus-stack.fullname" . }}-alertmanager:{{ .Values.alertmanager.service.port }}"
   - "https:{{ template "project-prometheus-stack.fullname" . }}-alertmanager:{{ .Values.alertmanager.service.port }}"
-{{- if .Values.grafana.enabled }}
   - "http:{{ include "call-nested" (list . "grafana" "grafana.fullname") }}:{{ .Values.grafana.service.port }}"
   - "https:{{ include "call-nested" (list . "grafana" "grafana.fullname") }}:{{ .Values.grafana.service.port }}"
-{{- end }}
   verbs:
   - 'get'
-  - 'create'
-  - 'update'
-  - 'patch'
-  - 'delete'
 - apiGroups:
   - ""
   resources:
@@ -92,9 +78,7 @@ rules:
   resourceNames:
   - {{ template "project-prometheus-stack.fullname" . }}-prometheus
   - {{ template "project-prometheus-stack.fullname" . }}-alertmanager
-{{- if .Values.grafana.enabled }}
   - {{ include "call-nested" (list . "grafana" "grafana.fullname") }}
-{{- end }}
   verbs:
   - list
 - apiGroups:
@@ -130,10 +114,8 @@ rules:
   - "https:{{ template "project-prometheus-stack.fullname" . }}-prometheus:{{ .Values.prometheus.service.port }}"
   - "http:{{ template "project-prometheus-stack.fullname" . }}-alertmanager:{{ .Values.alertmanager.service.port }}"
   - "https:{{ template "project-prometheus-stack.fullname" . }}-alertmanager:{{ .Values.alertmanager.service.port }}"
-{{- if .Values.grafana.enabled }}
   - "http:{{ include "call-nested" (list . "grafana" "grafana.fullname") }}:{{ .Values.grafana.service.port }}"
   - "https:{{ include "call-nested" (list . "grafana" "grafana.fullname") }}:{{ .Values.grafana.service.port }}"
-{{- end }}
   verbs:
   - 'get'
 - apiGroups:
@@ -143,9 +125,7 @@ rules:
   resourceNames:
   - {{ template "project-prometheus-stack.fullname" . }}-prometheus
   - {{ template "project-prometheus-stack.fullname" . }}-alertmanager
-{{- if .Values.grafana.enabled }}
   - {{ include "call-nested" (list . "grafana" "grafana.fullname") }}
-{{- end }}
   verbs:
   - list
 - apiGroups:
