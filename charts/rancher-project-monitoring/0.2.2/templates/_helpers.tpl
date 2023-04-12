@@ -237,7 +237,7 @@ global:
 {{- define "project-prometheus-stack.hardened.networkPolicy.ingress" -}}
 {{- $root := index . 0 }}
 {{- $ns := index . 1 }}
-{{- if $root.Values.global.networkPolicy.ingress }}
+{{- if $root.Values.global.networkPolicy.ingress -}}
 {{ toYaml $root.Values.global.networkPolicy.ingress }}
 {{- end }}
 {{- if $root.Values.global.networkPolicy.limitIngressToProject }}
