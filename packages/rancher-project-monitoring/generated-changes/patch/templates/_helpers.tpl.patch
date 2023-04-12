@@ -351,7 +351,7 @@
  {{/*
  To help compatibility with other charts which use global.imagePullSecrets.
  Allow either an array of {name: pullSecret} maps (k8s-style), or an array of strings (more common helm-style).
-@@ -373,7 +222,7 @@
+@@ -373,12 +222,31 @@
    - pullSecret1
    - pullSecret2
  */}}
@@ -360,3 +360,29 @@
  {{- range .Values.global.imagePullSecrets }}
    {{- if eq (typeOf .) "map[string]interface {}" }}
  - {{ toYaml . | trim }}
+   {{- else }}
+ - name: {{ . }}
+   {{- end }}
++{{- end }}
++{{- end -}}
++
++
++{{/* Define ingress for all hardened namespaces */}}
++{{- define "project-prometheus-stack.hardened.networkPolicy.ingress" -}}
++{{- $root := index . 0 }}
++{{- $ns := index . 1 }}
++{{- if $root.Values.global.networkPolicy.ingress -}}
++{{ toYaml $root.Values.global.networkPolicy.ingress }}
++{{- end }}
++{{- if $root.Values.global.networkPolicy.limitIngressToProject }}
++- from:
++{{- if $root.Values.global.cattle.projectNamespaceSelector }}
++  - namespaceSelector: {{- $root.Values.global.cattle.projectNamespaceSelector | toYaml | nindent 6 }}
++{{- end }}
++  - namespaceSelector:
++      matchLabels:
++        kubernetes.io/metadata.name: {{ $ns }}
+ {{- end }}
+-{{- end -}}
++{{- end -}}
+\ No newline at end of file
