@@ -1,0 +1,246 @@
+#!/bin/bash
+set -e
+
+source $(dirname $0)/version
+
+cd $(dirname $0)/..
+
+trap "trap - SIGTERM && kill -- -$$" SIGINT SIGTERM EXIT;
+
+ARTIFACT_DIRECTORY=artifacts
+mkdir -p ${ARTIFACT_DIRECTORY}/events
+
+print_event() {
+    action=$1
+    output=$2
+
+    unset setID
+    unset key
+    unset ownerKey
+    
+    case $kind in
+        ProjectHelmChart)
+            setID=${namespace}
+        ;;
+        HelmRelease|HelmChart|RoleBinding)
+            setID=${ownerNamespace}
+        ;;
+        Namespace)
+            setID=${name%-monitoring}
+        ;;
+        Secret)
+            setID=$(echo ${name} | cut -d'.' -f5)
+            if [[ "${setID}" == "cattle-project-p"* ]]; then
+                # Otherwise it is the prometheus-federator chart
+                setID=${setID%-monitoring}
+            fi 
+        ;;
+        Job|Event)
+            setID=${ownerName%-monitoring}
+        ;;
+        Pod)
+            setID=$(echo ${name} | cut -d'-' -f3-6)
+        ;;
+        *)
+        echo "ERROR: found unknown kind (${kind})"
+        return
+        ;;
+    esac
+
+    key=${name}
+    if [[ -n ${namespace} && ${namespace} != "null" ]]; then
+        key=${namespace}/${key}
+    fi
+
+    ownerKey=${ownerName}
+    if [[ -n ${ownerNamespace} && ${ownerNamespace} != "null" ]]; then
+        ownerKey=${ownerNamespace}/${key}
+    fi
+
+    echo """action: ${action}
+kind: ${kind}
+object: ${key}
+owner: ${ownerKey} (${ownerGVK})
+controller: ${ownerController}
+${output}
+---""" >> ${ARTIFACT_DIRECTORY}/events/${setID}.yaml
+}
+
+for_resource() {
+    # DEVELOPER NOTE: Identify relevant fields from resources based on the logic here
+    unset apiVersion
+    unset kind
+    unset namespace
+    unset name
+    unset ownerController
+    unset ownerGVK
+    unset ownerNamespace
+    unset ownerName
+    unset deletionTimestamp
+    unset finalizers
+    unset relevantFields
+    unset releaseName
+
+    apiVersion=$(echo ${object} | yq e '.apiVersion' -)
+    kind=$(echo ${object} | yq e '.kind' -)
+
+    if [[ -z ${apiVersion} || ${apiVersion} == "null" || -z ${kind} || ${kind} == "null" ]]; then
+        # invalid object, this is probably some error
+        return
+    fi
+
+    namespace=$(echo ${object} | yq e '.metadata.namespace' -)
+    name=$(echo ${object} | yq e '.metadata.name' -)
+
+    ownerController=$(echo ${object} | yq e '.metadata.annotations.["objectset.rio.cattle.io/id"]')
+    if [[ -n "${ownerController}" && "${ownerController}" != "null"  ]]; then
+        # Grab from wrangler apply annotations
+        ownerGVK=$(echo ${object} | yq e '.metadata.annotations.["objectset.rio.cattle.io/owner-gvk"]')
+        ownerNamespace=$(echo ${object} | yq e '.metadata.annotations.["objectset.rio.cattle.io/owner-namespace"]')
+        ownerName=$(echo ${object} | yq e '.metadata.annotations.["objectset.rio.cattle.io/owner-name"]')
+    elif [[ "$(echo ${object} | yq e '.ownerReferences | length')" -gt 0 ]]; then
+        # Grab from owner reference
+        ownerGVK=$(echo ${object} | yq e '.metadata.ownerReferences[0] | .apiVersion + ", KIND=" + .kind')
+        ownerNamespace="${namespace}"
+        ownerName=$(echo ${object} | yq e '.metadata.ownerReferences[0] | .name')
+    elif [[ "$(echo ${object} | yq e '.involvedObject')" != "null" ]]; then
+        ownerGVK=$(echo ${object} | yq e '.involvedObject | .apiVersion + ", KIND=" + .kind')
+        ownerNamespace=$(echo ${object} | yq e '.involvedObject | .namespace')
+        ownerName=$(echo ${object} | yq e '.involvedObject | .name')
+    fi
+
+    deletionTimestamp=$(echo ${object} | yq e '.metadata.deletionTimestamp' -)
+    finalizers=$(echo ${object} | yq e '.metadata.finalizers' -)
+
+    if [[ "${deletionTimestamp}" != "null" ]]; then
+        print_event "DELETED" "deletionTimestamp: ${deletionTimestamp}
+finalizers: ${finalizers}"
+        return
+    fi
+
+    
+    case $kind in
+        ProjectHelmChart)
+            relevantFields=$(echo ${object} | yq e -P '{"spec": .spec}' -)
+        ;;
+        Secret)
+            relevantFields=$(echo ${object} | 
+            yq e '.data.release | @base64d | @base64d' | 
+            gunzip -c 2>/dev/null | 
+            yq e -P 'del(.chart) | del(.manifest) | del(.hooks)' -)
+        ;;
+        HelmRelease)
+            relevantFields=$(echo ${object} | yq e -P '{
+                    "secret": .spec.release,
+                    "status": .status
+                }' -)
+        ;;
+        HelmChart)
+            relevantFields=$(echo ${object} | yq e -P '{
+                    "release": {
+                        "name": .spec.chart,
+                        "namespace": .spec.targetNamespace
+                    },
+                    "jobImage": .spec.jobImage,
+                    "values": .spec.valuesContent,
+                    "status": .status
+                }' -)
+        ;;
+        Job)
+            relevantFields=$(echo ${object} | yq e -P '{
+                    "status": .status
+                }' -)
+        ;;
+        Pod)
+            relevantFields=$(echo ${object} | yq e -P '{
+                    "image": .spec.containers[0].image,
+                    "status": .status
+                }' -)
+        ;;
+        Namespace)
+            relevantFields=$(echo ${object} | yq e -P '{
+                    "labels": .metadata.labels
+                }' -)
+        ;;
+        RoleBinding)
+            relevantFields=$(echo ${object} | yq e -P '{
+                    "roleRef": .roleRef,
+                    "subjects": .subjects
+                }' -)
+        ;;
+        Event)
+            relevantFields=$(echo ${object} | yq e -P '{
+                    "timestamp": .lastTimestamp,
+                    "reason": .reason,
+                    "message": .message
+                }' -)
+        ;;
+        *)
+        print_event "ERROR" "message: unidentified resource"
+        return
+        ;;
+    esac
+
+    print_event "CREATED_OR_MODIFIED" "${relevantFields}"
+}
+
+while read -r object ; do
+    if ! echo ${object} | yq e '.' - 1>/dev/null; then
+        echo "invalid objects: ${object}"
+        exit 1
+    fi
+    kind=$(echo ${object} | yq e '.kind' -)
+    if [[ ${kind} == "List" ]]; then
+        objects=$(echo ${object} | yq e '.items' -)
+    else
+        objects=${object}
+    fi
+    while read -r object; do
+        if ! echo ${object} | yq e '.' - 1>/dev/null; then
+            echo "invalid object: ${object}"
+            exit 1
+        fi
+        for_resource
+    done < <( 
+        echo ${objects} 
+    )
+done < <(parallel --line-buffer <<EOF
+    # Helm Project Operator / Prometheus Federator
+    kubectl get projecthelmcharts -A -o=yaml --watch-only | yq -o=json -I=0 '.' -
+
+    # Helm Release Secrets
+    kubectl get secrets -A --field-selector='type=helm.sh/release.v1' -l "name" -o=yaml --watch-only | yq -o=json -I=0 '.' -
+
+    # Helm Locker
+    kubectl get helmreleases -n cattle-monitoring-system -o=yaml --watch-only | yq -o=json -I=0 '.' - 
+    kubectl get events -n cattle-monitoring-system --field-selector="involvedObject.kind=HelmRelease" -o=yaml --watch-only | yq -o=json -I=0 '.' -
+
+    # Helm Controller
+    kubectl get helmcharts -n cattle-monitoring-system -o=yaml --watch-only | yq -o=json -I=0 '. | del(.spec.chartContent) | del(.items[].spec.chartContent)' - # note: deleting the chartContent field here since it causes issues with parsing the JSON via yq and is not useful
+    kubectl get jobs -n cattle-monitoring-system -l "helmcharts.helm.cattle.io/chart" -o=yaml --watch-only | yq -o=json -I=0 '.' -
+    kubectl get events -n cattle-monitoring-system --field-selector="involvedObject.kind=HelmChart" -o=yaml --watch-only | yq -o=json -I=0 '.' -
+    kubectl get pods -n cattle-monitoring-system -l "helmcharts.helm.cattle.io/chart" -o=yaml --watch-only | yq -o=json -I=0 '.' -
+    
+    # Project Registration and Release Namespaces
+    kubectl get namespaces -l="helm.cattle.io/helm-project-operated=true" -o=yaml --watch-only | yq -o=json -I=0 '.' -
+
+    # Project Release RoleBindings
+    kubectl get rolebindings -A -l="helm.cattle.io/helm-project-operated=true" -o=yaml --watch-only | yq -o=json -I=0 '.' -
+
+    # DEVELOPER NOTE: Modify this part of this bash script if you would like to:
+    #
+    # 1. Add more resources that need to be monitored: make sure that you add
+    # labelSelectors and fieldSelectors to ensure that you are only grabbing the
+    # set of resources you actually want to watch for
+    #
+    # 2. Remove fields before they are processed above: ideally, the yq command here should
+    # parse out fields that would cause problems with parsing above (such as .spec.chartContent
+    # of a HelmChart CR), but the more you remove here the more efficient the above program will be.
+    #
+    # The output of each command here should always result in 1 line JSON per object or list of objects
+    # returned from the kubectl call
+EOF
+)
+
+
+
