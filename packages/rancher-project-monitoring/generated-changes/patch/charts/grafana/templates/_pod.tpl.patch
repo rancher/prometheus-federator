@@ -24,16 +24,15 @@
        {{- if .Values.sidecar.skipTlsVerify }}
        - name: SKIP_TLS_VERIFY
          value: "{{ .Values.sidecar.skipTlsVerify }}"
-@@ -214,8 +210,8 @@
+@@ -214,7 +210,7 @@
  {{- $root := . }}
  {{- range .Values.image.pullSecrets }}
    - name: {{ tpl . $root }}
 -{{- end}}
- {{- end }}
 +{{- end }}
+ {{- end }}
  {{- if not .Values.enableKubeBackwardCompatibility }}
  enableServiceLinks: {{ .Values.enableServiceLinks }}
- {{- end }}
 @@ -257,10 +253,8 @@
        - name: UNIQUE_FILENAMES
          value: "{{ .Values.sidecar.enableUniqueFilenames }}"
