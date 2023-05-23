@@ -9,7 +9,15 @@
  
          location /api/dashboards {
            proxy_pass     http://localhost:3000;
-@@ -75,7 +75,11 @@
+@@ -52,7 +52,6 @@
+ 
+           sub_filter_types application/json;
+           sub_filter_once off;
+-          sub_filter '"url":"/d' '"url":"d';
+         }
+ 
+         location /api/live/ {
+@@ -75,7 +74,11 @@
            proxy_pass     http://localhost:3000/;
  
            sub_filter_once off;
