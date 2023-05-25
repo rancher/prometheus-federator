@@ -78,17 +78,6 @@ global:
      securityContext:
        runAsNonRoot: true
        runAsUser: 1000
-  networkPolicy:
-    # If activated, creates ingress network policies to only allow ingress traffic from workloads within the project.
-    # This only works correctly, if Project Network Isolation is activated for the cluster in Rancher. Otherwise,
-    # Ingress traffic from the nodes and thus from the Kubernetes API will be blocked, which breaks accessing the UIs
-    # through the Rancher/Kubernetes API Proxy in the Rancher UI.
-    limitIngressToProject: false
-    # Custom ingress restrictions. If null and limitIngressToProject=false, all ingress traffic will be allowed.
-    ingress: null
-    # By default, all egress traffic is allowed.
-    egress:
-      - {}
   rbac:
     ## Create RBAC resources for ServiceAccounts and users
     ##
@@ -759,9 +748,6 @@ grafana:
       ## Annotations for Grafana dashboard configmaps
       ##
       annotations: {}
-      multicluster:
-        global:
-          enabled: false
       provider:
         allowUiUpdates: false
     datasources:

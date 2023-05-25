@@ -40,23 +40,25 @@
                          ],
                          "spaceLength": 10,
                          "span": 12,
-@@ -90,15 +80,7 @@
+@@ -90,17 +80,9 @@
                          "steppedLine": false,
                          "targets": [
                              {
 -                                "expr": "sum(kube_node_status_capacity{cluster=\"$cluster\", node=~\"$node\", resource=\"cpu\"})",
--                                "format": "time_series",
--                                "intervalFactor": 2,
++                                "expr": "sum(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{node=~\"$node\"}) by (pod)",
+                                 "format": "time_series",
+                                 "intervalFactor": 2,
 -                                "legendFormat": "max capacity",
 -                                "legendLink": null,
 -                                "step": 10
 -                            },
 -                            {
 -                                "expr": "sum(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{cluster=\"$cluster\", node=~\"$node\"}) by (pod)",
-+                                "expr": "sum(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{node=~\"$node\"}) by (pod)",
-                                 "format": "time_series",
-                                 "intervalFactor": 2,
+-                                "format": "time_series",
+-                                "intervalFactor": 2,
                                  "legendFormat": "{{`{{`}}pod{{`}}`}}",
+                                 "legendLink": null,
+                                 "step": 10
 @@ -336,7 +318,7 @@
                          ],
                          "targets": [
@@ -121,23 +123,25 @@
                          ],
                          "spaceLength": 10,
                          "span": 12,
-@@ -485,15 +457,7 @@
+@@ -485,17 +457,9 @@
                          "steppedLine": false,
                          "targets": [
                              {
 -                                "expr": "sum(kube_node_status_capacity{cluster=\"$cluster\", node=~\"$node\", resource=\"memory\"})",
--                                "format": "time_series",
--                                "intervalFactor": 2,
++                                "expr": "sum(node_namespace_pod_container:container_memory_working_set_bytes{node=~\"$node\", container!=\"\"}) by (pod)",
+                                 "format": "time_series",
+                                 "intervalFactor": 2,
 -                                "legendFormat": "max capacity",
 -                                "legendLink": null,
 -                                "step": 10
 -                            },
 -                            {
 -                                "expr": "sum(node_namespace_pod_container:container_memory_working_set_bytes{cluster=\"$cluster\", node=~\"$node\", container!=\"\"}) by (pod)",
-+                                "expr": "sum(node_namespace_pod_container:container_memory_working_set_bytes{node=~\"$node\", container!=\"\"}) by (pod)",
-                                 "format": "time_series",
-                                 "intervalFactor": 2,
+-                                "format": "time_series",
+-                                "intervalFactor": 2,
                                  "legendFormat": "{{`{{`}}pod{{`}}`}}",
+                                 "legendLink": null,
+                                 "step": 10
 @@ -788,7 +752,7 @@
                          ],
                          "targets": [

@@ -344,7 +344,7 @@
                      "tagValuesQuery": "",
                      "tags": [
  
-@@ -2106,45 +2111,13 @@
+@@ -2106,42 +2111,10 @@
                      "options": [
  
                      ],
@@ -353,9 +353,9 @@
                      "refresh": 2,
                      "regex": "",
                      "sort": 1,
-                     "tagValuesQuery": "",
-                     "tags": [
- 
+-                    "tagValuesQuery": "",
+-                    "tags": [
+-
 -                    ],
 -                    "tagsQuery": "",
 -                    "type": "query",
@@ -385,9 +385,6 @@
 -                    "regex": "",
 -                    "skipUrlSync": false,
 -                    "sort": 0,
--                    "tagValuesQuery": "",
--                    "tags": [
--
-                     ],
-                     "tagsQuery": "",
-                     "type": "query",
+                     "tagValuesQuery": "",
+                     "tags": [
+ 

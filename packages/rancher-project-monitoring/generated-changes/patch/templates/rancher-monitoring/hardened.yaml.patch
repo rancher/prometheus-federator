@@ -110,7 +110,7 @@
  spec:
    privileged: false
    hostNetwork: false
-@@ -108,21 +111,19 @@
+@@ -108,6 +111,7 @@
    readOnlyRootFilesystem: false
    volumes:
      - 'secret'
@@ -118,22 +118,11 @@
  {{- range $_, $ns := $namespaces }}
  ---
  apiVersion: networking.k8s.io/v1
- kind: NetworkPolicy
- metadata:
--  name: default-allow-all
-+  name: project-monitoring-policy
-   namespace: {{ $ns }}
- spec:
-   podSelector: {}
--  ingress:
--  - {}
--  egress:
--  - {}
-+  ingress: {{- default (list dict | toYaml) (include "project-prometheus-stack.hardened.networkPolicy.ingress" (list $ $ns)) | nindent 4 }}
-+  egress: {{- $.Values.global.networkPolicy.egress | toYaml | nindent 4 }}
+@@ -124,5 +128,4 @@
    policyTypes:
    - Ingress
    - Egress
- {{- end }}
+-{{- end }}
 -{{- end }}
 \ No newline at end of file
++{{- end }}

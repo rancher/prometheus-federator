@@ -560,7 +560,7 @@
 -  ## Image to use to run the scripts
 -  image:
 -    repository: rancher/shell
--    tag: v0.1.19
+-    tag: v0.1.18
 -
 -## Rancher Monitoring
 -##
@@ -672,15 +672,15 @@
  
    ## Reduce app namespace alert scope
    appNamespacesTarget: ".*"
-@@ -696,28 +62,6 @@
+@@ -696,59 +62,43 @@
  
    ## Disabled PrometheusRule alerts
    disabled: {}
 -  # KubeAPIDown: true
 -  # NodeRAIDDegraded: true
--
+ 
 -## Deprecated way to provide custom recording or alerting rules to be deployed into the cluster.
--##
+ ##
 -# additionalPrometheusRules: []
 -#  - name: my-rule-file
 -#    groups:
@@ -698,10 +698,10 @@
 -#      rules:
 -#      - record: my_record
 -#        expr: 100 * my_record
- 
- ##
+-
+-##
  global:
-@@ -725,30 +69,47 @@
+   cattle:
      psp:
        enabled: false
      systemDefaultRegistry: ""
@@ -725,17 +725,6 @@
 +     securityContext:
 +       runAsNonRoot: true
 +       runAsUser: 1000
-+  networkPolicy:
-+    # If activated, creates ingress network policies to only allow ingress traffic from workloads within the project.
-+    # This only works correctly, if Project Network Isolation is activated for the cluster in Rancher. Otherwise,
-+    # Ingress traffic from the nodes and thus from the Kubernetes API will be blocked, which breaks accessing the UIs
-+    # through the Rancher/Kubernetes API Proxy in the Rancher UI.
-+    limitIngressToProject: false
-+    # Custom ingress restrictions. If null and limitIngressToProject=false, all ingress traffic will be allowed.
-+    ingress: null
-+    # By default, all egress traffic is allowed.
-+    egress:
-+      - {}
    rbac:
      ## Create RBAC resources for ServiceAccounts and users
      ##
@@ -762,7 +751,7 @@
        aggregateToDefaultRoles: true
  
      pspAnnotations: {}
-@@ -769,6 +130,19 @@
+@@ -769,6 +119,19 @@
    # or
    # - "image-pull-secret"
  
@@ -782,7 +771,7 @@
  ## Configuration for alertmanager
  ## ref: https://prometheus.io/docs/alerting/alertmanager/
  ##
-@@ -978,50 +352,6 @@
+@@ -978,50 +341,6 @@
    secret:
      annotations: {}
  
@@ -833,7 +822,7 @@
    ## Configuration for Alertmanager service
    ##
    service:
-@@ -1062,36 +392,6 @@
+@@ -1062,36 +381,6 @@
      ##
      type: ClusterIP
  
@@ -870,7 +859,7 @@
    ## If true, create a serviceMonitor for alertmanager
    ##
    serviceMonitor:
-@@ -1148,11 +448,6 @@
+@@ -1148,11 +437,6 @@
        tag: v0.24.0
        sha: ""
  
@@ -882,7 +871,7 @@
      ## Secrets is a list of Secrets in the same namespace as the Alertmanager object, which shall be mounted into the
      ## Alertmanager Pods. The Secrets are mounted into /etc/alertmanager/secrets/.
      ##
-@@ -1174,39 +469,13 @@
+@@ -1174,40 +458,14 @@
  
      ## AlertmanagerConfigs to be selected to merge and configure Alertmanager with.
      ##
@@ -901,7 +890,14 @@
 -    # alertmanagerConfigSelector:
 -    #   matchLabels:
 -    #     role: example-config
--
++    alertmanagerConfigSelector:
++      # default ignores resources created by Rancher Monitoring
++      matchExpressions:
++        - key: release
++          operator: NotIn
++          values:
++            - rancher-monitoring
+ 
 -    ## Namespaces to be selected for AlertmanagerConfig discovery. If nil, only check own namespace.
 -    ##
 -    alertmanagerConfigNamespaceSelector: {}
@@ -919,17 +915,11 @@
 -    # alertmanagerConfigNamespaceSelector:
 -    #   matchLabels:
 -    #     alertmanagerconfig: enabled
-+    alertmanagerConfigSelector:
-+      # default ignores resources created by Rancher Monitoring
-+      matchExpressions:
-+        - key: release
-+          operator: NotIn
-+          values:
-+            - rancher-monitoring
- 
+-
      ## AlermanagerConfig to be used as top level configuration
      ##
-@@ -1417,9 +686,6 @@
+     alertmanagerConfiguration: {}
+@@ -1417,9 +675,6 @@
        org_role: Viewer
      auth.basic:
        enabled: false
@@ -939,7 +929,7 @@
      security:
        # Required to embed dashboards in Rancher Cluster Overview Dashboard on Cluster Explorer
        allow_embedding: true
-@@ -1439,18 +705,6 @@
+@@ -1439,18 +694,6 @@
    ##
    defaultDashboardsEnabled: true
  
@@ -958,7 +948,7 @@
    ## Timezone for the default dashboards
    ## Other options are: browser or a specific timezone, i.e. Europe/Luxembourg
    ##
-@@ -1500,7 +754,6 @@
+@@ -1500,17 +743,11 @@
      dashboards:
        enabled: true
        label: grafana_dashboard
@@ -966,16 +956,17 @@
        labelValue: "1"
  
        ## Annotations for Grafana dashboard configmaps
-@@ -1509,8 +762,6 @@
-       multicluster:
-         global:
-           enabled: false
+       ##
+       annotations: {}
+-      multicluster:
+-        global:
+-          enabled: false
 -        etcd:
 -          enabled: false
        provider:
          allowUiUpdates: false
      datasources:
-@@ -1530,11 +781,6 @@
+@@ -1530,11 +767,6 @@
        ##
        annotations: {}
  
@@ -987,7 +978,7 @@
        label: grafana_datasource
        labelValue: "1"
  
-@@ -1652,538 +898,8 @@
+@@ -1652,294 +884,10 @@
      tlsConfig: {}
      scrapeTimeout: 30s
  
@@ -1034,9 +1025,10 @@
 -        component: apiserver
 -        provider: kubernetes
 -
--    ## MetricRelabelConfigs to apply to samples after scraping, but before ingestion.
+     ## MetricRelabelConfigs to apply to samples after scraping, but before ingestion.
 -    ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#relabelconfig
--    ##
++    ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/master/Documentation/api.md#relabelconfig
+     ##
 -    metricRelabelings:
 -      # Drop excessively noisy apiserver buckets.
 -      - action: drop
@@ -1198,7 +1190,7 @@
 -    ## MetricRelabelConfigs to apply to samples after scraping, but before ingestion.
 -    ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#relabelconfig
 -    ##
--    metricRelabelings: []
+     metricRelabelings: []
 -    # - sourceLabels: [__name__, image]
 -    #   separator: ;
 -    #   regex: container_([a-z_]+);
@@ -1279,21 +1271,13 @@
 -    ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#relabelconfig
 -    ##
 -    metricRelabelings: []
--    # - action: keep
--    #   regex: 'kube_(daemonset|deployment|pod|namespace|node|statefulset).+'
--    #   sourceLabels: [__name__]
--
--    ## RelabelConfigs to apply to samples before scraping
--    ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#relabelconfig
--    ##
--    relabelings: []
--    # - sourceLabels: [__meta_kubernetes_pod_node_name]
--    #   separator: ;
--    #   regex: ^(.*)$
--    #   targetLabel: nodename
--    #   replacement: $1
--    #   action: replace
--
+     # - action: keep
+     #   regex: 'kube_(daemonset|deployment|pod|namespace|node|statefulset).+'
+     #   sourceLabels: [__name__]
+@@ -1955,735 +903,17 @@
+     #   replacement: $1
+     #   action: replace
+ 
 -    ## Additional labels
 -    ##
 -    additionalLabels: {}
@@ -1521,16 +1505,25 @@
 -    ## Name of the server to use when validating TLS certificate
 -    serverName: null
 -
-     ## MetricRelabelConfigs to apply to samples after scraping, but before ingestion.
+-    ## MetricRelabelConfigs to apply to samples after scraping, but before ingestion.
 -    ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#relabelconfig
-+    ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/master/Documentation/api.md#relabelconfig
-     ##
-     metricRelabelings: []
-     # - action: keep
-@@ -2201,488 +917,16 @@
-     #   replacement: $1
-     #   action: replace
- 
+-    ##
+-    metricRelabelings: []
+-    # - action: keep
+-    #   regex: 'kube_(daemonset|deployment|pod|namespace|node|statefulset).+'
+-    #   sourceLabels: [__name__]
+-
+-    ## RelabelConfigs to apply to samples before scraping
+-    ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#relabelconfig
+-    ##
+-    relabelings: []
+-    # - sourceLabels: [__meta_kubernetes_pod_node_name]
+-    #   separator: ;
+-    #   regex: ^(.*)$
+-    #   targetLabel: nodename
+-    #   replacement: $1
+-    #   action: replace
+-
 -    ## Additional labels
 -    ##
 -    additionalLabels: {}
@@ -1921,7 +1914,9 @@
 -  # because control-plane managed by AWS cannot communicate with pods' IP CIDR and admission webhooks are not working
 -  ##
 -  hostNetwork: false
--
++  testFramework:
++    enabled: false
+ 
 -  ## Define which Nodes the Pods are scheduled on.
 -  ## ref: https://kubernetes.io/docs/user-guide/node-selection/
 -  ##
@@ -2015,12 +2010,11 @@
 -  ## Set a Field Selector to filter watched secrets
 -  ##
 -  secretFieldSelector: ""
-+  testFramework:
-+    enabled: false
- 
+-
  ## Deploy a Prometheus instance
  ##
-@@ -2702,96 +946,6 @@
+ prometheus:
+@@ -2702,96 +932,6 @@
      name: ""
      annotations: {}
  
@@ -2117,7 +2111,7 @@
    ## Configuration for Prometheus service
    ##
    service:
-@@ -2842,36 +996,6 @@
+@@ -2842,36 +982,6 @@
  
      sessionAffinity: ""
  
@@ -2154,7 +2148,7 @@
    ## Configure pod disruption budgets for Prometheus
    ## ref: https://kubernetes.io/docs/tasks/run-application/configure-pdb/#specifying-a-poddisruptionbudget
    ## This configuration is immutable once created and will require the PDB to be deleted to be changed
-@@ -2882,46 +1006,6 @@
+@@ -2882,46 +992,6 @@
      minAvailable: 1
      maxUnavailable: ""
  
@@ -2201,7 +2195,7 @@
    ## ExtraSecret can be used to store various data in an extra secret
    ## (use it for example to store hashed basic auth credentials)
    extraSecret:
-@@ -2970,55 +1054,10 @@
+@@ -2970,55 +1040,10 @@
        #   hosts:
        #     - prometheus.example.com
  
@@ -2257,7 +2251,7 @@
      volumes: []
  
    serviceMonitor:
-@@ -3031,7 +1070,7 @@
+@@ -3031,7 +1056,7 @@
      scheme: ""
  
      ## tlsConfig: TLS configuration to use when scraping the endpoint. For example if using istio mTLS.
@@ -2266,7 +2260,7 @@
      tlsConfig: {}
  
      bearerTokenFile:
-@@ -3069,7 +1108,7 @@
+@@ -3069,7 +1094,7 @@
      ## Defaults to 30s.
      ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/release-0.44/pkg/prometheus/promcfg.go#L180-L183
      ##
@@ -2275,7 +2269,7 @@
  
      ## Number of seconds to wait for target to respond before erroring
      ##
-@@ -3077,7 +1116,7 @@
+@@ -3077,7 +1102,7 @@
  
      ## Interval between consecutive evaluations.
      ##
@@ -2284,7 +2278,7 @@
  
      ## ListenLocal makes the Prometheus server listen on loopback, so that it does not bind against the Pod IP.
      ##
-@@ -3156,14 +1195,6 @@
+@@ -3156,14 +1181,6 @@
      ##
      enableRemoteWriteReceiver: false
  
@@ -2299,7 +2293,7 @@
      ## Name of the external label used to denote Prometheus instance name
      ##
      prometheusExternalLabelName: ""
-@@ -3198,12 +1229,6 @@
+@@ -3198,12 +1215,6 @@
      ##
      query: {}
  
@@ -2312,7 +2306,7 @@
      ## If true, a nil or {} value for prometheus.prometheusSpec.ruleSelector will cause the
      ## prometheus resource to be created with selectors based on values in the helm deployment,
      ## which will also match the PrometheusRule resources created
-@@ -3213,21 +1238,13 @@
+@@ -3213,21 +1224,13 @@
      ## PrometheusRules to be selected for target discovery.
      ## If {}, select all PrometheusRules
      ##
@@ -2341,21 +2335,13 @@
  
      ## If true, a nil or {} value for prometheus.prometheusSpec.serviceMonitorSelector will cause the
      ## prometheus resource to be created with selectors based on values in the helm deployment,
-@@ -3238,19 +1255,13 @@
+@@ -3238,20 +1241,14 @@
      ## ServiceMonitors to be selected for target discovery.
      ## If {}, select all ServiceMonitors
      ##
 -    serviceMonitorSelector: {}
 -    ## Example which selects ServiceMonitors with label "prometheus" set to "somelabel"
 -    # serviceMonitorSelector:
--    #   matchLabels:
--    #     prometheus: somelabel
--
--    ## Namespaces to be selected for ServiceMonitor discovery.
--    ##
--    serviceMonitorNamespaceSelector: {}
--    ## Example which selects ServiceMonitors in namespaces with label "prometheus" set to "somelabel"
--    # serviceMonitorNamespaceSelector:
 -    #   matchLabels:
 -    #     prometheus: somelabel
 +    serviceMonitorSelector:
@@ -2366,9 +2352,18 @@
 +          values:
 +            - rancher-monitoring
  
+-    ## Namespaces to be selected for ServiceMonitor discovery.
+-    ##
+-    serviceMonitorNamespaceSelector: {}
+-    ## Example which selects ServiceMonitors in namespaces with label "prometheus" set to "somelabel"
+-    # serviceMonitorNamespaceSelector:
+-    #   matchLabels:
+-    #     prometheus: somelabel
+-
      ## If true, a nil or {} value for prometheus.prometheusSpec.podMonitorSelector will cause the
      ## prometheus resource to be created with selectors based on values in the helm deployment,
-@@ -3261,16 +1272,13 @@
+     ## which will also match the podmonitors created
+@@ -3261,17 +1258,14 @@
      ## PodMonitors to be selected for target discovery.
      ## If {}, select all PodMonitors
      ##
@@ -2377,11 +2372,6 @@
 -    # podMonitorSelector:
 -    #   matchLabels:
 -    #     prometheus: somelabel
--
--    ## Namespaces to be selected for PodMonitor discovery.
--    ## See https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#namespaceselector for usage
--    ##
--    podMonitorNamespaceSelector: {}
 +    podMonitorSelector:
 +      # default ignores resources created by Rancher Monitoring
 +      matchExpressions:
@@ -2390,9 +2380,15 @@
 +          values:
 +            - rancher-monitoring
  
+-    ## Namespaces to be selected for PodMonitor discovery.
+-    ## See https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#namespaceselector for usage
+-    ##
+-    podMonitorNamespaceSelector: {}
+-
      ## If true, a nil or {} value for prometheus.prometheusSpec.probeSelector will cause the
      ## prometheus resource to be created with selectors based on values in the helm deployment,
-@@ -3281,16 +1289,13 @@
+     ## which will also match the probes created
+@@ -3281,24 +1275,21 @@
      ## Probes to be selected for target discovery.
      ## If {}, select all Probes
      ##
@@ -2401,11 +2397,6 @@
 -    # probeSelector:
 -    #   matchLabels:
 -    #     prometheus: somelabel
--
--    ## Namespaces to be selected for Probe discovery.
--    ## See https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#namespaceselector for usage
--    ##
--    probeNamespaceSelector: {}
 +    probeSelector:
 +      # default ignores resources created by Rancher Monitoring
 +      matchExpressions:
@@ -2414,9 +2405,14 @@
 +          values:
 +            - rancher-monitoring
  
+-    ## Namespaces to be selected for Probe discovery.
+-    ## See https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#namespaceselector for usage
+-    ##
+-    probeNamespaceSelector: {}
+-
      ## How long to retain metrics
      ##
-@@ -3298,7 +1303,7 @@
+     retention: 10d
  
      ## Maximum size of metrics
      ##
@@ -2425,7 +2421,7 @@
  
      ## Enable compression of the write-ahead log using Snappy.
      ##
-@@ -3368,13 +1373,6 @@
+@@ -3368,13 +1359,6 @@
      #         - e2e-az1
      #         - e2e-az2
  
@@ -2439,7 +2435,7 @@
      ## The remote_write spec configuration for Prometheus.
      ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#remotewritespec
      remoteWrite: []
-@@ -3395,6 +1393,8 @@
+@@ -3395,6 +1379,8 @@
          memory: 750Mi
          cpu: 750m
  
@@ -2448,7 +2444,7 @@
      ## Prometheus StorageSpec for persistent data
      ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/user-guides/storage.md
      ##
-@@ -3427,122 +1427,9 @@
+@@ -3427,122 +1413,9 @@
      # Additional VolumeMounts on the output StatefulSet definition.
      volumeMounts: []
  
@@ -2572,7 +2568,7 @@
      ##
      securityContext:
        runAsGroup: 2000
-@@ -3554,20 +1441,6 @@
+@@ -3554,20 +1427,6 @@
      ##
      priorityClassName: ""
  
@@ -2593,7 +2589,7 @@
      proxy:
        image:
          repository: rancher/mirrored-library-nginx
-@@ -3575,7 +1448,7 @@
+@@ -3575,7 +1434,7 @@
  
      ## Containers allows injecting additional containers. This is meant to allow adding an authentication proxy to a Prometheus pod.
      ## if using proxy extraContainer update targetPort with proxy container port
@@ -2602,7 +2598,16 @@
        - name: prometheus-proxy
          args:
          - nginx
-@@ -3616,10 +1489,6 @@
+@@ -3583,7 +1442,7 @@
+         - daemon off;
+         - -c
+         - /nginx/nginx.conf
+-        image: rancher/mirrored-library-nginx:1.21.1-alpine
++        image: "{{ template "system_default_registry" . }}{{ .Values.prometheus.prometheusSpec.proxy.image.repository }}:{{ .Values.prometheus.prometheusSpec.proxy.image.tag }}"
+         ports:
+         - containerPort: 8081
+           name: nginx-http
+@@ -3616,10 +1475,6 @@
      ## OverrideHonorTimestamps allows to globally enforce honoring timestamps in all scrape configs.
      overrideHonorTimestamps: false
  
@@ -2613,10 +2618,11 @@
      ## EnforcedNamespaceLabel enforces adding a namespace label of origin for each alert and metric that is user created.
      ## The label value will always be the namespace of the object that is being created.
      ## Disabled by default
-@@ -3677,514 +1546,6 @@
+@@ -3676,514 +1531,6 @@
+     ## Minimum number of seconds for which a newly created pod should be ready without any of its container crashing for it to
      ## be considered available. Defaults to 0 (pod will be considered available as soon as it is ready).
      minReadySeconds: 0
- 
+-
 -  additionalRulesForClusterRole: []
 -  #  - apiGroups: [ "" ]
 -  #    resources:
@@ -3124,7 +3130,6 @@
 -  #   auth: |
 -  #     foo:$apr1$OFG3Xybp$ckL0FHDAkoXYIlH9.cysT0
 -  #     someoneelse:$apr1$DMZX2Z4q$6SbQIfyuLQd.xmo/P0m2c.
--
+ 
  ## Setting to true produces cleaner resource names, but requires a data migration because the name of the persistent volume changes. Therefore this should only be set once on initial installation.
  ##
- cleanPrometheusOperatorObjectNames: false
