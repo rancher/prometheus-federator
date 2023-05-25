@@ -30,7 +30,7 @@ questions:
 - variable: grafana.persistence.enabled
   type: boolean
   required: true
-  label: Enable Persistent Volume
+  label: Grafana Persistent Volume Enabled
   show_subquestion_if: true
   group: Grafana
   subquestions:
@@ -101,7 +101,7 @@ questions:
 - variable: prometheus.prometheusSpec.storage.enabled
   type: boolean
   required: true
-  label: Enable Persistent Volume
+  label: Prometheus Persistent Volume Enabled
   show_subquestion_if: true
   group: Prometheus
   subquestions:

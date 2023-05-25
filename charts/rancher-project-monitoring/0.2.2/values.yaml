@@ -759,9 +759,6 @@ grafana:
       ## Annotations for Grafana dashboard configmaps
       ##
       annotations: {}
-      multicluster:
-        global:
-          enabled: false
       provider:
         allowUiUpdates: false
     datasources:
