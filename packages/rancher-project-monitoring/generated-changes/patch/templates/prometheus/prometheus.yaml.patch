@@ -90,7 +90,7 @@
  {{- if .Values.prometheus.prometheusSpec.probeSelector }}
    probeSelector:
  {{ toYaml .Values.prometheus.prometheusSpec.probeSelector | indent 4 }}
-@@ -173,40 +158,12 @@
+@@ -173,21 +158,6 @@
  {{ else }}
    probeSelector: {}
  {{- end }}
@@ -109,15 +109,13 @@
 -{{ toYaml .Values.prometheus.prometheusSpec.additionalRemoteRead | indent 4 }}
 -{{- end }}
 -{{- end }}
--{{- if (or .Values.prometheus.prometheusSpec.remoteWrite .Values.prometheus.prometheusSpec.additionalRemoteWrite) }}
--  remoteWrite:
--{{- if .Values.prometheus.prometheusSpec.remoteWrite }}
--{{ tpl (toYaml .Values.prometheus.prometheusSpec.remoteWrite | indent 4) . }}
--{{- end }}
--{{- if .Values.prometheus.prometheusSpec.additionalRemoteWrite }}
--{{ toYaml .Values.prometheus.prometheusSpec.additionalRemoteWrite | indent 4 }}
--{{- end }}
--{{- end }}
+ {{- if (or .Values.prometheus.prometheusSpec.remoteWrite .Values.prometheus.prometheusSpec.additionalRemoteWrite) }}
+   remoteWrite:
+ {{- if .Values.prometheus.prometheusSpec.remoteWrite }}
+@@ -197,16 +167,12 @@
+ {{ toYaml .Values.prometheus.prometheusSpec.additionalRemoteWrite | indent 4 }}
+ {{- end }}
+ {{- end }}
 +  probeNamespaceSelector: {{ .Values.global.cattle.projectNamespaceSelector | toYaml | nindent 4 }}
  {{- if .Values.prometheus.prometheusSpec.securityContext }}
    securityContext:
@@ -133,7 +131,16 @@
  {{- if .Values.prometheus.prometheusSpec.ruleSelector }}
    ruleSelector:
  {{ toYaml .Values.prometheus.prometheusSpec.ruleSelector | indent 4}}
-@@ -241,7 +198,7 @@
+@@ -217,7 +183,7 @@
+ {{ else }}
+   ruleSelector: {}
+ {{- end }}
+-{{- if .Values.prometheus.prometheusSpec.storageSpec }}
++{{- if .Values.prometheus.prometheusSpec.storage.enabled }}
+   storage:
+ {{ tpl (toYaml .Values.prometheus.prometheusSpec.storageSpec | indent 4) . }}
+ {{- end }}
+@@ -241,7 +207,7 @@
          labelSelector:
            matchExpressions:
              - {key: app.kubernetes.io/name, operator: In, values: [prometheus]}
@@ -142,7 +149,7 @@
  {{- else if eq .Values.prometheus.prometheusSpec.podAntiAffinity "soft" }}
      podAntiAffinity:
        preferredDuringSchedulingIgnoredDuringExecution:
-@@ -251,7 +208,7 @@
+@@ -251,7 +217,7 @@
            labelSelector:
              matchExpressions:
                - {key: app.kubernetes.io/name, operator: In, values: [prometheus]}
@@ -151,21 +158,21 @@
  {{- end }}
  {{- end }}
    tolerations: {{ include "linux-node-tolerations" . | nindent 4 }}
-@@ -264,41 +221,12 @@
+@@ -264,41 +230,12 @@
  {{- end }}
  {{- if .Values.global.imagePullSecrets }}
    imagePullSecrets:
 -{{ include "kube-prometheus-stack.imagePullSecrets" . | trim | indent 4 }}
-+{{ include "project-prometheus-stack.imagePullSecrets" . | trim | indent 4 }}
- {{- end }}
+-{{- end }}
 -{{- if .Values.prometheus.prometheusSpec.additionalScrapeConfigs }}
-+{{- if .Values.federate.enabled }}
-   additionalScrapeConfigs:
+-  additionalScrapeConfigs:
 -    name: {{ template "kube-prometheus-stack.fullname" . }}-prometheus-scrape-confg
 -    key: additional-scrape-configs.yaml
--{{- end }}
++{{ include "project-prometheus-stack.imagePullSecrets" . | trim | indent 4 }}
+ {{- end }}
 -{{- if .Values.prometheus.prometheusSpec.additionalScrapeConfigsSecret.enabled }}
--  additionalScrapeConfigs:
++{{- if .Values.federate.enabled }}
+   additionalScrapeConfigs:
 -    name: {{ .Values.prometheus.prometheusSpec.additionalScrapeConfigsSecret.name }}
 -    key: {{ .Values.prometheus.prometheusSpec.additionalScrapeConfigsSecret.key }}
 -{{- end }}
@@ -197,7 +204,7 @@
  {{- end }}
  {{- if .Values.prometheus.prometheusSpec.containers }}
    containers:
-@@ -311,10 +239,6 @@
+@@ -311,10 +248,6 @@
  {{- if .Values.prometheus.prometheusSpec.priorityClassName }}
    priorityClassName: {{ .Values.prometheus.prometheusSpec.priorityClassName }}
  {{- end }}
@@ -208,7 +215,7 @@
  {{- if .Values.prometheus.prometheusSpec.disableCompaction }}
    disableCompaction: {{ .Values.prometheus.prometheusSpec.disableCompaction }}
  {{- end }}
-@@ -337,16 +261,14 @@
+@@ -337,16 +270,14 @@
  {{- if .Values.prometheus.prometheusSpec.overrideHonorTimestamps }}
    overrideHonorTimestamps: {{ .Values.prometheus.prometheusSpec.overrideHonorTimestamps }}
  {{- end }}
@@ -228,7 +235,7 @@
  {{- end }}
  {{- if .Values.prometheus.prometheusSpec.prometheusRulesExcludedFromEnforce }}
  {{ toYaml .Values.prometheus.prometheusSpec.prometheusRulesExcludedFromEnforce | indent 4 }}
-@@ -354,8 +276,8 @@
+@@ -354,8 +285,8 @@
    excludedFromEnforcement:
  {{- range $prometheusDefaultRulesExcludedFromEnforce.rules }}
      - resource: prometheusrules
