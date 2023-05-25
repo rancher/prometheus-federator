@@ -351,7 +351,7 @@
  {{/*
  To help compatibility with other charts which use global.imagePullSecrets.
  Allow either an array of {name: pullSecret} maps (k8s-style), or an array of strings (more common helm-style).
-@@ -373,7 +222,7 @@
+@@ -373,12 +222,31 @@
    - pullSecret1
    - pullSecret2
  */}}
@@ -360,10 +360,11 @@
  {{- range .Values.global.imagePullSecrets }}
    {{- if eq (typeOf .) "map[string]interface {}" }}
  - {{ toYaml . | trim }}
-@@ -382,3 +231,22 @@
+   {{- else }}
+ - name: {{ . }}
    {{- end }}
- {{- end }}
- {{- end -}}
++{{- end }}
++{{- end -}}
 +
 +
 +{{/* Define ingress for all hardened namespaces */}}
@@ -381,6 +382,7 @@
 +  - namespaceSelector:
 +      matchLabels:
 +        kubernetes.io/metadata.name: {{ $ns }}
-+{{- end }}
+ {{- end }}
+-{{- end -}}
 +{{- end -}}
 \ No newline at end of file

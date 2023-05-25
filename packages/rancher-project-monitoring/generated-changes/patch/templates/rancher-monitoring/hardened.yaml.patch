@@ -134,6 +134,7 @@
    policyTypes:
    - Ingress
    - Egress
- {{- end }}
+-{{- end }}
 -{{- end }}
 \ No newline at end of file
++{{- end }}

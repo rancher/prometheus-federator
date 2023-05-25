@@ -31,10 +31,11 @@
        {{- end }}
        access: proxy
        isDefault: true
-@@ -39,23 +39,6 @@
+@@ -38,23 +38,6 @@
+         exemplarTraceIdDestinations:
          - datasourceUid: {{ .Values.grafana.sidecar.datasources.exemplarTraceIdDestinations.datasourceUid }}
            name: {{ .Values.grafana.sidecar.datasources.exemplarTraceIdDestinations.traceIdLabelName }}
- {{- end }}
+-{{- end }}
 -{{- if .Values.grafana.sidecar.datasources.createPrometheusReplicasDatasources }}
 -{{- range until (int .Values.prometheus.prometheusSpec.replicas) }}
 -    - name: Prometheus-{{ . }}
@@ -51,7 +52,6 @@
 -          name: {{ .Values.grafana.sidecar.datasources.exemplarTraceIdDestinations.traceIdLabelName }}
 -{{- end }}
 -{{- end }}
--{{- end }}
+ {{- end }}
  {{- end }}
  {{- if .Values.grafana.additionalDataSources }}
- {{ tpl (toYaml .Values.grafana.additionalDataSources | indent 4) . }}

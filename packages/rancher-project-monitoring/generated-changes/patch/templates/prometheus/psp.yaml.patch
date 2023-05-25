@@ -18,12 +18,13 @@
  spec:
    privileged: false
    # Allow core volume types.
-@@ -49,8 +49,4 @@
+@@ -48,9 +48,5 @@
+ {{- if .Values.prometheus.podSecurityPolicy.allowedCapabilities }}
    allowedCapabilities:
  {{ toYaml .Values.prometheus.podSecurityPolicy.allowedCapabilities | indent 4 }}
- {{- end }}
+-{{- end }}
 -{{- if .Values.prometheus.podSecurityPolicy.allowedHostPaths }}
 -  allowedHostPaths:
 -{{ toYaml .Values.prometheus.podSecurityPolicy.allowedHostPaths | indent 4 }}
--{{- end }}
+ {{- end }}
  {{- end }}
