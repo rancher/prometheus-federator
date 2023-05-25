@@ -117,14 +117,12 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: default-allow-all
+  name: project-monitoring-policy
   namespace: {{ $ns }}
 spec:
   podSelector: {}
-  ingress:
-  - {}
-  egress:
-  - {}
+  ingress: {{- default (list dict | toYaml) (include "project-prometheus-stack.hardened.networkPolicy.ingress" (list $ $ns)) | nindent 4 }}
+  egress: {{- $.Values.global.networkPolicy.egress | toYaml | nindent 4 }}
   policyTypes:
   - Ingress
   - Egress
