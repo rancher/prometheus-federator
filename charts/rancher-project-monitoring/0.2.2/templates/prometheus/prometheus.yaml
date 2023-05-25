@@ -158,15 +158,6 @@ spec:
 {{ else }}
   probeSelector: {}
 {{- end }}
-{{- if (or .Values.prometheus.prometheusSpec.remoteWrite .Values.prometheus.prometheusSpec.additionalRemoteWrite) }}
-  remoteWrite:
-{{- if .Values.prometheus.prometheusSpec.remoteWrite }}
-{{ tpl (toYaml .Values.prometheus.prometheusSpec.remoteWrite | indent 4) . }}
-{{- end }}
-{{- if .Values.prometheus.prometheusSpec.additionalRemoteWrite }}
-{{ toYaml .Values.prometheus.prometheusSpec.additionalRemoteWrite | indent 4 }}
-{{- end }}
-{{- end }}
   probeNamespaceSelector: {{ .Values.global.cattle.projectNamespaceSelector | toYaml | nindent 4 }}
 {{- if .Values.prometheus.prometheusSpec.securityContext }}
   securityContext:
@@ -183,7 +174,7 @@ spec:
 {{ else }}
   ruleSelector: {}
 {{- end }}
-{{- if .Values.prometheus.prometheusSpec.storage.enabled }}
+{{- if .Values.prometheus.prometheusSpec.storageSpec }}
   storage:
 {{ tpl (toYaml .Values.prometheus.prometheusSpec.storageSpec | indent 4) . }}
 {{- end }}

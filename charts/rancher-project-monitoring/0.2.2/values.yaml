@@ -75,20 +75,6 @@ global:
      repository: rancher/kubectl
      tag: v1.20.2
      pullPolicy: IfNotPresent
-     securityContext:
-       runAsNonRoot: true
-       runAsUser: 1000
-  networkPolicy:
-    # If activated, creates ingress network policies to only allow ingress traffic from workloads within the project.
-    # This only works correctly, if Project Network Isolation is activated for the cluster in Rancher. Otherwise,
-    # Ingress traffic from the nodes and thus from the Kubernetes API will be blocked, which breaks accessing the UIs
-    # through the Rancher/Kubernetes API Proxy in the Rancher UI.
-    limitIngressToProject: false
-    # Custom ingress restrictions. If null and limitIngressToProject=false, all ingress traffic will be allowed.
-    ingress: null
-    # By default, all egress traffic is allowed.
-    egress:
-      - {}
   rbac:
     ## Create RBAC resources for ServiceAccounts and users
     ##
@@ -100,14 +86,14 @@ global:
       ## How does this work?
       ##
       ## The operator will watch for all subjects bound to each Kubernetes default ClusterRole in the project registration namespace
-      ## where the ProjectHelmChart that deployed this chart belongs to; if it observes a subject bound to a particular role in
+      ## where the ProjectHelmChart that deployed this chart belongs to; if it observes a subject bound to a particular role in 
       ## the project registration namespace (e.g. edit) and if a Role exists that is deployed by this chart with the label
       ## 'helm.cattle.io/project-helm-chart-role-aggregate-from': '<role, e.g. edit>', it will automaticaly create a RoleBinding
       ## in the release namespace binding all such subjects to that Role.
       ##
       ## Note: while the default behavior is to use the Kubernetes default ClusterRole, the operator deployment (prometheus-federator)
       ## can be configured to use a different set of ClusterRoles as the source of truth for admin, edit, and view permissions.
-      ##
+      ## 
       create: true
       ## Add labels to Roles
       aggregateToDefaultRoles: true
@@ -1105,7 +1091,7 @@ prometheus:
     ## Defaults to 30s.
     ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/release-0.44/pkg/prometheus/promcfg.go#L180-L183
     ##
-    scrapeInterval: "30s"
+    scrapeInterval: ""
 
     ## Number of seconds to wait for target to respond before erroring
     ##
@@ -1113,7 +1099,7 @@ prometheus:
 
     ## Interval between consecutive evaluations.
     ##
-    evaluationInterval: "1m"
+    evaluationInterval: ""
 
     ## ListenLocal makes the Prometheus server listen on loopback, so that it does not bind against the Pod IP.
     ##
@@ -1300,7 +1286,7 @@ prometheus:
 
     ## Maximum size of metrics
     ##
-    retentionSize: "50GiB"
+    retentionSize: ""
 
     ## Enable compression of the write-ahead log using Snappy.
     ##
@@ -1370,16 +1356,6 @@ prometheus:
     #         - e2e-az1
     #         - e2e-az2
 
-    ## The remote_write spec configuration for Prometheus.
-    ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#remotewritespec
-    remoteWrite: []
-    # - url: http://remote1/push
-    ## additionalRemoteWrite is appended to remoteWrite
-    additionalRemoteWrite: []
-
-    ## Enable/Disable Grafana dashboards provisioning for prometheus remote write feature
-    remoteWriteDashboards: false
-
     ## Resource limits & requests
     ##
     resources:
@@ -1390,8 +1366,6 @@ prometheus:
         memory: 750Mi
         cpu: 750m
 
-    storage:
-      enabled: false
     ## Prometheus StorageSpec for persistent data
     ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/user-guides/storage.md
     ##
