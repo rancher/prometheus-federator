@@ -2578,7 +2578,7 @@
      ##
      securityContext:
        runAsGroup: 2000
-@@ -3554,20 +1441,6 @@
+@@ -3554,28 +1441,14 @@
      ##
      priorityClassName: ""
  
@@ -2599,7 +2599,8 @@
      proxy:
        image:
          repository: rancher/mirrored-library-nginx
-@@ -3575,7 +1448,7 @@
+-        tag: 1.21.1-alpine
++        tag: 1.24.0-alpine
  
      ## Containers allows injecting additional containers. This is meant to allow adding an authentication proxy to a Prometheus pod.
      ## if using proxy extraContainer update targetPort with proxy container port
