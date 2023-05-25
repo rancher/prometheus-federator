@@ -118,11 +118,9 @@
  {{- range $_, $ns := $namespaces }}
  ---
  apiVersion: networking.k8s.io/v1
-@@ -124,5 +128,4 @@
-   policyTypes:
+@@ -125,4 +129,3 @@
    - Ingress
    - Egress
--{{- end }}
+ {{- end }}
 -{{- end }}
 \ No newline at end of file
-+{{- end }}
