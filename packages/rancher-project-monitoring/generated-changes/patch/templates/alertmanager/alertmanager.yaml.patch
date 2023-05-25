@@ -61,7 +61,7 @@
  {{- else if eq .Values.alertmanager.alertmanagerSpec.podAntiAffinity "soft" }}
      podAntiAffinity:
        preferredDuringSchedulingIgnoredDuringExecution:
-@@ -119,9 +114,10 @@
+@@ -119,8 +114,9 @@
            topologyKey: {{ .Values.alertmanager.alertmanagerSpec.podAntiAffinityTopologyKey }}
            labelSelector:
              matchExpressions:
@@ -69,11 +69,10 @@
 -              - {key: alertmanager, operator: In, values: [{{ template "kube-prometheus-stack.alertmanager.crname" . }}]}
 +            - {key: app.kubernetes.io/name, operator: In, values: [alertmanager]}
 +            - {key: alertmanager, operator: In, values: [{{ template "project-prometheus-stack.alertmanager.crname" . }}]}
- {{- end }}
 +{{- end }}
+ {{- end }}
    tolerations: {{ include "linux-node-tolerations" . | nindent 4 }}
  {{- if .Values.alertmanager.alertmanagerSpec.tolerations }}
- {{ toYaml .Values.alertmanager.alertmanagerSpec.tolerations | indent 4 }}
 @@ -132,7 +128,7 @@
  {{- end }}
  {{- if .Values.global.imagePullSecrets }}
@@ -83,9 +82,8 @@
  {{- end }}
  {{- if .Values.alertmanager.alertmanagerSpec.containers }}
    containers:
-@@ -166,5 +162,4 @@
- {{- end }}
+@@ -167,4 +163,3 @@
  {{- if .Values.alertmanager.alertmanagerSpec.minReadySeconds }}
    minReadySeconds: {{ .Values.alertmanager.alertmanagerSpec.minReadySeconds }}
--{{- end }}
  {{- end }}
+-{{- end }}

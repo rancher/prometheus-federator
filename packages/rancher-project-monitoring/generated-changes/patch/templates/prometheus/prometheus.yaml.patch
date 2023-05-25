@@ -151,7 +151,7 @@
  {{- end }}
  {{- end }}
    tolerations: {{ include "linux-node-tolerations" . | nindent 4 }}
-@@ -264,42 +221,13 @@
+@@ -264,41 +221,12 @@
  {{- end }}
  {{- if .Values.global.imagePullSecrets }}
    imagePullSecrets:
@@ -163,9 +163,7 @@
    additionalScrapeConfigs:
 -    name: {{ template "kube-prometheus-stack.fullname" . }}-prometheus-scrape-confg
 -    key: additional-scrape-configs.yaml
-+    name: {{ template "project-prometheus-stack.fullname" . }}-federate
-+    key: federate-scrape-config.yaml
- {{- end }}
+-{{- end }}
 -{{- if .Values.prometheus.prometheusSpec.additionalScrapeConfigsSecret.enabled }}
 -  additionalScrapeConfigs:
 -    name: {{ .Values.prometheus.prometheusSpec.additionalScrapeConfigsSecret.name }}
@@ -194,10 +192,11 @@
 -  additionalAlertRelabelConfigs:
 -    name: {{ .Values.prometheus.prometheusSpec.additionalAlertRelabelConfigsSecret.name }}
 -    key: {{ .Values.prometheus.prometheusSpec.additionalAlertRelabelConfigsSecret.key }}
--{{- end }}
++    name: {{ template "project-prometheus-stack.fullname" . }}-federate
++    key: federate-scrape-config.yaml
+ {{- end }}
  {{- if .Values.prometheus.prometheusSpec.containers }}
    containers:
- {{ tpl .Values.prometheus.prometheusSpec.containers $ | indent 4 }}
 @@ -311,10 +239,6 @@
  {{- if .Values.prometheus.prometheusSpec.priorityClassName }}
    priorityClassName: {{ .Values.prometheus.prometheusSpec.priorityClassName }}
