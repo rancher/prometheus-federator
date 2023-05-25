@@ -560,7 +560,7 @@
 -  ## Image to use to run the scripts
 -  image:
 -    repository: rancher/shell
--    tag: v0.1.18
+-    tag: v0.1.19
 -
 -## Rancher Monitoring
 -##
@@ -971,15 +971,6 @@
        label: grafana_datasource
        labelValue: "1"
  
-@@ -1591,7 +820,7 @@
-   proxy:
-     image:
-       repository: rancher/mirrored-library-nginx
--      tag: 1.21.1-alpine
-+      tag: 1.24.0-alpine
- 
-   ## Enable an Specify container in extraContainers. This is meant to allow adding an authentication proxy to a grafana pod
-   extraContainers: |
 @@ -1652,292 +881,8 @@
      tlsConfig: {}
      scrapeTimeout: 30s
@@ -2539,7 +2530,7 @@
      ##
      securityContext:
        runAsGroup: 2000
-@@ -3554,28 +1412,14 @@
+@@ -3554,20 +1412,6 @@
      ##
      priorityClassName: ""
  
@@ -2560,8 +2551,7 @@
      proxy:
        image:
          repository: rancher/mirrored-library-nginx
--        tag: 1.21.1-alpine
-+        tag: 1.24.0-alpine
+@@ -3575,7 +1419,7 @@
  
      ## Containers allows injecting additional containers. This is meant to allow adding an authentication proxy to a Prometheus pod.
      ## if using proxy extraContainer update targetPort with proxy container port
@@ -2570,15 +2560,6 @@
        - name: prometheus-proxy
          args:
          - nginx
-@@ -3583,7 +1427,7 @@
-         - daemon off;
-         - -c
-         - /nginx/nginx.conf
--        image: rancher/mirrored-library-nginx:1.21.1-alpine
-+        image: "{{ template "system_default_registry" . }}{{ .Values.prometheus.prometheusSpec.proxy.image.repository }}:{{ .Values.prometheus.prometheusSpec.proxy.image.tag }}"
-         ports:
-         - containerPort: 8081
-           name: nginx-http
 @@ -3616,10 +1460,6 @@
      ## OverrideHonorTimestamps allows to globally enforce honoring timestamps in all scrape configs.
      overrideHonorTimestamps: false
