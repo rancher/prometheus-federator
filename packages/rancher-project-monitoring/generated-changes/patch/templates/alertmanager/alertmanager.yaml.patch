@@ -81,3 +81,10 @@
  {{- end }}
  {{- if .Values.alertmanager.alertmanagerSpec.containers }}
    containers:
+@@ -167,4 +162,4 @@
+ {{- if .Values.alertmanager.alertmanagerSpec.minReadySeconds }}
+   minReadySeconds: {{ .Values.alertmanager.alertmanagerSpec.minReadySeconds }}
+ {{- end }}
+-{{- end }}
++{{- end }}
+\ No newline at end of file
