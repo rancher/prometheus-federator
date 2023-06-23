@@ -58,7 +58,7 @@ helmProjectOperator:
 
   image:
     repository: rancher/prometheus-federator
-    tag: v0.3.1
+    tag: v0.3.2
     pullPolicy: IfNotPresent
 
   # Additional arguments to be passed into the Prometheus Federator image
