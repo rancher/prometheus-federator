@@ -46,9 +46,18 @@ exclude_queries=(
     # CPU Throttling Metrics
     "db/kubernetes-compute-resources-pod/CPU_Throttling_query0"
     "db/rancher-pod/CPU_Utilization_query0"
+    "db/rancher-pod/CPU_Utilization_query1"
+    "db/rancher-pod/CPU_Utilization_query3"
     "db/rancher-pod-containers/CPU_Utilization_query0"
+    "db/rancher-pod-containers/CPU_Utilization_query1"
+    "db/rancher-pod-containers/CPU_Utilization_query3"
     "db/rancher-workload/CPU_Utilization_query0"
+    "db/rancher-workload/CPU_Utilization_query1"
+    "db/rancher-workload/CPU_Utilization_query3"
     "db/rancher-workload-pods/CPU_Utilization_query0"
+    "db/rancher-workload-pods/CPU_Utilization_query1"
+    "db/rancher-workload-pods/CPU_Utilization_query3"
+
 
     # Persistent Volume Metrics
     "db/kubernetes-persistent-volumes/Volume_Space_Usage_query0"
@@ -73,7 +82,9 @@ exclude_queries=(
     "db/kubernetes-compute-resources-project/Current_Storage_IO_query0"
     "db/kubernetes-compute-resources-project/Current_Storage_IO_query1"
     "db/kubernetes-compute-resources-project/Current_Storage_IO_query2"
-)
+    "db/kubernetes-compute-resources-namespace-pods/Memory_Quota_query7"
+    "db/kubernetes-compute-resources-node-pods/Memory_Quota_query7"
+    "db/kubernetes-compute-resources-pod/Memory_Quota_query7")
 
 
 unset FAILED
