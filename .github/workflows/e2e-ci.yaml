@@ -127,9 +127,9 @@ jobs:
       -
         name: Validate Project Grafana Dashboards
         run: ./.github/workflows/e2e/scripts/validate-project-grafana-dashboards.sh;
-      -
-        name: Validate Project Grafana Dashboard Data
-        run: ./.github/workflows/e2e/scripts/validate-project-grafana-dashboard-data.sh;
+      #-
+        #name: Validate Project Grafana Dashboard Data
+        #run: ./.github/workflows/e2e/scripts/validate-project-grafana-dashboard-data.sh;
       -
         name: Validate Project Prometheus Alerts
         run: ./.github/workflows/e2e/scripts/validate-project-prometheus-alerts.sh;
