@@ -32,7 +32,11 @@ data:
 {{- else if and .Values.grafana.ingress.enabled .Values.grafana.ingress.hosts }}
       "grafanaURL": "http://{{ tpl (index .Values.grafana.ingress.hosts 0) . }}{{ .Values.grafana.grafanaSpec.ingress.path }}",
 {{- else if not (or (empty .Values.global.cattle.url) (empty .Values.global.cattle.clusterId)) }}
+      {{- if eq .Values.global.cattle.clusterId "local" -}}
+      "grafanaURL": "{{ .Values.global.cattle.url }}/api/v1/namespaces/{{ template "project-prometheus-stack.namespace" . }}/services/http:{{ include "call-nested" (list . "grafana" "grafana.fullname") }}:{{ .Values.grafana.service.port }}/proxy",
+      {{- else }}
       "grafanaURL": "{{ .Values.global.cattle.url }}/k8s/clusters/{{ .Values.global.cattle.clusterId }}/api/v1/namespaces/{{ template "project-prometheus-stack.namespace" . }}/services/http:{{ include "call-nested" (list . "grafana" "grafana.fullname") }}:{{ .Values.grafana.service.port }}/proxy",
+      {{- end }}
 {{- else }}
       "grafanaURL": "http://{{ include "call-nested" (list . "grafana" "grafana.fullname") }}.{{ template "project-prometheus-stack.namespace" . }}:{{ .Values.grafana.service.port }}",
 {{- end }}
