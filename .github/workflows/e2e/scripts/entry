@@ -16,7 +16,11 @@ if [[ "${E2E_CI}" == "true" ]]; then
 fi
 
 if [[ -n ${RANCHER_URL} ]] && [[ -n ${RANCHER_CLUSTER} ]] && [[ -n ${RANCHER_TOKEN} ]]; then
-    API_SERVER_URL=${RANCHER_URL}/k8s/clusters/${RANCHER_CLUSTER}
+    if [[ -n ${RANCHER_CLUSTER} && ${RANCHER_CLUSTER} != "local" ]]; then 
+        API_SERVER_URL=${RANCHER_URL}/k8s/clusters/${RANCHER_CLUSTER}
+    else
+        API_SERVER_URL=${RANCHER_URL}
+    fi 
     API_SERVER_CURL_AUTH_HEADERS="-k -H 'Authorization: Bearer ${RANCHER_TOKEN}'"
     RANCHER_HELM_ARGS="--set global.cattle.url=${RANCHER_URL} --set global.cattle.clusterId=${RANCHER_CLUSTER}"
 else
