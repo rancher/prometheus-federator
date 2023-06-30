@@ -1,6 +1,6 @@
 --- charts-original/Chart.yaml
 +++ charts/Chart.yaml
-@@ -1,25 +1,11 @@
+@@ -1,25 +1,9 @@
  annotations:
 -  artifacthub.io/links: |
 -    - name: Chart Source
@@ -16,7 +16,6 @@
 -  catalog.cattle.io/namespace: cattle-monitoring-system
 +  catalog.cattle.io/display-name: Project Monitoring
 +  catalog.cattle.io/hidden: "true"
-+  catalog.cattle.io/kube-version: '>= 1.16.0-0 < 1.26.0-0'
    catalog.cattle.io/permits-os: linux,windows
 -  catalog.cattle.io/provides-gvr: monitoring.coreos.com.prometheus/v1
 -  catalog.cattle.io/rancher-version: '>= 2.7.0-0 < 2.8.0-0'
@@ -26,12 +25,11 @@
 -  catalog.cattle.io/type: cluster-tool
 -  catalog.cattle.io/ui-component: monitoring
 -  catalog.cattle.io/upstream-version: 19.0.3
-+  catalog.cattle.io/rancher-version: '>= 2.6.5-0 <= 2.8.0-0'
 +  catalog.cattle.io/release-name: rancher-project-monitoring
  apiVersion: v2
  appVersion: 0.59.1
  dependencies:
-@@ -28,38 +14,20 @@
+@@ -28,38 +12,19 @@
    repository: file://./charts/grafana
  description: Collects several related Helm charts, Grafana dashboards, and Prometheus
    rules combined with documentation and scripts to provide easy to operate end-to-end
@@ -45,7 +43,7 @@
  - prometheus
 -- kube-prometheus
  - monitoring
- kubeVersion: '>=1.16.0-0'
+-kubeVersion: '>=1.16.0-0'
  maintainers:
 -- email: andrew@quadcorps.co.uk
 -  name: andrewgkew
