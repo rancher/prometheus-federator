@@ -150,6 +150,7 @@ rules:
 {{- end }}
   verbs:
   - 'get'
+  - 'create'
 - apiGroups:
   - ""
   resources:
