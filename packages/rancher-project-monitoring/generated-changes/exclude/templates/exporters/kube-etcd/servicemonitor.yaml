@@ -1,4 +1,4 @@
-{{- if and .Values.kubeEtcd.enabled .Values.kubeEtcd.serviceMonitor.enabled }}
+{{- if and .Values.kubeEtcd.enabled .Values.kubeEtcd.serviceMonitor.enabled .Values.kubernetesServiceMonitors.enabled }}
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
@@ -12,6 +12,7 @@ metadata:
 {{ include "kube-prometheus-stack.labels" . | indent 4 }}
 spec:
   jobLabel: jobLabel
+  {{- include "servicemonitor.scrapeLimits" .Values.kubeEtcd.serviceMonitor | nindent 4 }}
   selector:
     matchLabels:
       app: {{ template "kube-prometheus-stack.name" . }}-kube-etcd
@@ -45,7 +46,7 @@ spec:
       {{- end}}
       insecureSkipVerify: {{ .Values.kubeEtcd.serviceMonitor.insecureSkipVerify }}
     {{- end }}
-  - metricRelabelings:
+    metricRelabelings:
     {{- if .Values.kubeEtcd.serviceMonitor.metricRelabelings }}
     {{ tpl (toYaml .Values.kubeEtcd.serviceMonitor.metricRelabelings | indent 4) . }}
     {{- end }}

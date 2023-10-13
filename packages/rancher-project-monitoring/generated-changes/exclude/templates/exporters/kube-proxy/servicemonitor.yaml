@@ -1,4 +1,4 @@
-{{- if and .Values.kubeProxy.enabled .Values.kubeProxy.serviceMonitor.enabled }}
+{{- if and .Values.kubeProxy.enabled .Values.kubeProxy.serviceMonitor.enabled .Values.kubernetesServiceMonitors.enabled }}
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
@@ -12,6 +12,7 @@ metadata:
 {{ include "kube-prometheus-stack.labels" . | indent 4 }}
 spec:
   jobLabel: jobLabel
+  {{- include "servicemonitor.scrapeLimits" .Values.kubeProxy.serviceMonitor | nindent 2 }}
   selector:
     matchLabels:
       app: {{ template "kube-prometheus-stack.name" . }}-kube-proxy
@@ -33,7 +34,7 @@ spec:
     tlsConfig:
       caFile: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
     {{- end}}
-  - metricRelabelings:
+    metricRelabelings:
     {{- if .Values.kubeProxy.serviceMonitor.metricRelabelings }}
     {{ tpl (toYaml .Values.kubeProxy.serviceMonitor.metricRelabelings | indent 4) . }}
     {{- end }}

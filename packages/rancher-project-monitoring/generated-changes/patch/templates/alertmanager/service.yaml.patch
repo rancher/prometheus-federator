@@ -17,11 +17,12 @@
  {{- if .Values.alertmanager.service.labels }}
  {{ toYaml .Values.alertmanager.service.labels | indent 4 }}
  {{- end }}
-@@ -48,6 +48,6 @@
+@@ -48,7 +48,7 @@
  {{- end }}
    selector:
      app.kubernetes.io/name: alertmanager
 -    alertmanager: {{ template "kube-prometheus-stack.alertmanager.crname" . }}
 +    alertmanager: {{ template "project-prometheus-stack.alertmanager.crname" . }}
-   type: "{{ .Values.alertmanager.service.type }}"
+ {{- if .Values.alertmanager.service.sessionAffinity }}
+   sessionAffinity: {{ .Values.alertmanager.service.sessionAffinity }}
  {{- end }}

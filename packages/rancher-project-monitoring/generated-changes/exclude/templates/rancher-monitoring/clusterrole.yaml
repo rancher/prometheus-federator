@@ -119,6 +119,7 @@ rules:
 {{- end }}
   verbs:
   - 'get'
+  - 'create'
 - apiGroups:
   - ""
   resourceNames:

@@ -1,6 +1,6 @@
 --- charts-original/templates/prometheus/psp-clusterrole.yaml
 +++ charts/templates/prometheus/psp-clusterrole.yaml
-@@ -2,10 +2,10 @@
+@@ -3,10 +3,10 @@
  kind: ClusterRole
  apiVersion: rbac.authorization.k8s.io/v1
  metadata:
@@ -14,10 +14,13 @@
  rules:
  {{- $kubeTargetVersion := default .Capabilities.KubeVersion.GitVersion .Values.kubeTargetVersionOverride }}
  {{- if semverCompare "> 1.15.0-0" $kubeTargetVersion }}
-@@ -16,5 +16,5 @@
+@@ -17,6 +17,6 @@
    resources: ['podsecuritypolicies']
    verbs:     ['use']
    resourceNames:
 -  - {{ template "kube-prometheus-stack.fullname" . }}-prometheus
 +  - {{ template "project-prometheus-stack.fullname" . }}-prometheus
++{{- end }}
  {{- end }}
+-{{- end }}
+\ No newline at end of file
