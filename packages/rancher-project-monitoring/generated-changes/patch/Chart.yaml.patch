@@ -1,39 +1,15 @@
 --- charts-original/Chart.yaml
 +++ charts/Chart.yaml
-@@ -1,25 +1,9 @@
- annotations:
--  artifacthub.io/links: |
--    - name: Chart Source
--      url: https://github.com/prometheus-community/helm-charts
--    - name: Upstream Project
--      url: https://github.com/prometheus-operator/kube-prometheus
--  artifacthub.io/operator: "true"
--  catalog.cattle.io/auto-install: rancher-monitoring-crd=match
-   catalog.cattle.io/certified: rancher
--  catalog.cattle.io/deploys-on-os: windows
--  catalog.cattle.io/display-name: Monitoring
--  catalog.cattle.io/kube-version: '>= 1.16.0-0 < 1.27.0-0'
--  catalog.cattle.io/namespace: cattle-monitoring-system
-+  catalog.cattle.io/display-name: Project Monitoring
-+  catalog.cattle.io/hidden: "true"
-   catalog.cattle.io/permits-os: linux,windows
--  catalog.cattle.io/provides-gvr: monitoring.coreos.com.prometheus/v1
--  catalog.cattle.io/rancher-version: '>= 2.7.0-0 < 2.8.0-0'
--  catalog.cattle.io/release-name: rancher-monitoring
--  catalog.cattle.io/requests-cpu: 4500m
--  catalog.cattle.io/requests-memory: 4000Mi
--  catalog.cattle.io/type: cluster-tool
--  catalog.cattle.io/ui-component: monitoring
--  catalog.cattle.io/upstream-version: 19.0.3
-+  catalog.cattle.io/release-name: rancher-project-monitoring
- apiVersion: v2
- appVersion: 0.59.1
- dependencies:
-@@ -28,38 +12,19 @@
+@@ -27,35 +27,21 @@
+ - condition: grafana.enabled
+   name: grafana
    repository: file://./charts/grafana
- description: Collects several related Helm charts, Grafana dashboards, and Prometheus
-   rules combined with documentation and scripts to provide easy to operate end-to-end
--  Kubernetes cluster monitoring with Prometheus using the Prometheus Operator.
+-description: kube-prometheus-stack collects Kubernetes manifests, Grafana dashboards,
+-  and Prometheus rules combined with documentation and scripts to provide easy to
+-  operate end-to-end Kubernetes cluster monitoring with Prometheus using the Prometheus
+-  Operator.
++description: Collects several related Helm charts, Grafana dashboards, and Prometheus
++  rules combined with documentation and scripts to provide easy to operate end-to-end
 +  Kubernetes cluster monitoring with Prometheus. Depends on the existence of a Cluster
 +  Prometheus deployed via Prometheus Operator
  home: https://github.com/prometheus-operator/kube-prometheus
@@ -42,13 +18,11 @@
 -- operator
  - prometheus
 -- kube-prometheus
- - monitoring
 -kubeVersion: '>=1.16.0-0'
++- monitoring
  maintainers:
 -- email: andrew@quadcorps.co.uk
 -  name: andrewgkew
--- email: cedric@desaintmartin.fr
--  name: desaintmartin
 -- email: gianrubio@gmail.com
 -  name: gianrubio
 -- email: github.gkarthiks@gmail.com
@@ -59,16 +33,18 @@
 -  name: scottrigby
 -- email: miroslav.hadzhiev@gmail.com
 -  name: Xtigyro
- - email: arvind.iyengar@suse.com
-   name: Arvind
- - email: amangeet.samra@suse.com
-   name: Geet
-   url: https://github.com/geethub97
+-- email: quentin.bisson@gmail.com
+-  name: QuentinBisson
 -name: rancher-monitoring
 -sources:
 -- https://github.com/prometheus-community/helm-charts
 -- https://github.com/prometheus-operator/kube-prometheus
++- email: arvind.iyengar@suse.com
++  name: Arvind
++- email: amangeet.samra@suse.com
++  name: Geet
++  url: https://github.com/geethub97
 +name: rancher-project-monitoring
  type: application
--version: 102.0.1+up40.1.2
-+version: 0.1.0
+-version: 103.0.0+up45.31.1
++version: 0.2.0

@@ -5,9 +5,8 @@
    kind: ConfigMap
    metadata:
 -    name: {{ printf "%s-%s" (include "kube-prometheus-stack.fullname" $) $dashboardName | trunc 63 | trimSuffix "-" }}
--    namespace: {{ .Values.grafana.defaultDashboards.namespace }}
 +    name: {{ printf "%s-%s" (include "project-prometheus-stack.fullname" $) $dashboardName | trunc 63 | trimSuffix "-" }}
-+    namespace: {{ template "project-prometheus-stack.namespace" . }}
+     namespace: {{ .Values.grafana.defaultDashboards.namespace }}
      labels:
        {{- if $.Values.grafana.sidecar.dashboards.label }}
        {{ $.Values.grafana.sidecar.dashboards.label }}: {{ ternary $.Values.grafana.sidecar.dashboards.labelValue "1" (not (empty $.Values.grafana.sidecar.dashboards.labelValue)) | quote }}

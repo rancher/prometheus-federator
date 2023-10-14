@@ -10,7 +10,7 @@
 +  namespace: {{ template "project-prometheus-stack.namespace" . }}
    labels:
 -    app: {{ template "kube-prometheus-stack.name" . }}-prometheus
-+    app: {{ template "project-prometheus-stack.name" . }}-prometheus
++    app: {{ template "project-prometheus-stack.name" . }}-prometheus1
      self-monitor: {{ .Values.prometheus.serviceMonitor.selfMonitor | quote }}
 -{{ include "kube-prometheus-stack.labels" . | indent 4 }}
 +{{ include "project-prometheus-stack.labels" . | indent 4 }}

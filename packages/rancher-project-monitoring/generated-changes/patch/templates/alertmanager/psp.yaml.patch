@@ -1,6 +1,6 @@
 --- charts-original/templates/alertmanager/psp.yaml
 +++ charts/templates/alertmanager/psp.yaml
-@@ -2,14 +2,14 @@
+@@ -3,14 +3,14 @@
  apiVersion: policy/v1beta1
  kind: PodSecurityPolicy
  metadata:

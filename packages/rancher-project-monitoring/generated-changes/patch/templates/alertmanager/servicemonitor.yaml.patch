@@ -1,6 +1,6 @@
 --- charts-original/templates/alertmanager/servicemonitor.yaml
 +++ charts/templates/alertmanager/servicemonitor.yaml
-@@ -2,20 +2,20 @@
+@@ -2,11 +2,11 @@
  apiVersion: monitoring.coreos.com/v1
  kind: ServiceMonitor
  metadata:
@@ -13,7 +13,11 @@
 -{{ include "kube-prometheus-stack.labels" . | indent 4 }}
 +    app: {{ template "project-prometheus-stack.name" . }}-alertmanager
 +{{ include "project-prometheus-stack.labels" . | indent 4 }}
- spec:
+ {{- with .Values.alertmanager.serviceMonitor.additionalLabels }}
+ {{- toYaml . | nindent 4 }}
+ {{- end }}
+@@ -14,12 +14,12 @@
+   {{- include "servicemonitor.scrapeLimits" .Values.alertmanager.serviceMonitor | nindent 2 }}
    selector:
      matchLabels:
 -      app: {{ template "kube-prometheus-stack.name" . }}-alertmanager
@@ -26,4 +30,4 @@
 +      - {{ printf "%s" (include "project-prometheus-stack.namespace" .) | quote }}
    endpoints:
    - port: {{ .Values.alertmanager.alertmanagerSpec.portName }}
-     {{- if .Values.alertmanager.serviceMonitor.interval }}
+     enableHttp2: {{ .Values.alertmanager.serviceMonitor.enableHttp2 }}

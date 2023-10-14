@@ -1,6 +1,6 @@
 --- charts-original/templates/alertmanager/psp-role.yaml
 +++ charts/templates/alertmanager/psp-role.yaml
-@@ -2,11 +2,11 @@
+@@ -3,11 +3,11 @@
  kind: Role
  apiVersion: rbac.authorization.k8s.io/v1
  metadata:
@@ -16,10 +16,11 @@
  rules:
  {{- $kubeTargetVersion := default .Capabilities.KubeVersion.GitVersion .Values.kubeTargetVersionOverride }}
  {{- if semverCompare "> 1.15.0-0" $kubeTargetVersion }}
-@@ -17,5 +17,5 @@
+@@ -18,6 +18,6 @@
    resources: ['podsecuritypolicies']
    verbs:     ['use']
    resourceNames:
 -  - {{ template "kube-prometheus-stack.fullname" . }}-alertmanager
 +  - {{ template "project-prometheus-stack.fullname" . }}-alertmanager
+ {{- end }}
  {{- end }}

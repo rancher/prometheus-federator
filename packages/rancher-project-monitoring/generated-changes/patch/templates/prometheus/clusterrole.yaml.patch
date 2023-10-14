@@ -14,13 +14,3 @@
  rules:
  # This permission are not in the kube-prometheus repo
  # they're grabbed from https://github.com/prometheus/prometheus/blob/master/documentation/examples/rbac-setup.yml
-@@ -22,9 +22,4 @@
-   resources:
-   - ingresses
-   verbs: ["get", "list", "watch"]
--- nonResourceURLs: ["/metrics", "/metrics/cadvisor"]
--  verbs: ["get"]
--{{- if .Values.prometheus.additionalRulesForClusterRole }}
--{{ toYaml .Values.prometheus.additionalRulesForClusterRole | indent 0 }}
--{{- end }}
- {{- end }}

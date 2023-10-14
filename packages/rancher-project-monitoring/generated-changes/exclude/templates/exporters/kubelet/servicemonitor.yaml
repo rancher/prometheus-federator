@@ -1,7 +1,7 @@
 {{- if (and (not .Values.kubelet.enabled) .Values.hardenedKubelet.enabled) }}
 {{ required "Cannot set .Values.hardenedKubelet.enabled=true when .Values.kubelet.enabled=false" "" }}
 {{- end }}
-{{- if (and .Values.kubelet.enabled (not .Values.hardenedKubelet.enabled) (not .Values.k3sServer.enabled)) }}
+{{- if (and .Values.kubelet.enabled .Values.kubernetesServiceMonitors.enabled (not .Values.hardenedKubelet.enabled) (not .Values.k3sServer.enabled)) }}
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
@@ -14,6 +14,7 @@ metadata:
   {{- end }}
 {{- include "kube-prometheus-stack.labels" . | indent 4 }}
 spec:
+  {{- include "servicemonitor.scrapeLimits" .Values.kubelet.serviceMonitor | nindent 2 }}
   endpoints:
   {{- if .Values.kubelet.serviceMonitor.https }}
   - port: https-metrics
@@ -32,7 +33,7 @@ spec:
       insecureSkipVerify: true
     bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
     honorLabels: true
-  - metricRelabelings:
+    metricRelabelings:
     {{- if .Values.kubelet.serviceMonitor.metricRelabelings }}
     {{ tpl (toYaml .Values.kubelet.serviceMonitor.metricRelabelings | indent 4) . }}
     {{- end }}

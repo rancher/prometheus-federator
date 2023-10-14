@@ -1,12 +1,10 @@
 --- charts-original/templates/grafana/dashboards-1.14/k8s-resources-node.yaml
 +++ charts/templates/grafana/dashboards-1.14/k8s-resources-node.yaml
-@@ -8,16 +8,16 @@
- apiVersion: v1
+@@ -9,15 +9,15 @@
  kind: ConfigMap
  metadata:
--  namespace: {{ .Values.grafana.defaultDashboards.namespace }}
+   namespace: {{ .Values.grafana.defaultDashboards.namespace }}
 -  name: {{ printf "%s-%s" (include "kube-prometheus-stack.fullname" $) "k8s-resources-node" | trunc 63 | trimSuffix "-" }}
-+  namespace: {{ template "project-prometheus-stack.namespace" . }}
 +  name: {{ printf "%s-%s" (include "project-prometheus-stack.fullname" $) "k8s-resources-node" | trunc 63 | trimSuffix "-" }}
    annotations:
  {{ toYaml .Values.grafana.sidecar.dashboards.annotations | indent 4 }}
@@ -21,7 +19,7 @@
  data:
    k8s-resources-node.json: |-
      {
-@@ -72,17 +72,7 @@
+@@ -72,17 +72,6 @@
                          "points": false,
                          "renderer": "flot",
                          "seriesOverrides": [
@@ -36,11 +34,10 @@
 -                                "linewidth": 2,
 -                                "stack": false
 -                            }
-+
                          ],
                          "spaceLength": 10,
                          "span": 12,
-@@ -90,15 +80,7 @@
+@@ -90,15 +79,7 @@
                          "steppedLine": false,
                          "targets": [
                              {
@@ -57,7 +54,7 @@
                                  "format": "time_series",
                                  "intervalFactor": 2,
                                  "legendFormat": "{{`{{`}}pod{{`}}`}}",
-@@ -336,7 +318,7 @@
+@@ -336,7 +317,7 @@
                          ],
                          "targets": [
                              {
@@ -66,7 +63,7 @@
                                  "format": "table",
                                  "instant": true,
                                  "intervalFactor": 2,
-@@ -345,7 +327,7 @@
+@@ -345,7 +326,7 @@
                                  "step": 10
                              },
                              {
@@ -75,7 +72,7 @@
                                  "format": "table",
                                  "instant": true,
                                  "intervalFactor": 2,
-@@ -354,7 +336,7 @@
+@@ -354,7 +335,7 @@
                                  "step": 10
                              },
                              {
@@ -84,7 +81,7 @@
                                  "format": "table",
                                  "instant": true,
                                  "intervalFactor": 2,
-@@ -363,7 +345,7 @@
+@@ -363,7 +344,7 @@
                                  "step": 10
                              },
                              {
@@ -93,7 +90,7 @@
                                  "format": "table",
                                  "instant": true,
                                  "intervalFactor": 2,
-@@ -372,7 +354,7 @@
+@@ -372,7 +353,7 @@
                                  "step": 10
                              },
                              {
@@ -102,7 +99,7 @@
                                  "format": "table",
                                  "instant": true,
                                  "intervalFactor": 2,
-@@ -467,17 +449,7 @@
+@@ -467,17 +448,6 @@
                          "points": false,
                          "renderer": "flot",
                          "seriesOverrides": [
@@ -117,11 +114,10 @@
 -                                "linewidth": 2,
 -                                "stack": false
 -                            }
-+
                          ],
                          "spaceLength": 10,
                          "span": 12,
-@@ -485,15 +457,7 @@
+@@ -485,15 +455,7 @@
                          "steppedLine": false,
                          "targets": [
                              {
@@ -138,7 +134,7 @@
                                  "format": "time_series",
                                  "intervalFactor": 2,
                                  "legendFormat": "{{`{{`}}pod{{`}}`}}",
-@@ -788,7 +752,7 @@
+@@ -788,7 +750,7 @@
                          ],
                          "targets": [
                              {
@@ -147,7 +143,7 @@
                                  "format": "table",
                                  "instant": true,
                                  "intervalFactor": 2,
-@@ -797,7 +761,7 @@
+@@ -797,7 +759,7 @@
                                  "step": 10
                              },
                              {
@@ -156,7 +152,7 @@
                                  "format": "table",
                                  "instant": true,
                                  "intervalFactor": 2,
-@@ -806,7 +770,7 @@
+@@ -806,7 +768,7 @@
                                  "step": 10
                              },
                              {
@@ -165,7 +161,7 @@
                                  "format": "table",
                                  "instant": true,
                                  "intervalFactor": 2,
-@@ -815,7 +779,7 @@
+@@ -815,7 +777,7 @@
                                  "step": 10
                              },
                              {
@@ -174,7 +170,7 @@
                                  "format": "table",
                                  "instant": true,
                                  "intervalFactor": 2,
-@@ -824,7 +788,7 @@
+@@ -824,7 +786,7 @@
                                  "step": 10
                              },
                              {
@@ -183,7 +179,7 @@
                                  "format": "table",
                                  "instant": true,
                                  "intervalFactor": 2,
-@@ -833,7 +797,7 @@
+@@ -833,7 +795,7 @@
                                  "step": 10
                              },
                              {
@@ -192,7 +188,7 @@
                                  "format": "table",
                                  "instant": true,
                                  "intervalFactor": 2,
-@@ -842,7 +806,7 @@
+@@ -842,7 +804,7 @@
                                  "step": 10
                              },
                              {
@@ -201,7 +197,7 @@
                                  "format": "table",
                                  "instant": true,
                                  "intervalFactor": 2,
-@@ -851,7 +815,7 @@
+@@ -851,7 +813,7 @@
                                  "step": 10
                              },
                              {
@@ -210,7 +206,7 @@
                                  "format": "table",
                                  "instant": true,
                                  "intervalFactor": 2,
-@@ -940,33 +904,6 @@
+@@ -940,33 +902,6 @@
                          "value": ""
                      },
                      "datasource": "$datasource",
@@ -244,7 +240,7 @@
                      "hide": 0,
                      "includeAll": false,
                      "label": null,
-@@ -975,7 +912,7 @@
+@@ -975,7 +910,7 @@
                      "options": [
  
                      ],
