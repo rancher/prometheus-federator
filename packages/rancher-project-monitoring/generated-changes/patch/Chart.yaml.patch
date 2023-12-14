@@ -46,5 +46,5 @@
 +  url: https://github.com/geethub97
 +name: rancher-project-monitoring
  type: application
--version: 103.0.0+up45.31.1
+-version: 103.0.2+up45.31.1
 +version: 0.2.0

@@ -7,7 +7,7 @@ annotations:
   catalog.cattle.io/provides-gvr: helm.cattle.io.projecthelmchart/v1alpha1
   catalog.cattle.io/release-name: prometheus-federator
 apiVersion: v2
-appVersion: 0.3.4
+appVersion: 0.3.5
 dependencies:
 - condition: helmProjectOperator.enabled
   name: helmProjectOperator
@@ -15,4 +15,4 @@ dependencies:
 description: Prometheus Federator
 icon: https://raw.githubusercontent.com/rancher/prometheus-federator/main/assets/logos/prometheus-federator.svg
 name: prometheus-federator
-version: 0.4.0
+version: 0.4.1
