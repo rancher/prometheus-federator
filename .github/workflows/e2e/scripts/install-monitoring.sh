@@ -1,13 +1,23 @@
 #!/bin/bash
 set -e
+set -x
 
 source $(dirname $0)/entry
 
+HELM_REPO="rancher-charts"
+
 cd $(dirname $0)/../../../..
 
-helm repo add rancher-charts https://charts.rancher.io
+helm version
+
+helm repo add ${HELM_REPO} https://charts.rancher.io
 helm repo update
-helm upgrade --install --create-namespace -n cattle-monitoring-system rancher-monitoring-crd rancher-charts/rancher-monitoring-crd
+
+echo "Installing rancher monitoring crd with :\n"
+
+helm search repo ${HELM_REPO}/rancher-monitoring-crd --versions --max-col-width=0 | head -n 2
+
+helm upgrade --install --create-namespace -n cattle-monitoring-system rancher-monitoring-crd ${HELM_REPO}/rancher-monitoring-crd
 
 if [[ "${E2E_CI}" == "true" ]]; then
     e2e_args="--set grafana.resources=null --set prometheus.prometheusSpec.resources=null --set alertmanager.alertmanagerSpec.resources=null"
@@ -28,6 +38,9 @@ case "${KUBERNETES_DISTRIBUTION_TYPE}" in
     exit 1
 esac
 
-helm upgrade --install --create-namespace -n cattle-monitoring-system rancher-monitoring ${cluster_args} ${e2e_args} ${RANCHER_HELM_ARGS} rancher-charts/rancher-monitoring
+echo "Installing rancher monitoring with :\n"
+
+helm search repo ${HELM_REPO}/rancher-monitoring --versions --max-col-width=0 | head -n 2
+helm upgrade --install --create-namespace -n cattle-monitoring-system rancher-monitoring ${cluster_args} ${e2e_args} ${RANCHER_HELM_ARGS} ${HELM_REPO}/rancher-monitoring
 
 echo "PASS: Rancher Monitoring has been installed"
