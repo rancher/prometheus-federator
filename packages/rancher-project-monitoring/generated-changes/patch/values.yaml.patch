@@ -564,7 +564,7 @@
 -  ## Image to use to run the scripts
 -  image:
 -    repository: rancher/shell
--    tag: v0.1.19
+-    tag: v0.1.22
 -
 +# Rancher Project Monitoring Configuration
  ## Rancher Monitoring
@@ -824,10 +824,13 @@
  
      ## Hosts must be provided if Ingress is enabled.
      ##
-@@ -1000,50 +369,6 @@
+@@ -1000,53 +369,6 @@
    secret:
      annotations: {}
  
+-  # by default the alertmanager secret is not overwritten if it already exists
+-    recreateIfExists: false
+-
 -  ## Configuration for creating an Ingress that will map to each Alertmanager replica service
 -  ## alertmanager.servicePerReplica must be enabled
 -  ##
@@ -875,7 +878,7 @@
    ## Configuration for Alertmanager service
    ##
    service:
-@@ -1080,41 +405,6 @@
+@@ -1083,41 +405,6 @@
      ##
      externalTrafficPolicy: Cluster
  
@@ -917,7 +920,7 @@
      ## Service type
      ##
      type: ClusterIP
-@@ -1127,30 +417,6 @@
+@@ -1130,30 +417,6 @@
      interval: ""
      selfMonitor: true
  
@@ -948,7 +951,7 @@
      ## proxyUrl: URL of a proxy that should be used for scraping.
      ##
      proxyUrl: ""
-@@ -1158,10 +424,6 @@
+@@ -1161,10 +424,6 @@
      ## scheme: HTTP scheme to use for scraping. Can be used with `tlsConfig` for example if using istio mTLS.
      scheme: ""
  
@@ -959,7 +962,7 @@
      ## tlsConfig: TLS configuration to use when scraping the endpoint. For example if using istio mTLS.
      ## Of type: https://github.com/coreos/prometheus-operator/blob/main/Documentation/api.md#tlsconfig
      tlsConfig: {}
-@@ -1229,39 +491,13 @@
+@@ -1232,39 +491,13 @@
  
      ## AlertmanagerConfigs to be selected to merge and configure Alertmanager with.
      ##
@@ -1006,7 +1009,7 @@
  
      ## AlermanagerConfig to be used as top level configuration
      ##
-@@ -1270,13 +506,6 @@
+@@ -1273,13 +506,6 @@
      # alertmanagerConfiguration:
      #   name: global-alertmanager-Configuration
  
@@ -1020,7 +1023,7 @@
      ## Define Log Format
      # Use logfmt (default) or json logging
      logFormat: logfmt
-@@ -1479,9 +708,6 @@
+@@ -1482,9 +708,6 @@
        org_role: Viewer
      auth.basic:
        enabled: false
@@ -1030,7 +1033,7 @@
      security:
        # Required to embed dashboards in Rancher Cluster Overview Dashboard on Cluster Explorer
        allow_embedding: true
-@@ -1562,10 +788,7 @@
+@@ -1565,10 +788,7 @@
      dashboards:
        enabled: true
        label: grafana_dashboard
@@ -1041,7 +1044,7 @@
  
        ## Annotations for Grafana dashboard configmaps
        ##
-@@ -1573,14 +796,11 @@
+@@ -1576,14 +796,11 @@
        multicluster:
          global:
            enabled: false
@@ -1056,7 +1059,7 @@
  
        uid: prometheus
  
-@@ -1588,9 +808,6 @@
+@@ -1591,9 +808,6 @@
        ##
        # url: http://prometheus-stack-prometheus:9090/
  
@@ -1066,7 +1069,7 @@
        # If not defined, will use prometheus.prometheusSpec.scrapeInterval or its default
        # defaultDatasourceScrapeInterval: 15s
  
-@@ -1598,14 +815,6 @@
+@@ -1601,14 +815,6 @@
        ##
        annotations: {}
  
@@ -1081,7 +1084,7 @@
        label: grafana_datasource
        labelValue: "1"
  
-@@ -1723,424 +932,8 @@
+@@ -1726,690 +932,8 @@
      tlsConfig: {}
      scrapeTimeout: 30s
  
@@ -1154,7 +1157,7 @@
 -        component: apiserver
 -        provider: kubernetes
 -
-     ## MetricRelabelConfigs to apply to samples after scraping, but before ingestion.
+-    ## MetricRelabelConfigs to apply to samples after scraping, but before ingestion.
 -    ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#relabelconfig
 -    ##
 -    metricRelabelings:
@@ -1503,14 +1506,23 @@
 -
 -    ## MetricRelabelConfigs to apply to samples after scraping, but before ingestion.
 -    ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#relabelconfig
-+    ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/master/Documentation/api.md#relabelconfig
-     ##
-     metricRelabelings: []
-     # - action: keep
-@@ -2158,939 +951,27 @@
-     #   replacement: $1
-     #   action: replace
- 
+-    ##
+-    metricRelabelings: []
+-    # - action: keep
+-    #   regex: 'kube_(daemonset|deployment|pod|namespace|node|statefulset).+'
+-    #   sourceLabels: [__name__]
+-
+-    ## RelabelConfigs to apply to samples before scraping
+-    ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#relabelconfig
+-    ##
+-    relabelings: []
+-    # - sourceLabels: [__meta_kubernetes_pod_node_name]
+-    #   separator: ;
+-    #   regex: ^(.*)$
+-    #   targetLabel: nodename
+-    #   replacement: $1
+-    #   action: replace
+-
 -    ## Additional labels
 -    ##
 -    additionalLabels: {}
@@ -1758,25 +1770,16 @@
 -    ## Name of the server to use when validating TLS certificate
 -    serverName: null
 -
--    ## MetricRelabelConfigs to apply to samples after scraping, but before ingestion.
+     ## MetricRelabelConfigs to apply to samples after scraping, but before ingestion.
 -    ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#relabelconfig
--    ##
--    metricRelabelings: []
--    # - action: keep
--    #   regex: 'kube_(daemonset|deployment|pod|namespace|node|statefulset).+'
--    #   sourceLabels: [__name__]
--
--    ## RelabelConfigs to apply to samples before scraping
--    ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#relabelconfig
--    ##
--    relabelings: []
--    # - sourceLabels: [__meta_kubernetes_pod_node_name]
--    #   separator: ;
--    #   regex: ^(.*)$
--    #   targetLabel: nodename
--    #   replacement: $1
--    #   action: replace
--
++    ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/master/Documentation/api.md#relabelconfig
+     ##
+     metricRelabelings: []
+     # - action: keep
+@@ -2427,673 +951,27 @@
+     #   replacement: $1
+     #   action: replace
+ 
 -    ## Additional labels
 -    ##
 -    additionalLabels: {}
@@ -2451,7 +2454,7 @@
    ## Service account for Prometheuses to use.
    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
    ##
-@@ -3099,100 +980,6 @@
+@@ -3102,100 +980,6 @@
      name: ""
      annotations: {}
  
@@ -2552,7 +2555,7 @@
    ## Configuration for Prometheus service
    ##
    service:
-@@ -3243,36 +1030,6 @@
+@@ -3246,36 +1030,6 @@
  
      sessionAffinity: ""
  
@@ -2589,7 +2592,7 @@
    ## Configure pod disruption budgets for Prometheus
    ## ref: https://kubernetes.io/docs/tasks/run-application/configure-pdb/#specifying-a-poddisruptionbudget
    ## This configuration is immutable once created and will require the PDB to be deleted to be changed
-@@ -3283,46 +1040,6 @@
+@@ -3286,46 +1040,6 @@
      minAvailable: 1
      maxUnavailable: ""
  
@@ -2636,7 +2639,7 @@
    ## ExtraSecret can be used to store various data in an extra secret
    ## (use it for example to store hashed basic auth credentials)
    extraSecret:
-@@ -3371,55 +1088,10 @@
+@@ -3374,55 +1088,10 @@
        #   hosts:
        #     - prometheus.example.com
  
@@ -2692,7 +2695,7 @@
      volumes: []
  
    serviceMonitor:
-@@ -3428,35 +1100,11 @@
+@@ -3431,35 +1100,11 @@
      interval: ""
      selfMonitor: true
  
@@ -2729,7 +2732,7 @@
      tlsConfig: {}
  
      bearerTokenFile:
-@@ -3490,15 +1138,11 @@
+@@ -3493,15 +1138,11 @@
      ##
      apiserverConfig: {}
  
@@ -2746,7 +2749,7 @@
  
      ## Number of seconds to wait for target to respond before erroring
      ##
-@@ -3506,7 +1150,7 @@
+@@ -3509,7 +1150,7 @@
  
      ## Interval between consecutive evaluations.
      ##
@@ -2755,7 +2758,7 @@
  
      ## ListenLocal makes the Prometheus server listen on loopback, so that it does not bind against the Pod IP.
      ##
-@@ -3518,10 +1162,6 @@
+@@ -3521,10 +1162,6 @@
      ##
      enableAdminAPI: false
  
@@ -2766,7 +2769,7 @@
      ## WebTLSConfig defines the TLS parameters for HTTPS
      ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#webtlsconfig
      web: {}
-@@ -3589,14 +1229,6 @@
+@@ -3592,14 +1229,6 @@
      ##
      enableRemoteWriteReceiver: false
  
@@ -2781,7 +2784,7 @@
      ## Name of the external label used to denote Prometheus instance name
      ##
      prometheusExternalLabelName: ""
-@@ -3631,13 +1263,6 @@
+@@ -3634,13 +1263,6 @@
      ##
      query: {}
  
@@ -2795,7 +2798,7 @@
      ## If true, a nil or {} value for prometheus.prometheusSpec.ruleSelector will cause the
      ## prometheus resource to be created with selectors based on values in the helm deployment,
      ## which will also match the PrometheusRule resources created
-@@ -3647,21 +1272,13 @@
+@@ -3650,21 +1272,13 @@
      ## PrometheusRules to be selected for target discovery.
      ## If {}, select all PrometheusRules
      ##
@@ -2824,7 +2827,7 @@
  
      ## If true, a nil or {} value for prometheus.prometheusSpec.serviceMonitorSelector will cause the
      ## prometheus resource to be created with selectors based on values in the helm deployment,
-@@ -3672,19 +1289,13 @@
+@@ -3675,19 +1289,13 @@
      ## ServiceMonitors to be selected for target discovery.
      ## If {}, select all ServiceMonitors
      ##
@@ -2851,7 +2854,7 @@
  
      ## If true, a nil or {} value for prometheus.prometheusSpec.podMonitorSelector will cause the
      ## prometheus resource to be created with selectors based on values in the helm deployment,
-@@ -3695,18 +1306,13 @@
+@@ -3698,18 +1306,13 @@
      ## PodMonitors to be selected for target discovery.
      ## If {}, select all PodMonitors
      ##
@@ -2877,7 +2880,7 @@
  
      ## If true, a nil or {} value for prometheus.prometheusSpec.probeSelector will cause the
      ## prometheus resource to be created with selectors based on values in the helm deployment,
-@@ -3717,18 +1323,13 @@
+@@ -3720,18 +1323,13 @@
      ## Probes to be selected for target discovery.
      ## If {}, select all Probes
      ##
@@ -2903,7 +2906,7 @@
  
      ## How long to retain metrics
      ##
-@@ -3736,12 +1337,7 @@
+@@ -3739,12 +1337,7 @@
  
      ## Maximum size of metrics
      ##
@@ -2917,7 +2920,7 @@
  
      ## Enable compression of the write-ahead log using Snappy.
      ##
-@@ -3811,13 +1407,6 @@
+@@ -3814,13 +1407,6 @@
      #         - e2e-az1
      #         - e2e-az2
  
@@ -2931,7 +2934,7 @@
      ## The remote_write spec configuration for Prometheus.
      ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#remotewritespec
      remoteWrite: []
-@@ -3838,6 +1427,8 @@
+@@ -3841,6 +1427,8 @@
          memory: 750Mi
          cpu: 750m
  
