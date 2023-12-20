@@ -49,9 +49,20 @@ kubectl get helmreleases -n cattle-monitoring-system -o yaml > ${MANIFEST_DIRECT
 
 # Logs
 
-mkdir -p ${LOG_DIRECTORY}/rancher-monitoring
+
+## Rancher logs
+
+mkdir -p ${LOG_DIRECTORY}/rancher
+
+
+kubectl logs deployment/rancher-webhook -n cattle-system > ${LOG_DIRECTORY}/rancher/rancher_webhook.log || true
+kubectl logs deployment/cattle-cluster-agent -n cattle-system > ${LOG_DIRECTORY}/rancher/cluster_agent.log || true
+kubectl logs deployment/system-upgrade-controller -n cattle-system > ${LOG_DIRECTORY}/rancher/upgrade_controller.log || true
 
 ## Rancher Monitoring
+
+mkdir -p ${LOG_DIRECTORY}/rancher-monitoring
+
 kubectl logs deployment/rancher-monitoring-operator -n cattle-monitoring-system > ${LOG_DIRECTORY}/rancher-monitoring/prometheus_operator.log || true
 kubectl logs statefulset/alertmanager-rancher-monitoring-alertmanager -n cattle-monitoring-system > ${LOG_DIRECTORY}/rancher-monitoring/alertmanager.log || true
 kubectl logs statefulset/prometheus-rancher-monitoring-prometheus -n cattle-monitoring-system > ${LOG_DIRECTORY}/rancher-monitoring/prometheus.log || true
