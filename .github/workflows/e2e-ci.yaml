@@ -111,38 +111,37 @@ jobs:
         name: Check if Project Registration Namespace is auto-created on namespace detection
         run: ./.github/workflows/e2e/scripts/create-project-namespace.sh;
 
-      # Commenting out for failure in CI but not locally
-      # -
-      #   name: Create Project Monitoring Stack via ProjectHelmChart CR
-      #   run: ./.github/workflows/e2e/scripts/create-projecthelmchart.sh;
-      # - 
-      #   name: Check if the Project Prometheus Stack is up
-      #   run: ./.github/workflows/e2e/scripts/validate-project-monitoring.sh;
-      # - 
-      #   name: Wait for 8 minutes for enough scraping to be done to continue
-      #   run: |
-      #     for i in {1..48}; do sleep 10; echo "Waited $((i*10)) seconds for metrics to be populated"...; done;
-      # -
-      #   name: Validate Project Prometheus Targets
-      #   run: ./.github/workflows/e2e/scripts/validate-project-prometheus-targets.sh;
-      # -
-      #   name: Validate Project Grafana Datasources
-      #   run: ./.github/workflows/e2e/scripts/validate-project-grafana-datasource.sh;
-      # -
-      #   name: Validate Project Grafana Dashboards
-      #   run: ./.github/workflows/e2e/scripts/validate-project-grafana-dashboards.sh;
-      # #-
-      #   #name: Validate Project Grafana Dashboard Data
-      #   #run: ./.github/workflows/e2e/scripts/validate-project-grafana-dashboard-data.sh;
-      # -
-      #   name: Validate Project Prometheus Alerts
-      #   run: ./.github/workflows/e2e/scripts/validate-project-prometheus-alerts.sh;
-      # -
-      #   name: Validate Project Alertmanager
-      #   run: ./.github/workflows/e2e/scripts/validate-project-alertmanager.sh;
-      # - 
-      #   name: Delete Project Prometheus Stack
-      #   run: ./.github/workflows/e2e/scripts/delete-projecthelmchart.sh;
+      -
+        name: Create Project Monitoring Stack via ProjectHelmChart CR
+        run: ./.github/workflows/e2e/scripts/create-projecthelmchart.sh;
+      - 
+        name: Check if the Project Prometheus Stack is up
+        run: ./.github/workflows/e2e/scripts/validate-project-monitoring.sh;
+      - 
+        name: Wait for 8 minutes for enough scraping to be done to continue
+        run: |
+          for i in {1..48}; do sleep 10; echo "Waited $((i*10)) seconds for metrics to be populated"...; done;
+      -
+        name: Validate Project Prometheus Targets
+        run: ./.github/workflows/e2e/scripts/validate-project-prometheus-targets.sh;
+      -
+        name: Validate Project Grafana Datasources
+        run: ./.github/workflows/e2e/scripts/validate-project-grafana-datasource.sh;
+      -
+        name: Validate Project Grafana Dashboards
+        run: ./.github/workflows/e2e/scripts/validate-project-grafana-dashboards.sh;
+      -
+        name: Validate Project Grafana Dashboard Data
+        run: ./.github/workflows/e2e/scripts/validate-project-grafana-dashboard-data.sh;
+      -
+        name: Validate Project Prometheus Alerts
+        run: ./.github/workflows/e2e/scripts/validate-project-prometheus-alerts.sh;
+      -
+        name: Validate Project Alertmanager
+        run: ./.github/workflows/e2e/scripts/validate-project-alertmanager.sh;
+      - 
+        name: Delete Project Prometheus Stack
+        run: ./.github/workflows/e2e/scripts/delete-projecthelmchart.sh;
       - 
         name: Uninstall Prometheus Federator
         run: ./.github/workflows/e2e/scripts/uninstall-federator.sh;
