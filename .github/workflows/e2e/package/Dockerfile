@@ -10,7 +10,7 @@ ENV KUBECTL_VERSION v1.21.8
 
 # Install dependencies
 RUN zypper -n install awk git docker curl wget nodejs sudo
-RUN curl -LO https://storage.googleapis.com/kubernetes-release/release/${KUBECTL_VERSION}/bin/linux/${ARCH}/kubectl && \
+RUN curl -LO https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/${ARCH}/kubectl && \
     chmod +x kubectl && mv ./kubectl /usr/local/bin/kubectl
 COPY --from=helm ./helm/bin/helm /usr/local/bin/helm
 
