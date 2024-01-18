@@ -11,7 +11,15 @@ if [[ "${E2E_CI}" == "true" ]]; then
 else
     kubectl apply -f ./examples/example.yaml
 fi
+
+# debug
+kubectl get -n cattle-monitoring-system job || true
+kubectl get -A job || true
+
 sleep ${DEFAULT_SLEEP_TIMEOUT_SECONDS};
+
+kubectl get -n cattle-monitoring-system job || true
+kubectl get -A job || true
 
 if ! kubectl get -n cattle-monitoring-system job/helm-install-cattle-project-p-example-monitoring; then
     echo "ERROR: Helm Install Job for Project Monitoring Stack was never created after ${KUBECTL_WAIT_TIMEOUT} seconds"
