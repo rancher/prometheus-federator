@@ -45,6 +45,15 @@
  
  ## See `kubectl explain poddisruptionbudget.spec` for more
  ## ref: https://kubernetes.io/docs/tasks/run-application/configure-pdb/
+@@ -92,7 +85,7 @@
+ image:
+   repository: rancher/mirrored-grafana-grafana
+   # Overrides the Grafana image tag whose default is the chart appVersion
+-  tag: 9.1.5
++  tag: 9.5.14
+   sha: ""
+   pullPolicy: IfNotPresent
+ 
 @@ -101,7 +94,7 @@
    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
    ## Can be templated.
