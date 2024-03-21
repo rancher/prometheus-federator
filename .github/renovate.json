@@ -1,0 +1,5 @@
+{
+  "extends": ["github>rancher/renovate-config#release"],
+  "baseBranches": ["main"],
+  "prHourlyLimit": 2
+}
