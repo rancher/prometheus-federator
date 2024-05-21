@@ -12,7 +12,7 @@ RUN go mod download
 COPY . .
 RUN make build
 
-FROM registry.suse.com/bci/bci-micro:15.4
+FROM registry.suse.com/bci/bci-micro:15.5
 RUN echo 'prometheus:x:1000:1000::/home/prometheus:/bin/bash' >> /etc/passwd && \
     echo 'prometheus:x:1000:' >> /etc/group && \
     mkdir /home/prometheus && \
