@@ -13,10 +13,10 @@ else
     VERSION="${COMMIT}${DIRTY}"
 fi
 
-
 TAG=${TAG:-${VERSION}}
 REPO=${REPO:-rancher}
 
 if echo $TAG | grep -q dirty; then
     TAG=dev
 fi
+IMAGE=${IMAGE:-$REPO/prometheus-federator:${TAG}}
