@@ -42,7 +42,7 @@ type PrometheusFederator struct {
 	Kubeconfig string `usage:"Kubeconfig file"`
 }
 
-func (f *PrometheusFederator) Run(cmd *cobra.Command, args []string) error {
+func (f *PrometheusFederator) Run(cmd *cobra.Command, _ []string) error {
 	go func() {
 		// required to set up healthz and pprof handlers
 		log.Println(http.ListenAndServe("localhost:80", nil))
