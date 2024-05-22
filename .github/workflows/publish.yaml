@@ -6,7 +6,7 @@ on:
       - "*"
 
 jobs:
-  push:
+  publish-images:
     runs-on: ubuntu-latest
     permissions:
       contents : read
@@ -33,7 +33,7 @@ jobs:
           echo IMAGE=$IMAGE >> $GITHUB_ENV
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3 
-      - name: Build Helm-Project-Operator image 
+      - name: Build Prometheus Federator image 
         uses: docker/build-push-action@v5
         with:
           context: .
