@@ -1,6 +1,6 @@
 module github.com/rancher/prometheus-federator
 
-go 1.20
+go 1.22.3
 
 replace (
 	k8s.io/api => k8s.io/api v0.25.4

@@ -1,4 +1,3 @@
-/.dapper
 /.cache
 /bin
 /dist
@@ -7,4 +6,5 @@
 /prometheus-federator
 /.charts-build-scripts
 *.DS_Store
-/Dockerfile.dapper*
+dev/
+kubeconfig.yaml

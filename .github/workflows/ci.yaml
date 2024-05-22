@@ -1,0 +1,39 @@
+name: ci
+
+on:
+  pull_request:
+    paths-ignore:
+      - 'docs/**'
+      - 'scripts/**'
+      - '*.md'
+      - '*.dapper'
+      - '.gitignore'
+      - 'CODEOWNERS'
+      - 'LICENSE'
+      - 'Makefile'
+
+env:
+  YQ_VERSION : v4.25.1
+  CGO_ENABLED : 0
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name : Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: '1.22'
+      - name : Install YQ
+        run: |
+          sudo wget https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_amd64 -O /usr/bin/yq && sudo chmod +x /usr/bin/yq;
+      - name : Install helm
+        run : |
+          curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+          chmod 700 get_helm.sh
+          ./get_helm.sh
+          rm get_helm.sh
+          helm version
+      - name: Run CI
+        run: make ci
