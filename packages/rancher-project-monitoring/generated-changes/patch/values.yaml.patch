@@ -962,6 +962,15 @@
      ## tlsConfig: TLS configuration to use when scraping the endpoint. For example if using istio mTLS.
      ## Of type: https://github.com/coreos/prometheus-operator/blob/main/Documentation/api.md#tlsconfig
      tlsConfig: {}
+@@ -1203,7 +462,7 @@
+     ##
+     image:
+       repository: rancher/mirrored-prometheus-alertmanager
+-      tag: v0.25.0
++      tag: v0.26.0
+       sha: ""
+ 
+     ## If true then the user will be responsible to provide a secret with alertmanager configuration
 @@ -1232,39 +491,13 @@
  
      ## AlertmanagerConfigs to be selected to merge and configure Alertmanager with.
@@ -2769,6 +2778,15 @@
      ## WebTLSConfig defines the TLS parameters for HTTPS
      ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#webtlsconfig
      web: {}
+@@ -3546,7 +1183,7 @@
+     ##
+     image:
+       repository: rancher/mirrored-prometheus-prometheus
+-      tag: v2.42.0
++      tag: v2.48.1
+       sha: ""
+ 
+     ## Tolerations for use with node taints
 @@ -3592,14 +1229,6 @@
      ##
      enableRemoteWriteReceiver: false
