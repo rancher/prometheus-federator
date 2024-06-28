@@ -39,10 +39,10 @@
 -sources:
 -- https://github.com/prometheus-community/helm-charts
 -- https://github.com/prometheus-operator/kube-prometheus
-+- email: arvind.iyengar@suse.com
-+  name: Arvind
-+- email: amangeet.samra@suse.com
-+  name: Geet
++- email: alexandre.lamarre@suse.com
++  name: Alexandre
++- email: joshua.meranda@suse.com
++  name: Joshua
 +  url: https://github.com/geethub97
 +name: rancher-project-monitoring
  type: application
