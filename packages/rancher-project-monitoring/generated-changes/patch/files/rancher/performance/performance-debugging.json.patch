@@ -1,0 +1,39 @@
+--- charts-original/files/rancher/performance/performance-debugging.json
++++ charts/files/rancher/performance/performance-debugging.json
+@@ -119,8 +119,7 @@
+       "aliasColors": {},
+       "bars": false,
+       "dashLength": 10,
+-      "dashes": false,
+-      "datasource": {
++      "dashes": false,      "datasource": {
+         "uid": "$datasource"
+       },
+       "description": "",
+@@ -825,8 +824,7 @@
+       "aliasColors": {},
+       "bars": false,
+       "dashLength": 10,
+-      "dashes": false,
+-      "datasource": {
++      "dashes": false,      "datasource": {
+         "uid": "$datasource"
+       },
+       "description": "",
+@@ -1258,8 +1256,7 @@
+       "aliasColors": {},
+       "bars": false,
+       "dashLength": 10,
+-      "dashes": false,
+-      "datasource": {
++      "dashes": false,      "datasource": {
+         "uid": "$datasource"
+       },
+       "description": "",
+@@ -1649,4 +1646,4 @@
+   "uid": "tfrfU0a7k",
+   "version": 1,
+   "weekStart": ""
+-}
+\ No newline at end of file
++}

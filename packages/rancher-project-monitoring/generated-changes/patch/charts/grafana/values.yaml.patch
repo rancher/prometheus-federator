@@ -22,7 +22,7 @@
  
  rbac:
    create: true
-@@ -53,11 +40,17 @@
+@@ -60,11 +47,17 @@
  #
  autoscaling:
    enabled: false
@@ -45,7 +45,7 @@
  
  ## See `kubectl explain poddisruptionbudget.spec` for more
  ## ref: https://kubernetes.io/docs/tasks/run-application/configure-pdb/
-@@ -101,7 +94,7 @@
+@@ -108,31 +101,17 @@
    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
    ## Can be templated.
    ##
@@ -54,7 +54,33 @@
    #   - myRegistrKeySecretName
  
  testFramework:
-@@ -119,13 +112,7 @@
+   enabled: false
++  image: "rancher/mirrored-bats-bats"
++  tag: "v1.4.1"
+   imagePullPolicy: IfNotPresent
+   securityContext:
+     runAsNonRoot: true
+     runAsUser: 1000
+-  #  limits:
+-  #    cpu: 100m
+-  #    memory: 128Mi
+-  #  requests:
+-  #    cpu: 100m
+-  #    memory: 128Mi
+-
+-# dns configuration for pod
+-dnsPolicy: ~
+-dnsConfig: {}
+-  # nameservers:
+-  #   - 8.8.8.8
+-  #   options:
+-  #   - name: ndots
+-  #     value: "2"
+-  #   - name: edns0
+ 
+ securityContext:
+   runAsNonRoot: true
+@@ -140,13 +119,7 @@
    runAsGroup: 472
    fsGroup: 472
  
@@ -69,7 +95,7 @@
  
  # Enable creating the grafana configmap
  createConfigmap: true
-@@ -161,18 +148,7 @@
+@@ -182,18 +155,7 @@
    env: {}
    envFromSecret: ""
    resources: {}
@@ -89,7 +115,7 @@
  
  ## Pod Annotations
  # podAnnotations: {}
-@@ -383,14 +359,6 @@
+@@ -406,14 +368,6 @@
    #  requests:
    #    cpu: 100m
    #    memory: 128Mi
@@ -104,7 +130,7 @@
  
  # Administrator credentials when not using an existing secret (see below)
  adminUser: admin
-@@ -812,13 +780,7 @@
+@@ -845,13 +799,7 @@
  #   requests:
  #     cpu: 50m
  #     memory: 50Mi
@@ -119,21 +145,3 @@
    # skipTlsVerify Set to true to skip tls verification for kube api calls
    # skipTlsVerify: true
    enableUniqueFilenames: false
-@@ -1060,17 +1022,9 @@
- 
- ## Add a seperate remote image renderer deployment/service
- imageRenderer:
--  deploymentStrategy: {}
-   # Enable the image-renderer deployment & service
-   enabled: false
-   replicas: 1
--  autoscaling:
--    enabled: false
--    minReplicas: 1
--    maxReplicas: 5
--    targetCPU: "60"
--    targetMemory: ""
--    behavior: {}
-   image:
-     # image-renderer Image repository
-     repository: rancher/mirrored-grafana-grafana-image-renderer

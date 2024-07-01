@@ -1,5 +1,5 @@
 {{- /*
-Generated from 'config-reloaders' group from https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/main/manifests/prometheusOperator-prometheusRule.yaml
+Generated from 'config-reloaders' group from https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/a8ba97a150c75be42010c75d10b720c55e182f1a/manifests/prometheusOperator-prometheusRule.yaml
 Do not change in-place! In order to change this file first read following link:
 https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack/hack
 */ -}}
@@ -30,17 +30,28 @@ spec:
 {{- if .Values.defaultRules.additionalRuleAnnotations }}
 {{ toYaml .Values.defaultRules.additionalRuleAnnotations | indent 8 }}
 {{- end }}
+{{- if .Values.defaultRules.additionalRuleGroupAnnotations.configReloaders }}
+{{ toYaml .Values.defaultRules.additionalRuleGroupAnnotations.configReloaders | indent 8 }}
+{{- end }}
         description: 'Errors encountered while the {{`{{`}}$labels.pod{{`}}`}} config-reloader sidecar attempts to sync config in {{`{{`}}$labels.namespace{{`}}`}} namespace.
 
           As a result, configuration for service running in {{`{{`}}$labels.pod{{`}}`}} may be stale and cannot be updated anymore.'
         runbook_url: {{ .Values.defaultRules.runbookUrl }}/prometheus-operator/configreloadersidecarerrors
         summary: config-reloader sidecar has not had a successful reload for 10m
       expr: max_over_time(reloader_last_reload_successful{namespace=~".+"}[5m]) == 0
-      for: 10m
+      for: {{ dig "ConfigReloaderSidecarErrors" "for" "10m" .Values.customRules }}
+      {{- with .Values.defaultRules.keepFiringFor }}
+      keep_firing_for: "{{ . }}"
+      {{- end }}
       labels:
-        severity: warning
-      {{- if .Values.defaultRules.additionalRuleLabels }}
-        {{ toYaml .Values.defaultRules.additionalRuleLabels | nindent 8 }}
+        severity: {{ dig "ConfigReloaderSidecarErrors" "severity" "warning" .Values.customRules }}
+      {{- if or .Values.defaultRules.additionalRuleLabels .Values.defaultRules.additionalRuleGroupLabels.configReloaders }}
+        {{- with .Values.defaultRules.additionalRuleLabels }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
+        {{- with .Values.defaultRules.additionalRuleGroupLabels.configReloaders }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
       {{- end }}
 {{- end }}
 {{- end }}

@@ -39,3 +39,12 @@
        access: proxy
        isDefault: false
        jsonData:
+@@ -67,7 +67,7 @@
+       {{- if .Values.grafana.sidecar.datasources.alertmanager.url }}
+       url: {{ .Values.grafana.sidecar.datasources.alertmanager.url }}
+       {{- else }}
+-      url: http://{{ template "kube-prometheus-stack.fullname" . }}-alertmanager.{{ template "kube-prometheus-stack.namespace" . }}:{{ .Values.alertmanager.service.port }}/{{ trimPrefix "/" .Values.alertmanager.alertmanagerSpec.routePrefix }}
++      url: http://{{ template "project-prometheus-stack.fullname" . }}-alertmanager.{{ template "project-prometheus-stack.namespace" . }}:{{ .Values.alertmanager.service.port }}/{{ trimPrefix "/" .Values.alertmanager.alertmanagerSpec.routePrefix }}
+       {{- end }}
+       access: proxy
+       jsonData:

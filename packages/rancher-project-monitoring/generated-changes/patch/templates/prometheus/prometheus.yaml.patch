@@ -1,8 +1,8 @@
 --- charts-original/templates/prometheus/prometheus.yaml
 +++ charts/templates/prometheus/prometheus.yaml
-@@ -2,11 +2,11 @@
- apiVersion: monitoring.coreos.com/v1
+@@ -7,11 +7,11 @@
  kind: Prometheus
+ {{- end }}
  metadata:
 -  name: {{ template "kube-prometheus-stack.prometheus.crname" . }}
 -  namespace: {{ template "kube-prometheus-stack.namespace" . }}
@@ -16,7 +16,7 @@
  {{- if .Values.prometheus.annotations }}
    annotations:
  {{ toYaml .Values.prometheus.annotations | indent 4 }}
-@@ -18,8 +18,8 @@
+@@ -23,8 +23,8 @@
  {{- if .Values.prometheus.prometheusSpec.alertingEndpoints }}
  {{ toYaml .Values.prometheus.prometheusSpec.alertingEndpoints | indent 6 }}
  {{- else if .Values.alertmanager.enabled }}
@@ -27,7 +27,7 @@
          port: {{ .Values.alertmanager.alertmanagerSpec.portName }}
          {{- if .Values.alertmanager.alertmanagerSpec.routePrefix }}
          pathPrefix: "{{ .Values.alertmanager.alertmanagerSpec.routePrefix }}"
-@@ -70,9 +70,9 @@
+@@ -82,9 +82,9 @@
  {{- else if and .Values.prometheus.ingress.enabled .Values.prometheus.ingress.hosts }}
    externalUrl: "http://{{ tpl (index .Values.prometheus.ingress.hosts 0) . }}{{ .Values.prometheus.prometheusSpec.routePrefix }}"
  {{- else if not (or (kindIs "invalid" .Values.global.cattle.url) (kindIs "invalid" .Values.global.cattle.clusterId)) }}
@@ -39,7 +39,7 @@
  {{- end }}
    nodeSelector: {{ include "linux-node-selector" . | nindent 4 }}
  {{- if .Values.prometheus.prometheusSpec.nodeSelector }}
-@@ -138,7 +138,7 @@
+@@ -154,10 +154,10 @@
    configMaps:
  {{ toYaml .Values.prometheus.prometheusSpec.configMaps | indent 4 }}
  {{- end }}
@@ -47,104 +47,68 @@
 +  serviceAccountName: {{ template "project-prometheus-stack.prometheus.serviceAccountName" . }}
  {{- if .Values.prometheus.prometheusSpec.serviceMonitorSelector }}
    serviceMonitorSelector:
- {{ toYaml .Values.prometheus.prometheusSpec.serviceMonitorSelector | indent 4 }}
-@@ -165,12 +165,7 @@
+-{{ tpl (toYaml .Values.prometheus.prometheusSpec.serviceMonitorSelector | indent 4) . }}
++{{ toYaml .Values.prometheus.prometheusSpec.serviceMonitorSelector | indent 4 }}
+ {{ else if .Values.prometheus.prometheusSpec.serviceMonitorSelectorNilUsesHelmValues  }}
+   serviceMonitorSelector:
+     matchLabels:
+@@ -181,15 +181,10 @@
  {{ else }}
    podMonitorSelector: {}
  {{- end }}
 -{{- if .Values.prometheus.prometheusSpec.podMonitorNamespaceSelector }}
 -  podMonitorNamespaceSelector:
--{{ toYaml .Values.prometheus.prometheusSpec.podMonitorNamespaceSelector | indent 4 }}
+-{{ tpl (toYaml .Values.prometheus.prometheusSpec.podMonitorNamespaceSelector | indent 4) . }}
 -{{ else }}
 -  podMonitorNamespaceSelector: {}
 -{{- end }}
 +  podMonitorNamespaceSelector: {{ .Values.global.cattle.projectNamespaceSelector | toYaml | nindent 4 }}
  {{- if .Values.prometheus.prometheusSpec.probeSelector }}
    probeSelector:
- {{ toYaml .Values.prometheus.prometheusSpec.probeSelector | indent 4 }}
-@@ -181,12 +176,6 @@
+-{{ tpl (toYaml .Values.prometheus.prometheusSpec.probeSelector | indent 4) . }}
++{{ toYaml .Values.prometheus.prometheusSpec.probeSelector | indent 4 }}
+ {{ else if .Values.prometheus.prometheusSpec.probeSelectorNilUsesHelmValues  }}
+   probeSelector:
+     matchLabels:
+@@ -197,12 +192,7 @@
  {{ else }}
    probeSelector: {}
  {{- end }}
 -{{- if .Values.prometheus.prometheusSpec.probeNamespaceSelector }}
 -  probeNamespaceSelector:
--{{ toYaml .Values.prometheus.prometheusSpec.probeNamespaceSelector | indent 4 }}
+-{{ tpl (toYaml .Values.prometheus.prometheusSpec.probeNamespaceSelector | indent 4) . }}
 -{{ else }}
 -  probeNamespaceSelector: {}
 -{{- end }}
- {{- if (or .Values.prometheus.prometheusSpec.remoteRead .Values.prometheus.prometheusSpec.additionalRemoteRead) }}
++  probeNamespaceSelector: {{ .Values.global.cattle.projectNamespaceSelector | toYaml | nindent 4 }}
+ {{- if and (not .Values.prometheus.agentMode) (or .Values.prometheus.prometheusSpec.remoteRead .Values.prometheus.prometheusSpec.additionalRemoteRead) }}
    remoteRead:
  {{- if .Values.prometheus.prometheusSpec.remoteRead }}
-@@ -205,16 +194,12 @@
- {{ toYaml .Values.prometheus.prometheusSpec.additionalRemoteWrite | indent 4 }}
- {{- end }}
- {{- end }}
-+  probeNamespaceSelector: {{ .Values.global.cattle.projectNamespaceSelector | toYaml | nindent 4 }}
- {{- if .Values.prometheus.prometheusSpec.securityContext }}
+@@ -225,13 +215,8 @@
    securityContext:
  {{ toYaml .Values.prometheus.prometheusSpec.securityContext | indent 4 }}
  {{- end }}
++  ruleNamespaceSelector: {{ .Values.global.cattle.projectNamespaceSelector | toYaml | nindent 4 }}
+ {{- if not .Values.prometheus.agentMode }}
 -{{- if .Values.prometheus.prometheusSpec.ruleNamespaceSelector }}
 -  ruleNamespaceSelector:
--{{ toYaml .Values.prometheus.prometheusSpec.ruleNamespaceSelector | indent 4 }}
+-{{ tpl (toYaml .Values.prometheus.prometheusSpec.ruleNamespaceSelector | indent 4) . }}
 -{{ else }}
 -  ruleNamespaceSelector: {}
 -{{- end }}
-+  ruleNamespaceSelector: {{ .Values.global.cattle.projectNamespaceSelector | toYaml | nindent 4 }}
- {{- if not (has "agent" .Values.prometheus.prometheusSpec.enableFeatures) }}
  {{- if .Values.prometheus.prometheusSpec.ruleSelector }}
    ruleSelector:
-@@ -251,7 +236,7 @@
-         labelSelector:
-           matchExpressions:
-             - {key: app.kubernetes.io/name, operator: In, values: [prometheus]}
--            - {key: prometheus, operator: In, values: [{{ template "kube-prometheus-stack.prometheus.crname" . }}]}
-+            - {key: prometheus, operator: In, values: [{{ template "project-prometheus-stack.prometheus.crname" . }}]}
- {{- else if eq .Values.prometheus.prometheusSpec.podAntiAffinity "soft" }}
-     podAntiAffinity:
-       preferredDuringSchedulingIgnoredDuringExecution:
-@@ -261,7 +246,7 @@
-           labelSelector:
-             matchExpressions:
-               - {key: app.kubernetes.io/name, operator: In, values: [prometheus]}
--              - {key: prometheus, operator: In, values: [{{ template "kube-prometheus-stack.prometheus.crname" . }}]}
-+              - {key: prometheus, operator: In, values: [{{ template "project-prometheus-stack.prometheus.crname" . }}]}
+ {{ tpl (toYaml .Values.prometheus.prometheusSpec.ruleSelector | indent 4) . }}
+@@ -368,7 +353,7 @@
+ {{- else if ((.Values.prometheus.prometheusSpec.thanos.objectStorageConfig).secret) }}
+     objectStorageConfig:
+       key: object-storage-configs.yaml
+-      name: {{ template "kube-prometheus-stack.fullname" . }}-prometheus
++      name: {{ template "project-prometheus-stack.fullname" . }}-prometheus
  {{- end }}
  {{- end }}
-   tolerations: {{ include "linux-node-tolerations" . | nindent 4 }}
-@@ -274,11 +259,11 @@
- {{- end }}
- {{- if .Values.global.imagePullSecrets }}
-   imagePullSecrets:
--{{ include "kube-prometheus-stack.imagePullSecrets" . | trim | indent 4 }}
-+{{ include "project-prometheus-stack.imagePullSecrets" . | trim | indent 4 }}
- {{- end }}
- {{- if .Values.prometheus.prometheusSpec.additionalScrapeConfigs }}
-   additionalScrapeConfigs:
--    name: {{ template "kube-prometheus-stack.fullname" . }}-prometheus-scrape-confg
-+    name: {{ template "project-prometheus-stack.fullname" . }}-prometheus-scrape-confg
-     key: additional-scrape-configs.yaml
- {{- end }}
- {{- if .Values.prometheus.prometheusSpec.additionalScrapeConfigsSecret.enabled }}
-@@ -289,7 +274,7 @@
- {{- if or .Values.prometheus.prometheusSpec.additionalAlertManagerConfigs .Values.prometheus.prometheusSpec.additionalAlertManagerConfigsSecret }}
-   additionalAlertManagerConfigs:
- {{- if .Values.prometheus.prometheusSpec.additionalAlertManagerConfigs }}
--    name: {{ template "kube-prometheus-stack.fullname" . }}-prometheus-am-confg
-+    name: {{ template "project-prometheus-stack.fullname" . }}-prometheus-am-confg
-     key: additional-alertmanager-configs.yaml
- {{- end }}
- {{- if .Values.prometheus.prometheusSpec.additionalAlertManagerConfigsSecret }}
-@@ -302,7 +287,7 @@
- {{- end }}
- {{- if .Values.prometheus.prometheusSpec.additionalAlertRelabelConfigs }}
-   additionalAlertRelabelConfigs:
--    name: {{ template "kube-prometheus-stack.fullname" . }}-prometheus-am-relabel-confg
-+    name: {{ template "project-prometheus-stack.fullname" . }}-prometheus-am-relabel-confg
-     key: additional-alert-relabel-configs.yaml
- {{- end }}
- {{- if .Values.prometheus.prometheusSpec.additionalAlertRelabelConfigsSecret }}
-@@ -347,16 +332,14 @@
+ {{- if .Values.prometheus.prometheusSpec.disableCompaction }}
+@@ -394,17 +379,15 @@
  {{- if .Values.prometheus.prometheusSpec.overrideHonorTimestamps }}
    overrideHonorTimestamps: {{ .Values.prometheus.prometheusSpec.overrideHonorTimestamps }}
  {{- end }}
@@ -155,6 +119,7 @@
  {{- if .Values.prometheus.prometheusSpec.enforcedNamespaceLabel }}
    enforcedNamespaceLabel: {{ .Values.prometheus.prometheusSpec.enforcedNamespaceLabel }}
  {{- $prometheusDefaultRulesExcludedFromEnforce := (include "rules.names" .) | fromYaml }}
+ {{- if not .Values.prometheus.agentMode }}
    prometheusRulesExcludedFromEnforce:
  {{- range $prometheusDefaultRulesExcludedFromEnforce.rules }}
 -    - ruleNamespace: "{{ template "kube-prometheus-stack.namespace" $ }}"
@@ -164,14 +129,3 @@
  {{- end }}
  {{- if .Values.prometheus.prometheusSpec.prometheusRulesExcludedFromEnforce }}
  {{ toYaml .Values.prometheus.prometheusSpec.prometheusRulesExcludedFromEnforce | indent 4 }}
-@@ -365,8 +348,8 @@
- {{- range $prometheusDefaultRulesExcludedFromEnforce.rules }}
-     - group: monitoring.coreos.com
-       resource: prometheusrules
--      namespace: "{{ template "kube-prometheus-stack.namespace" $ }}"
--      name: "{{ printf "%s-%s" (include "kube-prometheus-stack.fullname" $) . | trunc 63 | trimSuffix "-" }}"
-+      namespace: "{{ template "project-prometheus-stack.namespace" $ }}"
-+      name: "{{ printf "%s-%s" (include "project-prometheus-stack.fullname" $) . | trunc 63 | trimSuffix "-" }}"
- {{- end }}
- {{- if .Values.prometheus.prometheusSpec.excludedFromEnforcement }}
- {{ tpl (toYaml .Values.prometheus.prometheusSpec.excludedFromEnforcement | indent 4) . }}

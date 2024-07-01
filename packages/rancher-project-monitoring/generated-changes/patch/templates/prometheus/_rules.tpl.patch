@@ -1,6 +1,6 @@
 --- charts-original/templates/prometheus/_rules.tpl
 +++ charts/templates/prometheus/_rules.tpl
-@@ -1,36 +1,8 @@
+@@ -1,44 +1,8 @@
 -{{- /*
 -Generated file. Do not change in-place! In order to change this file first read following link:
 -https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack/hack
@@ -11,7 +11,13 @@
 -  - "config-reloaders"
 -  - "etcd"
    - "general.rules"
--  - "k8s.rules"
+-  - "k8s.rules.container-cpu-usage-seconds-total"
+-  - "k8s.rules.container-memory-cache"
+-  - "k8s.rules.container-memory-rss"
+-  - "k8s.rules.container-memory-swap"
+-  - "k8s.rules.container-memory-working-set-bytes"
+-  - "k8s.rules.container-resource"
+-  - "k8s.rules.pod-owner"
 -  - "kube-apiserver-availability.rules"
 -  - "kube-apiserver-burnrate.rules"
 -  - "kube-apiserver-histogram.rules"
@@ -36,6 +42,8 @@
 -  - "node-network"
 -  - "prometheus-operator"
    - "prometheus"
+-  - "windows.node.rules"
+-  - "windows.pod.rules"
 +  - "kubernetes-apps"
  {{- end }}
 \ No newline at end of file

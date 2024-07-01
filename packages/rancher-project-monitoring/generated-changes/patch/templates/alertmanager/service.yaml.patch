@@ -1,6 +1,6 @@
 --- charts-original/templates/alertmanager/service.yaml
 +++ charts/templates/alertmanager/service.yaml
-@@ -2,12 +2,12 @@
+@@ -3,12 +3,12 @@
  apiVersion: v1
  kind: Service
  metadata:
@@ -17,7 +17,7 @@
  {{- if .Values.alertmanager.service.labels }}
  {{ toYaml .Values.alertmanager.service.labels | indent 4 }}
  {{- end }}
-@@ -48,7 +48,7 @@
+@@ -55,7 +55,7 @@
  {{- end }}
    selector:
      app.kubernetes.io/name: alertmanager

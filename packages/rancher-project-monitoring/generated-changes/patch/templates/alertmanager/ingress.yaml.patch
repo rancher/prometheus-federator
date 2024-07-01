@@ -23,7 +23,8 @@
 +  namespace: {{ template "project-prometheus-stack.namespace" . }}
  {{- if .Values.alertmanager.ingress.annotations }}
    annotations:
- {{ toYaml .Values.alertmanager.ingress.annotations | indent 4 }}
+-    {{- tpl (toYaml .Values.alertmanager.ingress.annotations) . | nindent 4 }}
++{{ toYaml .Values.alertmanager.ingress.annotations | indent 4 }}
  {{- end }}
    labels:
 -    app: {{ template "kube-prometheus-stack.name" . }}-alertmanager
