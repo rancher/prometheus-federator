@@ -1,6 +1,6 @@
 --- charts-original/templates/_helpers.tpl
 +++ charts/templates/_helpers.tpl
-@@ -133,9 +133,14 @@
+@@ -142,9 +142,14 @@
  
  # Prometheus Operator
  
@@ -16,7 +16,7 @@
  {{- default .Chart.Name .Values.nameOverride | trunc 50 | trimSuffix "-" -}}
  {{- end }}
  
-@@ -146,7 +151,7 @@
+@@ -155,7 +160,7 @@
  The components in this chart create additional resources that expand the longest created name strings.
  The longest name that gets created adds and extra 37 characters, so truncation should be 63-35=26.
  */}}
@@ -25,12 +25,19 @@
  {{- if .Values.fullnameOverride -}}
  {{- .Values.fullnameOverride | trunc 26 | trimSuffix "-" -}}
  {{- else -}}
-@@ -160,56 +165,56 @@
+@@ -168,62 +173,57 @@
+ {{- end -}}
  {{- end -}}
  
- {{/* Fullname suffixed with operator */}}
+-{{/* Fullname suffixed with -operator */}}
+-{{/* Adding 9 to 26 truncation of kube-prometheus-stack.fullname */}}
 -{{- define "kube-prometheus-stack.operator.fullname" -}}
+-{{- if .Values.prometheusOperator.fullnameOverride -}}
+-{{- .Values.prometheusOperator.fullnameOverride | trunc 35 | trimSuffix "-" -}}
+-{{- else -}}
 -{{- printf "%s-operator" (include "kube-prometheus-stack.fullname" .) -}}
+-{{- end }}
++{{/* Fullname suffixed with operator */}}
 +{{- define "project-prometheus-stack.operator.fullname" -}}
 +{{- printf "%s-operator" (include "project-prometheus-stack.fullname" .) -}}
  {{- end }}
@@ -99,7 +106,7 @@
  release: {{ $.Release.Name | quote }}
  heritage: {{ $.Release.Service | quote }}
  {{- if .Values.commonLabels}}
-@@ -217,37 +222,37 @@
+@@ -231,46 +231,37 @@
  {{- end }}
  {{- end }}
  
@@ -115,6 +122,15 @@
  {{- end -}}
  {{- end -}}
  
+-{{/* Create the name of kube-prometheus-stack service account to use */}}
+-{{- define "kube-prometheus-stack.operator.admissionWebhooks.serviceAccountName" -}}
+-{{- if .Values.prometheusOperator.serviceAccount.create -}}
+-    {{ default (printf "%s-webhook" (include "kube-prometheus-stack.operator.fullname" .)) .Values.prometheusOperator.admissionWebhooks.deployment.serviceAccount.name }}
+-{{- else -}}
+-    {{ default "default" .Values.prometheusOperator.admissionWebhooks.deployment.serviceAccount.name }}
+-{{- end -}}
+-{{- end -}}
+-
  {{/* Create the name of prometheus service account to use */}}
 -{{- define "kube-prometheus-stack.prometheus.serviceAccountName" -}}
 +{{- define "project-prometheus-stack.prometheus.serviceAccountName" -}}
@@ -146,7 +162,7 @@
  {{- else -}}
      {{ default "default" .Values.thanosRuler.serviceAccount.name }}
  {{- end -}}
-@@ -256,7 +261,7 @@
+@@ -279,7 +270,7 @@
  {{/*
  Allow the release namespace to be overridden for multi-namespace deployments in combined charts
  */}}
@@ -155,7 +171,7 @@
    {{- if .Values.namespaceOverride -}}
      {{- .Values.namespaceOverride -}}
    {{- else -}}
-@@ -267,7 +272,7 @@
+@@ -290,7 +281,7 @@
  {{/*
  Use the grafana namespace override for multi-namespace deployments in combined charts
  */}}
@@ -164,8 +180,21 @@
    {{- if .Values.grafana.namespaceOverride -}}
      {{- .Values.grafana.namespaceOverride -}}
    {{- else -}}
-@@ -278,7 +283,7 @@
+@@ -299,20 +290,9 @@
+ {{- end -}}
+ 
  {{/*
+-Allow kube-state-metrics job name to be overridden
+-*/}}
+-{{- define "kube-prometheus-stack-kube-state-metrics.name" -}}
+-  {{- if index .Values "kube-state-metrics" "nameOverride" -}}
+-    {{- index .Values "kube-state-metrics" "nameOverride" -}}
+-  {{- else -}}
+-    {{- print "kube-state-metrics" -}}
+-  {{- end -}}
+-{{- end -}}
+-
+-{{/*
  Use the kube-state-metrics namespace override for multi-namespace deployments in combined charts
  */}}
 -{{- define "kube-prometheus-stack-kube-state-metrics.namespace" -}}
@@ -173,7 +202,7 @@
    {{- if index .Values "kube-state-metrics" "namespaceOverride" -}}
      {{- index .Values "kube-state-metrics" "namespaceOverride" -}}
    {{- else -}}
-@@ -289,7 +294,7 @@
+@@ -323,7 +303,7 @@
  {{/*
  Use the prometheus-node-exporter namespace override for multi-namespace deployments in combined charts
  */}}
@@ -182,7 +211,7 @@
    {{- if index .Values "prometheus-node-exporter" "namespaceOverride" -}}
      {{- index .Values "prometheus-node-exporter" "namespaceOverride" -}}
    {{- else -}}
-@@ -298,13 +303,13 @@
+@@ -332,13 +312,13 @@
  {{- end -}}
  
  {{/* Allow KubeVersion to be overridden. */}}
@@ -199,7 +228,7 @@
        {{- print "networking.k8s.io/v1" -}}
    {{- else if .Capabilities.APIVersions.Has "networking.k8s.io/v1beta1" -}}
      {{- print "networking.k8s.io/v1beta1" -}}
-@@ -314,19 +319,19 @@
+@@ -348,19 +328,19 @@
  {{- end -}}
  
  {{/* Check Ingress stability */}}
@@ -225,7 +254,7 @@
        {{- print "policy/v1" -}}
    {{- else -}}
      {{- print "policy/v1beta1" -}}
-@@ -334,14 +339,14 @@
+@@ -368,14 +348,14 @@
    {{- end -}}
  
  {{/* Get value based on current Kubernetes version */}}
@@ -242,7 +271,7 @@
        {{- print $new -}}
      {{- else -}}
        {{- print $old -}}
-@@ -352,21 +357,21 @@
+@@ -386,21 +366,21 @@
  {{- end -}}
  
  {{/* Get value for kube-controller-manager depending on insecure scraping availability */}}
@@ -268,7 +297,7 @@
  {{- end -}}
  
  {{/* Sets default scrape limits for servicemonitor */}}
-@@ -403,7 +408,7 @@
+@@ -437,7 +417,7 @@
    - pullSecret1
    - pullSecret2
  */}}
@@ -277,11 +306,13 @@
  {{- range .Values.global.imagePullSecrets }}
    {{- if eq (typeOf .) "map[string]interface {}" }}
  - {{ toYaml . | trim }}
-@@ -412,3 +417,22 @@
-   {{- end }}
+@@ -447,9 +427,28 @@
  {{- end }}
  {{- end -}}
-+
+ 
+-{{- define "kube-prometheus-stack.operator.admission-webhook.dnsNames" }}
+-{{- $fullname := include "kube-prometheus-stack.operator.fullname" . }}
+-{{- $namespace := include "kube-prometheus-stack.namespace" . }}
 +
 +{{/* Define ingress for all hardened namespaces */}}
 +{{- define "project-prometheus-stack.hardened.networkPolicy.ingress" -}}
@@ -300,3 +331,10 @@
 +        kubernetes.io/metadata.name: {{ $ns }}
 +{{- end }}
 +{{- end -}}
++
++{{- define "project-prometheus-stack.operator.admission-webhook.dnsNames" }}
++{{- $fullname := include "project-prometheus-stack.operator.fullname" . }}
++{{- $namespace := include "project-prometheus-stack.namespace" . }}
+ {{- $fullname }}
+ {{ $fullname }}.{{ $namespace }}.svc
+ {{- if .Values.prometheusOperator.admissionWebhooks.deployment.enabled }}

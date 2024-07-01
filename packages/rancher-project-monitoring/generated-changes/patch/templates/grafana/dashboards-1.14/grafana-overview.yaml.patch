@@ -4,7 +4,7 @@
  apiVersion: v1
  kind: ConfigMap
  metadata:
--  namespace: {{ template "kube-prometheus-stack-grafana.namespace" . }}
+-  namespace: {{ .Values.grafana.defaultDashboards.namespace }}
 -  name: {{ printf "%s-%s" (include "kube-prometheus-stack.fullname" $) "grafana-overview" | trunc 63 | trimSuffix "-" }}
 +  namespace: {{ template "project-prometheus-stack-grafana.namespace" . }}
 +  name: {{ printf "%s-%s" (include "project-prometheus-stack.fullname" $) "grafana-overview" | trunc 63 | trimSuffix "-" }}

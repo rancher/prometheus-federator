@@ -16,12 +16,13 @@
  {{- if .Values.alertmanager.annotations }}
    annotations:
  {{ toYaml .Values.alertmanager.annotations | indent 4 }}
-@@ -30,15 +30,15 @@
+@@ -30,16 +30,16 @@
  {{- end }}
    replicas: {{ .Values.alertmanager.alertmanagerSpec.replicas }}
    listenLocal: {{ .Values.alertmanager.alertmanagerSpec.listenLocal }}
 -  serviceAccountName: {{ template "kube-prometheus-stack.alertmanager.serviceAccountName" . }}
 +  serviceAccountName: {{ template "project-prometheus-stack.alertmanager.serviceAccountName" . }}
+   automountServiceAccountToken: {{ .Values.alertmanager.alertmanagerSpec.automountServiceAccountToken }}
  {{- if .Values.alertmanager.alertmanagerSpec.externalUrl }}
    externalUrl: "{{ tpl .Values.alertmanager.alertmanagerSpec.externalUrl . }}"
  {{- else if and .Values.alertmanager.ingress.enabled .Values.alertmanager.ingress.hosts }}
@@ -35,13 +36,18 @@
  {{- end }}
    nodeSelector: {{ include "linux-node-selector" . | nindent 4 }}
  {{- if .Values.alertmanager.alertmanagerSpec.nodeSelector }}
-@@ -65,12 +65,7 @@
+@@ -62,16 +62,11 @@
+ {{- end }}
+ {{- if .Values.alertmanager.alertmanagerSpec.alertmanagerConfigSelector }}
+   alertmanagerConfigSelector:
+-{{ tpl (toYaml .Values.alertmanager.alertmanagerSpec.alertmanagerConfigSelector | indent 4) . }}
++{{ toYaml .Values.alertmanager.alertmanagerSpec.alertmanagerConfigSelector | indent 4}}
  {{ else }}
    alertmanagerConfigSelector: {}
  {{- end }}
 -{{- if .Values.alertmanager.alertmanagerSpec.alertmanagerConfigNamespaceSelector }}
 -  alertmanagerConfigNamespaceSelector:
--{{ toYaml .Values.alertmanager.alertmanagerSpec.alertmanagerConfigNamespaceSelector | indent 4}}
+-{{ tpl (toYaml .Values.alertmanager.alertmanagerSpec.alertmanagerConfigNamespaceSelector | indent 4) . }}
 -{{ else }}
 -  alertmanagerConfigNamespaceSelector: {}
 -{{- end }}
@@ -49,7 +55,7 @@
  {{- if .Values.alertmanager.alertmanagerSpec.web }}
    web:
  {{ toYaml .Values.alertmanager.alertmanagerSpec.web | indent 4 }}
-@@ -115,7 +110,7 @@
+@@ -116,7 +111,7 @@
          labelSelector:
            matchExpressions:
              - {key: app.kubernetes.io/name, operator: In, values: [alertmanager]}
@@ -58,7 +64,7 @@
  {{- else if eq .Values.alertmanager.alertmanagerSpec.podAntiAffinity "soft" }}
      podAntiAffinity:
        preferredDuringSchedulingIgnoredDuringExecution:
-@@ -125,7 +120,7 @@
+@@ -126,7 +121,7 @@
            labelSelector:
              matchExpressions:
                - {key: app.kubernetes.io/name, operator: In, values: [alertmanager]}
@@ -67,7 +73,7 @@
  {{- end }}
    tolerations: {{ include "linux-node-tolerations" . | nindent 4 }}
  {{- if .Values.alertmanager.alertmanagerSpec.tolerations }}
-@@ -137,7 +132,7 @@
+@@ -138,7 +133,7 @@
  {{- end }}
  {{- if .Values.global.imagePullSecrets }}
    imagePullSecrets:
