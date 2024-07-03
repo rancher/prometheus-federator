@@ -1,6 +1,6 @@
 --- charts-original/templates/prometheus/ingress.yaml
 +++ charts/templates/prometheus/ingress.yaml
-@@ -1,12 +1,12 @@
+@@ -1,23 +1,23 @@
  {{- if and .Values.prometheus.enabled .Values.prometheus.ingress.enabled -}}
    {{- $pathType := .Values.prometheus.ingress.pathType | default "ImplementationSpecific" -}}
 -  {{- $serviceName := printf "%s-%s" (include "kube-prometheus-stack.fullname" .) "prometheus" -}}
@@ -17,8 +17,9 @@
  kind: Ingress
  metadata:
  {{- if .Values.prometheus.ingress.annotations }}
-@@ -14,10 +14,10 @@
- {{ toYaml .Values.prometheus.ingress.annotations | indent 4 }}
+   annotations:
+-    {{- tpl (toYaml .Values.prometheus.ingress.annotations) . | nindent 4 }}
++{{ toYaml .Values.prometheus.ingress.annotations | indent 4 }}
  {{- end }}
    name: {{ $serviceName }}
 -  namespace: {{ template "kube-prometheus-stack.namespace" . }}
