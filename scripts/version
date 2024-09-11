@@ -16,6 +16,11 @@ else
     VERSION="${COMMIT}${DIRTY}"
 fi
 
+ARCH=$TARGET_ARCH
+if [ -z "$ARCH" ]; then
+    ARCH=$(go env GOHOSTARCH)
+fi
+
 TAG=${TAG:-${VERSION}}
 REPO=${REPO:-rancher}
 
