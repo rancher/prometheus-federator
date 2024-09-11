@@ -3,6 +3,7 @@ module github.com/rancher/prometheus-federator
 go 1.22.3
 
 replace (
+	github.com/rancher/helm-project-operator => github.com/rancher/helm-project-operator v0.2.2-rc.1.0.20240911141850-1140ae4aace0
 	k8s.io/api => k8s.io/api v0.25.4
 	k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.25.4
 	k8s.io/apimachinery => k8s.io/apimachinery v0.25.4
@@ -62,7 +63,6 @@ require (
 	github.com/prometheus/client_model v0.3.0 // indirect
 	github.com/prometheus/common v0.39.0 // indirect
 	github.com/prometheus/procfs v0.9.0 // indirect
-	github.com/rancher/helm-locker v0.0.1 // indirect
 	github.com/rancher/lasso v0.0.0-20221227210133-6ea88ca2fbcc // indirect
 	github.com/rubenv/sql-migrate v1.3.0 // indirect
 	github.com/sirupsen/logrus v1.9.0 // indirect
