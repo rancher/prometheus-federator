@@ -1,9 +1,23 @@
-FROM registry.suse.com/bci/golang:1.22 AS helm
-RUN zypper -n install git
-RUN git -C / clone --branch release-v3.9.0 --depth=1 https://github.com/rancher/helm
+# Image that provides cross compilation tooling.
+FROM --platform=$BUILDPLATFORM rancher/mirrored-tonistiigi-xx:1.3.0 AS xx
+
+FROM --platform=$BUILDPLATFORM registry.suse.com/bci/golang:1.22 AS helm
+
+# Clone repository once, and reuse it for target archs.
+ARG HELM_VERSION=release-v3.9.0
+ADD --keep-git-dir=true https://github.com/rancher/helm.git#${HELM_VERSION} /helm
+RUN cd /helm && go mod download
+
+COPY --from=xx / /
+
+# Cross-compile instead of emulating the compilation on the target arch.
+ARG TARGETPLATFORM
+RUN xx-go --wrap && mkdir -p /run/lock
 RUN make -C /helm
 
-FROM registry.suse.com/bci/golang:1.22 as builder
+RUN xx-verify --static /helm/bin/helm
+
+FROM registry.suse.com/bci/golang:1.22 AS builder
 WORKDIR /usr/src/app
 COPY --from=helm ./helm/bin/helm /usr/local/bin/
 RUN zypper -n install git vim less file curl wget patch
@@ -12,7 +26,7 @@ RUN go mod download
 COPY . .
 RUN make build
 
-FROM registry.suse.com/bci/bci-micro:15.5
+FROM registry.suse.com/bci/bci-micro:15.6
 RUN echo 'prometheus:x:1000:1000::/home/prometheus:/bin/bash' >> /etc/passwd && \
     echo 'prometheus:x:1000:' >> /etc/group && \
     mkdir /home/prometheus && \
