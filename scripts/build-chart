@@ -12,4 +12,4 @@ helm package charts/${CHART}/${VERSION} --destination bin/${CHART}
 base64 -i bin/${CHART}/${CHART}-${VERSION}.tgz > bin/${CHART}/${CHART}.tgz.base64
 rm bin/${CHART}/${CHART}-${VERSION}.tgz
 
-echo "Completed ${CHART} build process."
+echo "Completed ${CHART} (${VERSION}) build process."
