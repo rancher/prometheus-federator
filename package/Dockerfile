@@ -18,6 +18,11 @@ RUN make -C /helm
 RUN xx-verify --static /helm/bin/helm
 
 FROM registry.suse.com/bci/golang:1.22 AS builder
+
+# Allow chart version config
+ARG CHART_VERSION
+ENV CHART_VERSION=$CHART_VERSION
+
 WORKDIR /usr/src/app
 COPY --from=helm ./helm/bin/helm /usr/local/bin/
 RUN zypper -n install git vim less file curl wget patch
