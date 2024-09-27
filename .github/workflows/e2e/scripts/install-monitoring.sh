@@ -13,6 +13,9 @@ helm version
 helm repo add ${HELM_REPO} https://charts.rancher.io
 helm repo update
 
+echo "Create required \`cattle-fleet-system\` namespace"
+kubectl create namespace cattle-fleet-system
+
 echo "Installing rancher monitoring crd with :\n"
 
 helm search repo ${HELM_REPO}/rancher-monitoring-crd --versions --max-col-width=0 | head -n 2
