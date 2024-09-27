@@ -3,7 +3,6 @@ module github.com/rancher/prometheus-federator
 go 1.22.3
 
 replace (
-	github.com/rancher/helm-project-operator => github.com/rancher/helm-project-operator v0.2.2-rc.1.0.20240911141850-1140ae4aace0
 	k8s.io/api => k8s.io/api v0.25.4
 	k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.25.4
 	k8s.io/apimachinery => k8s.io/apimachinery v0.25.4
@@ -12,7 +11,7 @@ replace (
 )
 
 require (
-	github.com/rancher/helm-project-operator v0.2.1
+	github.com/rancher/helm-project-operator v0.3.0
 	github.com/rancher/wrangler v1.0.2
 	github.com/rancher/wrangler-cli v0.0.0-20220624114648-479c5692ba22
 	github.com/spf13/cobra v1.6.1

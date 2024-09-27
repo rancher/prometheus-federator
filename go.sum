@@ -368,8 +368,8 @@ github.com/prometheus/procfs v0.9.0 h1:wzCHvIvM5SxWqYvwgVL7yJY8Lz3PKn49KQtpgMYJf
 github.com/prometheus/procfs v0.9.0/go.mod h1:+pB4zwohETzFnmlpe6yd2lSc+0/46IYZRB/chUwxUZY=
 github.com/rancher/client-go v1.25.4-rancher1 h1:9MlBC8QbgngUkhNzMR8rZmmCIj6WNRHFOnYiwC2Kty4=
 github.com/rancher/client-go v1.25.4-rancher1/go.mod h1:8trHCAC83XKY0wsBIpbirZU4NTUpbuhc2JnI7OruGZw=
-github.com/rancher/helm-project-operator v0.2.2-rc.1.0.20240911141850-1140ae4aace0 h1:LJXfxKzKCVSvDvRHO8lzyM1FUyqiT/2UgS31UAEFHvU=
-github.com/rancher/helm-project-operator v0.2.2-rc.1.0.20240911141850-1140ae4aace0/go.mod h1:HkQq2yAWVGoZ0Q6jUlNTJaI2J8mar/PF8Ur2PN9nmYY=
+github.com/rancher/helm-project-operator v0.3.0 h1:9JtzgQVUnwgr9btUNFybPUuChAKOL3ye6855ATAtQyM=
+github.com/rancher/helm-project-operator v0.3.0/go.mod h1:HkQq2yAWVGoZ0Q6jUlNTJaI2J8mar/PF8Ur2PN9nmYY=
 github.com/rancher/lasso v0.0.0-20221227210133-6ea88ca2fbcc h1:29VHrInLV4qSevvcvhBj5UhQWkPShxrxv4AahYg2Scw=
 github.com/rancher/lasso v0.0.0-20221227210133-6ea88ca2fbcc/go.mod h1:dEfC9eFQigj95lv/JQ8K5e7+qQCacWs1aIA6nLxKzT8=
 github.com/rancher/wrangler v1.0.2 h1:0JGv62gF2OkYUoR0fsr99Za63fquFeKTHE2z9kAFVsE=
