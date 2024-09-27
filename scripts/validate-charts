@@ -6,4 +6,4 @@ cd $(dirname $0)/..
 echo Running chart validation
 
 ./scripts/pull-scripts
-./bin/charts-build-scripts validate --local
+./.bin/charts-build-scripts validate --local
