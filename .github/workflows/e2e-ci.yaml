@@ -37,6 +37,7 @@ env:
   DEFAULT_SLEEP_TIMEOUT_SECONDS: 10
   KUBECTL_WAIT_TIMEOUT: 300s
   DEBUG: ${{ github.event.inputs.debug || false }}
+  CLUSTER_NAME: 'e2e-ci-prometheus-federator'
 
 permissions:
   contents: write
@@ -75,15 +76,15 @@ jobs:
         run : ./.github/workflows/e2e/scripts/install-k3d.sh
       -
         name : Setup k3d cluster
-        run : CLUSTER_NAME=e2e-ci-prometheus-federator K3S_VERSION=${{ matrix.k3s_version }} ./.github/workflows/e2e/scripts/setup-cluster.sh
+        run : K3S_VERSION=${{ matrix.k3s_version }} ./.github/workflows/e2e/scripts/setup-cluster.sh
       -
         name: Import Images Into k3d
         run: |
-          k3d image import ${REPO}/prometheus-federator:${TAG} -c e2e-ci-prometheus-federator;
+          k3d image import ${REPO}/prometheus-federator:${TAG} -c $CLUSTER_NAME;
       -
         name: Setup kubectl context
         run: |
-          kubectl config use-context k3d-e2e-ci-prometheus-federator;
+          kubectl config use-context "k3d-$CLUSTER_NAME";
       -
         name: Set Up Tmate Debug Session
         if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.enable_tmate == 'true' }}
