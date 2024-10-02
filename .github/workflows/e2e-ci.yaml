@@ -71,15 +71,11 @@ jobs:
           REPO=${REPO} TAG=${TAG} ./scripts/build;
           REPO=${REPO} TAG=${TAG} ./scripts/package;
       -
-        name: Provision k3d Cluster
-        uses: AbsaOSS/k3d-action@v2
-        # k3d will automatically create a network named k3d-test-cluster-1 with the range 172.18.0.0/16
-        with:
-          cluster-name: "e2e-ci-prometheus-federator"
-          args: >-
-            --agents 1
-            --network "nw01"
-            --image docker.io/rancher/k3s:${{matrix.k3s_version}}
+        name : Install k3d
+        run : ./.github/workflows/e2e/scripts/install-k3d.sh
+      -
+        name : Setup k3d cluster
+        run : CLUSTER_NAME=e2e-ci-prometheus-federator K3S_VERSION=${{ matrix.k3s_version }} ./.github/workflows/e2e/scripts/setup-cluster.sh
       -
         name: Import Images Into k3d
         run: |
