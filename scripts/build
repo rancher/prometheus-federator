@@ -7,7 +7,7 @@ cd $(dirname $0)/..
 
 ./scripts/build-chart
 
-echo "Starting binary build";
+echo "Starting \`prometheus-federator\` binary build:";
 
 ARCHES=( "$ARCH" )
 # Set CROSS_ARCH to build for the other architecture
@@ -20,7 +20,7 @@ if [ "$CROSS_ARCH" == "true" ]; then
   ARCHES+=( "$XARCH" )
 fi
 
-echo "Building for Arch: ${ARCHES[*]}"
+echo "Building for Arch(s): ${ARCHES[*]}"
 
 mkdir -p bin
 if [ "$(uname)" = "Linux" ]; then
@@ -34,6 +34,7 @@ for A in "${ARCHES[@]}" ; do
   if [ "$CROSS" = "true" ]; then
     for OS in darwin windows ; do
           GOARCH="$A" GOOS=$OS go build -ldflags "$LINKFLAGS" -o "bin/prometheus-federator-$OS-$A"
+          echo "Built \`prometheus-federator-$OS-$A\`"
     done
   fi
 done
@@ -41,3 +42,5 @@ done
 cd bin
 ln -sf "./prometheus-federator-$ARCH" "./prometheus-federator"
 cd ..
+
+echo "Completed \`prometheus-federator\` binary build."
