@@ -21,7 +21,9 @@ FROM registry.suse.com/bci/golang:1.22 AS builder
 
 # Allow chart version config
 ARG CHART_VERSION
-ENV CHART_VERSION=$CHART_VERSION
+ARG TAG=''
+ARG REPO=''
+ENV CHART_VERSION=$CHART_VERSION TAG=$TAG REPO=$REPO
 
 WORKDIR /usr/src/app
 COPY --from=helm ./helm/bin/helm /usr/local/bin/
