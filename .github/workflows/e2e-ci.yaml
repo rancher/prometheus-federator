@@ -67,10 +67,10 @@ jobs:
         run: |
           sudo wget https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_amd64 -O /usr/bin/yq && sudo chmod +x /usr/bin/yq;
       -
-        name: Perform CI
+        name: Perform pre-e2e image build
         run: |
-          REPO=${REPO} TAG=${TAG} ./scripts/build;
-          REPO=${REPO} TAG=${TAG} ./scripts/package;
+          REPO=${REPO} TAG=${TAG} make build;
+          REPO=${REPO} TAG=${TAG} make package;
       -
         name : Install k3d
         run : ./.github/workflows/e2e/scripts/install-k3d.sh
