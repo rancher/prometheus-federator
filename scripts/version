@@ -8,7 +8,7 @@ if [ -n "$(git status --porcelain --untracked-files=no)" ]; then
 fi
 
 COMMIT=$(git rev-parse --short HEAD)
-GIT_TAG=${DRONE_TAG:-$(git tag -l --contains HEAD | head -n 1)}
+GIT_TAG=$(git tag -l --contains HEAD | head -n 1)
 
 if [[ -z "$DIRTY" && -n "$GIT_TAG" ]]; then
     VERSION=$GIT_TAG
@@ -25,6 +25,6 @@ TAG=${TAG:-${VERSION}}
 REPO=${REPO:-rancher}
 
 if echo $TAG | grep -q dirty; then
-    TAG=dev
+    TAG="dev-$COMMIT"
 fi
 IMAGE=${IMAGE:-$REPO/prometheus-federator:${TAG}}
