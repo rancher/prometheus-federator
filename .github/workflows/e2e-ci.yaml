@@ -32,7 +32,6 @@ env:
   YQ_VERSION: v4.25.1
   E2E_CI: true
   REPO: rancher
-  TAG: dev
   APISERVER_PORT: 8001
   DEFAULT_SLEEP_TIMEOUT_SECONDS: 10
   KUBECTL_WAIT_TIMEOUT: 300s
@@ -43,8 +42,26 @@ permissions:
   contents: write
 
 jobs:
-  e2e-prometheus-federator:
+  prebuild-env:
+    name: Prebuild needed Env vars
     runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository to the runner
+        uses: actions/checkout@v4
+      - name: Set Branch Tag and Other Variables
+        id: set-vars
+        run: bash ./.github/scripts/branch-tags.sh >> $GITHUB_OUTPUT
+    outputs:
+      branch_tag: ${{ steps.set-vars.outputs.branch_tag }}
+      branch_static_tag: ${{ steps.set-vars.outputs.branch_static_tag }}
+      prev_tag: ${{ steps.set-vars.outputs.prev_tag }}
+  e2e-prometheus-federator:
+    needs: [
+      prebuild-env,
+    ]
+    runs-on: ubuntu-latest
+    env:
+      TAG: ${{ needs.prebuild-env.outputs.branch_static_tag }}
     strategy:
       matrix:
         k3s_version:
