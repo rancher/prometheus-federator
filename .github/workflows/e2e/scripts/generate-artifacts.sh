@@ -39,6 +39,13 @@ LOG_DIRECTORY=${ARTIFACT_DIRECTORY}/logs
 
 # Manifests
 mkdir -p ${MANIFEST_DIRECTORY}
+mkdir -p ${MANIFEST_DIRECTORY}/helmcharts
+mkdir -p ${MANIFEST_DIRECTORY}/helmreleases
+mkdir -p ${MANIFEST_DIRECTORY}/daemonsets
+mkdir -p ${MANIFEST_DIRECTORY}/deployments
+mkdir -p ${MANIFEST_DIRECTORY}/jobs
+mkdir -p ${MANIFEST_DIRECTORY}/statefulsets
+mkdir -p ${MANIFEST_DIRECTORY}/pods
 
 kubectl get namespaces -o yaml > ${MANIFEST_DIRECTORY}/namespaces.yaml || true
 
