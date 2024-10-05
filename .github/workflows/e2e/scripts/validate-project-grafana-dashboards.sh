@@ -14,9 +14,9 @@ cleanup() {
 }
 
 if [[ -z "${RANCHER_TOKEN}" ]]; then
-    curl -s ${API_SERVER_URL}/api/v1/namespaces/cattle-project-p-example/services/http:cattle-project-p-example-monitoring-grafana:80/proxy/api/search | yq -P - > ${tmp_dashboards_yaml}
+    curl -s ${API_SERVER_URL}/api/v1/namespaces/cattle-project-p-example-monitoring/services/http:cattle-project-p-example-monitoring-grafana:80/proxy/api/search | yq -P - > ${tmp_dashboards_yaml}
 else
-    curl -s ${API_SERVER_URL}/api/v1/namespaces/cattle-project-p-example/services/http:cattle-project-p-example-monitoring-grafana:80/proxy/api/search -k -H "Authorization: Bearer ${RANCHER_TOKEN}" | yq -P - > ${tmp_dashboards_yaml}
+    curl -s ${API_SERVER_URL}/api/v1/namespaces/cattle-project-p-example-monitoring/services/http:cattle-project-p-example-monitoring-grafana:80/proxy/api/search -k -H "Authorization: Bearer ${RANCHER_TOKEN}" | yq -P - > ${tmp_dashboards_yaml}
 fi
 
 expected_dashboards=(

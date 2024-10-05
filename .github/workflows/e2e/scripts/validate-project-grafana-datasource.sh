@@ -14,9 +14,9 @@ cleanup() {
 }
 
 if [[ -z "${RANCHER_TOKEN}" ]]; then
-    curl -s ${API_SERVER_URL}/api/v1/namespaces/cattle-project-p-example/services/http:cattle-project-p-example-monitoring-grafana:80/proxy/api/datasources | yq -P - > ${tmp_datasources_yaml}
+    curl -s ${API_SERVER_URL}/api/v1/namespaces/cattle-project-p-example-monitoring/services/http:cattle-project-p-example-monitoring-grafana:80/proxy/api/datasources | yq -P - > ${tmp_datasources_yaml}
 else
-    curl -s ${API_SERVER_URL}/api/v1/namespaces/cattle-project-p-example/services/http:cattle-project-p-example-monitoring-grafana:80/proxy/api/datasources -k -H "Authorization: Bearer ${RANCHER_TOKEN}" | yq -P - > ${tmp_datasources_yaml}
+    curl -s ${API_SERVER_URL}/api/v1/namespaces/cattle-project-p-example-monitoring/services/http:cattle-project-p-example-monitoring-grafana:80/proxy/api/datasources -k -H "Authorization: Bearer ${RANCHER_TOKEN}" | yq -P - > ${tmp_datasources_yaml}
 fi
 
 if [[ $(yq '. | length' ${tmp_datasources_yaml}) != "1" ]]; then
@@ -25,8 +25,8 @@ if [[ $(yq '. | length' ${tmp_datasources_yaml}) != "1" ]]; then
     exit 1
 fi
 
-if [[ $(yq '.[0].url' ${tmp_datasources_yaml}) != "http://cattle-project-p-example-m-prometheus.cattle-project-p-example:9090/" ]]; then
-    echo "ERROR: Expected the only datasource to be configured to point to Project Prometheus at Kubernetes DNS http://cattle-project-p-example-m-prometheus.cattle-project-p-example:9090/"
+if [[ $(yq '.[0].url' ${tmp_datasources_yaml}) != "http://cattle-project-p-example-m-prometheus.cattle-project-p-example-monitoring:9090/" ]]; then
+    echo "ERROR: Expected the only datasource to be configured to point to Project Prometheus at Kubernetes DNS http://cattle-project-p-example-m-prometheus.cattle-project-p-example-monitoring:9090/"
     cat ${tmp_datasources_yaml}
     exit 1
 fi
