@@ -16,9 +16,9 @@ cleanup() {
 }
 
 if [[ -z "${RANCHER_TOKEN}" ]]; then
-    curl -s ${API_SERVER_URL}/api/v1/namespaces/cattle-project-p-example/services/http:cattle-project-p-example-m-prometheus:9090/proxy/api/v1/alerts | yq -P - > ${tmp_rules_yaml}
+    curl -s ${API_SERVER_URL}/api/v1/namespaces/cattle-project-p-example-monitoring/services/http:cattle-project-p-example-m-prometheus:9090/proxy/api/v1/alerts | yq -P - > ${tmp_rules_yaml}
 else
-    curl -s ${API_SERVER_URL}/api/v1/namespaces/cattle-project-p-example/services/http:cattle-project-p-example-m-prometheus:9090/proxy/api/v1/alerts -k -H "Authorization: Bearer ${RANCHER_TOKEN}" | yq -P - > ${tmp_rules_yaml}
+    curl -s ${API_SERVER_URL}/api/v1/namespaces/cattle-project-p-example-monitoring/services/http:cattle-project-p-example-m-prometheus:9090/proxy/api/v1/alerts -k -H "Authorization: Bearer ${RANCHER_TOKEN}" | yq -P - > ${tmp_rules_yaml}
 fi
 
 yq '.data.alerts' ${tmp_rules_yaml} > ${tmp_alert_rules_yaml}
