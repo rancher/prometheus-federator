@@ -20,7 +20,7 @@ RUN xx-verify --static /helm/bin/helm
 FROM registry.suse.com/bci/golang:1.22 AS builder
 
 # Allow chart version config
-ARG CHART_VERSION
+ARG CHART_VERSION=0.3.4
 ARG TAG=''
 ARG REPO=''
 ENV CHART_VERSION=$CHART_VERSION TAG=$TAG REPO=$REPO
