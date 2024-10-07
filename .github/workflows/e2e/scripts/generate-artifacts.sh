@@ -50,6 +50,7 @@ mkdir -p ${MANIFEST_DIRECTORY}/projecthelmcharts
 
 kubectl get namespaces -o yaml > ${MANIFEST_DIRECTORY}/namespaces.yaml || true
 kubectl get helmcharts -A > ${MANIFEST_DIRECTORY}/helmcharts-list.txt || true
+kubectl get services -A > ${MANIFEST_DIRECTORY}/services-list.txt || true
 
 ## cattle-monitoring-system ns manifests
 kubectl get helmcharts -n cattle-monitoring-system -o yaml > ${MANIFEST_DIRECTORY}/helmcharts/cattle-monitoring-system.yaml || true
