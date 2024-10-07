@@ -25,7 +25,7 @@ case "${KUBERNETES_DISTRIBUTION_TYPE}" in
             cluster_args="--set helmProjectOperator.helmController.enabled=false"
         fi
         ;;
-    *)
+    v1.25.*)
         embedded_helm_controller_fixed_version="v1.25.4"
         if [[ $(echo ${kubernetes_version} ${embedded_helm_controller_fixed_version} | tr " " "\n" | sort -rV | head -n 1 ) == "${embedded_helm_controller_fixed_version}" ]]; then
             cluster_args="--set helmProjectOperator.helmController.enabled=false"
@@ -52,7 +52,7 @@ case "${KUBERNETES_DISTRIBUTION_TYPE}" in
             cluster_args="--set helmProjectOperator.helmController.enabled=false"
         fi
         ;;
-    *)
+    v1.25.*)
         embedded_helm_controller_fixed_version="v1.25.4"
         if [[ $(echo ${kubernetes_version} ${embedded_helm_controller_fixed_version} | tr " " "\n" | sort -rV | head -n 1 ) == "${embedded_helm_controller_fixed_version}" ]]; then
             cluster_args="--set helmProjectOperator.helmController.enabled=false"
