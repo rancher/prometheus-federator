@@ -3,7 +3,7 @@ set -e
 
 cd $(dirname $0)/..
 
-
+echo "Validating newest prometheus-federator chart"
 CHART=prometheus-federator
 VERSION=$(find ./charts/${CHART} -type d -maxdepth 1 -mindepth 1 | tr - \~ | sort -rV | tr \~ - | head -n1 | cut -d'/' -f4)
 

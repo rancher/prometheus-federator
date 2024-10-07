@@ -1,6 +1,7 @@
 #!/bin/bash
 set -e
 
+echo "Validating packages..."
 cd $(dirname $0)/..
 
 monitoring_pkg_path=packages/rancher-project-monitoring/package.yaml
