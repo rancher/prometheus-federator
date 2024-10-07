@@ -61,6 +61,7 @@ kubectl get statefulset -n cattle-monitoring-system -o yaml > ${MANIFEST_DIRECTO
 kubectl get pods -n cattle-monitoring-system -o yaml > ${MANIFEST_DIRECTORY}/pods/cattle-monitoring-system.yaml || true
 
 ## cattle-project-p-example ns manifests
+kubectl get deployment -n cattle-project-p-example -o yaml > ${MANIFEST_DIRECTORY}/deployments/cattle-project-p-example.yaml || true
 kubectl get projecthelmchart -n cattle-project-p-example -o yaml > ${MANIFEST_DIRECTORY}/projecthelmcharts/cattle-project-p-example.yaml || true
 kubectl get statefulset -n cattle-project-p-example -o yaml > ${MANIFEST_DIRECTORY}/statefulsets/cattle-project-p-example.yaml || true
 kubectl get pods -n cattle-project-p-example -o yaml > ${MANIFEST_DIRECTORY}/pods/cattle-project-p-example.yaml || true
