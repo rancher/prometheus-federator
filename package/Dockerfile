@@ -20,6 +20,7 @@ RUN xx-verify --static /helm/bin/helm
 FROM registry.suse.com/bci/golang:1.22 AS builder
 
 # Allow chart version config
+ARG TARGETPLATFORM
 ARG CHART_VERSION=0.3.4
 ARG TAG=''
 ARG REPO=''
@@ -31,9 +32,9 @@ RUN zypper -n install git vim less file curl wget patch
 COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
-RUN make build
+RUN ./scripts/build
 
-FROM registry.suse.com/bci/bci-micro:15.6
+FROM registry.suse.com/bci/bci-micro:latest
 RUN echo 'prometheus:x:1000:1000::/home/prometheus:/bin/bash' >> /etc/passwd && \
     echo 'prometheus:x:1000:' >> /etc/group && \
     mkdir /home/prometheus && \
