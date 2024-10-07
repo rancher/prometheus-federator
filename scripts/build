@@ -9,6 +9,14 @@ cd $(dirname $0)/..
 
 echo "Starting \`prometheus-federator\` binary build:";
 
+mkdir -p bin
+if [ "$(uname)" = "Linux" ]; then
+    OTHER_LINKFLAGS="-extldflags -static -s"
+fi
+
+LINKFLAGS="-X github.com/rancher/prometheus-federator/pkg/version.Version=$VERSION"
+LINKFLAGS="-X github.com/rancher/prometheus-federator/pkg/version.GitCommit=$COMMIT $LINKFLAGS"
+
 ARCHES=( "$ARCH" )
 # Set CROSS_ARCH to build for the other architecture
 if [ "$CROSS_ARCH" == "true" ]; then
@@ -19,15 +27,8 @@ if [ "$CROSS_ARCH" == "true" ]; then
   esac
   ARCHES+=( "$XARCH" )
 fi
-
 echo "Building for Arch(s): ${ARCHES[*]}"
 
-mkdir -p bin
-if [ "$(uname)" = "Linux" ]; then
-    OTHER_LINKFLAGS="-extldflags -static -s"
-fi
-LINKFLAGS="-X github.com/rancher/prometheus-federator/pkg/version.Version=$VERSION"
-LINKFLAGS="-X github.com/rancher/prometheus-federator/pkg/version.GitCommit=$COMMIT $LINKFLAGS"
 for A in "${ARCHES[@]}" ; do
   GOARCH="$A" CGO_ENABLED=0 go build -ldflags "$LINKFLAGS $OTHER_LINKFLAGS" -o "bin/prometheus-federator-$A"
   # Set CROSS to build for other OS'es
