@@ -25,7 +25,8 @@ yq '.data.activeTargets[] | {.labels.job: .health}' ${tmp_targets_yaml} > ${tmp_
 
 echo "TARGETS:";
 if [[ $(yq '. | length' ${tmp_targets_up_yaml}) != "4" ]]; then
-    echo "ERROR: Expected exacty 4 targets to be up in Project Prometheus: federate, cattle-project-p-example-m-alertmanager, cattle-project-p-example-m-prometheus, cattle-project-p-example-monitoring-grafana"
+    echo "ERROR: Expected exactly 4 targets but found $(yq '. | length' ${tmp_targets_up_yaml})."
+    echo "Expected Targets in Project Prometheus: federate, cattle-project-p-example-m-alertmanager, cattle-project-p-example-m-prometheus, cattle-project-p-example-monitoring-grafana"
     echo "TARGETS:"
     cat ${tmp_targets_up_yaml}
     exit 1
