@@ -46,6 +46,7 @@ mkdir -p ${MANIFEST_DIRECTORY}/deployments
 mkdir -p ${MANIFEST_DIRECTORY}/jobs
 mkdir -p ${MANIFEST_DIRECTORY}/statefulsets
 mkdir -p ${MANIFEST_DIRECTORY}/pods
+mkdir -p ${MANIFEST_DIRECTORY}/projecthelmcharts
 
 kubectl get namespaces -o yaml > ${MANIFEST_DIRECTORY}/namespaces.yaml || true
 kubectl get helmcharts -A > ${MANIFEST_DIRECTORY}/helmcharts-list.txt || true
