@@ -9,8 +9,7 @@ annotations:
 apiVersion: v2
 appVersion: 0.4.3-rc.1
 dependencies:
-- condition: helmProjectOperator.enabled
-  name: helmProjectOperator
+- name: helmProjectOperator
   repository: file://./charts/helmProjectOperator
   version: 0.3.1
 description: Prometheus Federator
