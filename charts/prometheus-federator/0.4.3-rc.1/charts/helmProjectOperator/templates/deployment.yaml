@@ -6,7 +6,9 @@ metadata:
   labels: {{ include "helm-project-operator.labels" . | nindent 4 }}
     app: {{ template "helm-project-operator.name" . }}
 spec:
-  replicas: {{ include "replicaDefault" . }}
+  {{- if .Values.replicas }}
+  replicas: {{ .Values.replicas }}
+  {{- end }}
   selector:
     matchLabels:
       app: {{ template "helm-project-operator.name" . }}

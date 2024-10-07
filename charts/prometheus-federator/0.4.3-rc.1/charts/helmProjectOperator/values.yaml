@@ -129,8 +129,8 @@ namespaceOverride: ""
 replicas: 1
 
 image:
-  repository: rancher/helm-project-operator
-  tag: v0.2.1
+  repository: ghcr.io/rancher/helm-project-operator
+  tag: v0.3.0
   pullPolicy: IfNotPresent
 
 helmController:
