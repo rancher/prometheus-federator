@@ -16,9 +16,9 @@ cleanup() {
 }
 
 if [[ -z "${RANCHER_TOKEN}" ]]; then
-    curl -s ${API_SERVER_URL}/api/v1/namespaces/cattle-project-p-example-monitoring/services/http:cattle-project-p-example-monitoring-grafana:80/proxy/api/search | yq -P - > ${tmp_dashboards_yaml}
+    curl -s ${API_SERVER_URL}/api/v1/namespaces/cattle-project-p-example/services/http:cattle-project-p-example-monitoring-grafana:80/proxy/api/search | yq -P - > ${tmp_dashboards_yaml}
 else
-    curl -s ${API_SERVER_URL}/api/v1/namespaces/cattle-project-p-example-monitoring/services/http:cattle-project-p-example-monitoring-grafana:80/proxy/api/search -k -H "Authorization: Bearer ${RANCHER_TOKEN}" | yq -P - > ${tmp_dashboards_yaml}
+    curl -s ${API_SERVER_URL}/api/v1/namespaces/cattle-project-p-example/services/http:cattle-project-p-example-monitoring-grafana:80/proxy/api/search -k -H "Authorization: Bearer ${RANCHER_TOKEN}" | yq -P - > ${tmp_dashboards_yaml}
 fi
 
 dashboards=$(yq '.[].uri' ${tmp_dashboards_yaml})
@@ -27,9 +27,9 @@ dashboards=$(yq '.[].uri' ${tmp_dashboards_yaml})
 for dashboard in ${dashboards[@]}; do
     dashboard_uid=$(yq ".[] | select(.uri==\"${dashboard}\") | .uid" ${tmp_dashboards_yaml});
     if [[ -z "${RANCHER_TOKEN}" ]]; then
-        dashboard_json=$(curl -s ${API_SERVER_URL}/api/v1/namespaces/cattle-project-p-example-monitoring/services/http:cattle-project-p-example-monitoring-grafana:80/proxy/api/dashboards/uid/${dashboard_uid} | yq '.dashboard' -)
+        dashboard_json=$(curl -s ${API_SERVER_URL}/api/v1/namespaces/cattle-project-p-example/services/http:cattle-project-p-example-monitoring-grafana:80/proxy/api/dashboards/uid/${dashboard_uid} | yq '.dashboard' -)
     else
-        dashboard_json=$(curl -s ${API_SERVER_URL}/api/v1/namespaces/cattle-project-p-example-monitoring/services/http:cattle-project-p-example-monitoring-grafana:80/proxy/api/dashboards/uid/${dashboard_uid} -k -H "Authorization: Bearer ${RANCHER_TOKEN}" | yq '.dashboard' -)
+        dashboard_json=$(curl -s ${API_SERVER_URL}/api/v1/namespaces/cattle-project-p-example/services/http:cattle-project-p-example-monitoring-grafana:80/proxy/api/dashboards/uid/${dashboard_uid} -k -H "Authorization: Bearer ${RANCHER_TOKEN}" | yq '.dashboard' -)
     fi
     # TODO: Fix this to actually recursively utilize Grafana dashboard's yaml structure
     # Today, it just looks for .expr entries in .panels[], .panels[].panels[], and .rows[].panels[], which should cover all dashboards in Monitoring today
@@ -147,9 +147,9 @@ for query_key in $(yq "keys" ${tmp_queries_yaml} | cut -d' ' -f2-); do
 EOF
     )"
     if [[ -z "${RANCHER_TOKEN}" ]]; then
-        query_response=$(curl -s "${API_SERVER_URL}/api/v1/namespaces/cattle-project-p-example-monitoring/services/http:cattle-project-p-example-monitoring-grafana:80/proxy/api/ds/query" -H 'content-type: application/json' --data-raw "${query_body}")
+        query_response=$(curl -s "${API_SERVER_URL}/api/v1/namespaces/cattle-project-p-example/services/http:cattle-project-p-example-monitoring-grafana:80/proxy/api/ds/query" -H 'content-type: application/json' --data-raw "${query_body}")
     else
-        query_response=$(curl -s "${API_SERVER_URL}/api/v1/namespaces/cattle-project-p-example-monitoring/services/http:cattle-project-p-example-monitoring-grafana:80/proxy/api/ds/query" -H 'content-type: application/json' --data-raw "${query_body}" -k -H "Authorization: Bearer ${RANCHER_TOKEN}")
+        query_response=$(curl -s "${API_SERVER_URL}/api/v1/namespaces/cattle-project-p-example/services/http:cattle-project-p-example-monitoring-grafana:80/proxy/api/ds/query" -H 'content-type: application/json' --data-raw "${query_body}" -k -H "Authorization: Bearer ${RANCHER_TOKEN}")
     fi
     if [[ "$(echo ${query_response} | yq '.message == "bad request data"')" == "true" ]]; then
         # echo "QUERY: ${query}"
