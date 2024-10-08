@@ -9,7 +9,7 @@ cd $(dirname $0)/..
 
 echo "Starting \`prometheus-federator\` binary build:";
 
-mkdir -p bin
+mkdir -p build/bin
 if [ "$(uname)" = "Linux" ]; then
     OTHER_LINKFLAGS="-extldflags -static -s"
 fi
@@ -30,18 +30,18 @@ fi
 echo "Building for Arch(s): ${ARCHES[*]}"
 
 for A in "${ARCHES[@]}" ; do
-  GOARCH="$A" CGO_ENABLED=0 go build -ldflags "$LINKFLAGS $OTHER_LINKFLAGS" -o "bin/prometheus-federator-$A"
+  GOARCH="$A" CGO_ENABLED=0 go build -ldflags "$LINKFLAGS $OTHER_LINKFLAGS" -o "build/bin/prometheus-federator-$A"
   # Set CROSS to build for other OS'es
   if [ "$CROSS" = "true" ]; then
     for OS in darwin windows ; do
-          GOARCH="$A" GOOS=$OS go build -ldflags "$LINKFLAGS" -o "bin/prometheus-federator-$OS-$A"
+          GOARCH="$A" GOOS=$OS go build -ldflags "$LINKFLAGS" -o "build/bin/prometheus-federator-$OS-$A"
           echo "Built \`prometheus-federator-$OS-$A\`"
     done
   fi
 done
 
-cd bin
+cd build/bin
 ln -sf "./prometheus-federator-$ARCH" "./prometheus-federator"
-cd ..
+cd ../..
 
 echo "Completed \`prometheus-federator\` binary build."

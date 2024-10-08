@@ -40,6 +40,6 @@ RUN echo 'prometheus:x:1000:1000::/home/prometheus:/bin/bash' >> /etc/passwd && 
     mkdir /home/prometheus && \
     chown -R prometheus:prometheus /home/prometheus
 COPY --from=helm ./helm/bin/helm /usr/local/bin/
-COPY --from=builder /usr/src/app/bin/prometheus-federator /usr/bin/
+COPY --from=builder /usr/src/app/build/bin/prometheus-federator /usr/bin/
 USER prometheus
 CMD ["prometheus-federator"]

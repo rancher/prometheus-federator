@@ -8,7 +8,7 @@ cd $(dirname $0)/..
 echo "Starting \`prometheus-federator\` packaging:";
 
 mkdir -p dist/artifacts
-cp bin/prometheus-federator dist/artifacts/prometheus-federator${SUFFIX}
+cp build/bin/prometheus-federator dist/artifacts/prometheus-federator${SUFFIX}
 
 IMAGE=${REPO}/prometheus-federator:${TAG}
 DOCKERFILE=package/Dockerfile

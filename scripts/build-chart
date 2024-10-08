@@ -8,8 +8,10 @@ cd $(dirname $0)/..
 CHART=${CHART:-rancher-project-monitoring}
 VERSION=${EMBEDED_CHART_VERSION:-$(find ./charts/${CHART} -maxdepth 1 -mindepth 1 -type d | tr - \~ | sort -rV | tr \~ - | head -n1 | cut -d'/' -f4)}
 
-helm package charts/${CHART}/${VERSION} --destination bin/${CHART}
-base64 -i bin/${CHART}/${CHART}-${VERSION}.tgz > bin/${CHART}/${CHART}.tgz.base64
-rm bin/${CHART}/${CHART}-${VERSION}.tgz
+mkdir -p build/bin
+
+helm package charts/${CHART}/${VERSION} --destination build/chart
+base64 -i build/chart/${CHART}-${VERSION}.tgz > build/chart/${CHART}.tgz.base64
+rm build/chart/${CHART}-${VERSION}.tgz
 
 echo "Completed ${CHART} (${VERSION}) build process."
