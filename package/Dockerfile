@@ -21,10 +21,10 @@ FROM registry.suse.com/bci/golang:1.22 AS builder
 
 # Allow chart version config
 ARG TARGETPLATFORM
-ARG CHART_VERSION=0.3.4
+ARG EMBEDED_CHART_VERSION=0.3.4
 ARG TAG=''
 ARG REPO=''
-ENV CHART_VERSION=$CHART_VERSION TAG=$TAG REPO=$REPO
+ENV EMBEDED_CHART_VERSION=$EMBEDED_CHART_VERSION TAG=$TAG REPO=$REPO
 
 WORKDIR /usr/src/app
 COPY --from=helm ./helm/bin/helm /usr/local/bin/
