@@ -26,10 +26,10 @@ if [[ "$OS" == "windows" ]]; then
 else
     BINARY_NAME="charts-build-scripts_${OS}_${ARCH}"
 fi
-curl -s -L ${CHARTS_BUILD_SCRIPTS_REPO%.git}/releases/download/${CHARTS_BUILD_SCRIPT_VERSION}/${BINARY_NAME} --output bin/charts-build-scripts
+response_code=$(curl -s -o bin/charts-build-scripts -w "%{http_code}" -L "${CHARTS_BUILD_SCRIPTS_REPO%.git}/releases/download/${CHARTS_BUILD_SCRIPT_VERSION}/${BINARY_NAME}")
 
 # Fall back to binary name format from old release scheme
-if ! [[ -f bin/charts-build-scripts ]] || [[ $(cat bin/charts-build-scripts) == "Not Found" ]]; then 
+if ! [[ -f bin/charts-build-scripts ]] || [[ "$response_code" == "404" ]]; then
     echo "Falling back to old binary name format..."
     rm bin/charts-build-scripts; 
     if [[ ${OS} == "linux" ]]; then
@@ -37,11 +37,11 @@ if ! [[ -f bin/charts-build-scripts ]] || [[ $(cat bin/charts-build-scripts) == 
     else
         BINARY_NAME=charts-build-scripts-${OS}
     fi
-    curl -s -L ${CHARTS_BUILD_SCRIPTS_REPO%.git}/releases/download/${CHARTS_BUILD_SCRIPT_VERSION}/${BINARY_NAME} --output bin/charts-build-scripts
+    response_code=$(curl -s -o bin/charts-build-scripts -w "%{http_code}" -L "${CHARTS_BUILD_SCRIPTS_REPO%.git}/releases/download/${CHARTS_BUILD_SCRIPT_VERSION}/${BINARY_NAME}")
 fi
 
 # If falling back to old binary name format did not work, fail
-if ! [[ -f bin/charts-build-scripts ]] || [[ $(cat bin/charts-build-scripts) == "Not Found" ]]; then
+if ! [[ -f bin/charts-build-scripts ]] || [[ "$response_code" == "404" ]]; then
     echo "Failed to find charts-build-scripts binary"
     rm bin/charts-build-scripts;
     exit 1

@@ -3,7 +3,8 @@ set -e
 
 cd $(dirname $0)/..
 
-echo Running validation
+echo "Running validation"
 PACKAGES="$(go list ./...)"
 echo Running: go fmt
 test -z "$(go fmt ${PACKAGES} | tee /dev/stderr)"
+echo "Validate passed"

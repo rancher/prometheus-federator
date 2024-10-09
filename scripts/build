@@ -7,14 +7,41 @@ cd $(dirname $0)/..
 
 ./scripts/build-chart
 
-mkdir -p bin
+echo "Starting \`prometheus-federator\` binary build:";
+
+mkdir -p build/bin
 if [ "$(uname)" = "Linux" ]; then
     OTHER_LINKFLAGS="-extldflags -static -s"
 fi
+
 LINKFLAGS="-X github.com/rancher/prometheus-federator/pkg/version.Version=$VERSION"
 LINKFLAGS="-X github.com/rancher/prometheus-federator/pkg/version.GitCommit=$COMMIT $LINKFLAGS"
-CGO_ENABLED=0 go build -ldflags "$LINKFLAGS $OTHER_LINKFLAGS" -o bin/prometheus-federator
-if [ "$CROSS" = "true" ] && [ "$ARCH" = "amd64" ]; then
-    GOOS=darwin go build -ldflags "$LINKFLAGS" -o bin/prometheus-federator-darwin
-    GOOS=windows go build -ldflags "$LINKFLAGS" -o bin/prometheus-federator-windows
+
+ARCHES=( "$ARCH" )
+# Set CROSS_ARCH to build for the other architecture
+if [ "$CROSS_ARCH" == "true" ]; then
+  case "$ARCH" in
+    amd64) XARCH=arm64 ;;
+    arm64) XARCH=amd64 ;;
+    *) echo "Unsupported ARCH of $ARCH" 1>&2 ; exit 1
+  esac
+  ARCHES+=( "$XARCH" )
 fi
+echo "Building for Arch(s): ${ARCHES[*]}"
+
+for A in "${ARCHES[@]}" ; do
+  GOARCH="$A" CGO_ENABLED=0 go build -ldflags "$LINKFLAGS $OTHER_LINKFLAGS" -o "build/bin/prometheus-federator-$A"
+  # Set CROSS to build for other OS'es
+  if [ "$CROSS" = "true" ]; then
+    for OS in darwin windows ; do
+          GOARCH="$A" GOOS=$OS go build -ldflags "$LINKFLAGS" -o "build/bin/prometheus-federator-$OS-$A"
+          echo "Built \`prometheus-federator-$OS-$A\`"
+    done
+  fi
+done
+
+cd build/bin
+ln -sf "./prometheus-federator-$ARCH" "./prometheus-federator"
+cd ../..
+
+echo "Completed \`prometheus-federator\` binary build."

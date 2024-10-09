@@ -38,17 +38,41 @@ MANIFEST_DIRECTORY=${ARTIFACT_DIRECTORY}/manifests
 LOG_DIRECTORY=${ARTIFACT_DIRECTORY}/logs
 
 # Manifests
-
 mkdir -p ${MANIFEST_DIRECTORY}
-kubectl get pods -n cattle-monitoring-system -o yaml > ${MANIFEST_DIRECTORY}/monitoring_pods.yaml || true
-kubectl get pods -n cattle-project-p-example -o yaml > ${MANIFEST_DIRECTORY}/project_pods.yaml || true
+mkdir -p ${MANIFEST_DIRECTORY}/helmcharts
+mkdir -p ${MANIFEST_DIRECTORY}/helmreleases
+mkdir -p ${MANIFEST_DIRECTORY}/daemonsets
+mkdir -p ${MANIFEST_DIRECTORY}/deployments
+mkdir -p ${MANIFEST_DIRECTORY}/jobs
+mkdir -p ${MANIFEST_DIRECTORY}/statefulsets
+mkdir -p ${MANIFEST_DIRECTORY}/pods
+mkdir -p ${MANIFEST_DIRECTORY}/projecthelmcharts
+
 kubectl get namespaces -o yaml > ${MANIFEST_DIRECTORY}/namespaces.yaml || true
-kubectl get projecthelmchart -n cattle-project-p-example -o yaml > ${MANIFEST_DIRECTORY}/projecthelmcharts.yaml || true
-kubectl get helmcharts -n cattle-monitoring-system -o yaml > ${MANIFEST_DIRECTORY}/helmcharts.yaml || true
-kubectl get helmreleases -n cattle-monitoring-system -o yaml > ${MANIFEST_DIRECTORY}/helmreleases.yaml || true
+kubectl get helmcharts -A > ${MANIFEST_DIRECTORY}/helmcharts-list.txt || true
+kubectl get services -A > ${MANIFEST_DIRECTORY}/services-list.txt || true
+
+## cattle-monitoring-system ns manifests
+kubectl get helmcharts -n cattle-monitoring-system -o yaml > ${MANIFEST_DIRECTORY}/helmcharts/cattle-monitoring-system.yaml || true
+kubectl get helmreleases -n cattle-monitoring-system -o yaml > ${MANIFEST_DIRECTORY}/helmreleases/cattle-monitoring-system.yaml || true
+kubectl get daemonset -n cattle-monitoring-system -o yaml > ${MANIFEST_DIRECTORY}/daemonsets/cattle-monitoring-system.yaml || true
+kubectl get deployment -n cattle-monitoring-system -o yaml > ${MANIFEST_DIRECTORY}/deployments/cattle-monitoring-system.yaml || true
+kubectl get job -n cattle-monitoring-system -o yaml > ${MANIFEST_DIRECTORY}/jobs/cattle-monitoring-system.yaml || true
+kubectl get statefulset -n cattle-monitoring-system -o yaml > ${MANIFEST_DIRECTORY}/statefulsets/cattle-monitoring-system.yaml || true
+kubectl get pods -n cattle-monitoring-system -o yaml > ${MANIFEST_DIRECTORY}/pods/cattle-monitoring-system.yaml || true
+
+## cattle-project-p-example ns manifests
+kubectl get deployment -n cattle-project-p-example -o yaml > ${MANIFEST_DIRECTORY}/deployments/cattle-project-p-example.yaml || true
+kubectl get projecthelmchart -n cattle-project-p-example -o yaml > ${MANIFEST_DIRECTORY}/projecthelmcharts/cattle-project-p-example.yaml || true
+kubectl get statefulset -n cattle-project-p-example -o yaml > ${MANIFEST_DIRECTORY}/statefulsets/cattle-project-p-example.yaml || true
+kubectl get pods -n cattle-project-p-example -o yaml > ${MANIFEST_DIRECTORY}/pods/cattle-project-p-example.yaml || true
+
+## cattle-project-p-example-monitoring ns manifests
+kubectl get deployment -n cattle-project-p-example-monitoring -o yaml > ${MANIFEST_DIRECTORY}/deployments/cattle-project-p-example-monitoring.yaml || true
+kubectl get statefulset -n cattle-project-p-example-monitoring -o yaml > ${MANIFEST_DIRECTORY}/statefulsets/cattle-project-p-example-monitoring.yaml || true
+kubectl get pods -n cattle-project-p-example-monitoring -o yaml > ${MANIFEST_DIRECTORY}/pods/cattle-project-p-example-monitoring.yaml || true
 
 # Logs
-
 mkdir -p ${LOG_DIRECTORY}/rancher-monitoring
 
 ## Rancher Monitoring

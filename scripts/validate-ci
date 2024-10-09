@@ -3,6 +3,7 @@ set -e
 
 cd $(dirname $0)/..
 
+echo "Verifying code is generated and repo is clean"
 go generate
 
 source ./scripts/version

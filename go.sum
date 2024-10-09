@@ -338,7 +338,7 @@ github.com/modern-go/reflect2 v1.0.2/go.mod h1:yWuevngMOJpCy52FWWMvUC8ws7m/LJsjY
 github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 h1:C3w9PqII01/Oq1c1nUAm88MOHcQC9l5mIlSMApZMrHA=
 github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822/go.mod h1:+n7T8mK8HuQTcFwEeznm/DIxMOiR9yIdICNftLE1DvQ=
 github.com/olekukonko/tablewriter v0.0.5/go.mod h1:hPp6KlRPjbx+hW8ykQs1w3UBbZlj6HuIJcUGPhkA7kY=
-github.com/onsi/ginkgo v1.16.5 h1:8xi0RTUf59SOSfEtZMvwTvXYMzG4gV23XVHOZiXNtnE=
+github.com/onsi/ginkgo v1.14.0 h1:2mOpI4JVVPBN+WQRa0WKH2eXR+Ey+uK4n7Zj0aYpIQA=
 github.com/onsi/ginkgo/v2 v2.1.6 h1:Fx2POJZfKRQcM1pH49qSZiYeu319wji004qX+GDovrU=
 github.com/onsi/ginkgo/v2 v2.1.6/go.mod h1:MEH45j8TBi6u9BMogfbp0stKC5cdGjumZj5Y7AG4VIk=
 github.com/onsi/gomega v1.20.1 h1:PA/3qinGoukvymdIDV8pii6tiZgC8kbmJO6Z5+b002Q=
@@ -368,10 +368,8 @@ github.com/prometheus/procfs v0.9.0 h1:wzCHvIvM5SxWqYvwgVL7yJY8Lz3PKn49KQtpgMYJf
 github.com/prometheus/procfs v0.9.0/go.mod h1:+pB4zwohETzFnmlpe6yd2lSc+0/46IYZRB/chUwxUZY=
 github.com/rancher/client-go v1.25.4-rancher1 h1:9MlBC8QbgngUkhNzMR8rZmmCIj6WNRHFOnYiwC2Kty4=
 github.com/rancher/client-go v1.25.4-rancher1/go.mod h1:8trHCAC83XKY0wsBIpbirZU4NTUpbuhc2JnI7OruGZw=
-github.com/rancher/helm-locker v0.0.1 h1:v/m7Uu5wGivn+FQn5/xMuUG2L+CzocSzD7sjM7+/74E=
-github.com/rancher/helm-locker v0.0.1/go.mod h1:PRThM9wL4o7MXJwUDeAk/+9s1vpmbRbacnGm+HoGqbY=
-github.com/rancher/helm-project-operator v0.2.1 h1:EYqqyYgOOqCsNBAzTub9nJmjkmspfhLhO2u8iHPDLM4=
-github.com/rancher/helm-project-operator v0.2.1/go.mod h1:8z5cRg/aOcxpIUWhLoW/bBUtxR8coJSnZT26k3bZa+g=
+github.com/rancher/helm-project-operator v0.3.0 h1:9JtzgQVUnwgr9btUNFybPUuChAKOL3ye6855ATAtQyM=
+github.com/rancher/helm-project-operator v0.3.0/go.mod h1:HkQq2yAWVGoZ0Q6jUlNTJaI2J8mar/PF8Ur2PN9nmYY=
 github.com/rancher/lasso v0.0.0-20221227210133-6ea88ca2fbcc h1:29VHrInLV4qSevvcvhBj5UhQWkPShxrxv4AahYg2Scw=
 github.com/rancher/lasso v0.0.0-20221227210133-6ea88ca2fbcc/go.mod h1:dEfC9eFQigj95lv/JQ8K5e7+qQCacWs1aIA6nLxKzT8=
 github.com/rancher/wrangler v1.0.2 h1:0JGv62gF2OkYUoR0fsr99Za63fquFeKTHE2z9kAFVsE=

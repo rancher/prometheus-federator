@@ -11,7 +11,7 @@ replace (
 )
 
 require (
-	github.com/rancher/helm-project-operator v0.2.1
+	github.com/rancher/helm-project-operator v0.3.0
 	github.com/rancher/wrangler v1.0.2
 	github.com/rancher/wrangler-cli v0.0.0-20220624114648-479c5692ba22
 	github.com/spf13/cobra v1.6.1
@@ -62,7 +62,6 @@ require (
 	github.com/prometheus/client_model v0.3.0 // indirect
 	github.com/prometheus/common v0.39.0 // indirect
 	github.com/prometheus/procfs v0.9.0 // indirect
-	github.com/rancher/helm-locker v0.0.1 // indirect
 	github.com/rancher/lasso v0.0.0-20221227210133-6ea88ca2fbcc // indirect
 	github.com/rubenv/sql-migrate v1.3.0 // indirect
 	github.com/sirupsen/logrus v1.9.0 // indirect

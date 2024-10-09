@@ -6,7 +6,6 @@ $(TARGETS):
 .DEFAULT_GOAL := default
 
 # Charts Build Scripts
-
 pull-scripts:
 	./scripts/pull-scripts
 

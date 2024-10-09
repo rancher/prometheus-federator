@@ -29,7 +29,7 @@ var (
 	// SystemNamespaces is the system namespaces scoped for the embedded monitoring chart (rancher-project-monitoring)
 	SystemNamespaces = []string{"kube-system", "cattle-monitoring-system", "cattle-dashboards"}
 
-	//go:embed bin/rancher-project-monitoring/rancher-project-monitoring.tgz.base64
+	//go:embed build/chart/rancher-project-monitoring.tgz.base64
 	base64TgzChart string
 
 	debugConfig command.DebugConfig

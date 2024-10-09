@@ -6,7 +6,11 @@ source $(dirname $0)/entry
 
 cd $(dirname $0)/../../../..
 
-kubectl delete -f ./examples/ci-example.yaml
+if [[ "${E2E_CI}" == "true" ]]; then
+    kubectl delete -f ./examples/ci/project-helm-chart.yaml
+else
+    kubectl delete -f ./examples/project-helm-chart.yaml
+fi
 if kubectl get -n cattle-monitoring-system job/helm-delete-cattle-project-p-example-monitoring --ignore-not-found; then
     if ! kubectl wait --for=condition=complete --timeout="${KUBECTL_WAIT_TIMEOUT}" -n cattle-monitoring-system job/helm-delete-cattle-project-p-example-monitoring; then
         echo "ERROR: Helm Uninstall Job for Project Monitoring Stack never completed after ${KUBECTL_WAIT_TIMEOUT}"

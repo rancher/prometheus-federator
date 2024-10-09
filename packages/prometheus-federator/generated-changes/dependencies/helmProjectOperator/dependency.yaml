@@ -1,3 +1,2 @@
-url: https://github.com/rancher/helm-project-operator.git
-subdirectory: charts/helm-project-operator
-commit: 54630179aeae78d5bb28688ee2262a0ec362ec65
+url: https://github.com/rancher/helm-project-operator/releases/download/v0.3.1/helm-project-operator-0.3.1.tgz
+doNotRelease: true
