@@ -11,7 +11,7 @@ VERSION=${EMBEDED_CHART_VERSION:-$(find ./charts/${CHART} -maxdepth 1 -mindepth 
 mkdir -p build/bin
 
 helm package charts/${CHART}/${VERSION} --destination build/chart
-base64 -i build/chart/${CHART}-${VERSION}.tgz > build/chart/${CHART}.tgz.base64
+base64 -i build/chart/${CHART}-${VERSION}.tgz > cmd/prometheus-federator/fs/${CHART}.tgz.base64
 rm build/chart/${CHART}-${VERSION}.tgz
 
 echo "Completed ${CHART} (${VERSION}) build process."

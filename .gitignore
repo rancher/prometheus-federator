@@ -1,6 +1,8 @@
 /.cache
 /bin
 /build
+!/cmd/prometheus-federator/fs/.gitkeep
+/cmd/prometheus-federator/fs/*
 /dist
 *.swp
 .idea
