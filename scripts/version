@@ -1,5 +1,4 @@
 #!/bin/bash
-set -x
 
 CHARTS_BUILD_SCRIPTS_REPO=https://github.com/rancher/charts-build-scripts.git
 CHARTS_BUILD_SCRIPT_VERSION=v0.9.2
@@ -44,6 +43,7 @@ fi
 IMAGE=${IMAGE:-"$REPO/${BUILD_TARGET}:${TAG}"}
 
 function print_version_debug() {
+    echo "DIRTY: $DIRTY"
     echo "BUILD_TARGET: $BUILD_TARGET";
     echo "SUFFIX: $SUFFIX";
     echo "HELM_IMAGE_TAG: $HELM_IMAGE_TAG";
