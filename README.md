@@ -1,7 +1,25 @@
 prometheus-federator
 ========
 
-Prometheus Federator is an operator (powered by [`rancher/helm-project-operator`](https://github.com/rancher/helm-project-operator) and [`rancher/charts-build-scripts`](https://github.com/rancher/charts-build-scripts)) that manages deploying one or more Project Monitoring Stacks composed of the following set of resources that are scoped to project namespaces:
+This repo contains a set of three interlinked projects:
+
+- The **Prometheus Federator** is a k8s Operator that manages deploying Project Monitoring Stacks.
+- The **Helm Project Operator** is a generic design for a Kubernetes Operator that acts on `ProjectHelmChart` CRs.
+- **Helm Locker** is a Kubernetes operator that prevents resource drift on (i.e. "locks") Kubernetes objects that are tracked by Helm 3 releases.
+
+> [!NOTE]
+> The last two project (helm-project-operator and helm-locker) are not intended or supported for standalone use.
+
+For more info on _Helm Project Operator_, see the [dedicated README file](README-helm-project-operator.md).  
+For more info on _Helm Locker_, see the [dedicated README file](README-helm-locker.md).
+
+## Getting Started
+
+For more information, see the [Getting Started guide](docs/prometheus-federator/gettingstarted.md).
+
+## More Info
+
+Prometheus Federator is an operator (powered by [`rancher/helm-project-operator`](README-helm-project-operator.md) and [`rancher/charts-build-scripts`](README-helm-locker.md)) that manages deploying one or more Project Monitoring Stacks composed of the following set of resources that are scoped to project namespaces:
 - [Prometheus](https://prometheus.io/) (managed externally by [Prometheus Operator](https://github.com/prometheus-operator/prometheus-operator))
 - [Alertmanager](https://prometheus.io/docs/alerting/latest/alertmanager/) (managed externally by [Prometheus Operator](https://github.com/prometheus-operator/prometheus-operator))
 - [Grafana](https://github.com/helm/charts/tree/master/stable/grafana) (deployed via an embedded Helm chart)
@@ -15,11 +33,6 @@ A user can specify that they would like to deploy a Project Monitoring Stack by 
 For more information on ProjectHelmCharts and how to configure the underlying operator, please read the [`README.md` on the chart](packages/prometheus-federator/charts/README.md) or check out the general docs on Helm Project Operators in [`rancher/helm-project-operator`](https://github.com/rancher/helm-project-operator).
 
 For more information on how to configure the underlying Project Monitoring Stack, please read the [`README.md` of the underlying chart](packages/rancher-project-monitoring/charts/README.md) (`rancher-project-monitoring`).
-
-
-## Getting Started
-
-For more information, see the [Getting Started guide](docs/prometheus-federator/gettingstarted.md).
 
 ## Developing
 
@@ -37,7 +50,7 @@ For more information, see the [Developing guide](docs/prometheus-federator/devel
 
 ## Running
 
-`./bin/prometheus-federator`
+`./build/bin/prometheus-federator`
 
 ## Versioning and Releasing For Rancher
 
