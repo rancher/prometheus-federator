@@ -16,7 +16,7 @@ Therefore, in order to rebase the `rancher-project-monitoring` chart against the
 PACKAGE=rancher-project-monitoring TO_COMMIT=<commit-hash-in-rancher-charts> TO_DIR=charts/rancher-monitoring/<version> make rebase
 ```
 
-On running this command locally, the script will automatically pull in the `rancher/charts` repository as a Git remote, construct the patch from the current chart base (listed in the [`package.yaml` of `rancher-project-monitoring`](../../packages/rancher-project-monitoring/package.yaml)) to the new chart base (defined from the environment variables provided, namely `TO_REMOTE`, `TO_COMMIT` , `TO_DIR`), and try to `git apply -3` the patches onto the current version of the charts created by running the `make prepare` command.
+On running this command locally, the script will automatically pull in the `rancher/charts` repository as a Git remote, construct the patch from the current chart base (listed in the [`package.yaml` of `rancher-project-monitoring`](../../../packages/rancher-project-monitoring/package.yaml)) to the new chart base (defined from the environment variables provided, namely `TO_REMOTE`, `TO_COMMIT` , `TO_DIR`), and try to `git apply -3` the patches onto the current version of the charts created by running the `make prepare` command.
 
 On applying the 3-way merge from the `git apply` command, the script will automatically create a shell (titled `interactive-rebase-shell`) that allows you to look through the changes that have been absorbed from upstream, resolve any conflicts (using the same Git conflict resolution experience you would have on executing a `git rebase -i`), and add all your changes to `staging` (`git add` **only**; the script will force you to stage any unstaged or committed changes if you try to).
 
@@ -27,16 +27,16 @@ Once all your conflicts have been resolved (which you can check by running `git 
 Once you have made the changes using the rebase script, you will need to manually rebase the Grafana dependency as well. To do this, take the following steps:
 
 1. Run `export PACKAGE=rancher-project-monitoring; make prepare` to prepare the working directory using your existing base
-2. Modify the `.url`, `.subdirectory`, and `.commit` fields in [packages/rancher-project-monitoring/generated-changes/dependencies/grafana/dependency.yaml](../../packages/rancher-project-monitoring/generated-changes/dependencies/grafana/dependency.yaml) to reflect the contents of [packages/rancher-project-monitoring/package.yaml](../../packages/rancher-project-monitoring/package.yaml). **Note: The subdirectory should be the same as `rancher-project-monitoring` with `charts/grafana` appended after.**
-3. Run `make patch`. This should regenerate [packages/rancher-project-monitoring/generated-changes](../../packages/rancher-project-monitoring/generated-changes).
+2. Modify the `.url`, `.subdirectory`, and `.commit` fields in [packages/rancher-project-monitoring/generated-changes/dependencies/grafana/dependency.yaml](../../../packages/rancher-project-monitoring/generated-changes/dependencies/grafana/dependency.yaml) to reflect the contents of [packages/rancher-project-monitoring/package.yaml](../../../packages/rancher-project-monitoring/package.yaml). **Note: The subdirectory should be the same as `rancher-project-monitoring` with `charts/grafana` appended after.**
+3. Run `make patch`. This should regenerate [packages/rancher-project-monitoring/generated-changes](../../../packages/rancher-project-monitoring/generated-changes).
 4. Add all your changes and create a commit, i.e. `Update grafana dependency to new base ${TO_COMMIT}`
 
 ### Once you have successfully run the scripts and rebased Grafana
 
-1. Bump the minor version listed under [`packages/prometheus-federator/charts/Chart.yaml`](../../packages/prometheus-federator/charts/Chart.yaml) under `appVersion` and `version` and reset the patch version (i.e. `0.1.1` -> `0.2.0`); they should both match.
-1. Update the tag in [`packages/prometheus-federator/charts/values.yaml`](../../packages/prometheus-federator/charts/values.yaml) under `helmProjectOperator.image.tag` to `v<VERSION>`, where `<VERSION>` is the version you identified in the previous step (i.e. `0.2.0`)
-1. Modify the `version` field under [`packages/rancher-project-monitoring/package.yaml`](../../packages/rancher-project-monitoring/package.yaml) to the same version from above (i.e. `0.2.0`)
-1. Modify the `VERSION` environment variable under [`scripts/build-chart`](../../scripts/build-chart) to the same version (i.e. `0.2.0`)
+1. Bump the minor version listed under [`packages/prometheus-federator/charts/Chart.yaml`](../../../packages/prometheus-federator/charts/Chart.yaml) under `appVersion` and `version` and reset the patch version (i.e. `0.1.1` -> `0.2.0`); they should both match.
+1. Update the tag in [`packages/prometheus-federator/charts/values.yaml`](../../../packages/prometheus-federator/charts/values.yaml) under `helmProjectOperator.image.tag` to `v<VERSION>`, where `<VERSION>` is the version you identified in the previous step (i.e. `0.2.0`)
+1. Modify the `version` field under [`packages/rancher-project-monitoring/package.yaml`](../../../packages/rancher-project-monitoring/package.yaml) to the same version from above (i.e. `0.2.0`)
+1. Modify the `VERSION` environment variable under [`scripts/build-chart`](../../../scripts/build-chart) to the same version (i.e. `0.2.0`)
 1. Run `make charts`; this should produce:
   - `assets/prometheus-federator/prometheus-federator-<VERSION>.tgz`
   - `assets/rancher-project-monitoring/rancher-project-monitoring-<VERSION>.tgz`
