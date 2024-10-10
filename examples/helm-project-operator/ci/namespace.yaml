@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  annotations:
+    field.cattle.io/projectId: local:p-example
+  labels:
+    field.cattle.io/projectId: p-example
+  name: e2e-hpo
