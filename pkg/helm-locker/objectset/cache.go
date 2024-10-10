@@ -6,8 +6,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/rancher/helm-project-operator/pkg/helm-locker/gvk"
 	"github.com/rancher/lasso/pkg/controller"
+	"github.com/rancher/prometheus-federator/pkg/helm-locker/gvk"
 	"github.com/rancher/wrangler/pkg/objectset"
 	"github.com/rancher/wrangler/pkg/relatedresource"
 	"github.com/sirupsen/logrus"

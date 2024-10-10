@@ -4,9 +4,9 @@ import (
 	"context"
 	"time"
 
-	"github.com/rancher/helm-project-operator/pkg/helm-locker/gvk"
-	"github.com/rancher/helm-project-operator/pkg/helm-locker/informerfactory"
 	"github.com/rancher/lasso/pkg/controller"
+	"github.com/rancher/prometheus-federator/pkg/helm-locker/gvk"
+	"github.com/rancher/prometheus-federator/pkg/helm-locker/informerfactory"
 	"github.com/rancher/wrangler/pkg/apply"
 	"github.com/rancher/wrangler/pkg/start"
 	"k8s.io/client-go/discovery"

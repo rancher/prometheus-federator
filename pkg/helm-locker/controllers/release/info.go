@@ -1,7 +1,7 @@
 package release
 
 import (
-	v1alpha1 "github.com/rancher/helm-project-operator/pkg/helm-locker/apis/helm.cattle.io/v1alpha1"
+	v1alpha1 "github.com/rancher/prometheus-federator/pkg/helm-locker/apis/helm.cattle.io/v1alpha1"
 	rspb "helm.sh/helm/v3/pkg/release"
 )
 

@@ -19,7 +19,7 @@ limitations under the License.
 package helm
 
 import (
-	v1alpha1 "github.com/rancher/helm-project-operator/pkg/helm-locker/generated/controllers/helm.cattle.io/v1alpha1"
+	v1alpha1 "github.com/rancher/prometheus-federator/pkg/helm-locker/generated/controllers/helm.cattle.io/v1alpha1"
 	"github.com/rancher/lasso/pkg/controller"
 )
 

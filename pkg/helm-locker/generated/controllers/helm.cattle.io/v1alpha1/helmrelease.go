@@ -22,7 +22,7 @@ import (
 	"context"
 	"time"
 
-	v1alpha1 "github.com/rancher/helm-project-operator/pkg/helm-locker/apis/helm.cattle.io/v1alpha1"
+	v1alpha1 "github.com/rancher/prometheus-federator/pkg/helm-locker/apis/helm.cattle.io/v1alpha1"
 	"github.com/rancher/lasso/pkg/client"
 	"github.com/rancher/lasso/pkg/controller"
 	"github.com/rancher/wrangler/pkg/apply"

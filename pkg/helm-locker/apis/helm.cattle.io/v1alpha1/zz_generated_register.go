@@ -21,7 +21,7 @@ limitations under the License.
 package v1alpha1
 
 import (
-	helm "github.com/rancher/helm-project-operator/pkg/helm-locker/apis/helm.cattle.io"
+	helm "github.com/rancher/prometheus-federator/pkg/helm-locker/apis/helm.cattle.io"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
