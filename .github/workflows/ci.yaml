@@ -1,6 +1,7 @@
-name: ci
+name: "[prom-fed] ci"
 
 on:
+  workflow_call:
   pull_request:
     paths-ignore:
       - 'docs/**'
@@ -11,6 +12,9 @@ on:
       - 'CODEOWNERS'
       - 'LICENSE'
       - 'Makefile'
+  push:
+    branches:
+      - main
 
 env:
   YQ_VERSION : v4.25.1

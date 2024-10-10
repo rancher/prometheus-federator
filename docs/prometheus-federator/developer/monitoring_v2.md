@@ -194,7 +194,7 @@ In addition, the main chart `rancher-monitoring` has `catalog.cattle.io/provides
 
 However, **unlike normal CRD charts in Rancher (which just directly package CRDs in the `templates/` directory**, Monitoring also utilizes a pre-install / pre-upgrade Job and post-delete Job to install and remove CRDs from the cluster.
 
-This is necessary since Rancher has legacy controllers for the old [Monitoring V1](./monitoring_v1.md#legacy-what-is-monitoring--alerting-v1) solution embedded within it, so on initializing the management agent controllers when Monitoring V1's feature flag is enabled **(even if Monitoring V1 is not currently installed in the cluster)**, Rancher creates the Prometheus Operator CRDs within the cluster before starting the controllers.
+This is necessary since Rancher has legacy controllers for the old [Monitoring V1](monitoring_v1.md#legacy-what-is-monitoring--alerting-v1) solution embedded within it, so on initializing the management agent controllers when Monitoring V1's feature flag is enabled **(even if Monitoring V1 is not currently installed in the cluster)**, Rancher creates the Prometheus Operator CRDs within the cluster before starting the controllers.
 
 This poses a problem since Helm **cannot naturally assume ownership of non-Helm resources** (which gives a familiar error that says that it cannot import an object into a release due to missing labels), so instead Helm simply deploys a Job that runs `kubectl apply` and `kubectl delete` to manage the CRDs on Helm's behalf.
 

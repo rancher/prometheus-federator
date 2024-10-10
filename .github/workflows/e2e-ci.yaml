@@ -1,4 +1,4 @@
-name: E2E Prometheus Federator
+name: "[prom-fed] E2E CI"
 
 on:
   workflow_dispatch:
@@ -24,6 +24,14 @@ on:
       - 'CODEOWNERS'
       - 'LICENSE'
       - 'Makefile'
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+      - 'CODEOWNERS'
+      - 'LICENSE'
 
 env:
   GOARCH: amd64

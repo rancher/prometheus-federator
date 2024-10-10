@@ -19,7 +19,7 @@ For more information on how to configure the underlying Project Monitoring Stack
 
 ## Getting Started
 
-For more information, see the [Getting Started guide](docs/gettingstarted.md).
+For more information, see the [Getting Started guide](docs/prometheus-federator/gettingstarted.md).
 
 ## Developing
 
@@ -27,13 +27,13 @@ For more information, see the [Getting Started guide](docs/gettingstarted.md).
 
 Prometheus Federator is built and released off the contents of the `main` branch. To make a contribution, open up a PR to the `main` branch.
 
-For more information, see the [Developing guide](docs/developing.md).
+For more information, see the [Developing guide](docs/prometheus-federator/developing.md).
 
 ## Building
 
 `make`
 
-> **Note:** For a more in-depth explanation of how Prometheus Federator is built (intended for anyone who would like to fork this repo to create a new Project Operator!), see the [Build guide](docs/build.md).
+> **Note:** For a more in-depth explanation of how Prometheus Federator is built (intended for anyone who would like to fork this repo to create a new Project Operator!), see the [Build guide](docs/prometheus-federator/build.md).
 
 ## Running
 
@@ -45,7 +45,7 @@ While this repository does maintain a standalone Helm repository for vanilla Hel
 
 **The chart in rancher/charts is generally the version that is intended for use in production since that is the chart that will be tested by Rancher's QA team.** Generally, these charts will match stable versions of charts available in this repository, so non-Rancher users **should** be able to safely use those versions in this repository for production use cases (at their own risk).
 
-For more information on the process maintainers of this repository use to mirror these charts over to [`rancher/charts`](https://github.com/rancher/charts), see the [Rancher release guide](docs/rancher_release.md).
+For more information on the process maintainers of this repository use to mirror these charts over to [`rancher/charts`](https://github.com/rancher/charts), see the [Rancher release guide](docs/prometheus-federator/rancher_release.md).
 
 ## License
 Copyright (c) 2020 [Rancher Labs, Inc.](http://rancher.com)

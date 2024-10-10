@@ -6,7 +6,7 @@ Any time a PR is merged into this repository, the chart should be mirrored to th
 
 Prior to making changes to [`rancher/charts`](https://github.com/rancher/charts), you will need to cut a GitHub tag / release to trigger CI into creating [the Project Operator Image on DockerHub](https://hub.docker.com/r/rancher/prometheus-federator):
 1. Navigate to the page to [`Draft a new release`](https://github.com/rancher/prometheus-federator/releases/new)
-2. On the `Choose a tag` dropdown, carefully type in the version **prefixed with `v`** that corresponds to the version of Prometheus Federator that was just merged in the PR (i.e. the value found on the `version` field of [`packages/prometheus-federator/charts/Chart.yaml`](../packages/prometheus-federator/charts/Chart.yaml)).
+2. On the `Choose a tag` dropdown, carefully type in the version **prefixed with `v`** that corresponds to the version of Prometheus Federator that was just merged in the PR (i.e. the value found on the `version` field of [`packages/prometheus-federator/charts/Chart.yaml`](../../packages/prometheus-federator/charts/Chart.yaml)).
 3. Copy the tag name into the Release Name field (i.e. `vX.X.X`)
 4. Click on the button that says `Generate release notes`
 5. **Review all your changes**; once a tag is created, **it should never be deleted**.

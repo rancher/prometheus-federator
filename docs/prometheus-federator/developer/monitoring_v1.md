@@ -63,14 +63,14 @@ When only Alerting is enabled, unlike in Monitoring V2 which only supports **met
 
 From a chart design perspective, it's easier to compare Monitoring V1 against the upstream [`kube-prometheus-stack`](https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack) chart, since they were developed in parallel around the same timeframe.
 
-When both Monitoring V1 and Alerting V1 are enabled, Monitoring V1 deploys all the underlying components listed in [the Monitoring V2 docs around `kube-prometheus-stack`](./monitoring_v2.md#what-does-it-deploy). 
+When both Monitoring V1 and Alerting V1 are enabled, Monitoring V1 deploys all the underlying components listed in [the Monitoring V2 docs around `kube-prometheus-stack`](monitoring_v2.md#what-does-it-deploy). 
 
 The primary differences include that it:
 - Has far fewer configuration options than upstream **(this is primarily why Monitoring V2 is based on an upstream chart instead of Monitoring V1)**
 - Uses a completely different set of Rancher-original dashboards and alerts instead of upstream dashboards and alerts, which requires more maintainence from Rancher **(a secondary reason why Monitoring V2 is based on an upstream chart instead of Monitoring V1)**
-- Supports deploying `wmi_exporter` (now called [`windows_exporter`](./monitoring_v2.md#windowsexporterhttpsgithubcomprometheus-communitywindowsexporter-for-windows-support) in Monitoring V2, but it's the exact same codebase / solution) for RKE1 Windows Monitoring.
+- Supports deploying `wmi_exporter` (now called [`windows_exporter`](monitoring_v2.md#windowsexporterhttpsgithubcomprometheus-communitywindowsexporter-for-windows-support) in Monitoring V2, but it's the exact same codebase / solution) for RKE1 Windows Monitoring.
 - Has default exporters for integration with Rancher's Logging V1 and Istio V1 System Charts
-- Deploys [`rancher/webhook-receiver`](https://github.com/rancher/webhook-receiver), which is the Monitoring V1 equivalent of [Alerting Drivers](./monitoring_v2.md#add-on-chart-alerting-drivers) with Rancher-maintained non-native notification providers for Alertmanager, as opposed to Alerting Drivers which entirely packages official upstream solutions.
+- Deploys [`rancher/webhook-receiver`](https://github.com/rancher/webhook-receiver), which is the Monitoring V1 equivalent of [Alerting Drivers](monitoring_v2.md#add-on-chart-alerting-drivers) with Rancher-maintained non-native notification providers for Alertmanager, as opposed to Alerting Drivers which entirely packages official upstream solutions.
 - Uses [`rancher/prometheus-auth`](https://github.com/rancher/prometheus-auth) as a proxy in front of all Prometheus instances to ensure that users (or Grafana) are only able to see the values that they should have permissions to be able to see
 
 > **Note**: How does Prometheus Auth work on a high-level?
@@ -103,10 +103,10 @@ In order to be fully functional, Monitoring V1 also required the use of controll
 
 While some of these controllers operate on native Kubernetes resources (such as the `ExporterEndpointController`), some controllers also sometimes directly operate / manage Prometheus Operator CRs
 
-The issue with this appraoch is explained in more depth in a note in [the main Monitoring V2 docs around the CRD chart](./monitoring_v2.md#crd-chart-with-install--uninstall-jobs), but essentially splitting ownership of Prometheus Operator CRs between Prometheus Operator itself (that is deployed by the Monitoring V1 chart) and Rancher creates a lot of edge conditions; this is why Monitoring V2 primarily moved towards a **decoupled** approach with respect to Rancher and Monitoring V2.
+The issue with this appraoch is explained in more depth in a note in [the main Monitoring V2 docs around the CRD chart](monitoring_v2.md#crd-chart-with-install--uninstall-jobs), but essentially splitting ownership of Prometheus Operator CRs between Prometheus Operator itself (that is deployed by the Monitoring V1 chart) and Rancher creates a lot of edge conditions; this is why Monitoring V2 primarily moved towards a **decoupled** approach with respect to Rancher and Monitoring V2.
 
 However, assuming that this doesn't cause an issue, here are the different controllers that get deployed for **Monitoring V1**:
-- `ExporterEndpointController`: keeps track of all nodes in the cluster and manually maintains (injects into or removes endpoints from) the `Endpoints` objects tied to `etcd`, `kube-scheduler`, `kube-controller-manager`, and `node-windows`. These Endpoints objects were tied to headless Services deployed by the Monitoring V1 chart that the Monitoring V1 chart would already have `ServiceMonitors` pointing to, but unlike in Monitoring V2 where we have [PushProx](./monitoring_v2.md#pushprox-exporters-for-most-kubernetes-internal-components) that handles discovering new targets itself via scheduling the clients onto those nodes and populating the `Endpoints` objects based on labelSelectors on workloads, this needed to be manually maintained by Rancher legacy controllers
+- `ExporterEndpointController`: keeps track of all nodes in the cluster and manually maintains (injects into or removes endpoints from) the `Endpoints` objects tied to `etcd`, `kube-scheduler`, `kube-controller-manager`, and `node-windows`. These Endpoints objects were tied to headless Services deployed by the Monitoring V1 chart that the Monitoring V1 chart would already have `ServiceMonitors` pointing to, but unlike in Monitoring V2 where we have [PushProx](monitoring_v2.md#pushprox-exporters-for-most-kubernetes-internal-components) that handles discovering new targets itself via scheduling the clients onto those nodes and populating the `Endpoints` objects based on labelSelectors on workloads, this needed to be manually maintained by Rancher legacy controllers
 - `ConfigRefreshHandler`: keeps track of which namespaces are in a current Project and triggers an update of a Project Monitoring Stack deployment if necessary.
 - `MetricsServiceController`
 

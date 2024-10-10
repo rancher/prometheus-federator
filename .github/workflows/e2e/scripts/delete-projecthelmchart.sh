@@ -7,9 +7,9 @@ source $(dirname $0)/entry
 cd $(dirname $0)/../../../..
 
 if [[ "${E2E_CI}" == "true" ]]; then
-    kubectl delete -f ./examples/ci/project-helm-chart.yaml
+    kubectl delete -f ./examples/prometheus-federator/ci/project-helm-chart.yaml
 else
-    kubectl delete -f ./examples/project-helm-chart.yaml
+    kubectl delete -f ./examples/prometheus-federator/project-helm-chart.yaml
 fi
 if kubectl get -n cattle-monitoring-system job/helm-delete-cattle-project-p-example-monitoring --ignore-not-found; then
     if ! kubectl wait --for=condition=complete --timeout="${KUBECTL_WAIT_TIMEOUT}" -n cattle-monitoring-system job/helm-delete-cattle-project-p-example-monitoring; then

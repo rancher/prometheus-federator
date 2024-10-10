@@ -40,7 +40,7 @@ Scan through our [existing issues](https://github.com/rancher/helm-project-opera
 - Using the command line:
   - [Fork the repo](https://docs.github.com/en/github/getting-started-with-github/fork-a-repo#fork-an-example-repository) so that you can make your changes without affecting the original project until you're ready to merge them.
 
-3. Install or update to **Go 1.17**. For more information, see [the development guide](docs/developing.md).
+3. Install or update to **Go 1.17**. For more information, see [the development guide](docs/prometheus-federator/developing.md).
 
 4. Create a working branch and start with your changes!
 

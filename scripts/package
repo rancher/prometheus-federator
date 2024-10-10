@@ -2,20 +2,13 @@
 set -e
 
 source $(dirname $0)/version
+DOCKER_TARGET=${DOCKER_TARGET:-"-${BUILD_TARGET}"}
 
 cd $(dirname $0)/..
 
-echo "Starting \`prometheus-federator\` packaging:";
+echo "Starting \`${DOCKER_TARGET}\` image packaging:";
 
-mkdir -p dist/artifacts
-cp build/bin/prometheus-federator dist/artifacts/prometheus-federator${SUFFIX}
-
-IMAGE=${REPO}/prometheus-federator:${TAG}
-DOCKERFILE=package/Dockerfile
-if [ -e ${DOCKERFILE}.${ARCH} ]; then
-    DOCKERFILE=${DOCKERFILE}.${ARCH}
-fi
-
-echo "Building \`${DOCKERFILE}\` with name \`${IMAGE}\`:";
-docker build -f ${DOCKERFILE} -t ${IMAGE} .
+DOCKERFILE=package/Dockerfile${DOCKER_TARGET}
+echo "Building \`${IMAGE}\` from \`${DOCKERFILE}\`:";
+docker build -f "${DOCKERFILE}" -t "${IMAGE}" .
 echo "Completed building ${IMAGE} container image"
