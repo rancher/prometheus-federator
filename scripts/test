@@ -4,8 +4,8 @@ set -e
 cd $(dirname $0)/..
 
 declare -r target_test_tags=(
-    #["helm-locker"]="helm_locker",
     #["helm-project-operator"]="helm_locker",
+    ["helm-locker"]="helm_locker",
     ["prometheus-federator"]="prometheus_federator"
 )
 TARGET_TEST_TAG=${target_test_tags[$BUILD_TARGET]}
