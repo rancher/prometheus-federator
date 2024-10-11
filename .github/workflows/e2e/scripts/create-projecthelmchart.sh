@@ -7,9 +7,9 @@ source $(dirname $0)/entry
 cd $(dirname $0)/../../../..
 
 if [[ "${E2E_CI}" == "true" ]]; then
-    kubectl apply -f ./examples/ci/project-helm-chart.yaml
+    kubectl apply -f ./examples/prometheus-federator/ci/project-helm-chart.yaml
 else
-    kubectl apply -f ./examples/project-helm-chart.yaml
+    kubectl apply -f ./examples/prometheus-federator/project-helm-chart.yaml
 fi
 sleep ${DEFAULT_SLEEP_TIMEOUT_SECONDS};
 

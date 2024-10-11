@@ -1,6 +1,7 @@
-name: ci
+name: "[prom-fed] ci"
 
 on:
+  workflow_call:
   pull_request:
     paths-ignore:
       - 'docs/**'
@@ -11,6 +12,9 @@ on:
       - 'CODEOWNERS'
       - 'LICENSE'
       - 'Makefile'
+  push:
+    branches:
+      - main
 
 env:
   YQ_VERSION : v4.25.1
@@ -18,7 +22,12 @@ env:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        arch:
+          - x64
+          - arm64
+    runs-on : runs-on,image=ubuntu22-full-${{ matrix.arch }},runner=4cpu-linux-${{ matrix.arch }},run-id=${{ github.run_id }}
     steps:
       - uses: actions/checkout@v4
       - name : Set up Go
@@ -27,13 +36,8 @@ jobs:
           go-version: '1.22'
       - name : Install YQ
         run: |
-          sudo wget https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_amd64 -O /usr/bin/yq && sudo chmod +x /usr/bin/yq;
+          sudo wget https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_${{ matrix.arch == 'x64' && 'amd64' || matrix.arch  }} -O /usr/bin/yq && sudo chmod +x /usr/bin/yq;
       - name : Install helm
-        run : |
-          curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
-          chmod 700 get_helm.sh
-          ./get_helm.sh
-          rm get_helm.sh
-          helm version
+        uses: azure/setup-helm@v3
       - name: Run CI
         run: make ci

@@ -1,0 +1,12 @@
+#!/bin/bash
+
+function edit-charts() {
+    sed -i \
+        -e 's/^version:.*/version: '${2}'/' \
+        -e 's/^appVersion:.*/appVersion: '${3}'/' \
+        "${1}"
+}
+
+function package-charts() {
+    helm package --debug "${1:-"./build/charts/helm-project-operator"}" -d "${2:-"./dist/artifacts"}"
+}

@@ -1,12 +1,20 @@
 #!/bin/bash
 set -e
 
+source $(dirname $0)/version
 cd $(dirname $0)/..
 
-echo "Verifying code is generated and repo is clean"
-go generate
+echo "[validate-ci] starting to validate"
+echo "Running go mod tidy"
+go mod tidy
 
-source ./scripts/version
+echo "Running go mod verify"
+go mod verify
+
+if [ -f "generate.go" ]; then
+  echo "Verifying code is generated and repo is clean"
+  go generate
+fi
 
 if [ -n "$DIRTY" ]; then
     echo Git is dirty
@@ -14,3 +22,5 @@ if [ -n "$DIRTY" ]; then
     git diff
     exit 1
 fi
+
+echo "[validate-ci] success"

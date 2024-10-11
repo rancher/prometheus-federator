@@ -1,4 +1,4 @@
-TARGETS := $(shell ls scripts)
+TARGETS := $(shell ls scripts|grep -ve "^util-\|entry\|^pull-scripts")
 
 $(TARGETS):
 	./scripts/$@

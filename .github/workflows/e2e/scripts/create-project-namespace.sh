@@ -8,10 +8,10 @@ cd $(dirname $0)/../../../..
 
 USE_RANCHER=${USE_RANCHER:-"false"}
 if [ "$USE_RANCHER" = "true" ]; then
-  kubectl apply -f ./examples/ci/project.yaml
+  kubectl apply -f ./examples/prometheus-federator/ci/project.yaml
 fi
 
-kubectl apply -f ./examples/ci/namespace.yaml
+kubectl apply -f ./examples/prometheus-federator/ci/namespace.yaml
 
 sleep "${DEFAULT_SLEEP_TIMEOUT_SECONDS}"
 if ! kubectl get namespace cattle-project-p-example; then

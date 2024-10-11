@@ -1,8 +1,9 @@
 #!/bin/bash
-set -x
 
 CHARTS_BUILD_SCRIPTS_REPO=https://github.com/rancher/charts-build-scripts.git
 CHARTS_BUILD_SCRIPT_VERSION=v0.9.2
+
+BUILD_TARGET=${BUILD_TARGET:-"prometheus-federator"}
 
 if [ -n "$(git status --porcelain --untracked-files=no)" ]; then
     DIRTY="-dirty"
@@ -27,14 +28,26 @@ SUFFIX="-${ARCH}"
 TAG=${TAG:-${VERSION}}
 REPO=${REPO:-rancher}
 
+HELM_IMAGE_TAG=${HELM_IMAGE_TAG:-${TAG}}
+if [ "$TAG" == "$COMMIT" ]; then
+  HELM_CHART_VERSION="0.0.0-dev.${COMMIT}"
+else
+  HELM_CHART_VERSION=${HELM_IMAGE_TAG/v/}
+fi
+
 if echo "$TAG" | grep -q dirty; then
     TAG="v0.0.0-dev.1-${COMMIT}"
+    HELM_IMAGE_TAG=$TAG
+    HELM_CHART_VERSION=${HELM_CHART_VERSION_DEV:-${HELM_IMAGE_TAG/v/}}
 fi
-IMAGE=${IMAGE:-"$REPO/prometheus-federator:${TAG}"}
+IMAGE=${IMAGE:-"$REPO/${BUILD_TARGET}:${TAG}"}
 
 function print_version_debug() {
+    echo "DIRTY: $DIRTY"
     echo "BUILD_TARGET: $BUILD_TARGET";
     echo "SUFFIX: $SUFFIX";
+    echo "HELM_IMAGE_TAG: $HELM_IMAGE_TAG";
+    echo "HELM_CHART_VERSION: $HELM_CHART_VERSION";
     echo "REPO: $REPO; TAG: $TAG";
     echo "IMAGE: $IMAGE";
 }

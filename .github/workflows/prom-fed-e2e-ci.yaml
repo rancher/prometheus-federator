@@ -1,4 +1,4 @@
-name: E2E Prometheus Federator
+name: "[prom-fed] E2E CI"
 
 on:
   workflow_dispatch:
@@ -24,6 +24,14 @@ on:
       - 'CODEOWNERS'
       - 'LICENSE'
       - 'Makefile'
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+      - 'CODEOWNERS'
+      - 'LICENSE'
 
 env:
   GOARCH: amd64
@@ -44,7 +52,12 @@ permissions:
 jobs:
   prebuild-env:
     name: Prebuild needed Env vars
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        arch:
+          - x64
+          - arm64
+    runs-on : runs-on,image=ubuntu22-full-${{ matrix.arch }},runner=4cpu-linux-${{ matrix.arch }},run-id=${{ github.run_id }}
     steps:
       - name: Check out the repository to the runner
         uses: actions/checkout@v4
@@ -59,14 +72,17 @@ jobs:
     needs: [
       prebuild-env,
     ]
-    runs-on: ubuntu-latest
-    env:
-      TAG: ${{ needs.prebuild-env.outputs.branch_static_tag }}
     strategy:
       matrix:
+        arch:
+          - x64
+          - arm64
         k3s_version:
           # k3d version list k3s | sed 's/+/-/' | sort -h
           - ${{ github.event.inputs.k3s_version || 'v1.28.14-k3s1' }}
+    runs-on : runs-on,image=ubuntu22-full-${{ matrix.arch }},runner=4cpu-linux-${{ matrix.arch }},run-id=${{ github.run_id }}
+    env:
+      TAG: ${{ needs.prebuild-env.outputs.branch_static_tag }}
     steps:
       -
         uses: actions/checkout@v3
@@ -82,7 +98,7 @@ jobs:
       -
         name: Install mikefarah/yq
         run: |
-          sudo wget https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_amd64 -O /usr/bin/yq && sudo chmod +x /usr/bin/yq;
+          sudo wget https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_${{ matrix.arch == 'x64' && 'amd64' || matrix.arch  }} -O /usr/bin/yq && sudo chmod +x /usr/bin/yq;
       -
         name: Perform pre-e2e image build
         run: |
@@ -167,7 +183,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v3
         with:
-          name: artifacts
+          name: artifacts-${{ matrix.arch }}-${{ matrix.k3s_version }}
           path: artifacts/
           retention-days: 1
       - 
