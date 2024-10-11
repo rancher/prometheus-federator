@@ -1,16 +1,12 @@
 #!/usr/bin/env bash
 set -e
 
+source $(dirname $0)/version
 cd $(dirname $0)/..
 
 echo "Starating tests"
 
-declare -rA target_test_tags=(
-  #[helm-project-operator]="helm_project_operator",
-  ["helm-locker"]="helm_locker",
-  ["prometheus-federator"]="prometheus_federator"
-)
-TARGET_TEST_TAG="${target_test_tags["$BUILD_TARGET"]}"
+TARGET_TEST_TAG="${BUILD_TARGET/-/_}"
 
 echo "Running tests for ${TARGET_TEST_TAG}"
 go test -cover -tags="test,${TARGET_TEST_TAG}" ./...

@@ -11,12 +11,13 @@ fi
 
 cd $(dirname $0)/..
 
-declare -r chart_options=(
-    #["helm-project-operator"]="project-operator-example",
-    ["prometheus-federator"]="rancher-project-monitoring"
-)
+if [ "$BUILD_TARGET" == "prometheus-federator" ]; then
+  DEFAULT_CHART_TARGET="rancher-project-monitoring"
+elif [ "$BUILD_TARGET" == "helm-project-operator" ]; then
+  DEFAULT_CHART_TARGET="project-operator-example"
+fi
 
-CHART=${CHART:-${chart_options[$BUILD_TARGET]}}
+CHART=${CHART:-${DEFAULT_CHART_TARGET}}
 CHART_VERSION=${EMBEDDED_CHART_VERSION:-$(find ./charts/${CHART} -maxdepth 1 -mindepth 1 -type d | tr - \~ | sort -rV | tr \~ - | head -n1 | cut -d'/' -f4)}
 
 # Prepare and package charts
