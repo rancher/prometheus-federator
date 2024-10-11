@@ -1,0 +1,107 @@
+name: "[helm-project-operator] E2E Helm Project Operator"
+
+on:
+  workflow_dispatch:
+    inputs:
+      enable_tmate:
+        description: 'Enable debugging via tmate'
+        required: false
+        default: "false"
+      debug:
+        description: "Enable debug logs"
+        required: false
+        default: "false"
+      k3s_version:
+        description: "Version of k3s to use for the underlying cluster, should exist in https://hub.docker.com/r/rancher/k3s/tags"
+        required: false
+  pull_request:
+    paths-ignore:
+      - 'docs/**'
+      - 'scripts/**'
+      - '*.md'
+      - '*.dapper'
+      - '.gitignore'
+      - 'CODEOWNERS'
+      - 'LICENSE'
+      - 'Makefile'
+
+env:
+  CLUSTER_NAME: e2e-ci-helm-project-operator
+  CGO_ENABLED: 0
+  YQ_VERSION: v4.44.3
+  E2E_CI: true
+  REPO: rancher
+  TAG: v0.0.0-dev.1
+  APISERVER_PORT: 8001
+  DEFAULT_SLEEP_TIMEOUT_SECONDS: 10
+  KUBECTL_WAIT_TIMEOUT: 120s
+  DEBUG: ${{ github.event.inputs.debug || false }}
+
+permissions:
+  contents: write
+
+jobs:
+  e2e-helm-project-operator:
+    strategy:
+      matrix:
+        arch:
+          - x64
+          #- arm64
+        k3s_version:
+          # k3d version list k3s | sed 's/+/-/' | sort -h
+          - ${{ github.event.inputs.k3s_version || 'v1.20.15-k3s1' }}
+    runs-on : runs-on,image=ubuntu22-full-${{ matrix.arch }},runner=4cpu-linux-${{ matrix.arch }},run-id=${{ github.run_id }}
+    env:
+      K3S_VERSION: ${{ matrix.k3s_version }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name : setup Go
+        uses : actions/setup-go@v5
+        with:
+          go-version: 1.22
+      - name: Install mikefarah/yq
+        run: |
+          sudo wget https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_${{ matrix.arch == 'x64' && 'amd64' || matrix.arch  }} -O /usr/bin/yq && sudo chmod +x /usr/bin/yq;
+      - name: Perform pre-e2e image build
+        run: |
+          BUILD_TARGET=helm-project-operator REPO=${REPO} TAG=${TAG} ./scripts/build;
+          BUILD_TARGET=helm-project-operator REPO=${REPO} TAG=${TAG} ./scripts/package;
+      - name : Install k3d
+        run : ./.github/workflows/e2e/scripts/install-k3d.sh
+      - name : Setup k3d cluster
+        run : K3S_VERSION=${{ env.K3S_VERSION }} ./.github/workflows/e2e/scripts/setup-cluster.sh
+      - name: Import Images Into k3d
+        run: |
+          k3d image import ${REPO}/helm-project-operator:${TAG} -c "$CLUSTER_NAME";
+      - name: Setup kubectl context
+        run: |
+          kubectl config use-context "k3d-$CLUSTER_NAME";
+      - name: Set Up Tmate Debug Session
+        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.enable_tmate == 'true' }}
+        uses: mxschmitt/action-tmate@v3
+        timeout-minutes: 15
+        with:
+          limit-access-to-actor: true
+      - name: Install Helm Project Operator
+        run: ./.github/workflows/e2e/scripts/hpo/install-helm-project-operator.sh;
+
+      - name: Check if Helm Project Operator is up
+        run: ./.github/workflows/e2e/scripts/hpo/validate-helm-project-operator.sh;
+
+      - name: Check if Project Registration Namespace is auto-created on namespace detection
+        run: ./.github/workflows/e2e/scripts/hpo/create-project-namespace.sh;
+
+      - name: Deploy Example Chart via ProjectHelmChart CR
+        run: ./.github/workflows/e2e/scripts/hpo/create-projecthelmchart.sh;
+
+      - name: Delete Example Chart
+        run: ./.github/workflows/e2e/scripts/hpo/delete-projecthelmchart.sh;
+
+      - name: Uninstall Helm Project Operator
+        run: ./.github/workflows/e2e/scripts/hpo/uninstall-helm-project-operator.sh;
+
+      - name: Delete k3d cluster
+        if: always()
+        run: k3d cluster delete "$CLUSTER_NAME";
