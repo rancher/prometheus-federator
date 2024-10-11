@@ -3,6 +3,12 @@ set -e
 
 cd $(dirname $0)/..
 
+echo "Running go mod tidy"
+go mod tidy
+
+echo "Running go mod verify"
+go mod verify
+
 echo "Verifying code is generated and repo is clean"
 go generate
 
