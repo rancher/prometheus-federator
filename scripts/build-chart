@@ -29,9 +29,15 @@ if [ "$BUILD_TARGET" == "prometheus-federator" ]; then
   base64 -i "build/charts/${CHART}-${CHART_VERSION}.tgz" > "cmd/${BUILD_TARGET}/fs/${CHART}.tgz.base64"
   rm "build/charts/${CHART}-${CHART_VERSION}.tgz"
 elif [ "$BUILD_TARGET" == "helm-project-operator" ]; then
+  # Prepare base chart for build
+  rm -rf build/charts
+  mkdir -p build/charts
+  cp -rf "examples/helm-project-operator/${CHART}" build/charts/
+
+
   # Update the chart placeholders
-  edit-charts "examples/helm-project-operator/${CHART}/Chart.yaml" "${HELM_CHART_VERSION}" "${HELM_IMAGE_TAG}"
-  package-charts "./examples/helm-project-operator/${CHART}" ./build/charts
+  edit-charts "build/charts/${CHART}/Chart.yaml" "${HELM_CHART_VERSION}" "${HELM_IMAGE_TAG}"
+  package-charts "./build/charts/${CHART}" ./build/charts
 
   # Prepare chart for embedding location
   base64 -i "./build/charts/${CHART}-${HELM_CHART_VERSION}.tgz" > "cmd/${BUILD_TARGET}/fs/${CHART}.tgz.base64"
