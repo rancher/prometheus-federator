@@ -17,7 +17,7 @@ declare -r chart_options=(
 )
 
 CHART=${CHART:-${chart_options[$BUILD_TARGET]}}
-CHART_VERSION=${EMBEDED_CHART_VERSION:-$(find ./charts/${CHART} -maxdepth 1 -mindepth 1 -type d | tr - \~ | sort -rV | tr \~ - | head -n1 | cut -d'/' -f4)}
+CHART_VERSION=${EMBEDDED_CHART_VERSION:-$(find ./charts/${CHART} -maxdepth 1 -mindepth 1 -type d | tr - \~ | sort -rV | tr \~ - | head -n1 | cut -d'/' -f4)}
 
 # Prepare and package charts
 package-charts "charts/${CHART}/${CHART_VERSION}" ./build/charts
