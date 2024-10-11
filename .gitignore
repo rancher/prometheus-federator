@@ -1,4 +1,6 @@
+/.dapper
 /.cache
+/.vscode
 /bin
 /build
 !/cmd/prometheus-federator/fs/.gitkeep
@@ -8,8 +10,10 @@
 /dist
 *.swp
 .idea
+/helm-project-operator
 /prometheus-federator
 /.charts-build-scripts
 *.DS_Store
 dev/
 kubeconfig.yaml
+get_helm.sh
