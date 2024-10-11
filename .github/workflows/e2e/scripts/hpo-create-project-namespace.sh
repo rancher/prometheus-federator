@@ -1,9 +1,9 @@
 #!/bin/bash
 set -e
 
-source $(dirname $0)/../entry
+source $(dirname $0)/entry
 
-cd $(dirname $0)/../../../../..
+cd $(dirname $0)/../../../..
 
 USE_RANCHER=${USE_RANCHER:-"false"}
 if [ "$USE_RANCHER" = "true" ]; then

@@ -1,11 +1,11 @@
 #!/bin/bash
 set -e
 
-source $(dirname $0)/../entry
+source $(dirname $0)/entry
 
-cd $(dirname $0)/../../../../..
+cd $(dirname $0)/../../../..
 
-latest_chart=./charts/helm-project-operator
+latest_chart=./packages/helm-project-operator/charts
 
 case "${KUBERNETES_DISTRIBUTION_TYPE}" in
 "k3s")

@@ -1,9 +1,9 @@
 #!/bin/bash
 set -e
 
-source $(dirname $0)/../entry
+source $(dirname $0)/entry
 
-cd $(dirname $0)/../../../../..
+cd $(dirname $0)/../../../..
 
 kubectl delete -f ./examples/helm-project-operator/ci/project-helm-chart.yaml
 if kubectl get -n cattle-helm-system job/helm-delete-project-operator-example-chart-dummy --ignore-not-found; then

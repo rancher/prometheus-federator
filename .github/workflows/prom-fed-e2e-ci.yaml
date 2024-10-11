@@ -102,7 +102,7 @@ jobs:
       -
         name: Perform pre-e2e image build
         run: |
-          EMBEDDED_CHART_VERSION=0.3.4 REPO=${REPO} TAG=${TAG} make build;
+          EMBEDED_CHART_VERSION=0.3.4 REPO=${REPO} TAG=${TAG} make build;
           REPO=${REPO} TAG=${TAG} make package;
       -
         name : Install k3d

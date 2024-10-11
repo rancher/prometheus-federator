@@ -85,22 +85,22 @@ jobs:
         with:
           limit-access-to-actor: true
       - name: Install Helm Project Operator
-        run: ./.github/workflows/e2e/scripts/hpo/install-helm-project-operator.sh;
+        run: ./.github/workflows/e2e/scripts/hpo-install-helm-project-operator.sh;
 
       - name: Check if Helm Project Operator is up
-        run: ./.github/workflows/e2e/scripts/hpo/validate-helm-project-operator.sh;
+        run: ./.github/workflows/e2e/scripts/hpo-validate-helm-project-operator.sh;
 
       - name: Check if Project Registration Namespace is auto-created on namespace detection
-        run: ./.github/workflows/e2e/scripts/hpo/create-project-namespace.sh;
+        run: ./.github/workflows/e2e/scripts/hpo-create-project-namespace.sh;
 
       - name: Deploy Example Chart via ProjectHelmChart CR
-        run: ./.github/workflows/e2e/scripts/hpo/create-projecthelmchart.sh;
+        run: ./.github/workflows/e2e/scripts/hpo-create-projecthelmchart.sh;
 
       - name: Delete Example Chart
-        run: ./.github/workflows/e2e/scripts/hpo/delete-projecthelmchart.sh;
+        run: ./.github/workflows/e2e/scripts/hpo-delete-projecthelmchart.sh;
 
       - name: Uninstall Helm Project Operator
-        run: ./.github/workflows/e2e/scripts/hpo/uninstall-helm-project-operator.sh;
+        run: ./.github/workflows/e2e/scripts/hpo-uninstall-helm-project-operator.sh;
 
       - name: Delete k3d cluster
         if: always()

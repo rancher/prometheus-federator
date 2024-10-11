@@ -1,9 +1,9 @@
 #!/bin/bash
 set -e
 
-source $(dirname $0)/../entry
+source $(dirname $0)/entry
 
-cd $(dirname $0)/../../../../..
+cd $(dirname $0)/../../../..
 
 kubectl apply -f ./examples/helm-project-operator/ci/project-helm-chart.yaml
 sleep ${DEFAULT_SLEEP_TIMEOUT_SECONDS};
