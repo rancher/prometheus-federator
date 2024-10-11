@@ -3,5 +3,12 @@ set -e
 
 cd $(dirname $0)/..
 
-echo Running tests
-go test -cover -tags=test ./...
+declare -r target_test_tags=(
+    #["helm-locker"]="helm_locker",
+    #["helm-project-operator"]="helm_locker",
+    ["prometheus-federator"]="prometheus_federator"
+)
+TARGET_TEST_TAG=${target_test_tags[$BUILD_TARGET]}
+
+echo "Running tests for ${TARGET_TEST_TAG}"
+go test -cover -tags="test,${TARGET_TEST_TAG}" ./...

@@ -1,6 +1,11 @@
 #!/bin/bash
 set -e
 
+# We don't do this for helm-locker
+if [[ "${BUILD_TARGET}" == "helm-locker" ]]; then
+  exit
+fi
+
 cd $(dirname $0)/..
 
 echo "Validating newest prometheus-federator chart"

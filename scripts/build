@@ -2,21 +2,22 @@
 set -e
 
 source $(dirname $0)/version
-BUILD_CMD_TARGET=${BUILD_CMD_TARGET:-"./cmd/prometheus-federator/main.go"}
+BUILD_CMD_TARGET=${BUILD_CMD_TARGET:-"./cmd/${BUILD_TARGET}/main.go"}
 
 cd $(dirname $0)/..
 
 ./scripts/build-chart
 
-echo "Starting \`prometheus-federator\` binary build:";
+echo "Building \`${BUILD_TARGET}\` from \`${BUILD_CMD_TARGET}\`";
 
 mkdir -p build/bin
 if [ "$(uname)" = "Linux" ]; then
     OTHER_LINKFLAGS="-extldflags -static -s"
 fi
 
-LINKFLAGS="-X github.com/rancher/prometheus-federator/pkg/version.Version=$VERSION"
-LINKFLAGS="-X github.com/rancher/prometheus-federator/pkg/version.GitCommit=$COMMIT $LINKFLAGS"
+LINKFLAGS="-X github.com/rancher/${BUILD_TARGET}/pkg/version.Version=$VERSION"
+LINKFLAGS="-X github.com/rancher/${BUILD_TARGET}/pkg/version.GitCommit=$COMMIT $LINKFLAGS"
+BIN_DEST="build/bin/${BUILD_TARGET}"
 
 ARCHES=( "$ARCH" )
 # Set CROSS_ARCH to build for the other architecture
@@ -31,18 +32,17 @@ fi
 echo "Building for Arch(s): ${ARCHES[*]}"
 
 for A in "${ARCHES[@]}" ; do
-  GOARCH="$A" CGO_ENABLED=0 go build -ldflags "$LINKFLAGS $OTHER_LINKFLAGS" -o "build/bin/prometheus-federator-$A" "${BUILD_CMD_TARGET}"
+  GOARCH="$A" CGO_ENABLED=0 go build -ldflags "$LINKFLAGS $OTHER_LINKFLAGS" -o "${BIN_DEST}-$A" "${BUILD_CMD_TARGET}"
   # Set CROSS to build for other OS'es
   if [ "$CROSS" = "true" ]; then
     for OS in darwin windows ; do
-          GOARCH="$A" GOOS=$OS go build -ldflags "$LINKFLAGS" -o "build/bin/prometheus-federator-$OS-$A" "${BUILD_CMD_TARGET}"
-          echo "Built \`prometheus-federator-$OS-$A\`"
+          GOARCH="$A" GOOS=$OS go build -ldflags "$LINKFLAGS" -o "${BIN_DEST}-$OS-$A" "${BUILD_CMD_TARGET}"
     done
   fi
 done
 
 cd build/bin
-ln -sf "./prometheus-federator-$ARCH" "./prometheus-federator"
+ln -sf "${BUILD_TARGET}-$ARCH" "${BUILD_TARGET}"
 cd ../..
 
-echo "Completed \`prometheus-federator\` binary build."
+echo "Build complete, binary at: \`"${BIN_DEST}"\`"
