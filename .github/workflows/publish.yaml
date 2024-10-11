@@ -3,7 +3,7 @@ name : Publish images
 on:
   push:
     tags:
-      - "*"
+      - "v*"
 
 jobs:
   publish-images:
