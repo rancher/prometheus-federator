@@ -98,7 +98,7 @@ jobs:
       -
         name: Install mikefarah/yq
         run: |
-          sudo wget https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_amd64 -O /usr/bin/yq && sudo chmod +x /usr/bin/yq;
+          sudo wget https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_${{ matrix.arch == 'x64' && 'amd64' || matrix.arch  }} -O /usr/bin/yq && sudo chmod +x /usr/bin/yq;
       -
         name: Perform pre-e2e image build
         run: |
