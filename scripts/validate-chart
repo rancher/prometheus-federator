@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -e
 
-# We don't do this for helm-locker
-if [[ "${BUILD_TARGET}" == "helm-locker" ]]; then
+# We only do this for prometheus-federator
+if [[ "${BUILD_TARGET}" != "prometheus-federator" ]]; then
   exit
 fi
 
