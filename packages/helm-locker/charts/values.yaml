@@ -10,7 +10,7 @@ global:
   
   kubectl:
     repository: rancher/kubectl
-    tag: v1.20.2
+    tag: v1.25.16
     pullPolicy: IfNotPresent
 
   rbac:
@@ -48,9 +48,9 @@ namespaceOverride: ""
 replicas: 1
 
 image:
-  repository: ghcr.io/rancher/helm-project-operator/helm-locker
-  tag: v0.3.0
-  pullPolicy: IfNotPresent
+  repository: ghcr.io/rancher/prometheus-federator/helm-locker
+  tag: head
+  pullPolicy: Always
 
 # Additional arguments to be passed into the Helm Locker image
 additionalArgs: []
