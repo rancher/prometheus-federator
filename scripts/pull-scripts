@@ -6,7 +6,7 @@ cd $(dirname $0)
 source ./version
 
 if ls ../bin/charts-build-scripts 1>/dev/null 2>/dev/null; then
-    CURRENT_SCRIPT_VERSION=$(../bin/charts-build-scripts --version | cut -d' ' -f3)
+    CURRENT_SCRIPT_VERSION="v$(../bin/charts-build-scripts --version | cut -d' ' -f3)"
     if [[ "${CURRENT_SCRIPT_VERSION}" == "${CHARTS_BUILD_SCRIPT_VERSION}" ]]; then
         exit 0
     fi
