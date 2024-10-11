@@ -1,0 +1,11 @@
+apiVersion: v2
+name: project-operator-example
+description: Example Helm Project Operator chart
+version: 0.0.0
+appVersion: 0.0.0
+annotations:
+  catalog.cattle.io/certified: rancher
+  catalog.cattle.io/hidden: "true"
+  catalog.cattle.io/release-name: project-operator-example
+  catalog.cattle.io/os: linux,windows
+  catalog.cattle.io/permits-os: linux,windows
