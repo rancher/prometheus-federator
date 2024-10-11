@@ -1,0 +1,17 @@
+apiVersion: v2
+name: helm-locker-example
+description: Helm Locker Example Chart
+version: 0.0.1
+appVersion: 0.0.1
+annotations:
+  catalog.cattle.io/certified: rancher
+  catalog.cattle.io/display-name: Helm Locker Example Chart
+  catalog.cattle.io/kube-version: '>=1.16.0-0'
+  catalog.cattle.io/namespace: cattle-helm-system
+  catalog.cattle.io/permits-os: linux,windows
+  catalog.cattle.io/rancher-version: '>= 2.6.0-0'
+  catalog.cattle.io/release-name: helm-locker-example
+  catalog.cattle.io/os: linux,windows
+maintainers:
+  - email: dan.pock@suse.com
+    name: Dan Pock

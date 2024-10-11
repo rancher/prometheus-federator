@@ -1,0 +1,10 @@
+apiVersion: helm.cattle.io/v1alpha1
+kind: HelmRelease
+metadata:
+  name: {{ .Release.Name }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  release:
+    # Chart is configured to lock itself
+    name: {{ .Release.Name }}
+    namespace: {{ .Release.Namespace }}
