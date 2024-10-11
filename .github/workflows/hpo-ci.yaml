@@ -67,4 +67,3 @@ jobs:
           file: ./package/Dockerfile-helm-project-operator
           push: false
           tags: ${{ env.IMAGE }}
-          platforms: linux/amd64
