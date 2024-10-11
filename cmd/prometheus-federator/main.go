@@ -8,8 +8,8 @@ import (
 	"net/http"
 	_ "net/http/pprof"
 
-	"github.com/rancher/helm-project-operator/pkg/controllers/common"
-	"github.com/rancher/helm-project-operator/pkg/operator"
+	"github.com/rancher/prometheus-federator/pkg/helm-project-operator/controllers/common"
+	"github.com/rancher/prometheus-federator/pkg/helm-project-operator/operator"
 	"github.com/rancher/prometheus-federator/pkg/version"
 	command "github.com/rancher/wrangler-cli"
 	_ "github.com/rancher/wrangler/pkg/generated/controllers/apiextensions.k8s.io"

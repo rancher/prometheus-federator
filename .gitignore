@@ -3,6 +3,8 @@
 /build
 !/cmd/prometheus-federator/fs/.gitkeep
 /cmd/prometheus-federator/fs/*
+!/cmd/helm-project-operator/fs/.gitkeep
+/cmd/helm-project-operator/fs/*
 /dist
 *.swp
 .idea
