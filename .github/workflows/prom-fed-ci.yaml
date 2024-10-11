@@ -22,7 +22,12 @@ env:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        arch:
+          - x64
+          - arm64
+    runs-on : runs-on,image=ubuntu22-full-${{ matrix.arch }},runner=4cpu-linux-${{ matrix.arch }},run-id=${{ github.run_id }}
     steps:
       - uses: actions/checkout@v4
       - name : Set up Go
