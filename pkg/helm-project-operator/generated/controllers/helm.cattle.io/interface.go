@@ -19,8 +19,8 @@ limitations under the License.
 package helm
 
 import (
-	v1alpha1 "github.com/rancher/prometheus-federator/pkg/helm-project-operator/generated/controllers/helm.cattle.io/v1alpha1"
 	"github.com/rancher/lasso/pkg/controller"
+	v1alpha1 "github.com/rancher/prometheus-federator/pkg/helm-project-operator/generated/controllers/helm.cattle.io/v1alpha1"
 )
 
 type Interface interface {
