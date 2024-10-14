@@ -26,3 +26,10 @@ function edit-charts() {
 function package-charts() {
     helm package --debug "${1:-"./build/charts/helm-project-operator"}" -d "${2:-"./dist/artifacts"}"
 }
+
+function clean-old-chart() {
+  if [[ -d "./build/charts/${1}" ]]; then
+    rm -rf "./build/charts/${1}"
+  fi
+  mkdir -p "build/charts/${1}"
+}
