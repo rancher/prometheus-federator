@@ -6,6 +6,7 @@ source $(dirname $0)/util-chart
 
 # We don't do this for helm-locker
 if [[ "${BUILD_TARGET}" == "helm-locker" ]]; then
+  echo "No build-chart for helm-locker; maybe you meant package-helm"
   exit
 fi
 
@@ -20,14 +21,10 @@ fi
 CHART=${CHART:-${DEFAULT_CHART_TARGET}}
 
 if [ "$BUILD_TARGET" == "prometheus-federator" ]; then
-  CHART_VERSION=${EMBEDDED_CHART_VERSION:-$(find ./charts/${CHART} -maxdepth 1 -mindepth 1 -type d | tr - \~ | sort -rV | tr \~ - | head -n1 | cut -d'/' -f4)}
-
-  # Prepare and package charts
-  package-charts "charts/${CHART}/${CHART_VERSION}" ./build/charts
+  CHART_VERSION=${EMBEDDED_CHART_VERSION:-$(find "./charts/${CHART}" -maxdepth 1 -mindepth 1 -type d | tr - \~ | sort -rV | tr \~ - | head -n1 | cut -d'/' -f4)}
 
   # Prepare chart for embedding location
-  base64 -i "build/charts/${CHART}-${CHART_VERSION}.tgz" > "cmd/${BUILD_TARGET}/fs/${CHART}.tgz.base64"
-  rm "build/charts/${CHART}-${CHART_VERSION}.tgz"
+  base64 -i "assets/${CHART}/${CHART}-${CHART_VERSION}.tgz" > "cmd/${BUILD_TARGET}/fs/${CHART}.tgz.base64"
 elif [ "$BUILD_TARGET" == "helm-project-operator" ]; then
   # Prepare base chart for build
   rm -rf build/charts
@@ -43,4 +40,4 @@ elif [ "$BUILD_TARGET" == "helm-project-operator" ]; then
   base64 -i "./build/charts/${CHART}-${HELM_CHART_VERSION}.tgz" > "cmd/${BUILD_TARGET}/fs/${CHART}.tgz.base64"
 fi
 
-echo "Completed ${CHART} (${CHART_VERSION}) build process."
+echo "Completed ${CHART} (ver: ${HELM_CHART_VERSION:-"n/a"}) build process."
