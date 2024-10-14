@@ -1,0 +1,33 @@
+#!/bin/bash
+set -e
+
+if ! hash helm 2>/dev/null; then
+    echo "Helm is not installed"
+    exit 1
+fi
+
+source "$(dirname "$0")/version"
+source "$(dirname "$0")/util-chart"
+
+# We don't do this for helm-locker
+if [[ "${BUILD_TARGET}" == "prometheus-federator" ]]; then
+  exit
+fi
+
+cd "$(dirname "$0")/.."
+
+if [ "$BUILD_TARGET" == "helm-project-operator" ]; then
+  DEFAULT_CHART_SOURCE="packages/$BUILD_TARGET/charts/"
+elif [ "$BUILD_TARGET" == "helm-locker" ]; then
+  DEFAULT_CHART_SOURCE="examples/$BUILD_TARGET/helm-locker-chart-example/"
+fi
+
+clean-old-chart "$BUILD_TARGET"
+mkdir -p dist/artifacts
+cp -rf "${DEFAULT_CHART_SOURCE}" "build/charts/${BUILD_TARGET}/"
+
+if [ "$BUILD_TARGET" != "helm-project-operator" ]; then
+  edit-charts "build/charts/${BUILD_TARGET}/Chart.yaml" "${HELM_CHART_VERSION}" "${HELM_IMAGE_TAG}"
+fi
+cp -a "./build/charts/${BUILD_TARGET}" "./dist/charts/${BUILD_TARGET}"
+package-charts "./build/charts/${BUILD_TARGET}"
