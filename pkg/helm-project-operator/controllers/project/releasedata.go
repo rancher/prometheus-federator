@@ -3,9 +3,10 @@ package project
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
+
 	v1alpha2 "github.com/rancher/prometheus-federator/pkg/helm-project-operator/apis/helm.cattle.io/v1alpha1"
 	common2 "github.com/rancher/prometheus-federator/pkg/helm-project-operator/controllers/common"
-	"strings"
 
 	"github.com/rancher/wrangler/pkg/data"
 	"github.com/sirupsen/logrus"

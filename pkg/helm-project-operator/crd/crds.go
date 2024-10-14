@@ -3,12 +3,13 @@ package crd
 import (
 	"context"
 	"fmt"
-	"github.com/rancher/prometheus-federator/pkg/helm-project-operator/apis/helm.cattle.io/v1alpha1"
 	"io"
 	"os"
 	"path/filepath"
 	"strings"
 	"sync"
+
+	"github.com/rancher/prometheus-federator/pkg/helm-project-operator/apis/helm.cattle.io/v1alpha1"
 
 	helmcontrollercrd "github.com/k3s-io/helm-controller/pkg/crd"
 	helmlockercrd "github.com/rancher/prometheus-federator/pkg/helm-locker/crd"

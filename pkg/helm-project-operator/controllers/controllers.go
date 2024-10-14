@@ -4,13 +4,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
+
 	"github.com/rancher/prometheus-federator/pkg/helm-project-operator/controllers/common"
 	"github.com/rancher/prometheus-federator/pkg/helm-project-operator/controllers/hardened"
 	"github.com/rancher/prometheus-federator/pkg/helm-project-operator/controllers/namespace"
 	"github.com/rancher/prometheus-federator/pkg/helm-project-operator/controllers/project"
 	helmproject "github.com/rancher/prometheus-federator/pkg/helm-project-operator/generated/controllers/helm.cattle.io"
 	helmprojectcontroller "github.com/rancher/prometheus-federator/pkg/helm-project-operator/generated/controllers/helm.cattle.io/v1alpha1"
-	"time"
 
 	"github.com/k3s-io/helm-controller/pkg/controllers/chart"
 	k3shelm "github.com/k3s-io/helm-controller/pkg/generated/controllers/helm.cattle.io"

@@ -1,9 +1,10 @@
 package common
 
 import (
-	"github.com/rancher/prometheus-federator/pkg/helm-project-operator/apis/helm.cattle.io/v1alpha1"
 	"os"
 	"path/filepath"
+
+	"github.com/rancher/prometheus-federator/pkg/helm-project-operator/apis/helm.cattle.io/v1alpha1"
 
 	"github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"

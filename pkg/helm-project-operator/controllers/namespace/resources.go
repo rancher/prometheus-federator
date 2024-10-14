@@ -2,8 +2,9 @@ package namespace
 
 import (
 	"fmt"
-	common2 "github.com/rancher/prometheus-federator/pkg/helm-project-operator/controllers/common"
 	"strings"
+
+	common2 "github.com/rancher/prometheus-federator/pkg/helm-project-operator/controllers/common"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

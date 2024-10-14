@@ -1,9 +1,10 @@
 package main
 
 import (
+	"os"
+
 	"github.com/rancher/prometheus-federator/pkg/helm-project-operator/apis/helm.cattle.io/v1alpha1"
 	"github.com/rancher/prometheus-federator/pkg/helm-project-operator/crd"
-	"os"
 
 	"github.com/sirupsen/logrus"
 
