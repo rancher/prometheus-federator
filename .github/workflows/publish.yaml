@@ -1,4 +1,4 @@
-name : Publish images
+name : Publish images, charts and binaries
 
 on:
   push:
@@ -40,17 +40,18 @@ jobs:
       - name: Install mikefarah/yq
         run: |
           sudo wget https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_amd64 -O /usr/bin/yq && sudo chmod +x /usr/bin/yq;
+      - uses: azure/setup-kubectl@v3
       - name : Install helm
-        run : |
-          curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
-          chmod 700 get_helm.sh
-          ./get_helm.sh
-          helm version
-      - name: Package release helm charts
-        run: make package-helm
-      - run: mkdir -p ./build/artifacts/ && mv -v ./dist/artifacts/ ./build/
+        uses: azure/setup-helm@v3
       - name: Prepare embedded helm chart
-        run: make build-chart
+        run: |
+          BUILD_TARGET=helm-locker make package-helm && echo "hl: chart success"
+          BUILD_TARGET=helm-project-operator make package-helm && echo "hpo: embeded chart success"
+          BUILD_TARGET=prometheus-federator make package-helm && echo "pf: embeded chart success"
+      - name: Prepare embedded helm chart
+        run: |
+          BUILD_TARGET=helm-project-operator make build-chart
+          BUILD_TARGET=prometheus-federator make build-chart
       - uses: goreleaser/goreleaser-action@v6
         with:
           distribution: goreleaser
