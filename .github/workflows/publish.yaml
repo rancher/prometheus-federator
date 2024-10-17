@@ -1,13 +1,125 @@
-name : Publish images
+name : Publish images, charts and binaries
 
 on:
   push:
     tags:
-      - "*"
+      - "v*"
+
+env:
+  GHCR_REGISTRY: ghcr.io
+  REGISTRY: docker.io
+  IMAGE_NAME: ${{ github.repository }}
+  YQ_VERSION: v4.44.3
 
 jobs:
+  helm-locker-ci:
+    uses: ./.github/workflows/hl-ci.yaml
+  helm-project-operator-ci:
+    uses: ./.github/workflows/hpo-ci.yaml
+    with:
+      skip_build: 'true'
+  goreleaser:
+    name: Build go binaries and helm chart
+    runs-on : runs-on,image=ubuntu22-full-x64,runner=4cpu-linux-x64,run-id=${{ github.run_id }}
+    needs: [
+      helm-locker-ci,
+      helm-project-operator-ci,
+    ]
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GORELEASER_CURRENT_TAG: ${{ github.ref_name }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: git fetch --force --tags
+      - name : setup Go
+        uses : actions/setup-go@v5
+        with:
+          go-version: 1.22
+      - name: Install mikefarah/yq
+        run: |
+          sudo wget https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_amd64 -O /usr/bin/yq && sudo chmod +x /usr/bin/yq;
+      - uses: azure/setup-kubectl@v3
+      - name : Install helm
+        uses: azure/setup-helm@v3
+      - name: Prepare helm charts for debug artifacts
+        run: |
+          BUILD_TARGET=helm-locker make package-helm && echo "hl: chart success"
+          BUILD_TARGET=helm-project-operator make package-helm && echo "hpo: embeded chart success"
+          BUILD_TARGET=prometheus-federator make package-helm && echo "pf: embeded chart success"
+      - name: Prepare embedded helm chart (needed for build)
+        run: |
+          BUILD_TARGET=helm-project-operator make build-chart
+          BUILD_TARGET=prometheus-federator make build-chart
+      - uses: goreleaser/goreleaser-action@v6
+        with:
+          distribution: goreleaser
+          version: latest
+          args: release --clean
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GORELEASER_CURRENT_TAG: ${{ github.ref_name }}
+  push-dev-images:
+    name : Build and push helm-locker & Helm-Project-Operator images
+    runs-on : runs-on,image=ubuntu22-full-x64,runner=4cpu-linux-x64,run-id=${{ github.run_id }}
+    needs: [
+      helm-locker-ci,
+      helm-project-operator-ci,
+    ]
+    permissions:
+      contents: read
+      packages: write
+      attestations: write
+      id-token: write
+    steps:
+      - name : Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.GHCR_REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Extract metadata (tags, labels) for helm-locker image
+        id: meta-locker
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}/helm-locker
+      - name: Build and push helm-locker image
+        id: push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./package/Dockerfile-helm-locker
+          push: true
+          tags: ${{ steps.meta-locker.outputs.tags }}
+          labels: ${{ steps.meta-locker.outputs.labels }}
+          platforms : linux/amd64,linux/arm64
+      - name: Extract metadata (tags, labels) for Helm-Project-Operator image
+        id: meta-hpo
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}/helm-project-operator
+      - name: Build Helm-Project-Operator image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./package/Dockerfile-helm-project-operator
+          push: true
+          tags: ${{ steps.meta-hpo.outputs.tags }}
+          labels: ${{ steps.meta-hpo.outputs.labels }}
+          platforms: linux/amd64,linux/arm64
+
   publish-images:
+    name: Publish prometheus-federator image
     runs-on: ubuntu-latest
+    needs: [
+      helm-locker-ci,
+      helm-project-operator-ci,
+    ]
     permissions:
       contents : read
       id-token: write

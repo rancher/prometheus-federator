@@ -1,0 +1,33 @@
+#!/bin/bash
+set -e
+set -x
+
+if ! hash helm 2>/dev/null; then
+    echo "Helm is not installed"
+    exit 1
+fi
+
+source "$(dirname "$0")/version"
+source "$(dirname "$0")/util-chart"
+
+# We don't do the full process for prometheus-federator
+if [[ "${BUILD_TARGET}" == "prometheus-federator" ]]; then
+  mkdir -p ./dist/artifacts/
+  CHART_VERSION=${EMBEDDED_CHART_VERSION:-$(find "./charts/${BUILD_TARGET}" -maxdepth 1 -mindepth 1 -type d | tr - \~ | sort -rV | tr \~ - | head -n1 | cut -d'/' -f4)}
+  cp -a "./assets/${BUILD_TARGET}/${BUILD_TARGET}-${CHART_VERSION}.tgz" ./build/charts/
+  exit
+fi
+
+cd "$(dirname "$0")/.."
+
+if [ "$BUILD_TARGET" == "helm-project-operator" ]; then
+  DEFAULT_CHART_SOURCE="./packages/$BUILD_TARGET/charts"
+elif [ "$BUILD_TARGET" == "helm-locker" ]; then
+  DEFAULT_CHART_SOURCE="./examples/$BUILD_TARGET/helm-locker-chart-example"
+fi
+
+clean-old-chart "$BUILD_TARGET"
+cp -rf "${DEFAULT_CHART_SOURCE}" "./build/charts/${BUILD_TARGET}"
+
+edit-charts "./build/charts/${BUILD_TARGET}/Chart.yaml" "${HELM_CHART_VERSION}" "${HELM_IMAGE_TAG}"
+package-charts "./build/charts/${BUILD_TARGET}"
