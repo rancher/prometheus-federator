@@ -71,7 +71,7 @@ archives:
 release:
   prerelease: auto
   extra_files:
-    - glob : ./dist/artifacts/*.tgz
+    - glob : ./build/charts/*.tgz
 checksum:
   name_template: 'checksums.txt'
 snapshot:

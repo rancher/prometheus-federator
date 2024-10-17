@@ -43,12 +43,12 @@ jobs:
       - uses: azure/setup-kubectl@v3
       - name : Install helm
         uses: azure/setup-helm@v3
-      - name: Prepare embedded helm chart
+      - name: Prepare helm charts for debug artifacts
         run: |
           BUILD_TARGET=helm-locker make package-helm && echo "hl: chart success"
           BUILD_TARGET=helm-project-operator make package-helm && echo "hpo: embeded chart success"
           BUILD_TARGET=prometheus-federator make package-helm && echo "pf: embeded chart success"
-      - name: Prepare embedded helm chart
+      - name: Prepare embedded helm chart (needed for build)
         run: |
           BUILD_TARGET=helm-project-operator make build-chart
           BUILD_TARGET=prometheus-federator make build-chart
