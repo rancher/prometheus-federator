@@ -102,7 +102,7 @@ jobs:
         id: meta-hpo
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}
+          images: ${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}/helm-project-operator
       - name: Build Helm-Project-Operator image
         uses: docker/build-push-action@v5
         with:
