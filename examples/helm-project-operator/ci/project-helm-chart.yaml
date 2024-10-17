@@ -1,0 +1,15 @@
+# This is an example of a ProjectHelmChart that would be deployed onto a Helm Project Operator
+# instance that responds to helmApiVersion dummy.cattle.io/v1alpha1 and does not utilize --project-label
+#
+# When --project-label is not provided, it is expected that spec.projectNamespaceSelector should be provided
+#
+apiVersion: helm.cattle.io/v1alpha1
+kind: ProjectHelmChart
+metadata:
+  name: project-operator-example-chart
+  namespace: cattle-project-p-example
+spec:
+  helmApiVersion: dummy.cattle.io/v1alpha1
+  values:
+    data:
+      hello: e2e-ci

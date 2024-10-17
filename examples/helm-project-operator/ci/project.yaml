@@ -1,0 +1,8 @@
+apiVersion: management.cattle.io/v3
+kind: Project
+metadata:
+  name: p-example
+  namespace: local
+spec:
+  clusterName: local
+  displayName: HelmProjectOperator Example

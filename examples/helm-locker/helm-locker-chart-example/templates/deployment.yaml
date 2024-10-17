@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "helm-locker.name" . }}
+  namespace: {{ template "helm-locker.namespace" . }}
+  labels: {{ include "helm-locker.labels" . | nindent 4 }}
+    app: {{ template "helm-locker.name" . }}
+spec:
+  {{- if .Values.replicas }}
+  replicas: {{ .Values.replicas }}
+  {{- end }}
+  selector:
+    matchLabels:
+      app: {{ template "helm-locker.name" . }}
+      release: {{ $.Release.Name | quote }}
+  template:
+    metadata:
+      labels: {{ include "helm-locker.labels" . | nindent 8 }}
+        app: {{ template "helm-locker.name" . }}
+    spec:
+      containers:
+        - name: {{ template "helm-locker.name" . }}
+          image: "{{ template "system_default_registry" . }}{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: "{{ .Values.image.pullPolicy }}"
+          args:
+          - {{ template "helm-locker.name" . }}
+          - --namespace={{ template "helm-locker.namespace" . }}
+          - --controller-name={{ template "helm-locker.name" . }}
+{{- if .Values.debug }}
+          - --debug
+          - --debug-level={{ .Values.debugLevel }}
+{{- end }}
+{{- if .Values.additionalArgs }}
+{{- toYaml .Values.additionalArgs | nindent 10 }}
+{{- end }}
+          env:
+          - name: NODE_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: spec.nodeName
+{{- if .Values.resources }}
+          resources: {{ toYaml .Values.resources | nindent 12 }}
+{{- end }}
+      serviceAccountName: {{ template "helm-locker.name" . }}
+{{- if .Values.securityContext }}
+      securityContext: {{ toYaml .Values.securityContext | indent 8 }}
+{{- end }}
+      nodeSelector: {{ include "linux-node-selector" . | nindent 8 }} 
+{{- if .Values.nodeSelector }}
+{{- toYaml .Values.nodeSelector | nindent 8 }}
+{{- end }}
+      tolerations: {{ include "linux-node-tolerations" . | nindent 8 }} 
+{{- if .Values.tolerations }}
+{{- toYaml .Values.tolerations | nindent 8 }}
+{{- end }}

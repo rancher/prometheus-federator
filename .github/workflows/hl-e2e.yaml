@@ -1,0 +1,53 @@
+name: "[helm-locker] CI-e2e"
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+    paths:
+      - 'go.mod'
+      - 'charts/helm-locker*/**'
+      - 'crds/helm-locker/**'
+      - 'package/Dockerfile-helm-locker'
+      - 'cmd/helm-locker/**'
+      - 'pkg/helm-locker/**'
+
+env:
+  CLUSTER_NAME : e2e-ci-helm-locker
+  K3S_VERSION : v1.27.9-k3s1
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        arch:
+          - x64
+          - arm64
+    runs-on : runs-on,image=ubuntu22-full-${{ matrix.arch }},runner=4cpu-linux-${{ matrix.arch }},run-id=${{ github.run_id }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name : Set up Go
+        uses : actions/setup-go@v5
+        with:
+          go-version: 1.22
+      - uses: azure/setup-kubectl@v3
+      - uses: azure/setup-helm@v3
+      - name: build
+        run: BUILD_TARGET=helm-locker make build
+      - name : Install k3d
+        run : ./.github/workflows/e2e/scripts/install-k3d.sh
+      - name : Setup k3d cluster
+        run : K3S_VERSION=${{ env.K3S_VERSION }} ./.github/workflows/e2e/scripts/setup-cluster.sh
+      # temporary hack to run the helm-locker controller in the k3d cluster
+      - name : run helm-locker
+        run : |
+          kubectl create ns cattle-helm-system
+          ./build/bin/helm-locker &
+      - name : run e2e tests
+        run: |
+          k3d kubeconfig get ${{ env.CLUSTER_NAME }} > kubeconfig.yaml
+          export KUBECONFIG=$(pwd)/kubeconfig.yaml
+          cd tests && KUBECONFIG=$KUBECONFIG go test -v -race -timeout 30m ./...

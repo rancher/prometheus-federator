@@ -1,0 +1,61 @@
+{{- if and .Values.global.rbac.create .Values.global.rbac.userRoles.create }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ .Release.Name }}-admin
+  namespace: {{ .Release.Namespace }}
+  labels:
+    helm.cattle.io/project-helm-chart-role: {{ .Release.Name }}
+    {{- if .Values.global.rbac.userRoles.aggregateToDefaultRoles }}
+    helm.cattle.io/project-helm-chart-role-aggregate-from: admin
+    {{- end }}
+rules:
+- apiGroups:
+  - "test.cattle.io"
+  resources:
+  - test
+  resourceNames:
+  - test
+  verbs:
+  - 'test'
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ .Release.Name }}-edit
+  namespace: {{ .Release.Namespace }}
+  labels:
+    helm.cattle.io/project-helm-chart-role: {{ .Release.Name }}
+    {{- if .Values.global.rbac.userRoles.aggregateToDefaultRoles }}
+    helm.cattle.io/project-helm-chart-role-aggregate-from: edit
+    {{- end }}
+rules:
+- apiGroups:
+  - "test.cattle.io"
+  resources:
+  - test
+  resourceNames:
+  - test
+  verbs:
+  - 'test'
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ .Release.Name }}-view
+  namespace: {{ .Release.Namespace }}
+  labels:
+    helm.cattle.io/project-helm-chart-role: {{ .Release.Name }}
+    {{- if .Values.global.rbac.userRoles.aggregateToDefaultRoles }}
+    helm.cattle.io/project-helm-chart-role-aggregate-from: view
+    {{- end }}
+rules:
+- apiGroups:
+  - "test.cattle.io"
+  resources:
+  - test
+  resourceNames:
+  - test
+  verbs:
+  - 'test'
+{{- end }}

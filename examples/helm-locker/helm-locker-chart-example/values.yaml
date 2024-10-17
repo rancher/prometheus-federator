@@ -1,0 +1,86 @@
+# Default values for helm-locker.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# Helm Locker Configuration
+
+global:
+  cattle:
+    systemDefaultRegistry: ""
+  
+  kubectl:
+    repository: rancher/kubectl
+    tag: v1.25.16
+    pullPolicy: IfNotPresent
+
+  rbac:
+    ## Create RBAC resources for ServiceAccounts and users
+    ##
+    create: true
+
+    userRoles:
+      ## Create default user ClusterRoles to allow users to interact with HelmReleases
+      create: true
+      ## Aggregate default user ClusterRoles into default k8s ClusterRoles
+      aggregateToDefaultRoles: true
+
+    pspEnabled: true
+    pspAnnotations: {}
+      ## Specify pod annotations
+      ## Ref: https://kubernetes.io/docs/concepts/policy/pod-security-policy/#apparmor
+      ## Ref: https://kubernetes.io/docs/concepts/policy/pod-security-policy/#seccomp
+      ## Ref: https://kubernetes.io/docs/concepts/policy/pod-security-policy/#sysctl
+      ##
+      # seccomp.security.alpha.kubernetes.io/allowedProfileNames: '*'
+      # seccomp.security.alpha.kubernetes.io/defaultProfileName: 'docker/default'
+      # apparmor.security.beta.kubernetes.io/defaultProfileName: 'runtime/default'
+
+  ## Reference to one or more secrets to be used when pulling images
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+  ##
+  imagePullSecrets: []
+  # - name: "image-pull-secret"
+
+nameOverride: ""
+
+namespaceOverride: ""
+
+replicas: 1
+
+image:
+  repository: ghcr.io/rancher/prometheus-federator/helm-locker
+  tag: head
+  pullPolicy: Always
+
+# Additional arguments to be passed into the Helm Locker image
+additionalArgs: []
+
+## Define which Nodes the Pods are scheduled on.
+## ref: https://kubernetes.io/docs/user-guide/node-selection/
+##
+nodeSelector: {}
+
+## Tolerations for use with node taints
+## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+##
+tolerations: []
+# - key: "key"
+#   operator: "Equal"
+#   value: "value"
+#   effect: "NoSchedule"
+
+resources: {}
+  # limits:
+  #   memory: 500Mi
+  #   cpu: 1000m
+  # requests:
+  #   memory: 100Mi
+  #   cpu: 100m
+
+securityContext: {}
+  # allowPrivilegeEscalation: false
+  # readOnlyRootFilesystem: true
+
+debug: false
+debugLevel: 0
+
