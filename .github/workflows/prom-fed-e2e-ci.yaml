@@ -3,10 +3,6 @@ name: "[prom-fed] E2E CI"
 on:
   workflow_dispatch:
     inputs:
-      enable_tmate:
-        description: 'Enable debugging via tmate'
-        required: false
-        default: "false"
       debug:
         description: "Enable debug logs"
         required: false
@@ -118,13 +114,6 @@ jobs:
         name: Setup kubectl context
         run: |
           kubectl config use-context "k3d-$CLUSTER_NAME";
-      -
-        name: Set Up Tmate Debug Session
-        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.enable_tmate == 'true' }}
-        uses: mxschmitt/action-tmate@v3
-        timeout-minutes: 15
-        with:
-          limit-access-to-actor: true
       -
         name: Install Rancher Monitoring
         run: ./.github/workflows/e2e/scripts/install-monitoring.sh;
