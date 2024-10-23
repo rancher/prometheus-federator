@@ -73,6 +73,14 @@ kubectl get statefulset -n cattle-project-p-example-monitoring -o yaml > ${MANIF
 kubectl get pods -n cattle-project-p-example-monitoring -o yaml > ${MANIFEST_DIRECTORY}/pods/cattle-project-p-example-monitoring.yaml || true
 
 # Logs
+
+## Rancher logs
+mkdir -p ${LOG_DIRECTORY}/rancher
+
+kubectl logs deployment/rancher-webhook -n cattle-system > ${LOG_DIRECTORY}/rancher/rancher_webhook.log || true
+kubectl logs deployment/cattle-cluster-agent -n cattle-system > ${LOG_DIRECTORY}/rancher/cluster_agent.log || true
+kubectl logs deployment/system-upgrade-controller -n cattle-system > ${LOG_DIRECTORY}/rancher/upgrade_controller.log || true
+
 mkdir -p ${LOG_DIRECTORY}/rancher-monitoring
 
 ## Rancher Monitoring
