@@ -52,11 +52,11 @@ func writeFiles(dirpath string, objs []runtime.Object) error {
 		if err != nil {
 			return err
 		}
-		meta, err := meta.Accessor(o)
+		metaData, err := meta.Accessor(o)
 		if err != nil {
 			return err
 		}
-		key := strings.SplitN(meta.GetName(), ".", 2)[0]
+		key := strings.SplitN(metaData.GetName(), ".", 2)[0]
 		objMap[key] = data
 	}
 
@@ -121,17 +121,17 @@ func Objects(v1beta1 bool) (crds, crdDeps []runtime.Object, err error) {
 func objects(v1beta1 bool, crdDefs []crd.CRD) (crds []runtime.Object, err error) {
 	for _, crdDef := range crdDefs {
 		if v1beta1 {
-			crd, err := crdDef.ToCustomResourceDefinitionV1Beta1()
+			crdDefInstance, err := crdDef.ToCustomResourceDefinitionV1Beta1()
 			if err != nil {
 				return nil, err
 			}
-			crds = append(crds, crd)
+			crds = append(crds, crdDefInstance)
 		} else {
-			crd, err := crdDef.ToCustomResourceDefinition()
+			crdDefInstance, err := crdDef.ToCustomResourceDefinition()
 			if err != nil {
 				return nil, err
 			}
-			crds = append(crds, crd)
+			crds = append(crds, crdDefInstance)
 		}
 	}
 	return
@@ -169,12 +169,12 @@ func Create(ctx context.Context, cfg *rest.Config) error {
 }
 
 func newCRD(namespacedType string, obj interface{}, customize func(crd.CRD) crd.CRD) crd.CRD {
-	crd := crd.NamespacedType(namespacedType).
+	newCrd := crd.NamespacedType(namespacedType).
 		WithSchemaFromStruct(obj).
 		WithStatus()
 
 	if customize != nil {
-		crd = customize(crd)
+		newCrd = customize(newCrd)
 	}
-	return crd
+	return newCrd
 }
