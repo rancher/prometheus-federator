@@ -169,12 +169,12 @@ func Create(ctx context.Context, cfg *rest.Config) error {
 }
 
 func newCRD(namespacedType string, obj interface{}, customize func(crd.CRD) crd.CRD) crd.CRD {
-	crd := crd.NamespacedType(namespacedType).
+	newCrd := crd.NamespacedType(namespacedType).
 		WithSchemaFromStruct(obj).
 		WithStatus()
 
 	if customize != nil {
-		crd = customize(crd)
+		newCrd = customize(newCrd)
 	}
-	return crd
+	return newCrd
 }
