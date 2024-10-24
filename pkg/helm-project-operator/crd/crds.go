@@ -3,7 +3,11 @@ package crd
 import (
 	"context"
 	"fmt"
+	"github.com/rancher/wrangler/pkg/name"
 	"io"
+	"k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
+	"k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"os"
 	"path/filepath"
 	"strings"
@@ -164,7 +168,19 @@ func Create(ctx context.Context, cfg *rest.Config) error {
 		return err
 	}
 
+	crdClientSet := factory.CRDClient.(*clientset.Clientset)
 	crds, crdDeps := List()
+	// TODO: CRD updates topic, We could opt to not filter `crds` value and always install those?
+	err = filterMissingCRDs(crdClientSet, &crds)
+	if err != nil {
+		return err
+	}
+
+	err = filterMissingCRDs(crdClientSet, &crdDeps)
+	if err != nil {
+		return err
+	}
+
 	return factory.BatchCreateCRDs(ctx, append(crds, crdDeps...)...).BatchWait()
 }
 
@@ -177,4 +193,25 @@ func newCRD(namespacedType string, obj interface{}, customize func(crd.CRD) crd.
 		newCrd = customize(newCrd)
 	}
 	return newCrd
+}
+
+// filterMissingCRDs takes a list of expected CRDs and returns a filtered list of missing CRDs.
+func filterMissingCRDs(apiExtClient *clientset.Clientset, expectedCRDs *[]crd.CRD) error {
+	for i := len(*expectedCRDs) - 1; i >= 0; i-- {
+		currentCRD := (*expectedCRDs)[i]
+		crdName := currentCRD.GVK.GroupVersion().WithKind(strings.ToLower(name.GuessPluralName(currentCRD.GVK.Kind))).GroupKind().String()
+
+		// try to get the given CRD just to check for error, verifying if it exists
+		_, err := apiExtClient.ApiextensionsV1().CustomResourceDefinitions().Get(context.TODO(), crdName, metav1.GetOptions{})
+		// TODO: Add debugging logs here to show: expected version of CRD vs Found version, if found CRD needs to be updated
+		if err == nil {
+			// Update the list to remove the current item since the CRD is in the cluster already
+			*expectedCRDs = append((*expectedCRDs)[:i], (*expectedCRDs)[i+1:]...)
+		} else if !errors.IsNotFound(err) {
+			*expectedCRDs = []crd.CRD{}
+			return fmt.Errorf("failed to check CRD %s: %v", crdName, err)
+		}
+	}
+
+	return nil
 }
