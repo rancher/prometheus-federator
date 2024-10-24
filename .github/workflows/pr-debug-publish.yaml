@@ -8,6 +8,10 @@ on:
         required: true
         type: number
 
+concurrency:
+  group: prs-${{ github.event.inputs.pr_number }}
+  cancel-in-progress: true
+
 env:
   GHCR_REGISTRY: ghcr.io
   REGISTRY: docker.io
