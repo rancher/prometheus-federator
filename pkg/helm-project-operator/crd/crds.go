@@ -202,14 +202,22 @@ func filterMissingCRDs(apiExtClient *clientset.Clientset, expectedCRDs *[]crd.CR
 		crdName := currentCRD.GVK.GroupVersion().WithKind(strings.ToLower(name.GuessPluralName(currentCRD.GVK.Kind))).GroupKind().String()
 
 		// try to get the given CRD just to check for error, verifying if it exists
-		_, err := apiExtClient.ApiextensionsV1().CustomResourceDefinitions().Get(context.TODO(), crdName, metav1.GetOptions{})
-		// TODO: Add debugging logs here to show: expected version of CRD vs Found version, if found CRD needs to be updated
+		foundCRD, err := apiExtClient.ApiextensionsV1().CustomResourceDefinitions().Get(context.TODO(), crdName, metav1.GetOptions{})
+		logrus.Debugf(
+			"Found `%s` at version `%s`, expecting version `%s`",
+			crdName,
+			foundCRD.Status.StoredVersions[0],
+			currentCRD.GVK.Version,
+		)
 		if err == nil {
+			logrus.Debugf("Installing `%s` will be skipped; a suitible version exists on the cluster", crdName)
 			// Update the list to remove the current item since the CRD is in the cluster already
 			*expectedCRDs = append((*expectedCRDs)[:i], (*expectedCRDs)[i+1:]...)
 		} else if !errors.IsNotFound(err) {
 			*expectedCRDs = []crd.CRD{}
 			return fmt.Errorf("failed to check CRD %s: %v", crdName, err)
+		} else {
+			logrus.Debugf("`%s` will be installed or updated", crdName)
 		}
 	}
 
