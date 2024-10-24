@@ -11,13 +11,13 @@ entries:
       catalog.cattle.io/release-name: prometheus-federator
     apiVersion: v2
     appVersion: 0.4.3-rc.1
-    created: "2024-10-07T13:17:48.590665-04:00"
+    created: "2024-10-22T08:50:59.66311678Z"
     dependencies:
     - name: helmProjectOperator
       repository: file://./charts/helmProjectOperator
       version: 0.3.1
     description: Prometheus Federator
-    digest: 914d6606b938383710b923174e2505231fea144da555aa88119c7e3c88209c01
+    digest: 1b3e8643286a7857971f9e02a58e546102d285c47a284130acf6001e62c96e11
     icon: https://raw.githubusercontent.com/rancher/prometheus-federator/main/assets/logos/prometheus-federator.svg
     name: prometheus-federator
     urls:

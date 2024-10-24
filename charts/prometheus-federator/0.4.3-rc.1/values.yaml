@@ -87,6 +87,10 @@ helmProjectOperator:
   securityContext: {}
     # allowPrivilegeEscalation: false
     # readOnlyRootFilesystem: true
+
+  ## Priority class assigned to the Pods
+  ##
+  priorityClassName: ""
     
   debug: false
   debugLevel: 0

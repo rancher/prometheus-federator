@@ -18,6 +18,9 @@ spec:
       labels: {{ include "helm-project-operator.labels" . | nindent 8 }}
         app: {{ template "helm-project-operator.name" . }}
     spec:
+    {{- if .Values.priorityClassName }}
+      priorityClassName: {{ .Values.priorityClassName }}
+    {{- end }}
       containers:
         - name: {{ template "helm-project-operator.name" . }}
           image: "{{ template "system_default_registry" . }}{{ .Values.image.repository }}:{{ .Values.image.tag }}"

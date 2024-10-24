@@ -184,6 +184,11 @@ securityContext: {}
   # supplementalGroups:
   # - 1000
 
+## Priority class assigned to the Pods
+##
+priorityClassName: ""
+
+
 debug: false
 debugLevel: 0
 
