@@ -1,0 +1,135 @@
+name: Produce PR dev images (on Request)
+
+on:
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'Pull Request Number to build image for'
+        required: true
+        type: number
+
+env:
+  GHCR_REGISTRY: ghcr.io
+  REGISTRY: docker.io
+  IMAGE_NAME: ${{ github.repository }}
+  YQ_VERSION: v4.44.3
+  GH_TOKEN: ${{ github.token }}
+
+jobs:
+  push-dev-images:
+    name: Build and push helm-locker & Helm-Project-Operator images
+    #runs-on: runs-on,image=ubuntu22-full-x64,runner=4cpu-linux-x64,run-id=${{ github.run_id }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      attestations: write
+      id-token: write
+    steps:
+      # Checkout the code at the head of the specified PR
+      - name: Checkout the repository
+        uses: actions/checkout@v3
+      - name: Get Pull Request Head SHA
+        id: get_head_sha
+        run: |
+          pr_number=${{ github.event.inputs.pr_number }}
+          echo "Fetching details for PR #$pr_number"
+          pr_response=$(gh api repos/${{ github.repository }}/pulls/$pr_number)
+          head_sha=$(echo "$pr_response" | jq -r '.head.sha')
+          echo "::set-output name=head_sha::$head_sha"
+      - name: Checkout PR Head
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ steps.get_head_sha.outputs.head_sha }}
+      # Proceed to build images
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.GHCR_REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Extract metadata (tags, labels) for helm-locker image
+        id: meta-helm-locker
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}/helm-locker
+          tags: |
+            type=sha,prefix=pr-${{ github.event.inputs.pr_number }}-
+            type=raw,value=pr-${{ github.event.inputs.pr_number }}
+      - name: Build and push helm-locker image
+        id: push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./package/Dockerfile-helm-locker
+          push: true
+          tags: ${{ steps.meta-helm-locker.outputs.tags }}
+          labels: ${{ steps.meta-helm-locker.outputs.labels }}
+          platforms : linux/amd64,linux/arm64
+      - name: Extract metadata (tags, labels) for Helm-Project-Operator image
+        id: meta-helm-project-operator
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}/helm-project-operator
+          tags: |
+            type=sha,prefix=pr-${{ github.event.inputs.pr_number }}-
+            type=raw,value=pr-${{ github.event.inputs.pr_number }}
+      - name: Build Helm-Project-Operator image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./package/Dockerfile-helm-project-operator
+          push: true
+          tags: ${{ steps.meta-helm-project-operator.outputs.tags }}
+          labels: ${{ steps.meta-helm-project-operator.outputs.labels }}
+          platforms: linux/amd64,linux/arm64
+      - name: Extract metadata (tags, labels) for Prometheus Federator image
+        id: meta-prometheus-federator
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=sha,prefix=pr-${{ github.event.inputs.pr_number }}-
+            type=raw,value=pr-${{ github.event.inputs.pr_number }}
+      - name: Build Prometheus Federator image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./package/Dockerfile-prometheus-federator
+          push: true
+          tags: ${{ steps.meta-prometheus-federator.outputs.tags }}
+          labels: ${{ steps.meta-prometheus-federator.outputs.labels }}
+          platforms: linux/amd64,linux/arm64
+
+      - name: Comment on PR with image details
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const prNumber = context.payload.inputs.pr_number;
+            const images = [
+              {
+                name: 'Helm Locker',
+                url: `https://github.com/${{ github.repository }}/pkgs/container/prometheus-federator%2Fhelm-locker`
+              },
+              {
+                name: 'Helm Project Operator',
+                url: `https://${process.env.GHCR_REGISTRY}/${{ github.repository }}/pkgs/container/prometheus-federator%2Fhelm-project-operator`
+              },
+              {
+                name: 'Prometheus Federator',
+                url: `https://${process.env.GHCR_REGISTRY}/${{ github.repository }}/pkgs/container/prometheus-federator`
+              }
+            ];
+
+            const commentBody = images
+              .map(image => `- **${image.name}**: [Link to image](${image.url}):\n  Tags: \`${steps['meta-' + image.name.replace(/\s+/g, '-').toLowerCase()].outputs.tags}\``)
+              .join('\n\n');
+
+            github.rest.issues.createComment({
+              issue_number: prNumber,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `### Images built for PR #${prNumber}:\n\n${commentBody}`
+            });
