@@ -22,7 +22,7 @@ env:
 jobs:
   push-dev-images:
     name: Build and push helm-locker & Helm-Project-Operator images
-    runs-on: ${{ github.repository == 'rancher/prometheus-federator' && format('runs-on,image=ubuntu22-full-x64,runner=4cpu-linux-x64,run-id={1}', github.run_id) || 'ubuntu-latest' }}
+    runs-on: ${{ github.repository == 'rancher/prometheus-federator' && format('runs-on,image=ubuntu22-full-x64,runner=4cpu-linux-x64,run-id={0}', github.run_id) || 'ubuntu-latest' }}
     permissions:
       contents: read
       packages: write
