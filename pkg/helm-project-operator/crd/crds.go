@@ -203,13 +203,14 @@ func filterMissingCRDs(apiExtClient *clientset.Clientset, expectedCRDs *[]crd.CR
 
 		// try to get the given CRD just to check for error, verifying if it exists
 		foundCRD, err := apiExtClient.ApiextensionsV1().CustomResourceDefinitions().Get(context.TODO(), crdName, metav1.GetOptions{})
-		logrus.Debugf(
-			"Found `%s` at version `%s`, expecting version `%s`",
-			crdName,
-			foundCRD.Status.StoredVersions[0],
-			currentCRD.GVK.Version,
-		)
+
 		if err == nil {
+			logrus.Debugf(
+				"Found `%s` at version `%s`, expecting version `%s`",
+				crdName,
+				foundCRD.Status.StoredVersions[0],
+				currentCRD.GVK.Version,
+			)
 			logrus.Debugf("Installing `%s` will be skipped; a suitible version exists on the cluster", crdName)
 			// Update the list to remove the current item since the CRD is in the cluster already
 			*expectedCRDs = append((*expectedCRDs)[:i], (*expectedCRDs)[i+1:]...)
@@ -217,6 +218,7 @@ func filterMissingCRDs(apiExtClient *clientset.Clientset, expectedCRDs *[]crd.CR
 			*expectedCRDs = []crd.CRD{}
 			return fmt.Errorf("failed to check CRD %s: %v", crdName, err)
 		} else {
+			logrus.Debugf("Did not find `%s` on the cluster", crdName)
 			logrus.Debugf("`%s` will be installed or updated", crdName)
 		}
 	}
