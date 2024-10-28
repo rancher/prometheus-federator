@@ -24,6 +24,7 @@ func main() {
 	}
 
 	os.Unsetenv("GOPATH")
+	logrus.Info("Generating controller boilerplate")
 	controllergen.Run(args.Options{
 		OutputPackage: "github.com/rancher/prometheus-federator/pkg/helm-locker/generated",
 		Boilerplate:   "gen/boilerplate.go.txt",
