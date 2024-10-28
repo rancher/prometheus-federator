@@ -23,8 +23,7 @@ This is the current branch strategy for `rancher/backup-restore-operator`, it ma
 | Branch         | Tag      | Rancher                |
 |----------------|----------|------------------------|
 | `main`         | `head`   | `main` branch (`head`) |
-| `release/v1.0` | `v1.x.x` | `v2.9.x`               |
-| `release/v0.0` | `v0.x.x` | `v2.8.x`               |
+| `release/v0.0` | `v0.x.x` | `v2.9.x`, `v2.8.x`     |
 
 > [!NOTE]
 > We are starting our new Branch strategy officially in 2.10, the prior Rancher versions will receive updates to their new versions once cleared for backporting.
