@@ -17,6 +17,18 @@ For more info on _Helm Locker_, see the [dedicated README file](README-helm-lock
 
 For more information, see the [Getting Started guide](docs/prometheus-federator/gettingstarted.md).
 
+### Branches and Releases
+This is the current branch strategy for `rancher/backup-restore-operator`, it may change in the future.
+
+| Branch         | Tag      | Rancher                |
+|----------------|----------|------------------------|
+| `main`         | `head`   | `main` branch (`head`) |
+| `release/v0.0` | `v0.x.x` | `v2.9.x`, `v2.8.x`     |
+
+> [!NOTE]
+> We are starting our new Branch strategy officially in 2.10, the prior Rancher versions will receive updates to their new versions once cleared for backporting.
+
+
 ## More Info
 
 Prometheus Federator is an operator (powered by [`rancher/helm-project-operator`](README-helm-project-operator.md) and [`rancher/charts-build-scripts`](README-helm-locker.md)) that manages deploying one or more Project Monitoring Stacks composed of the following set of resources that are scoped to project namespaces:
@@ -53,6 +65,10 @@ For more information, see the [Developing guide](docs/prometheus-federator/devel
 `./build/bin/prometheus-federator`
 
 ## Versioning and Releasing For Rancher
+
+> [!NOTE]
+> We are starting our new Branch strategy officially in 2.10, the prior Rancher versions will receive updates to their new versions once cleared for backporting.
+> Once we fully adopt this branching and release process, we will remove this note.
 
 While this repository does maintain a standalone Helm repository for vanilla Helm users to consume directly, users of Rancher will see forked versions of these chart releases available on Rancher's Apps & Marketplace; the forked chart releases are maintained in the [`rancher/charts`](https://github.com/rancher/charts) repository on being released from a `dev-vX.X` branch to a `release-vX.X` branch, where `X.X` corresponds to the Rancher `${Major}.${Minor}` version that the users is using (i.e. Rancher `2.7`). 
 

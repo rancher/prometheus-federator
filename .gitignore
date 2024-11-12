@@ -15,5 +15,7 @@
 /.charts-build-scripts
 *.DS_Store
 dev/
-kubeconfig.yaml
+kubeconfig*.yaml
 get_helm.sh
+Dockerfile.dapper*
+!Dockerfile.dapper
