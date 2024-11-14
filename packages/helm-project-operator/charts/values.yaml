@@ -129,8 +129,9 @@ namespaceOverride: ""
 replicas: 1
 
 image:
-  repository: ghcr.io/rancher/helm-project-operator
-  tag: v0.3.0
+  registry: ghcr.io
+  repository: rancher/prometheus-federator/helm-project-operator
+  tag: ''
   pullPolicy: IfNotPresent
 
 helmController:
