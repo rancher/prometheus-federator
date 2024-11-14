@@ -27,6 +27,8 @@ func Init(ctx context.Context, systemNamespace string, cfg clientcmd.ClientConfi
 	}
 	clientConfig.RateLimiter = ratelimit.None
 
+	// TODO: Sort out how updating CRDs should be done if at all...
+	// IT could be a second phase, or maybe build it into Create?
 	if err := crd.Create(ctx, clientConfig); err != nil {
 		return err
 	}

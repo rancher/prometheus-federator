@@ -10,7 +10,6 @@ import (
 	"github.com/rancher/wrangler/pkg/crd"
 	"github.com/rancher/wrangler/pkg/yaml"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/rest"
 )
 
@@ -66,13 +65,16 @@ func Objects(v1beta1 bool) (result []runtime.Object, err error) {
 // List returns the set of CRDs that need to be generated
 func List() []crd.CRD {
 	return []crd.CRD{
-		newCRD(&v1alpha1.HelmRelease{}, func(c crd.CRD) crd.CRD {
-			return c.
-				WithColumn("Release Name", ".spec.release.name").
-				WithColumn("Release Namespace", ".spec.release.namespace").
-				WithColumn("Version", ".status.version").
-				WithColumn("State", ".status.state")
-		}),
+		newCRD(
+			"HelmRelease.helm.cattle.io/v1alpha1",
+			&v1alpha1.HelmRelease{},
+			func(c crd.CRD) crd.CRD {
+				return c.
+					WithColumn("Release Name", ".spec.release.name").
+					WithColumn("Release Namespace", ".spec.release.namespace").
+					WithColumn("Version", ".status.version").
+					WithColumn("State", ".status.state")
+			}),
 	}
 }
 
@@ -88,17 +90,14 @@ func Create(ctx context.Context, cfg *rest.Config) error {
 
 // newCRD returns the CustomResourceDefinition of an object that is customized
 // according to the provided customize function
-func newCRD(obj interface{}, customize func(crd.CRD) crd.CRD) crd.CRD {
-	crd := crd.CRD{
-		GVK: schema.GroupVersionKind{
-			Group:   "helm.cattle.io",
-			Version: "v1alpha1",
-		},
-		Status:       true,
-		SchemaObject: obj,
-	}
+func newCRD(namespacedType string, obj interface{}, customize func(crd.CRD) crd.CRD) crd.CRD {
+	crd := crd.NamespacedType(namespacedType).
+		WithSchemaFromStruct(obj).
+		WithStatus()
+
 	if customize != nil {
 		crd = customize(crd)
 	}
+
 	return crd
 }
