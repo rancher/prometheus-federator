@@ -9,7 +9,7 @@ cd $(dirname $0)/../../../..
 case "${KUBERNETES_DISTRIBUTION_TYPE}" in
 "k3s")
     cluster_args=""
-    kubernetes_version=$(kubectl version --short | grep "Server Version" | cut -d ' ' -f3)
+    kubernetes_version=$(kubectl version | grep "Server Version" | cut -d ' ' -f3)
     case "${kubernetes_version}" in
     v1.23.*)
         embedded_helm_controller_fixed_version="v1.23.14"
@@ -36,7 +36,7 @@ case "${KUBERNETES_DISTRIBUTION_TYPE}" in
     ;;
 "rke2")
     cluster_args=""
-    kubernetes_version=$(kubectl version --short | grep "Server Version" | cut -d ' ' -f3)
+    kubernetes_version=$(kubectl version | grep "Server Version" | cut -d ' ' -f3)
     case "${kubernetes_version}" in
     v1.23.*)
         embedded_helm_controller_fixed_version="v1.23.14"
