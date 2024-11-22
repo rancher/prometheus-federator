@@ -11,8 +11,8 @@ appVersion: 0.4.3
 dependencies:
 - name: helmProjectOperator
   repository: file://./charts/helmProjectOperator
-  version: 0.3.1
+  version: 0.3.2
 description: Prometheus Federator
 icon: https://raw.githubusercontent.com/rancher/prometheus-federator/main/assets/logos/prometheus-federator.svg
 name: prometheus-federator
-version: 0.4.3
+version: 0.4.4
