@@ -9,10 +9,10 @@ annotations:
   catalog.cattle.io/rancher-version: '>= 2.6.0-0'
   catalog.cattle.io/release-name: helm-project-operator
 apiVersion: v2
-appVersion: v0.3.1
+appVersion: v0.4.3
 description: Helm Project Operator
 maintainers:
 - email: dan.pock@suse.com
   name: Dan Pock
 name: helm-project-operator
-version: 0.3.1
+version: 0.3.2
