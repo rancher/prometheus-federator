@@ -55,6 +55,7 @@ helmProjectOperator:
       - rancher-monitoring-prometheus.cattle-monitoring-system.svc:9090
 
   image:
+    registry: ''
     repository: rancher/prometheus-federator
     tag: ''
     pullPolicy: IfNotPresent
