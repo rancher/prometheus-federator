@@ -67,18 +67,14 @@ heritage: {{ $.Release.Service | quote }}
 
 {{/* Define the image registry to use; either values, or systemdefault if set, or nothing */}}
 {{- define "helm-project-operator.imageRegistry" -}}
-{{- if .Values.image.registry }}
-{{- printf "%s/" .Values.image.registry -}}
-{{- else }}
-{{ template "system_default_registry" .  }}
+{{- if .Values.image.registry }}{{- printf "%s/" .Values.image.registry -}}
+{{- else }}{{ template "system_default_registry" .  }}
 {{- end }}
 {{- end }}
 
 {{/* Define the image tag to use; either values, or chart app version */}}
 {{- define "helm-project-operator.imageTag" -}}
-{{- if .Values.image.tag }}
-{{ .Values.image.tag  }}
-{{- else }}
-{{ .Chart.AppVersion }}
+{{- if .Values.image.tag }}{{ .Values.image.tag  }}
+{{- else }}{{ .Chart.AppVersion }}
 {{- end -}}
 {{- end -}}
