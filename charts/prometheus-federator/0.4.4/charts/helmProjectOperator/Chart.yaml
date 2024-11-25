@@ -14,5 +14,5 @@ description: Helm Project Operator
 maintainers:
 - email: dan.pock@suse.com
   name: Dan Pock
-name: helm-project-operator
+name: helmProjectOperator
 version: 0.3.2

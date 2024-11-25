@@ -31,14 +31,14 @@ kubernetes.io/os: linux
 
 {{/* vim: set filetype=mustache: */}}
 {{/* Expand the name of the chart. This is suffixed with -alertmanager, which means subtract 13 from longest 63 available */}}
-{{- define "helm-project-operator.name" -}}
+{{- define "prometheus-federator.name" -}}
 {{- default .Chart.Name .Values.nameOverride | trunc 50 | trimSuffix "-" -}}
 {{- end }}
 
 {{/*
 Allow the release namespace to be overridden for multi-namespace deployments in combined charts
 */}}
-{{- define "helm-project-operator.namespace" -}}
+{{- define "prometheus-federator.namespace" -}}
   {{- if .Values.namespaceOverride -}}
     {{- .Values.namespaceOverride -}}
   {{- else -}}
@@ -47,27 +47,20 @@ Allow the release namespace to be overridden for multi-namespace deployments in 
 {{- end -}}
 
 {{/* Create chart name and version as used by the chart label. */}}
-{{- define "helm-project-operator.chartref" -}}
+{{- define "prometheus-federator.chartref" -}}
 {{- replace "+" "_" .Chart.Version | printf "%s-%s" .Chart.Name -}}
 {{- end }}
 
 {{/* Generate basic labels */}}
-{{- define "helm-project-operator.labels" -}}
+{{- define "prometheus-federator.labels" }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 app.kubernetes.io/version: "{{ replace "+" "_" .Chart.Version }}"
-app.kubernetes.io/part-of: {{ template "helm-project-operator.name" . }}
-chart: {{ template "helm-project-operator.chartref" . }}
+app.kubernetes.io/part-of: {{ template "prometheus-federator.name" . }}
+chart: {{ template "prometheus-federator.chartref" . }}
 release: {{ $.Release.Name | quote }}
 heritage: {{ $.Release.Service | quote }}
 {{- if .Values.commonLabels}}
 {{ toYaml .Values.commonLabels }}
-{{- end }}
-{{- end -}}
-
-{{/* Define the image registry to use; either values, or systemdefault if set, or nothing */}}
-{{- define "helm-project-operator.imageRegistry" -}}
-{{- if .Values.image.registry }}{{- printf "%s/" .Values.image.registry -}}
-{{- else }}{{ template "system_default_registry" .  }}
 {{- end }}
 {{- end }}
