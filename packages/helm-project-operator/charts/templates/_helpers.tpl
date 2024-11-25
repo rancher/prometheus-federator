@@ -71,10 +71,3 @@ heritage: {{ $.Release.Service | quote }}
 {{- else }}{{ template "system_default_registry" .  }}
 {{- end }}
 {{- end }}
-
-{{/* Define the image tag to use; either values, or chart app version */}}
-{{- define "helm-project-operator.imageTag" -}}
-{{- if .Values.image.tag }}{{ .Values.image.tag  }}
-{{- else }}{{ .Chart.AppVersion }}
-{{- end -}}
-{{- end -}}
