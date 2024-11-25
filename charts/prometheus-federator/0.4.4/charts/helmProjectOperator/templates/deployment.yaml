@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
         - name: {{ template "helm-project-operator.name" . }}
-          image: "{{ template "helm-project-operator.imageRegistry" . }}{{ .Values.image.repository }}:{{ template "helm-project-operator.imageTag" . }}"
+          image: "{{ template "helm-project-operator.imageRegistry" . }}{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: "{{ .Values.image.pullPolicy }}"
           args:
           - {{ template "helm-project-operator.name" . }}
