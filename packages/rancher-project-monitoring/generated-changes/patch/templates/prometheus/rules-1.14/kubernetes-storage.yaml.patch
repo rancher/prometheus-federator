@@ -1,6 +1,6 @@
 --- charts-original/templates/prometheus/rules-1.14/kubernetes-storage.yaml
 +++ charts/templates/prometheus/rules-1.14/kubernetes-storage.yaml
-@@ -1,20 +1,19 @@
+@@ -1,11 +1,10 @@
  {{- /*
 -Generated from 'kubernetes-storage' group from https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/a8ba97a150c75be42010c75d10b720c55e182f1a/manifests/kubernetesControlPlane-prometheusRule.yaml
 +Generated from 'kubernetes-storage' group from https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/main/manifests/kubernetesControlPlane-prometheusRule.yaml
@@ -13,19 +13,6 @@
  {{- $targetNamespace := .Values.defaultRules.appNamespacesTarget }}
  apiVersion: monitoring.coreos.com/v1
  kind: PrometheusRule
- metadata:
--  name: {{ printf "%s-%s" (include "kube-prometheus-stack.fullname" .) "kubernetes-storage" | trunc 63 | trimSuffix "-" }}
--  namespace: {{ template "kube-prometheus-stack.namespace" . }}
-+  name: {{ printf "%s-%s" (include "project-prometheus-stack.fullname" .) "kubernetes-storage" | trunc 63 | trimSuffix "-" }}
-+  namespace: {{ template "project-prometheus-stack.namespace" . }}
-   labels:
--    app: {{ template "kube-prometheus-stack.name" . }}
--{{ include "kube-prometheus-stack.labels" . | indent 4 }}
-+    app: {{ template "project-prometheus-stack.name" . }}
-+{{ include "project-prometheus-stack.labels" . | indent 4 }}
- {{- if .Values.defaultRules.labels }}
- {{ toYaml .Values.defaultRules.labels | indent 4 }}
- {{- end }}
 @@ -35,16 +34,16 @@
  {{- if .Values.defaultRules.additionalRuleGroupAnnotations.kubernetesStorage }}
  {{ toYaml .Values.defaultRules.additionalRuleGroupAnnotations.kubernetesStorage | indent 8 }}

@@ -1,41 +1,5 @@
 --- charts-original/templates/alertmanager/alertmanager.yaml
 +++ charts/templates/alertmanager/alertmanager.yaml
-@@ -2,11 +2,11 @@
- apiVersion: monitoring.coreos.com/v1
- kind: Alertmanager
- metadata:
--  name: {{ template "kube-prometheus-stack.alertmanager.crname" . }}
--  namespace: {{ template "kube-prometheus-stack.namespace" . }}
-+  name: {{ template "project-prometheus-stack.alertmanager.crname" . }}
-+  namespace: {{ template "project-prometheus-stack.namespace" . }}
-   labels:
--    app: {{ template "kube-prometheus-stack.name" . }}-alertmanager
--{{ include "kube-prometheus-stack.labels" . | indent 4 }}
-+    app: {{ template "project-prometheus-stack.name" . }}-alertmanager
-+{{ include "project-prometheus-stack.labels" . | indent 4 }}
- {{- if .Values.alertmanager.annotations }}
-   annotations:
- {{ toYaml .Values.alertmanager.annotations | indent 4 }}
-@@ -30,16 +30,16 @@
- {{- end }}
-   replicas: {{ .Values.alertmanager.alertmanagerSpec.replicas }}
-   listenLocal: {{ .Values.alertmanager.alertmanagerSpec.listenLocal }}
--  serviceAccountName: {{ template "kube-prometheus-stack.alertmanager.serviceAccountName" . }}
-+  serviceAccountName: {{ template "project-prometheus-stack.alertmanager.serviceAccountName" . }}
-   automountServiceAccountToken: {{ .Values.alertmanager.alertmanagerSpec.automountServiceAccountToken }}
- {{- if .Values.alertmanager.alertmanagerSpec.externalUrl }}
-   externalUrl: "{{ tpl .Values.alertmanager.alertmanagerSpec.externalUrl . }}"
- {{- else if and .Values.alertmanager.ingress.enabled .Values.alertmanager.ingress.hosts }}
-   externalUrl: "http://{{ tpl (index .Values.alertmanager.ingress.hosts 0) . }}{{ .Values.alertmanager.alertmanagerSpec.routePrefix }}"
- {{- else if not (or (kindIs "invalid" .Values.global.cattle.url) (kindIs "invalid" .Values.global.cattle.clusterId)) }}
--  externalUrl: "{{ .Values.global.cattle.url }}/k8s/clusters/{{ .Values.global.cattle.clusterId }}/api/v1/namespaces/{{ .Values.namespaceOverride }}/services/http:{{ template "kube-prometheus-stack.fullname" . }}-alertmanager:{{ .Values.alertmanager.service.port }}/proxy"
-+  externalUrl: "{{ .Values.global.cattle.url }}/k8s/clusters/{{ .Values.global.cattle.clusterId }}/api/v1/namespaces/{{ .Values.namespaceOverride }}/services/http:{{ template "project-prometheus-stack.fullname" . }}-alertmanager:{{ .Values.alertmanager.service.port }}/proxy"
- {{- else }}
--  externalUrl: http://{{ template "kube-prometheus-stack.fullname" . }}-alertmanager.{{ template "kube-prometheus-stack.namespace" . }}:{{ .Values.alertmanager.service.port }}
-+  externalUrl: http://{{ template "project-prometheus-stack.fullname" . }}-alertmanager.{{ template "project-prometheus-stack.namespace" . }}:{{ .Values.alertmanager.service.port }}
- {{- end }}
-   nodeSelector: {{ include "linux-node-selector" . | nindent 4 }}
- {{- if .Values.alertmanager.alertmanagerSpec.nodeSelector }}
 @@ -62,16 +62,11 @@
  {{- end }}
  {{- if .Values.alertmanager.alertmanagerSpec.alertmanagerConfigSelector }}
@@ -55,30 +19,3 @@
  {{- if .Values.alertmanager.alertmanagerSpec.web }}
    web:
  {{ toYaml .Values.alertmanager.alertmanagerSpec.web | indent 4 }}
-@@ -116,7 +111,7 @@
-         labelSelector:
-           matchExpressions:
-             - {key: app.kubernetes.io/name, operator: In, values: [alertmanager]}
--            - {key: alertmanager, operator: In, values: [{{ template "kube-prometheus-stack.alertmanager.crname" . }}]}
-+            - {key: alertmanager, operator: In, values: [{{ template "project-prometheus-stack.alertmanager.crname" . }}]}
- {{- else if eq .Values.alertmanager.alertmanagerSpec.podAntiAffinity "soft" }}
-     podAntiAffinity:
-       preferredDuringSchedulingIgnoredDuringExecution:
-@@ -126,7 +121,7 @@
-           labelSelector:
-             matchExpressions:
-               - {key: app.kubernetes.io/name, operator: In, values: [alertmanager]}
--              - {key: alertmanager, operator: In, values: [{{ template "kube-prometheus-stack.alertmanager.crname" . }}]}
-+              - {key: alertmanager, operator: In, values: [{{ template "project-prometheus-stack.alertmanager.crname" . }}]}
- {{- end }}
-   tolerations: {{ include "linux-node-tolerations" . | nindent 4 }}
- {{- if .Values.alertmanager.alertmanagerSpec.tolerations }}
-@@ -138,7 +133,7 @@
- {{- end }}
- {{- if .Values.global.imagePullSecrets }}
-   imagePullSecrets:
--{{ include "kube-prometheus-stack.imagePullSecrets" . | trim | indent 4 }}
-+{{ include "project-prometheus-stack.imagePullSecrets" . | trim | indent 4 }}
- {{- end }}
- {{- if .Values.alertmanager.alertmanagerSpec.containers }}
-   containers:

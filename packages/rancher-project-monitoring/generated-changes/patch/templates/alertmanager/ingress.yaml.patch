@@ -1,39 +1,11 @@
 --- charts-original/templates/alertmanager/ingress.yaml
 +++ charts/templates/alertmanager/ingress.yaml
-@@ -1,27 +1,27 @@
- {{- if and .Values.alertmanager.enabled .Values.alertmanager.ingress.enabled }}
- {{- $pathType := .Values.alertmanager.ingress.pathType | default "ImplementationSpecific" }}
--{{- $serviceName := printf "%s-%s" (include "kube-prometheus-stack.fullname" .) "alertmanager" }}
--{{- $backendServiceName := .Values.alertmanager.ingress.serviceName | default (printf "%s-%s" (include "kube-prometheus-stack.fullname" .) "alertmanager") }}
-+{{- $serviceName := printf "%s-%s" (include "project-prometheus-stack.fullname" .) "alertmanager" }}
-+{{- $backendServiceName := .Values.alertmanager.ingress.serviceName | default (printf "%s-%s" (include "project-prometheus-stack.fullname" .) "alertmanager") }}
- {{- $servicePort := .Values.alertmanager.ingress.servicePort | default .Values.alertmanager.service.port -}}
- {{- $routePrefix := list .Values.alertmanager.alertmanagerSpec.routePrefix }}
- {{- $paths := .Values.alertmanager.ingress.paths | default $routePrefix -}}
--{{- $apiIsStable := eq (include "kube-prometheus-stack.ingress.isStable" .) "true" -}}
--{{- $ingressSupportsPathType := eq (include "kube-prometheus-stack.ingress.supportsPathType" .) "true" -}}
--apiVersion: {{ include "kube-prometheus-stack.ingress.apiVersion" . }}
-+{{- $apiIsStable := eq (include "project-prometheus-stack.ingress.isStable" .) "true" -}}
-+{{- $ingressSupportsPathType := eq (include "project-prometheus-stack.ingress.supportsPathType" .) "true" -}}
-+apiVersion: {{ include "project-prometheus-stack.ingress.apiVersion" . }}
- kind: Ingress
- metadata:
-   name: {{ $serviceName }}
--  namespace: {{ template "kube-prometheus-stack.namespace" . }}
-+  namespace: {{ template "project-prometheus-stack.namespace" . }}
+@@ -14,7 +14,7 @@
+   namespace: {{ template "kube-prometheus-stack.namespace" . }}
  {{- if .Values.alertmanager.ingress.annotations }}
    annotations:
 -    {{- tpl (toYaml .Values.alertmanager.ingress.annotations) . | nindent 4 }}
 +{{ toYaml .Values.alertmanager.ingress.annotations | indent 4 }}
  {{- end }}
    labels:
--    app: {{ template "kube-prometheus-stack.name" . }}-alertmanager
-+    app: {{ template "project-prometheus-stack.name" . }}-alertmanager
- {{- if .Values.alertmanager.ingress.labels }}
- {{ toYaml .Values.alertmanager.ingress.labels | indent 4 }}
- {{- end }}
--{{ include "kube-prometheus-stack.labels" . | indent 4 }}
-+{{ include "project-prometheus-stack.labels" . | indent 4 }}
- spec:
-   {{- if $apiIsStable }}
-   {{- if .Values.alertmanager.ingress.ingressClassName }}
+     app: {{ template "kube-prometheus-stack.name" . }}-alertmanager
