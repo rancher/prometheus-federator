@@ -464,7 +464,7 @@ containers:
         value: "{{ . }}"
       {{- end }}
       - name: NAMESPACE
-        value: "{{ template "project-prometheus-stack.projectNamespaceList" . }}"
+        value: "{{ template "kube-prometheus-stack.projectNamespaceList" . }}"
       {{- with .Values.sidecar.skipTlsVerify }}
       - name: SKIP_TLS_VERIFY
         value: "{{ . }}"
@@ -573,7 +573,7 @@ containers:
         value: "{{ . }}"
       {{- end }}
       - name: NAMESPACE
-        value: "{{ template "project-prometheus-stack.projectNamespaceList" . }}"
+        value: "{{ template "kube-prometheus-stack.projectNamespaceList" . }}"
       {{- if .Values.sidecar.skipTlsVerify }}
       - name: SKIP_TLS_VERIFY
         value: "{{ .Values.sidecar.skipTlsVerify }}"
@@ -779,7 +779,7 @@ containers:
         value: "{{ . }}"
       {{- end }}
       - name: NAMESPACE
-        value: "{{ template "project-prometheus-stack.projectNamespaceList" . }}"
+        value: "{{ template "kube-prometheus-stack.projectNamespaceList" . }}"
       {{- with .Values.sidecar.plugins.script }}
       - name: SCRIPT
         value: "{{ . }}"

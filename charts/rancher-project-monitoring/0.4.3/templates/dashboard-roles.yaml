@@ -2,9 +2,9 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: {{ template "project-prometheus-stack.fullname" . }}-admin
-  namespace: {{ template "project-prometheus-stack.namespace" . }}
-  labels: {{ include "project-prometheus-stack.labels" . | nindent 4 }}
+  name: {{ template "kube-prometheus-stack.fullname" . }}-admin
+  namespace: {{ template "kube-prometheus-stack.namespace" . }}
+  labels: {{ include "kube-prometheus-stack.labels" . | nindent 4 }}
     helm.cattle.io/project-helm-chart-role: {{ .Release.Name }}
     {{- if .Values.global.rbac.userRoles.aggregateToDefaultRoles }}
     helm.cattle.io/project-helm-chart-role-aggregate-from: admin
@@ -15,11 +15,11 @@ rules:
   resources:
   - services/proxy
   resourceNames:
-  - "http:{{ template "project-prometheus-stack.fullname" . }}-prometheus:{{ .Values.prometheus.service.port }}"
-  - "https:{{ template "project-prometheus-stack.fullname" . }}-prometheus:{{ .Values.prometheus.service.port }}"
+  - "http:{{ template "kube-prometheus-stack.fullname" . }}-prometheus:{{ .Values.prometheus.service.port }}"
+  - "https:{{ template "kube-prometheus-stack.fullname" . }}-prometheus:{{ .Values.prometheus.service.port }}"
 {{- if .Values.alertmanager.enabled }}
-  - "http:{{ template "project-prometheus-stack.fullname" . }}-alertmanager:{{ .Values.alertmanager.service.port }}"
-  - "https:{{ template "project-prometheus-stack.fullname" . }}-alertmanager:{{ .Values.alertmanager.service.port }}"
+  - "http:{{ template "kube-prometheus-stack.fullname" . }}-alertmanager:{{ .Values.alertmanager.service.port }}"
+  - "https:{{ template "kube-prometheus-stack.fullname" . }}-alertmanager:{{ .Values.alertmanager.service.port }}"
 {{- end }}
 {{- if .Values.grafana.enabled }}
   - "http:{{ include "call-nested" (list . "grafana" "grafana.fullname") }}:{{ .Values.grafana.service.port }}"
@@ -36,9 +36,9 @@ rules:
   resources:
   - endpoints
   resourceNames:
-  - {{ template "project-prometheus-stack.fullname" . }}-prometheus
+  - {{ template "kube-prometheus-stack.fullname" . }}-prometheus
 {{- if .Values.alertmanager.enabled }}
-  - {{ template "project-prometheus-stack.fullname" . }}-alertmanager
+  - {{ template "kube-prometheus-stack.fullname" . }}-alertmanager
 {{- end }}
 {{- if .Values.grafana.enabled }}
   - {{ include "call-nested" (list . "grafana" "grafana.fullname") }}
@@ -51,7 +51,7 @@ rules:
   resources:
   - "secrets"
   resourceNames:
-  - {{ printf "%s-alertmanager-secret" (include "project-prometheus-stack.fullname" .) }}
+  - {{ printf "%s-alertmanager-secret" (include "kube-prometheus-stack.fullname" .) }}
   verbs:
   - get
   - list
@@ -64,9 +64,9 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: {{ template "project-prometheus-stack.fullname" . }}-edit
-  namespace: {{ template "project-prometheus-stack.namespace" . }}
-  labels: {{ include "project-prometheus-stack.labels" . | nindent 4 }}
+  name: {{ template "kube-prometheus-stack.fullname" . }}-edit
+  namespace: {{ template "kube-prometheus-stack.namespace" . }}
+  labels: {{ include "kube-prometheus-stack.labels" . | nindent 4 }}
     helm.cattle.io/project-helm-chart-role: {{ .Release.Name }}
     {{- if .Values.global.rbac.userRoles.aggregateToDefaultRoles }}
     helm.cattle.io/project-helm-chart-role-aggregate-from: edit
@@ -77,11 +77,11 @@ rules:
   resources:
   - services/proxy
   resourceNames:
-  - "http:{{ template "project-prometheus-stack.fullname" . }}-prometheus:{{ .Values.prometheus.service.port }}"
-  - "https:{{ template "project-prometheus-stack.fullname" . }}-prometheus:{{ .Values.prometheus.service.port }}"
+  - "http:{{ template "kube-prometheus-stack.fullname" . }}-prometheus:{{ .Values.prometheus.service.port }}"
+  - "https:{{ template "kube-prometheus-stack.fullname" . }}-prometheus:{{ .Values.prometheus.service.port }}"
 {{- if .Values.alertmanager.enabled }}
-  - "http:{{ template "project-prometheus-stack.fullname" . }}-alertmanager:{{ .Values.alertmanager.service.port }}"
-  - "https:{{ template "project-prometheus-stack.fullname" . }}-alertmanager:{{ .Values.alertmanager.service.port }}"
+  - "http:{{ template "kube-prometheus-stack.fullname" . }}-alertmanager:{{ .Values.alertmanager.service.port }}"
+  - "https:{{ template "kube-prometheus-stack.fullname" . }}-alertmanager:{{ .Values.alertmanager.service.port }}"
 {{- end }}
 {{- if .Values.grafana.enabled }}
   - "http:{{ include "call-nested" (list . "grafana" "grafana.fullname") }}:{{ .Values.grafana.service.port }}"
@@ -98,9 +98,9 @@ rules:
   resources:
   - endpoints
   resourceNames:
-  - {{ template "project-prometheus-stack.fullname" . }}-prometheus
+  - {{ template "kube-prometheus-stack.fullname" . }}-prometheus
 {{- if .Values.alertmanager.enabled }}
-  - {{ template "project-prometheus-stack.fullname" . }}-alertmanager
+  - {{ template "kube-prometheus-stack.fullname" . }}-alertmanager
 {{- end }}
 {{- if .Values.grafana.enabled }}
   - {{ include "call-nested" (list . "grafana" "grafana.fullname") }}
@@ -113,7 +113,7 @@ rules:
   resources:
   - "secrets"
   resourceNames:
-  - {{ printf "%s-alertmanager-secret" (include "project-prometheus-stack.fullname" .) }}
+  - {{ printf "%s-alertmanager-secret" (include "kube-prometheus-stack.fullname" .) }}
   verbs:
   - get
   - list
@@ -125,9 +125,9 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: {{ template "project-prometheus-stack.fullname" . }}-view
-  namespace: {{ template "project-prometheus-stack.namespace" . }}
-  labels: {{ include "project-prometheus-stack.labels" . | nindent 4 }}
+  name: {{ template "kube-prometheus-stack.fullname" . }}-view
+  namespace: {{ template "kube-prometheus-stack.namespace" . }}
+  labels: {{ include "kube-prometheus-stack.labels" . | nindent 4 }}
     helm.cattle.io/project-helm-chart-role: {{ .Release.Name }}
     {{- if .Values.global.rbac.userRoles.aggregateToDefaultRoles }}
     helm.cattle.io/project-helm-chart-role-aggregate-from: view
@@ -138,11 +138,11 @@ rules:
   resources:
   - services/proxy
   resourceNames:
-  - "http:{{ template "project-prometheus-stack.fullname" . }}-prometheus:{{ .Values.prometheus.service.port }}"
-  - "https:{{ template "project-prometheus-stack.fullname" . }}-prometheus:{{ .Values.prometheus.service.port }}"
+  - "http:{{ template "kube-prometheus-stack.fullname" . }}-prometheus:{{ .Values.prometheus.service.port }}"
+  - "https:{{ template "kube-prometheus-stack.fullname" . }}-prometheus:{{ .Values.prometheus.service.port }}"
 {{- if .Values.alertmanager.enabled }}
-  - "http:{{ template "project-prometheus-stack.fullname" . }}-alertmanager:{{ .Values.alertmanager.service.port }}"
-  - "https:{{ template "project-prometheus-stack.fullname" . }}-alertmanager:{{ .Values.alertmanager.service.port }}"
+  - "http:{{ template "kube-prometheus-stack.fullname" . }}-alertmanager:{{ .Values.alertmanager.service.port }}"
+  - "https:{{ template "kube-prometheus-stack.fullname" . }}-alertmanager:{{ .Values.alertmanager.service.port }}"
 {{- end }}
 {{- if .Values.grafana.enabled }}
   - "http:{{ include "call-nested" (list . "grafana" "grafana.fullname") }}:{{ .Values.grafana.service.port }}"
@@ -156,9 +156,9 @@ rules:
   resources:
   - endpoints
   resourceNames:
-  - {{ template "project-prometheus-stack.fullname" . }}-prometheus
+  - {{ template "kube-prometheus-stack.fullname" . }}-prometheus
 {{- if .Values.alertmanager.enabled }}
-  - {{ template "project-prometheus-stack.fullname" . }}-alertmanager
+  - {{ template "kube-prometheus-stack.fullname" . }}-alertmanager
 {{- end }}
 {{- if .Values.grafana.enabled }}
   - {{ include "call-nested" (list . "grafana" "grafana.fullname") }}
@@ -171,7 +171,7 @@ rules:
   resources:
   - "secrets"
   resourceNames:
-  - {{ printf "%s-alertmanager-secret" (include "project-prometheus-stack.fullname" .) }}
+  - {{ printf "%s-alertmanager-secret" (include "kube-prometheus-stack.fullname" .) }}
   verbs:
   - get
   - list

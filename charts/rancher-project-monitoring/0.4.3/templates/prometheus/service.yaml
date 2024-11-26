@@ -3,12 +3,12 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ template "project-prometheus-stack.fullname" . }}-prometheus
-  namespace: {{ template "project-prometheus-stack.namespace" . }}
+  name: {{ template "kube-prometheus-stack.fullname" . }}-prometheus
+  namespace: {{ template "kube-prometheus-stack.namespace" . }}
   labels:
-    app: {{ template "project-prometheus-stack.name" . }}-prometheus1
+    app: {{ template "kube-prometheus-stack.name" . }}-prometheus1
     self-monitor: {{ .Values.prometheus.serviceMonitor.selfMonitor | quote }}
-{{ include "project-prometheus-stack.labels" . | indent 4 }}
+{{ include "kube-prometheus-stack.labels" . | indent 4 }}
 {{- if .Values.prometheus.service.labels }}
 {{ toYaml .Values.prometheus.service.labels | indent 4 }}
 {{- end }}
@@ -59,7 +59,7 @@ spec:
     {{- else }}
     app.kubernetes.io/name: prometheus
     {{- end }}
-    operator.prometheus.io/name: {{ template "project-prometheus-stack.prometheus.crname" . }}
+    operator.prometheus.io/name: {{ template "kube-prometheus-stack.prometheus.crname" . }}
 {{- if .Values.prometheus.service.sessionAffinity }}
   sessionAffinity: {{ .Values.prometheus.service.sessionAffinity }}
 {{- end }}

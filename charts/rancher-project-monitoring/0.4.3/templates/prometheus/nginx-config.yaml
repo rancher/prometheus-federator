@@ -2,10 +2,10 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: prometheus-nginx-proxy-config
-  namespace: {{ template "project-prometheus-stack.namespace" . }}
+  namespace: {{ template "kube-prometheus-stack.namespace" . }}
   labels:
-    app: {{ template "project-prometheus-stack.name" . }}-prometheus
-{{ include "project-prometheus-stack.labels" . | indent 4 }}
+    app: {{ template "kube-prometheus-stack.name" . }}-prometheus
+{{ include "kube-prometheus-stack.labels" . | indent 4 }}
 {{- if .Values.prometheus.annotations }}
   annotations:
 {{ toYaml .Values.prometheus.annotations | indent 4 }}

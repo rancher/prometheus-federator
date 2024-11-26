@@ -1,4 +1,4 @@
-# Default values for project-prometheus-stack.
+# Default values for kube-prometheus-stack.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
@@ -21,7 +21,7 @@ rancherMonitoring:
   ##
   selector: {}
 
-## Provide a name in place of project-prometheus-stack for `app:` labels
+## Provide a name in place of kube-prometheus-stack for `app:` labels
 ## NOTE: If you change this value, you must update the prometheus-adapter.prometheus.url
 ##
 nameOverride: "rancher-project-monitoring"
