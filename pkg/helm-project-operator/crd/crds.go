@@ -11,7 +11,7 @@ import (
 
 	"github.com/rancher/wrangler/pkg/name"
 	"k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
-	"k8s.io/apimachinery/pkg/api/errors"
+	apimachineerrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/rancher/prometheus-federator/pkg/helm-project-operator/apis/helm.cattle.io/v1alpha1"
@@ -35,14 +35,14 @@ import (
 // i.e. if you uninstall the HelmChart CRD, it can destroy an RKE2 or K3s cluster that also uses those CRs
 // to manage internal Kubernetes component state
 func WriteFiles(crdDirpath, crdDepDirpath string) error {
-	objs, depObjs, err := Objects(false)
+	objs, crdLockerDeps, crdControllerDeps, err := Objects(false)
 	if err != nil {
 		return err
 	}
 	if err := writeFiles(crdDirpath, objs); err != nil {
 		return err
 	}
-	return writeFiles(crdDepDirpath, depObjs)
+	return writeFiles(crdDepDirpath, append(crdLockerDeps, crdControllerDeps...))
 }
 
 func writeFiles(dirpath string, objs []runtime.Object) error {
@@ -88,14 +88,17 @@ func writeFiles(dirpath string, objs []runtime.Object) error {
 
 // Print prints CRDs to out and dependent CRDs to depOut
 func Print(out io.Writer, depOut io.Writer) {
-	objs, depObjs, err := Objects(false)
+	objs, crdLockerDeps, crdControllerDeps, err := Objects(false)
 	if err != nil {
 		logrus.Fatalf("%s", err)
 	}
 	if err := printCrd(out, objs); err != nil {
 		logrus.Fatalf("%s", err)
 	}
-	if err := printCrd(depOut, depObjs); err != nil {
+	if err := printCrd(depOut, crdLockerDeps); err != nil {
+		logrus.Fatalf("%s", err)
+	}
+	if err := printCrd(depOut, crdControllerDeps); err != nil {
 		logrus.Fatalf("%s", err)
 	}
 }
@@ -110,17 +113,22 @@ func printCrd(out io.Writer, objs []runtime.Object) error {
 }
 
 // Objects returns runtime.Objects for every CRD or CRD Dependency this operator relies on
-func Objects(v1beta1 bool) (crds, crdDeps []runtime.Object, err error) {
-	crdDefs, crdDepDefs := List()
+func Objects(v1beta1 bool) (crds []runtime.Object, crdLockerDeps []runtime.Object, crdControllerDeps []runtime.Object, err error) {
+	crdDefs, helmLockerCrdDefs, helmControllerCrdDefs := List()
 	crds, err = objects(v1beta1, crdDefs)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
-	crdDeps, err = objects(v1beta1, crdDepDefs)
+	crdLockerDeps, err = objects(v1beta1, helmLockerCrdDefs)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
-	return
+	crdControllerDeps, err = objects(v1beta1, helmControllerCrdDefs)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+
+	return crds, crdLockerDeps, crdControllerDeps, nil
 }
 
 func objects(v1beta1 bool, crdDefs []crd.CRD) (crds []runtime.Object, err error) {
@@ -143,7 +151,7 @@ func objects(v1beta1 bool, crdDefs []crd.CRD) (crds []runtime.Object, err error)
 }
 
 // List returns the list of CRDs and dependent CRDs for this operator
-func List() ([]crd.CRD, []crd.CRD) {
+func List() ([]crd.CRD, []crd.CRD, []crd.CRD) {
 	crds := []crd.CRD{
 		newCRD(
 			"ProjectHelmChart.helm.cattle.io/v1alpha1",
@@ -158,31 +166,42 @@ func List() ([]crd.CRD, []crd.CRD) {
 			},
 		),
 	}
-	crdDeps := append(helmcontrollercrd.List(), helmlockercrd.List()...)
-	return crds, crdDeps
+	return crds, helmlockercrd.List(), helmcontrollercrd.List()
 }
 
 // Create creates all CRDs and dependent CRDs in the cluster
-func Create(ctx context.Context, cfg *rest.Config) error {
+func Create(ctx context.Context, cfg *rest.Config, shouldUpdateCRDs bool) error {
 	factory, err := crd.NewFactoryFromClient(cfg)
 	if err != nil {
 		return err
 	}
 
 	crdClientSet := factory.CRDClient.(*clientset.Clientset)
-	crds, crdDeps := List()
-	// TODO: CRD updates topic, We could opt to not filter `crds` value and always install those?
-	err = filterMissingCRDs(crdClientSet, &crds)
-	if err != nil {
-		return err
+	crdDefs, helmLockerCrdDefs, helmControllerCrdDefs := List()
+	// When updateCRDs is true we will skip filtering the CRDs, in turn all CRDs will be re-installed.
+	if !shouldUpdateCRDs {
+		err = filterMissingCRDs(crdClientSet, &crdDefs)
+		if err != nil {
+			return err
+		}
+
+		err = filterMissingCRDs(crdClientSet, &helmLockerCrdDefs)
+		if err != nil {
+			return err
+		}
+
+		err = filterMissingCRDs(crdClientSet, &helmControllerCrdDefs)
+		if err != nil {
+			return err
+		}
+	} else {
+		logrus.Debug("UpdateCRDs is Enabled; all CRDs will be installed.")
 	}
 
-	err = filterMissingCRDs(crdClientSet, &crdDeps)
-	if err != nil {
-		return err
-	}
+	crdDefs = append(crdDefs, helmLockerCrdDefs...)
+	crdDefs = append(crdDefs, helmControllerCrdDefs...)
 
-	return factory.BatchCreateCRDs(ctx, append(crds, crdDeps...)...).BatchWait()
+	return factory.BatchCreateCRDs(ctx, crdDefs...).BatchWait()
 }
 
 func newCRD(namespacedType string, obj interface{}, customize func(crd.CRD) crd.CRD) crd.CRD {
@@ -215,12 +234,11 @@ func filterMissingCRDs(apiExtClient *clientset.Clientset, expectedCRDs *[]crd.CR
 			logrus.Debugf("Installing `%s` will be skipped; a suitible version exists on the cluster", crdName)
 			// Update the list to remove the current item since the CRD is in the cluster already
 			*expectedCRDs = append((*expectedCRDs)[:i], (*expectedCRDs)[i+1:]...)
-		} else if !errors.IsNotFound(err) {
+		} else if !apimachineerrors.IsNotFound(err) {
 			*expectedCRDs = []crd.CRD{}
 			return fmt.Errorf("failed to check CRD %s: %v", crdName, err)
 		} else {
-			logrus.Debugf("Did not find `%s` on the cluster", crdName)
-			logrus.Debugf("`%s` will be installed or updated", crdName)
+			logrus.Debugf("Did not find `%s` on the cluster, it will be installed", crdName)
 		}
 	}
 

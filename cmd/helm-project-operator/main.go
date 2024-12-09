@@ -35,6 +35,7 @@ var (
 	base64TgzChart string
 
 	debugConfig command.DebugConfig
+	updateCRDs  bool = false
 )
 
 type DummyOperator struct {
@@ -54,6 +55,10 @@ func (o *DummyOperator) Run(cmd *cobra.Command, _ []string) error {
 
 	ctx := cmd.Context()
 
+	if os.Getenv("MANAGE_CRD_UPDATES") == "true" {
+		updateCRDs = true
+	}
+
 	if err := operator.Init(ctx, o.Namespace, cfg, common.Options{
 		OperatorOptions: common.OperatorOptions{
 			HelmAPIVersion:   DummyHelmAPIVersion,
@@ -61,6 +66,7 @@ func (o *DummyOperator) Run(cmd *cobra.Command, _ []string) error {
 			SystemNamespaces: DummySystemNamespaces,
 			ChartContent:     base64TgzChart,
 			Singleton:        false,
+			UpdateCRDs:       updateCRDs,
 		},
 		RuntimeOptions: o.RuntimeOptions,
 	}); err != nil {

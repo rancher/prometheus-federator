@@ -4,10 +4,6 @@ package main
 
 import (
 	_ "embed"
-	"log"
-	"net/http"
-	_ "net/http/pprof"
-
 	"github.com/rancher/prometheus-federator/pkg/helm-project-operator/controllers/common"
 	"github.com/rancher/prometheus-federator/pkg/helm-project-operator/operator"
 	"github.com/rancher/prometheus-federator/pkg/version"
@@ -16,6 +12,10 @@ import (
 	_ "github.com/rancher/wrangler/pkg/generated/controllers/networking.k8s.io"
 	"github.com/rancher/wrangler/pkg/kubeconfig"
 	"github.com/spf13/cobra"
+	"log"
+	"net/http"
+	_ "net/http/pprof"
+	"os"
 )
 
 const (
@@ -35,6 +35,7 @@ var (
 	base64TgzChart string
 
 	debugConfig command.DebugConfig
+	updateCRDs  bool = false
 )
 
 type PrometheusFederator struct {
@@ -55,6 +56,10 @@ func (f *PrometheusFederator) Run(cmd *cobra.Command, _ []string) error {
 
 	ctx := cmd.Context()
 
+	if os.Getenv("MANAGE_CRD_UPDATES") == "true" {
+		updateCRDs = true
+	}
+
 	if err := operator.Init(ctx, f.Namespace, cfg, common.Options{
 		OperatorOptions: common.OperatorOptions{
 			HelmAPIVersion:   HelmAPIVersion,
@@ -62,6 +67,7 @@ func (f *PrometheusFederator) Run(cmd *cobra.Command, _ []string) error {
 			SystemNamespaces: SystemNamespaces,
 			ChartContent:     base64TgzChart,
 			Singleton:        true, // indicates only one HelmChart can be registered per project defined
+			UpdateCRDs:       updateCRDs,
 		},
 		RuntimeOptions: f.RuntimeOptions,
 	}); err != nil {
