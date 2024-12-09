@@ -32,7 +32,7 @@
 -  - {}
 -  egress:
 -  - {}
-+  ingress: {{- default (list dict | toYaml) (include "project-prometheus-stack.hardened.networkPolicy.ingress" (list $ $ns)) | nindent 4 }}
++  ingress: {{- default (list dict | toYaml) (include "kube-prometheus-stack.hardened.networkPolicy.ingress" (list $ $ns)) | nindent 4 }}
 +  egress: {{- $.Values.global.networkPolicy.egress | toYaml | nindent 4 }}
    policyTypes:
    - Ingress

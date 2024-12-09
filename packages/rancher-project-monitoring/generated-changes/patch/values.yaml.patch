@@ -1,8 +1,6 @@
 --- charts-original/values.yaml
 +++ charts/values.yaml
-@@ -1,567 +1,8 @@
--# Default values for kube-prometheus-stack.
-+# Default values for project-prometheus-stack.
+@@ -2,566 +2,7 @@
  # This is a YAML-formatted file.
  # Declare variables to be passed into your templates.
  
@@ -616,8 +614,7 @@
 -
 -# Prometheus Operator Configuration
 -
--## Provide a name in place of kube-prometheus-stack for `app:` labels
-+## Provide a name in place of project-prometheus-stack for `app:` labels
+ ## Provide a name in place of kube-prometheus-stack for `app:` labels
  ## NOTE: If you change this value, you must update the prometheus-adapter.prometheus.url
  ##
 -nameOverride: "rancher-monitoring"
