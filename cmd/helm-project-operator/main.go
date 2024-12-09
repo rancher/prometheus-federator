@@ -4,11 +4,12 @@ package main
 
 import (
 	_ "embed"
-	"github.com/rancher/prometheus-federator/pkg/helm-project-operator/controllers/common"
-	"github.com/rancher/prometheus-federator/pkg/helm-project-operator/operator"
 	"log"
 	"net/http"
 	_ "net/http/pprof"
+
+	"github.com/rancher/prometheus-federator/pkg/helm-project-operator/controllers/common"
+	"github.com/rancher/prometheus-federator/pkg/helm-project-operator/operator"
 
 	"github.com/rancher/prometheus-federator/pkg/version"
 	command "github.com/rancher/wrangler-cli"
@@ -34,6 +35,7 @@ var (
 	base64TgzChart string
 
 	debugConfig command.DebugConfig
+	updateCRDs  bool = false
 )
 
 type DummyOperator struct {
@@ -60,6 +62,7 @@ func (o *DummyOperator) Run(cmd *cobra.Command, _ []string) error {
 			SystemNamespaces: DummySystemNamespaces,
 			ChartContent:     base64TgzChart,
 			Singleton:        false,
+			UpdateCRDs:       updateCRDs,
 		},
 		RuntimeOptions: o.RuntimeOptions,
 	}); err != nil {
@@ -75,5 +78,6 @@ func main() {
 		Version: version.FriendlyVersion(),
 	})
 	cmd = command.AddDebug(cmd, &debugConfig)
+	cmd.Flags().BoolVar(&updateCRDs, "update-crds", false, "If enabled, the controller will update existing CRDs at start up.")
 	command.Main(cmd)
 }

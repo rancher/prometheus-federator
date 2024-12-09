@@ -35,6 +35,7 @@ var (
 	base64TgzChart string
 
 	debugConfig command.DebugConfig
+	updateCRDs  bool = false
 )
 
 type PrometheusFederator struct {
@@ -62,6 +63,7 @@ func (f *PrometheusFederator) Run(cmd *cobra.Command, _ []string) error {
 			SystemNamespaces: SystemNamespaces,
 			ChartContent:     base64TgzChart,
 			Singleton:        true, // indicates only one HelmChart can be registered per project defined
+			UpdateCRDs:       updateCRDs,
 		},
 		RuntimeOptions: f.RuntimeOptions,
 	}); err != nil {
@@ -77,5 +79,6 @@ func main() {
 		Version: version.FriendlyVersion(),
 	})
 	cmd = command.AddDebug(cmd, &debugConfig)
+	cmd.Flags().BoolVar(&updateCRDs, "update-crds", false, "If enabled, the controller will update existing CRDs at start up.")
 	command.Main(cmd)
 }
