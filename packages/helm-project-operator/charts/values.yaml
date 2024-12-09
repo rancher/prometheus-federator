@@ -128,6 +128,9 @@ namespaceOverride: ""
 
 replicas: 1
 
+# Determine if the controller should auto-update CRDs at start; to opt-out set to false.
+updateCRDs: true
+
 image:
   registry: ghcr.io
   repository: rancher/prometheus-federator/helm-project-operator
