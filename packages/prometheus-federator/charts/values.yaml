@@ -36,6 +36,8 @@ helmProjectOperator:
   helmApiVersion: monitoring.cattle.io/v1alpha1
 
   nameOverride: prometheus-federator
+  # Determine if the controller should auto-update CRDs at start; to opt-out set to false.
+  updateCRDs: true
 
   helmController:
     # Note: should be disabled for RKE2 clusters since they already run Helm Controller to manage internal Kubernetes components
