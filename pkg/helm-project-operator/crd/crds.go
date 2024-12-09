@@ -194,6 +194,8 @@ func Create(ctx context.Context, cfg *rest.Config, updateCRDs bool) error {
 		if err != nil {
 			return err
 		}
+	} else {
+		logrus.Debug("UpdateCRDs is Enabled; all CRDs will be installed.")
 	}
 
 	crdDefs = append(crdDefs, helmLockerCrdDefs...)
