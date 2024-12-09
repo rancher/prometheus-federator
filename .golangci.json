@@ -11,9 +11,6 @@
 		]
 	},
 	"run": {
-		"skip-files": [
-			"/zz_generated_"
-		],
 		"deadline": "5m"
 	},
     "issues": {
@@ -22,6 +19,9 @@
                 "linters": "revive",
                 "text": "should have comment or be unexported"
             }
-        ]
+        ],
+		"exclude-files": [
+			"/zz_generated_*"
+		]
     }
 }
