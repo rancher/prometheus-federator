@@ -128,6 +128,13 @@ namespaceOverride: ""
 
 replicas: 1
 
+# Configure how the operator will manage the CustomResourceDefinitions (CRDs) it needs to function.
+crdManagement:
+  # Enable or disable automatic updates of CRDs during startup.
+  # When true, all CRDs will be udpated to the version the operator provides.
+  # When false, only missing CRDs will be installed, and existing ones will not be updated.
+  update: true
+
 image:
   registry: ghcr.io
   repository: rancher/prometheus-federator/helm-project-operator

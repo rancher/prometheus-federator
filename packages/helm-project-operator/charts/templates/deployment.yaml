@@ -99,6 +99,10 @@ spec:
             value: {{ .Values.hardenedNamespaces.configuration | toYaml | sha256sum }}
           - name: VALUES_OVERRIDE_SHA_256_HASH
             value: {{ .Values.valuesOverride | toYaml | sha256sum }}
+          {{- if .Values.crdManagement.update }}
+          - name: MANAGE_CRD_UPDATES
+            value: "true"
+          {{- end }}
 {{- if .Values.resources }}
           resources: {{ toYaml .Values.resources | nindent 12 }}
 {{- end }}
