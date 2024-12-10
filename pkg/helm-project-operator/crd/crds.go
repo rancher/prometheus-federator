@@ -170,7 +170,7 @@ func List() ([]crd.CRD, []crd.CRD, []crd.CRD) {
 }
 
 // Create creates all CRDs and dependent CRDs in the cluster
-func Create(ctx context.Context, cfg *rest.Config, updateCRDs bool) error {
+func Create(ctx context.Context, cfg *rest.Config, updateCRDs bool, k8sRuntimeType string) error {
 	factory, err := crd.NewFactoryFromClient(cfg)
 	if err != nil {
 		return err
@@ -199,7 +199,9 @@ func Create(ctx context.Context, cfg *rest.Config, updateCRDs bool) error {
 	}
 
 	crdDefs = append(crdDefs, helmLockerCrdDefs...)
-	crdDefs = append(crdDefs, helmControllerCrdDefs...)
+	if k8sRuntimeType != "k3s" && k8sRuntimeType != "rke2" {
+		crdDefs = append(crdDefs, helmControllerCrdDefs...)
+	}
 
 	return factory.BatchCreateCRDs(ctx, crdDefs...).BatchWait()
 }
