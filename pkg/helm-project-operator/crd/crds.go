@@ -26,6 +26,12 @@ import (
 	"k8s.io/client-go/rest"
 )
 
+type CreateOpts struct {
+	UpdateCRDs     bool
+	DetectK3sRke2  bool
+	K8sRuntimeType string
+}
+
 // WriteFiles writes CRDs and dependent CRDs to the paths specified
 //
 // Note: It is recommended to write CRDs to the templates directory (or similar) and to write
@@ -170,7 +176,7 @@ func List() ([]crd.CRD, []crd.CRD, []crd.CRD) {
 }
 
 // Create creates all CRDs and dependent CRDs in the cluster
-func Create(ctx context.Context, cfg *rest.Config, updateCRDs bool, k8sRuntimeType string) error {
+func Create(ctx context.Context, cfg *rest.Config, createOpts CreateOpts) error {
 	factory, err := crd.NewFactoryFromClient(cfg)
 	if err != nil {
 		return err
@@ -179,7 +185,7 @@ func Create(ctx context.Context, cfg *rest.Config, updateCRDs bool, k8sRuntimeTy
 	crdClientSet := factory.CRDClient.(*clientset.Clientset)
 	crdDefs, helmLockerCrdDefs, helmControllerCrdDefs := List()
 	// When updateCRDs is true we will skip filtering the CRDs, in turn all CRDs will be re-installed.
-	if !updateCRDs {
+	if !createOpts.UpdateCRDs {
 		err = filterMissingCRDs(crdClientSet, &crdDefs)
 		if err != nil {
 			return err
@@ -199,7 +205,7 @@ func Create(ctx context.Context, cfg *rest.Config, updateCRDs bool, k8sRuntimeTy
 	}
 
 	crdDefs = append(crdDefs, helmLockerCrdDefs...)
-	if k8sRuntimeType != "k3s" && k8sRuntimeType != "rke2" {
+	if shouldUseHelmControllerCRDs(createOpts) {
 		crdDefs = append(crdDefs, helmControllerCrdDefs...)
 	}
 
@@ -246,4 +252,12 @@ func filterMissingCRDs(apiExtClient *clientset.Clientset, expectedCRDs *[]crd.CR
 	}
 
 	return nil
+}
+
+func shouldUseHelmControllerCRDs(createOpts CreateOpts) bool {
+	if !createOpts.DetectK3sRke2 {
+		return true
+	}
+
+	return createOpts.K8sRuntimeType != "k3s" && createOpts.K8sRuntimeType != "rke2"
 }

@@ -34,8 +34,9 @@ var (
 	//go:embed fs/project-operator-example.tgz.base64
 	base64TgzChart string
 
-	debugConfig command.DebugConfig
-	updateCRDs  bool = false
+	debugConfig   command.DebugConfig
+	updateCRDs    bool = false
+	detectK3sRke2 bool = false
 )
 
 type DummyOperator struct {
@@ -63,6 +64,7 @@ func (o *DummyOperator) Run(cmd *cobra.Command, _ []string) error {
 			ChartContent:     base64TgzChart,
 			Singleton:        false,
 			UpdateCRDs:       updateCRDs,
+			DetectK3sRke2:    detectK3sRke2,
 		},
 		RuntimeOptions: o.RuntimeOptions,
 	}); err != nil {
@@ -79,5 +81,6 @@ func main() {
 	})
 	cmd = command.AddDebug(cmd, &debugConfig)
 	cmd.Flags().BoolVar(&updateCRDs, "update-crds", false, "If enabled, the controller will update existing CRDs at start up.")
+	cmd.Flags().BoolVar(&detectK3sRke2, "detect-k3s-rke2", false, "If enabled, the controller will detect if the cluster is k3s/rke2 and skip helm-controller CRDs.")
 	command.Main(cmd)
 }

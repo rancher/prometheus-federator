@@ -29,6 +29,9 @@ type OperatorOptions struct {
 
 	// UpdateCRDs determines if the controller should update CRDs that already exist in the cluster
 	UpdateCRDs bool
+
+	// DetectK3sRke2 detects if the cluster is a k3s or rke2 cluster.
+	DetectK3sRke2 bool
 }
 
 // Validate validates the provided OperatorOptions

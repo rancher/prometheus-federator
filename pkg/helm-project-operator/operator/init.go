@@ -34,10 +34,15 @@ func Init(ctx context.Context, systemNamespace string, cfg clientcmd.ClientConfi
 
 	k8sRuntimeType, err := identifyKubernetesRuntimeType(clientConfig)
 	if err != nil {
-		return err
+		logrus.Error(err)
 	}
 
-	if err := crd.Create(ctx, clientConfig, opts.UpdateCRDs, k8sRuntimeType); err != nil {
+	createOpts := crd.CreateOpts{
+		DetectK3sRke2:  opts.DetectK3sRke2,
+		UpdateCRDs:     opts.UpdateCRDs,
+		K8sRuntimeType: k8sRuntimeType,
+	}
+	if err := crd.Create(ctx, clientConfig, createOpts); err != nil {
 		return err
 	}
 
@@ -60,7 +65,7 @@ func identifyKubernetesRuntimeType(clientConfig *rest.Config) (string, error) {
 		if exists {
 			instanceTypes[instanceType]++
 		} else {
-			logrus.Fatalf("Cannot find `node.kubernetes.io/instance-type` label on node `%s`", node.Name)
+			logrus.Debugf("Cannot find `node.kubernetes.io/instance-type` label on node `%s`", node.Name)
 		}
 	}
 

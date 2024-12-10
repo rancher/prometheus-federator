@@ -34,8 +34,9 @@ var (
 	//go:embed fs/rancher-project-monitoring.tgz.base64
 	base64TgzChart string
 
-	debugConfig command.DebugConfig
-	updateCRDs  bool = false
+	debugConfig   command.DebugConfig
+	updateCRDs    bool = false
+	detectK3sRke2 bool = false
 )
 
 type PrometheusFederator struct {
@@ -64,6 +65,7 @@ func (f *PrometheusFederator) Run(cmd *cobra.Command, _ []string) error {
 			ChartContent:     base64TgzChart,
 			Singleton:        true, // indicates only one HelmChart can be registered per project defined
 			UpdateCRDs:       updateCRDs,
+			DetectK3sRke2:    detectK3sRke2,
 		},
 		RuntimeOptions: f.RuntimeOptions,
 	}); err != nil {
@@ -80,5 +82,6 @@ func main() {
 	})
 	cmd = command.AddDebug(cmd, &debugConfig)
 	cmd.Flags().BoolVar(&updateCRDs, "update-crds", false, "If enabled, the controller will update existing CRDs at start up.")
+	cmd.Flags().BoolVar(&detectK3sRke2, "detect-k3s-rke2", false, "If enabled, the controller will detect if the cluster is k3s/rke2 and skip helm-controller CRDs.")
 	command.Main(cmd)
 }
