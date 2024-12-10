@@ -125,12 +125,12 @@ jobs:
               {
                 name: 'Helm Project Operator',
                 key: 'meta-helm-project-operator',
-                url: `https://${process.env.GHCR_REGISTRY}/${{ github.repository }}/pkgs/container/prometheus-federator%2Fhelm-project-operator`
+                url: `https://github.com/${{ github.repository }}/pkgs/container/prometheus-federator%2Fhelm-project-operator`
               },
               {
                 name: 'Prometheus Federator',
                 key: 'meta-prometheus-federator',
-                url: `https://${process.env.GHCR_REGISTRY}/${{ github.repository }}/pkgs/container/prometheus-federator`
+                url: `https://github.com/${{ github.repository }}/pkgs/container/prometheus-federator`
               }
             ];
 
