@@ -35,6 +35,8 @@ jobs:
           go-version: 1.22
       - uses: azure/setup-kubectl@v3
       - uses: azure/setup-helm@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
       - name: build
         run: BUILD_TARGET=helm-locker make build
       - name : Install k3d

@@ -43,6 +43,8 @@ jobs:
       - uses: azure/setup-kubectl@v3
       - name : Install helm
         uses: azure/setup-helm@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
       - name: Prepare helm charts for debug artifacts
         run: |
           BUILD_TARGET=helm-locker make package-helm && echo "hl: chart success"
