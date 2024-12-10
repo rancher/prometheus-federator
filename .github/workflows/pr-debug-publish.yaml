@@ -40,7 +40,8 @@ jobs:
           echo "Fetching details for PR #$pr_number"
           pr_response=$(gh api repos/${{ github.repository }}/pulls/$pr_number)
           head_sha=$(echo "$pr_response" | jq -r '.head.sha')
-          echo "head_sha=$head_sha" >> $GITHUB_OUTPUT
+          echo "head_sha=${head_sha}" >> $GITHUB_OUTPUT
+          echo "head_sha_short=${head_sha:0:7}" >> $GITHUB_OUTPUT
       - name: Checkout PR Head
         uses: actions/checkout@v3
         with:
@@ -60,7 +61,7 @@ jobs:
         with:
           images: ${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}/helm-locker
           tags: |
-            type=raw,prefix=pr-${{ github.event.inputs.pr_number }}-${{ steps.get_head_sha.outputs.head_sha }}
+            type=raw,value=pr-${{ github.event.inputs.pr_number }}-${{ steps.get_head_sha.outputs.head_sha_short }}
             type=raw,value=pr-${{ github.event.inputs.pr_number }}
       - name: Build and push helm-locker image
         id: push
@@ -78,7 +79,7 @@ jobs:
         with:
           images: ${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}/helm-project-operator
           tags: |
-            type=raw,prefix=pr-${{ github.event.inputs.pr_number }}-${{ steps.get_head_sha.outputs.head_sha }}
+            type=raw,value=pr-${{ github.event.inputs.pr_number }}-${{ steps.get_head_sha.outputs.head_sha_short }}
             type=raw,value=pr-${{ github.event.inputs.pr_number }}
       - name: Build Helm-Project-Operator image
         uses: docker/build-push-action@v5
@@ -95,7 +96,7 @@ jobs:
         with:
           images: ${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
-            type=raw,prefix=pr-${{ github.event.inputs.pr_number }}-${{ steps.get_head_sha.outputs.head_sha }}
+            type=raw,value=pr-${{ github.event.inputs.pr_number }}-${{ steps.get_head_sha.outputs.head_sha_short }}
             type=raw,value=pr-${{ github.event.inputs.pr_number }}
       - name: Build Prometheus Federator image
         uses: docker/build-push-action@v5
