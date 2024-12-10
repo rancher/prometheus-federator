@@ -30,8 +30,11 @@ spec:
 {{- if .Values.global.cattle.systemDefaultRegistry }}
           - --system-default-registry={{ .Values.global.cattle.systemDefaultRegistry }}
 {{- end }}
-{{- if .Values.updateCRDs }}
+{{- if .Values.crdManagement.update }}
           - --update-crds
+{{- end }}
+{{- if .Values.crdManagement.detectK3sRke2 }}
+          - --detect-k3s-rke2
 {{- end }}
 {{- if .Values.global.cattle.url }}
           - --cattle-url={{ .Values.global.cattle.url }}
