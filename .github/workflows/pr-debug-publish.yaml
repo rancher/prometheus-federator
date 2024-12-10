@@ -40,7 +40,7 @@ jobs:
           echo "Fetching details for PR #$pr_number"
           pr_response=$(gh api repos/${{ github.repository }}/pulls/$pr_number)
           head_sha=$(echo "$pr_response" | jq -r '.head.sha')
-          echo "::set-output name=head_sha::$head_sha"
+          echo "head_sha=$head_sha" >> $GITHUB_OUTPUT
       - name: Checkout PR Head
         uses: actions/checkout@v3
         with:
@@ -60,7 +60,7 @@ jobs:
         with:
           images: ${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}/helm-locker
           tags: |
-            type=sha,prefix=pr-${{ github.event.inputs.pr_number }}-
+            type=raw,prefix=pr-${{ github.event.inputs.pr_number }}-${{ steps.get_head_sha.outputs.head_sha }}
             type=raw,value=pr-${{ github.event.inputs.pr_number }}
       - name: Build and push helm-locker image
         id: push
@@ -78,7 +78,7 @@ jobs:
         with:
           images: ${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}/helm-project-operator
           tags: |
-            type=sha,prefix=pr-${{ github.event.inputs.pr_number }}-
+            type=raw,prefix=pr-${{ github.event.inputs.pr_number }}-${{ steps.get_head_sha.outputs.head_sha }}
             type=raw,value=pr-${{ github.event.inputs.pr_number }}
       - name: Build Helm-Project-Operator image
         uses: docker/build-push-action@v5
@@ -95,7 +95,7 @@ jobs:
         with:
           images: ${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
-            type=sha,prefix=pr-${{ github.event.inputs.pr_number }}-
+            type=raw,prefix=pr-${{ github.event.inputs.pr_number }}-${{ steps.get_head_sha.outputs.head_sha }}
             type=raw,value=pr-${{ github.event.inputs.pr_number }}
       - name: Build Prometheus Federator image
         uses: docker/build-push-action@v5
@@ -125,12 +125,12 @@ jobs:
               {
                 name: 'Helm Project Operator',
                 key: 'meta-helm-project-operator',
-                url: `https://${process.env.GHCR_REGISTRY}/${{ github.repository }}/pkgs/container/prometheus-federator%2Fhelm-project-operator`
+                url: `https://github.com/${{ github.repository }}/pkgs/container/prometheus-federator%2Fhelm-project-operator`
               },
               {
                 name: 'Prometheus Federator',
                 key: 'meta-prometheus-federator',
-                url: `https://${process.env.GHCR_REGISTRY}/${{ github.repository }}/pkgs/container/prometheus-federator`
+                url: `https://github.com/${{ github.repository }}/pkgs/container/prometheus-federator`
               }
             ];
 
