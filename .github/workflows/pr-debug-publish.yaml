@@ -39,6 +39,9 @@ jobs:
           head_sha=$(echo "$pr_response" | jq -r '.head.sha')
           echo "head_sha=${head_sha}" >> $GITHUB_OUTPUT
           echo "head_sha_short=${head_sha:0:7}" >> $GITHUB_OUTPUT
+          echo "PR ${pr_number}" >> $GITHUB_STEP_SUMMARY
+          echo "PR SHA: ${head_sha}" >> $GITHUB_STEP_SUMMARY
+          echo "PR SHA Short: ${head_sha:0:7}" >> $GITHUB_STEP_SUMMARY
   build_dev_helm_locker:
     name: Build and push helm-locker
     runs-on: ${{ github.repository == 'rancher/prometheus-federator' && format('runs-on,image=ubuntu22-full-x64,runner=4cpu-linux-x64,run-id={0}', github.run_id) || 'ubuntu-latest' }}
@@ -207,8 +210,9 @@ jobs:
               }
             ];
 
+            const prepareTags = (tags) => tags.split(' ').join('\`, \`')
             const commentBody = images
-              .map(image => `- **${image.name}**: [Link to image](${image.url}):\n  Tags: \`${process.env[image.key]}\``)
+              .map(image => `- **${image.name}**: [Link to image](${image.url}):\n  Tags: \`${prepareTags(process.env[image.key])}\``)
               .join('\n\n');1
 
             github.rest.issues.createComment({
