@@ -4,6 +4,11 @@ package main
 
 import (
 	_ "embed"
+	"log"
+	"net/http"
+	_ "net/http/pprof"
+	"os"
+
 	"github.com/rancher/prometheus-federator/pkg/helm-project-operator/controllers/common"
 	"github.com/rancher/prometheus-federator/pkg/helm-project-operator/operator"
 	"github.com/rancher/prometheus-federator/pkg/version"
@@ -12,10 +17,6 @@ import (
 	_ "github.com/rancher/wrangler/pkg/generated/controllers/networking.k8s.io"
 	"github.com/rancher/wrangler/pkg/kubeconfig"
 	"github.com/spf13/cobra"
-	"log"
-	"net/http"
-	_ "net/http/pprof"
-	"os"
 )
 
 const (

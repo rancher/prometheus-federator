@@ -4,12 +4,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/rancher/wrangler/pkg/clients"
 	"io"
 	"os"
 	"path/filepath"
 	"strings"
 	"sync"
+
+	"github.com/rancher/wrangler/pkg/clients"
 
 	"github.com/rancher/wrangler/pkg/name"
 	"k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"

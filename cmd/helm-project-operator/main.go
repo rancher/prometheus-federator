@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	_ "net/http/pprof"
+	"os"
 
 	"github.com/rancher/prometheus-federator/pkg/helm-project-operator/controllers/common"
 	"github.com/rancher/prometheus-federator/pkg/helm-project-operator/operator"
