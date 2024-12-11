@@ -40,8 +40,8 @@ jobs:
           echo "head_sha=${head_sha}" >> $GITHUB_OUTPUT
           echo "head_sha_short=${head_sha:0:7}" >> $GITHUB_OUTPUT
           echo "PR ${pr_number}" >> $GITHUB_STEP_SUMMARY
-          echo "PR SHA: ${head_sha}" >> $GITHUB_STEP_SUMMARY
-          echo "PR SHA Short: ${head_sha:0:7}" >> $GITHUB_STEP_SUMMARY
+          echo "PR SHA: ${head_sha:0:7}" >> $GITHUB_STEP_SUMMARY
+          echo "PR SHA FULL: ${head_sha}" >> $GITHUB_STEP_SUMMARY
   build_dev_helm_locker:
     name: Build and push helm-locker
     runs-on: ${{ github.repository == 'rancher/prometheus-federator' && format('runs-on,image=ubuntu22-full-x64,runner=4cpu-linux-x64,run-id={0}', github.run_id) || 'ubuntu-latest' }}
@@ -177,6 +177,7 @@ jobs:
     name: Comment on PR with image details
     runs-on: ${{ github.repository == 'rancher/prometheus-federator' && format('runs-on,image=ubuntu22-full-x64,runner=4cpu-linux-x64,run-id={0}', github.run_id) || 'ubuntu-latest' }}
     needs:
+      - prepare_pr_info
       - build_dev_helm_locker
       - build_dev_helm_project_operator
       - build_dev_prometheus_federator
@@ -189,6 +190,8 @@ jobs:
           meta-helm-locker: ${{ needs.build_dev_helm_locker.outputs.tags }}
           meta-helm-project-operator: ${{ needs.build_dev_helm_project_operator.outputs.tags }}
           meta-prometheus-federator: ${{ needs.build_dev_prometheus_federator.outputs.tags }}
+          prNumber: ${{ github.event.inputs.pr_number }}
+          shortSha: ${{ needs.prepare_pr_info.outputs.head_sha_short }}
         with:
           script: |
             const prNumber = context.payload.inputs.pr_number;
@@ -210,14 +213,31 @@ jobs:
               }
             ];
 
-            const prepareTags = (tags) => tags.split(' ').join('\`,\n \`')
+            const prepareContainerImageText = function(imageInfo) {
+              const rawTags = process.env[imageInfo.key];
+              const tags = rawTags.split(' ')
+                .map(tag => `\t- \`${tag}\``)
+                .join('\n');
+            
+              return `- [**${imageInfo.name}**](${imageInfo.url}) - Tags:\n${tags}`;
+            }
             const commentBody = images
-              .map(image => `- **${image.name}**: [Link to image](${image.url}):\n  Tags: \`${prepareTags(process.env[image.key])}\``)
-              .join('\n\n');
-
+              .map(prepareContainerImageText)
+              .join('\n');
+            
+            const helmDebugValues = `#### Helm Debug Values:
+            \`\`\`yaml
+              image:
+                pullPolicy: Always
+                registry: ghcr.io
+                repository: rancher/prometheus-federator
+                tag: pr-${process.env.prNumber}-${process.env.shortSha}
+            \`\`\`\n`;
+            const fullCommentBody = `${commentBody}\n\n${helmDebugValues}`;
+            
             github.rest.issues.createComment({
               issue_number: prNumber,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `### Images built for PR #${prNumber}:\n\n${commentBody}`
+              body: `### Images built for PR #${prNumber}:\n\n${fullCommentBody}`
             });
