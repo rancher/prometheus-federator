@@ -2,7 +2,9 @@ package crd
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"github.com/rancher/wrangler/pkg/clients"
 	"io"
 	"os"
 	"path/filepath"
@@ -199,7 +201,9 @@ func Create(ctx context.Context, cfg *rest.Config, shouldUpdateCRDs bool) error 
 	}
 
 	crdDefs = append(crdDefs, helmLockerCrdDefs...)
-	crdDefs = append(crdDefs, helmControllerCrdDefs...)
+	if shouldManageHelmControllerCRDs(cfg) {
+		crdDefs = append(crdDefs, helmControllerCrdDefs...)
+	}
 
 	return factory.BatchCreateCRDs(ctx, crdDefs...).BatchWait()
 }
@@ -243,4 +247,56 @@ func filterMissingCRDs(apiExtClient *clientset.Clientset, expectedCRDs *[]crd.CR
 	}
 
 	return nil
+}
+
+func shouldManageHelmControllerCRDs(cfg *rest.Config) bool {
+	if os.Getenv("DETECT_K3S_RKE2") != "true" {
+		logrus.Debug("k3s/rke2 detection feature is disabled; `helm-controller` CRDs will be managed")
+		return true
+	}
+
+	k8sRuntimeType, err := identifyKubernetesRuntimeType(cfg)
+	if err != nil {
+		logrus.Error(err)
+	}
+
+	onK3sRke2 := k8sRuntimeType == "k3s" || k8sRuntimeType == "rke2"
+	if onK3sRke2 {
+		logrus.Debug("the cluster is running on k3s (or rke2), `helm-controller` CRDs will not be managed")
+	}
+
+	return !onK3sRke2
+}
+
+func identifyKubernetesRuntimeType(clientConfig *rest.Config) (string, error) {
+	client, err := clients.NewFromConfig(clientConfig, nil)
+	if err != nil {
+		return "", err
+	}
+
+	nodes, err := client.Core.Node().List(metav1.ListOptions{})
+	if err != nil {
+		logrus.Fatalf("Failed to list nodes: %v", err)
+	}
+	instanceTypes := make(map[string]int)
+	for _, node := range nodes.Items {
+		instanceType, exists := node.Labels["node.kubernetes.io/instance-type"]
+		if exists {
+			instanceTypes[instanceType]++
+		} else {
+			logrus.Debugf("Cannot find `node.kubernetes.io/instance-type` label on node `%s`", node.Name)
+		}
+	}
+
+	if len(instanceTypes) == 0 {
+		return "", errors.New("cannot identify k8s runtime type; no nodes in cluster have expected label")
+	}
+
+	var k8sRuntimeType string
+	for instanceType := range instanceTypes {
+		k8sRuntimeType = instanceType
+		break
+	}
+
+	return k8sRuntimeType, nil
 }
