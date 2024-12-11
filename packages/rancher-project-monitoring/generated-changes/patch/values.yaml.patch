@@ -1089,6 +1089,15 @@
  
      ## AlermanagerConfig to be used as top level configuration
      ##
+@@ -1692,7 +867,7 @@
+     namespace: cattle-dashboards
+     # Whether to create the default namespace as a Helm managed namespace or use an existing namespace
+     # If false, the defaultDashboards.namespace will be created as a Helm managed namespace
+-    useExistingNamespace: false
++    useExistingNamespace: true
+     # Whether the Helm managed namespace created by this chart should be left behind on a Helm uninstall
+     # If you place other dashboards in this namespace, then they will be deleted on a helm uninstall
+     # Ignore if useExistingNamespace is true
 @@ -1956,1713 +1131,16 @@
    testFramework:
      enabled: false

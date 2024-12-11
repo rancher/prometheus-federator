@@ -1,0 +1,10 @@
+{{- if and .Values.prometheus.enabled .Values.federate.enabled }}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ template "kube-prometheus-stack.fullname" . }}-federate
+  namespace: {{ template "kube-prometheus-stack.namespace" . }}
+  labels: {{ include "kube-prometheus-stack.labels" . | nindent 4 }}
+data:
+  federate-scrape-config.yaml: {{ tpl (.Files.Get "files/federate/federate-scrape-config.yaml" ) $ | b64enc | quote }}
+{{- end }}
