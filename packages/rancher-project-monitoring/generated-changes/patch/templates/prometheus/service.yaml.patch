@@ -1,14 +1,5 @@
 --- charts-original/templates/prometheus/service.yaml
 +++ charts/templates/prometheus/service.yaml
-@@ -6,7 +6,7 @@
-   name: {{ template "kube-prometheus-stack.fullname" . }}-prometheus
-   namespace: {{ template "kube-prometheus-stack.namespace" . }}
-   labels:
--    app: {{ template "kube-prometheus-stack.name" . }}-prometheus
-+    app: {{ template "kube-prometheus-stack.name" . }}-prometheus1
-     self-monitor: {{ .Values.prometheus.serviceMonitor.selfMonitor | quote }}
- {{ include "kube-prometheus-stack.labels" . | indent 4 }}
- {{- if .Values.prometheus.service.labels }}
 @@ -49,14 +49,6 @@
      {{- end }}
      port: {{ .Values.prometheus.service.reloaderWebPort }}
