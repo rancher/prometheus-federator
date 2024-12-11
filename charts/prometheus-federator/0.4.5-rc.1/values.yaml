@@ -43,6 +43,10 @@ helmProjectOperator:
     # When true, all CRDs will be udpated to the version the operator provides.
     # When false, only missing CRDs will be installed, and existing ones will not be updated.
     update: true
+    # Specify whether the operator should detect K3s and RKE2 clusters and exclude `helm-controller` CRDs from management.
+    # When true, `helm-controller` CRDs will not be managed by the operator in these environments, as K3s/RKE2 handle them internally.
+    # When false, the operator will manage `helm-controller` CRDs regardless of the runtime environment.
+    detectK3sRke2: false
 
   helmController:
     # Note: should be disabled for RKE2 clusters since they already run Helm Controller to manage internal Kubernetes components

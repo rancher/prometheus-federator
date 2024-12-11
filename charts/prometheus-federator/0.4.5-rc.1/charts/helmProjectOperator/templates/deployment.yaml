@@ -103,6 +103,10 @@ spec:
           - name: MANAGE_CRD_UPDATES
             value: "true"
           {{- end }}
+          {{- if .Values.crdManagement.detectK3sRke2 }}
+          - name: DETECT_K3S_RKE2
+            value: "true"
+          {{- end }}
 {{- if .Values.resources }}
           resources: {{ toYaml .Values.resources | nindent 12 }}
 {{- end }}
