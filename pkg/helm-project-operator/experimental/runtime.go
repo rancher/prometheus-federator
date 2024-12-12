@@ -1,4 +1,4 @@
-package experemental
+package experimental
 
 import (
 	"errors"

@@ -3,7 +3,6 @@ package crd
 import (
 	"context"
 	"fmt"
-	"github.com/rancher/prometheus-federator/pkg/helm-project-operator/experemental"
 	"io"
 	"os"
 	"path/filepath"
@@ -15,10 +14,10 @@ import (
 	apimachineerrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/rancher/prometheus-federator/pkg/helm-project-operator/apis/helm.cattle.io/v1alpha1"
-
 	helmcontrollercrd "github.com/k3s-io/helm-controller/pkg/crd"
 	helmlockercrd "github.com/rancher/prometheus-federator/pkg/helm-locker/crd"
+	"github.com/rancher/prometheus-federator/pkg/helm-project-operator/apis/helm.cattle.io/v1alpha1"
+	"github.com/rancher/prometheus-federator/pkg/helm-project-operator/experimental"
 	"github.com/rancher/wrangler/pkg/crd"
 	"github.com/rancher/wrangler/pkg/yaml"
 	"github.com/sirupsen/logrus"
@@ -260,7 +259,7 @@ func shouldManageHelmControllerCRDs(cfg *rest.Config) bool {
 	// TODO: In the future, this should not rely on detecting k8s runtime type
 	// The root question is "what component 'owns' this CRD" - and therefore updates it.
 	// Instead we should rely on verifiable details directly on the CRDs in question.
-	k8sRuntimeType, err := experemental.IdentifyKubernetesRuntimeType(cfg)
+	k8sRuntimeType, err := experimental.IdentifyKubernetesRuntimeType(cfg)
 	if err != nil {
 		logrus.Error(err)
 	}

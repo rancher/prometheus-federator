@@ -40,9 +40,13 @@ helmProjectOperator:
   # Configure how the operator will manage the CustomResourceDefinitions (CRDs) it needs to function.
   crdManagement:
     # Enable or disable automatic updates of CRDs during startup.
-    # When true, all CRDs will be udpated to the version the operator provides.
+    # When true, all CRDs will be updated to the version the operator provides.
     # When false, only missing CRDs will be installed, and existing ones will not be updated.
     update: true
+
+    # !! EXPERIMENTAL OPTION !! - Use this feature with caution and careful consideration.
+    # This feature is a stopgap solution and is already expected to be removed in the future.
+    #
     # Specify whether the operator should detect K3s and RKE2 clusters and exclude `helm-controller` CRDs from management.
     # When true, `helm-controller` CRDs will not be managed by the operator in these environments, as K3s/RKE2 handle them internally.
     # When false, the operator will manage `helm-controller` CRDs regardless of the runtime environment.
