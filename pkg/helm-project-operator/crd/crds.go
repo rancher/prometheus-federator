@@ -2,15 +2,13 @@ package crd
 
 import (
 	"context"
-	"errors"
 	"fmt"
+	"github.com/rancher/prometheus-federator/pkg/helm-project-operator/experemental"
 	"io"
 	"os"
 	"path/filepath"
 	"strings"
 	"sync"
-
-	"github.com/rancher/wrangler/pkg/clients"
 
 	"github.com/rancher/wrangler/pkg/name"
 	"k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
@@ -155,6 +153,8 @@ func objects(v1beta1 bool, crdDefs []crd.CRD) (crds []runtime.Object, err error)
 
 // List returns the list of CRDs and dependent CRDs for this operator
 func List() ([]crd.CRD, []crd.CRD, []crd.CRD) {
+	// TODO: The underlying crd.CRD is deprectated and will eventually be removed
+	// We simply do what `helm-controller` does, so we should work with them to update in tandem.
 	crds := []crd.CRD{
 		newCRD(
 			"ProjectHelmChart.helm.cattle.io/v1alpha1",
@@ -250,54 +250,25 @@ func filterMissingCRDs(apiExtClient *clientset.Clientset, expectedCRDs *[]crd.CR
 	return nil
 }
 
+// shouldManageHelmControllerCRDs determines if the controller should manage the CRDs for Helm Controller.
 func shouldManageHelmControllerCRDs(cfg *rest.Config) bool {
 	if os.Getenv("DETECT_K3S_RKE2") != "true" {
 		logrus.Debug("k3s/rke2 detection feature is disabled; `helm-controller` CRDs will be managed")
 		return true
 	}
 
-	k8sRuntimeType, err := identifyKubernetesRuntimeType(cfg)
+	// TODO: In the future, this should not rely on detecting k8s runtime type
+	// The root question is "what component 'owns' this CRD" - and therefore updates it.
+	// Instead we should rely on verifiable details directly on the CRDs in question.
+	k8sRuntimeType, err := experemental.IdentifyKubernetesRuntimeType(cfg)
 	if err != nil {
 		logrus.Error(err)
 	}
 
 	onK3sRke2 := k8sRuntimeType == "k3s" || k8sRuntimeType == "rke2"
 	if onK3sRke2 {
-		logrus.Debug("the cluster is running on k3s (or rke2), `helm-controller` CRDs will not be managed")
+		logrus.Debug("the cluster is running on k3s (or rke2), `helm-controller` CRDs will not be managed by `prometheus-federator`")
 	}
 
 	return !onK3sRke2
-}
-
-func identifyKubernetesRuntimeType(clientConfig *rest.Config) (string, error) {
-	client, err := clients.NewFromConfig(clientConfig, nil)
-	if err != nil {
-		return "", err
-	}
-
-	nodes, err := client.Core.Node().List(metav1.ListOptions{})
-	if err != nil {
-		logrus.Fatalf("Failed to list nodes: %v", err)
-	}
-	instanceTypes := make(map[string]int)
-	for _, node := range nodes.Items {
-		instanceType, exists := node.Labels["node.kubernetes.io/instance-type"]
-		if exists {
-			instanceTypes[instanceType]++
-		} else {
-			logrus.Debugf("Cannot find `node.kubernetes.io/instance-type` label on node `%s`", node.Name)
-		}
-	}
-
-	if len(instanceTypes) == 0 {
-		return "", errors.New("cannot identify k8s runtime type; no nodes in cluster have expected label")
-	}
-
-	var k8sRuntimeType string
-	for instanceType := range instanceTypes {
-		k8sRuntimeType = instanceType
-		break
-	}
-
-	return k8sRuntimeType, nil
 }
