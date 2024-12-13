@@ -7,7 +7,6 @@ import (
 	"github.com/rancher/prometheus-federator/pkg/helm-project-operator/controllers"
 	"github.com/rancher/prometheus-federator/pkg/helm-project-operator/controllers/common"
 	"github.com/rancher/prometheus-federator/pkg/helm-project-operator/crd"
-
 	"github.com/rancher/wrangler/pkg/ratelimit"
 	"k8s.io/client-go/tools/clientcmd"
 )
@@ -27,7 +26,7 @@ func Init(ctx context.Context, systemNamespace string, cfg clientcmd.ClientConfi
 	}
 	clientConfig.RateLimiter = ratelimit.None
 
-	if err := crd.Create(ctx, clientConfig); err != nil {
+	if err := crd.Create(ctx, clientConfig, opts.UpdateCRDs); err != nil {
 		return err
 	}
 
