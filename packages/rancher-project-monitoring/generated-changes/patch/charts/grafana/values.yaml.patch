@@ -1,28 +1,14 @@
 --- charts-original/charts/grafana/values.yaml
 +++ charts/charts/grafana/values.yaml
-@@ -3,20 +3,7 @@
-     psp:
-       enabled: false
+@@ -1,6 +1,7 @@
+ global:
+   cattle:
      systemDefaultRegistry: ""
--
--  # To help compatibility with other charts which use global.imagePullSecrets.
--  # Allow either an array of {name: pullSecret} maps (k8s-style), or an array of strings (more common helm-style).
--  # Can be tempalted.
--  # global:
--  #   imagePullSecrets:
--  #   - name: pullSecret1
--  #   - name: pullSecret2
--  # or
--  # global:
--  #   imagePullSecrets:
--  #   - pullSecret1
--  #   - pullSecret2
--  imagePullSecrets: []
 +    projectNamespaces: []
  
- rbac:
-   create: true
-@@ -60,11 +47,17 @@
+   # To help compatibility with other charts which use global.imagePullSecrets.
+   # Allow either an array of {name: pullSecret} maps (k8s-style), or an array of strings (more common helm-style).
+@@ -58,11 +59,17 @@
  #
  autoscaling:
    enabled: false
@@ -45,7 +31,7 @@
  
  ## See `kubectl explain poddisruptionbudget.spec` for more
  ## ref: https://kubernetes.io/docs/tasks/run-application/configure-pdb/
-@@ -108,31 +101,17 @@
+@@ -106,31 +113,17 @@
    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
    ## Can be templated.
    ##
@@ -80,7 +66,7 @@
  
  securityContext:
    runAsNonRoot: true
-@@ -140,13 +119,7 @@
+@@ -138,13 +131,7 @@
    runAsGroup: 472
    fsGroup: 472
  
@@ -95,7 +81,7 @@
  
  # Enable creating the grafana configmap
  createConfigmap: true
-@@ -182,18 +155,7 @@
+@@ -180,18 +167,7 @@
    env: {}
    envFromSecret: ""
    resources: {}
@@ -115,7 +101,7 @@
  
  ## Pod Annotations
  # podAnnotations: {}
-@@ -406,14 +368,6 @@
+@@ -417,14 +393,6 @@
    #  requests:
    #    cpu: 100m
    #    memory: 128Mi
@@ -130,7 +116,7 @@
  
  # Administrator credentials when not using an existing secret (see below)
  adminUser: admin
-@@ -845,13 +799,7 @@
+@@ -856,13 +824,7 @@
  #   requests:
  #     cpu: 50m
  #     memory: 50Mi

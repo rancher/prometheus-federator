@@ -1,9 +1,0 @@
---- charts-original/templates/prometheus/psp-clusterrole.yaml
-+++ charts/templates/prometheus/psp-clusterrole.yaml
-@@ -19,4 +19,4 @@
-   resourceNames:
-   - {{ template "kube-prometheus-stack.fullname" . }}-prometheus
- {{- end }}
--{{- end }}
-\ No newline at end of file
-+{{- end }}

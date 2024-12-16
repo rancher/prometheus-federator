@@ -1,11 +1,6 @@
 --- charts-original/templates/prometheus/rules-1.14/kubernetes-storage.yaml
 +++ charts/templates/prometheus/rules-1.14/kubernetes-storage.yaml
-@@ -1,11 +1,10 @@
- {{- /*
--Generated from 'kubernetes-storage' group from https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/a8ba97a150c75be42010c75d10b720c55e182f1a/manifests/kubernetesControlPlane-prometheusRule.yaml
-+Generated from 'kubernetes-storage' group from https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/main/manifests/kubernetesControlPlane-prometheusRule.yaml
- Do not change in-place! In order to change this file first read following link:
- https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack/hack
+@@ -5,7 +5,6 @@
  */ -}}
  {{- $kubeTargetVersion := default .Capabilities.KubeVersion.GitVersion .Values.kubeTargetVersionOverride }}
  {{- if and (semverCompare ">=1.14.0-0" $kubeTargetVersion) (semverCompare "<9.9.9-9" $kubeTargetVersion) .Values.defaultRules.create .Values.defaultRules.rules.kubernetesStorage }}

@@ -29,7 +29,7 @@
  
  {{/* Prometheus custom resource instance name */}}
  {{- define "kube-prometheus-stack.prometheus.crname" -}}
-@@ -240,15 +240,6 @@
+@@ -245,15 +245,6 @@
  {{- end -}}
  {{- end -}}
  
@@ -45,7 +45,7 @@
  {{/* Create the name of prometheus service account to use */}}
  {{- define "kube-prometheus-stack.prometheus.serviceAccountName" -}}
  {{- if .Values.prometheus.serviceAccount.create -}}
-@@ -299,17 +290,6 @@
+@@ -304,17 +295,6 @@
  {{- end -}}
  
  {{/*
@@ -63,7 +63,7 @@
  Use the kube-state-metrics namespace override for multi-namespace deployments in combined charts
  */}}
  {{- define "kube-prometheus-stack-kube-state-metrics.namespace" -}}
-@@ -447,6 +427,25 @@
+@@ -452,6 +432,25 @@
  {{- end }}
  {{- end -}}
  
