@@ -501,6 +501,64 @@ entries:
       catalog.cattle.io/certified: rancher
       catalog.cattle.io/deploys-on-os: windows
       catalog.cattle.io/display-name: Monitoring
+      catalog.cattle.io/kube-version: '>= 1.27.0-0 < 1.32.0-0'
+      catalog.cattle.io/namespace: cattle-monitoring-system
+      catalog.cattle.io/permits-os: linux,windows
+      catalog.cattle.io/provides-gvr: monitoring.coreos.com.prometheus/v1
+      catalog.cattle.io/rancher-version: '>= 2.9.0-0 < 2.11.0-0'
+      catalog.cattle.io/release-name: rancher-monitoring
+      catalog.cattle.io/requests-cpu: 4500m
+      catalog.cattle.io/requests-memory: 4000Mi
+      catalog.cattle.io/type: cluster-tool
+      catalog.cattle.io/ui-component: monitoring
+      catalog.cattle.io/upstream-version: 61.3.2
+    apiVersion: v2
+    appVersion: v0.75.1
+    created: "2024-12-16T17:06:14.602363-05:00"
+    dependencies:
+    - condition: grafana.enabled
+      name: grafana
+      repository: file://./charts/grafana
+      version: 8.3.6
+    description: kube-prometheus-stack collects Kubernetes manifests, Grafana dashboards,
+      and Prometheus rules combined with documentation and scripts to provide easy
+      to operate end-to-end Kubernetes cluster monitoring with Prometheus using the
+      Prometheus Operator.
+    digest: ce7eefd0354458197d81dfb1d7e4fc0b352275ce27ebe4945c484f44fdf41224
+    home: https://github.com/prometheus-operator/kube-prometheus
+    icon: file://assets/logos/rancher-monitoring.png
+    keywords:
+    - operator
+    - prometheus
+    - kube-prometheus
+    kubeVersion: '>=1.27.0-0'
+    maintainers:
+    - email: alexandre.lamarre@suse.com
+      name: Alexandre
+    - email: joshua.meranda@suse.com
+      name: Joshua
+    - email: dan.pock@suse.com
+      name: Dan
+    name: rancher-project-monitoring
+    sources:
+    - https://github.com/prometheus-community/helm-charts
+    - https://github.com/prometheus-operator/kube-prometheus
+    type: application
+    urls:
+    - assets/rancher-project-monitoring/rancher-project-monitoring-0.5.0.tgz
+    version: 0.5.0
+  - annotations:
+      artifacthub.io/license: Apache-2.0
+      artifacthub.io/links: |
+        - name: Chart Source
+          url: https://github.com/prometheus-community/helm-charts
+        - name: Upstream Project
+          url: https://github.com/prometheus-operator/kube-prometheus
+      artifacthub.io/operator: "true"
+      catalog.cattle.io/auto-install: rancher-monitoring-crd=match
+      catalog.cattle.io/certified: rancher
+      catalog.cattle.io/deploys-on-os: windows
+      catalog.cattle.io/display-name: Monitoring
       catalog.cattle.io/kube-version: '>= 1.26.0-0 < 1.31.0-0'
       catalog.cattle.io/namespace: cattle-monitoring-system
       catalog.cattle.io/permits-os: linux,windows
