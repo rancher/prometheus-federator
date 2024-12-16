@@ -1,4 +1,4 @@
 workingDir: ""
 url: https://github.com/rancher/charts.git
-subdirectory: charts/rancher-monitoring/104.0.0-rc1+up57.0.3/charts/grafana
-commit: 414f0688c935dd41145a037c1ae25cae9ebe2159
+subdirectory: charts/rancher-monitoring/105.1.1+up61.3.2/charts/grafana
+commit: ff5445c31fd76d86f08cb84a6fabc3ee4f2ae916
