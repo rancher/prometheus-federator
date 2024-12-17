@@ -1,19 +1,30 @@
 --- charts-original/Chart.yaml
 +++ charts/Chart.yaml
-@@ -4,7 +4,7 @@
-     - name: Chart Source
-       url: https://github.com/prometheus-community/helm-charts
-     - name: Upstream Project
--       url: https://github.com/prometheus-operator/kube-prometheus
-+      url: https://github.com/prometheus-operator/kube-prometheus
-   artifacthub.io/operator: "true"
-   catalog.cattle.io/auto-install: rancher-monitoring-crd=match
+@@ -10,17 +10,17 @@
    catalog.cattle.io/certified: rancher
-@@ -27,70 +27,6 @@
- - condition: grafana.enabled
+   catalog.cattle.io/deploys-on-os: windows
+   catalog.cattle.io/display-name: Monitoring
+-  catalog.cattle.io/kube-version: '>= 1.28.0-0 < 1.32.0-0'
++  catalog.cattle.io/kube-version: '>= 1.27.0-0 < 1.32.0-0'
+   catalog.cattle.io/namespace: cattle-monitoring-system
+   catalog.cattle.io/permits-os: linux,windows
+   catalog.cattle.io/provides-gvr: monitoring.coreos.com.prometheus/v1
+-  catalog.cattle.io/rancher-version: '>= 2.10.0-0 < 2.11.0-0'
++  catalog.cattle.io/rancher-version: '>= 2.9.0-0 < 2.11.0-0'
+   catalog.cattle.io/release-name: rancher-monitoring
+   catalog.cattle.io/requests-cpu: 4500m
+   catalog.cattle.io/requests-memory: 4000Mi
+   catalog.cattle.io/type: cluster-tool
+   catalog.cattle.io/ui-component: monitoring
+-  catalog.cattle.io/upstream-version: 57.0.3
++  catalog.cattle.io/upstream-version: 61.3.2
+ apiVersion: v2
+ appVersion: v0.75.1
+ dependencies:
+@@ -28,69 +28,6 @@
    name: grafana
    repository: file://./charts/grafana
--  version: 7.3.11
+   version: 8.3.6
 -- condition: hardenedKubelet.enabled
 -  name: hardenedKubelet
 -  repository: file://./charts/hardenedKubelet
@@ -80,9 +91,12 @@
  description: kube-prometheus-stack collects Kubernetes manifests, Grafana dashboards,
    and Prometheus rules combined with documentation and scripts to provide easy to
    operate end-to-end Kubernetes cluster monitoring with Prometheus using the Prometheus
-@@ -103,25 +39,13 @@
+@@ -101,25 +38,15 @@
+ - operator
+ - prometheus
  - kube-prometheus
- kubeVersion: '>=1.19.0-0'
+-kubeVersion: '>=1.28.0-0'
++kubeVersion: '>=1.27.0-0'
  maintainers:
 -- email: andrew@quadcorps.co.uk
 -  name: andrewgkew
@@ -105,10 +119,9 @@
 +  name: Alexandre
 +- email: joshua.meranda@suse.com
 +  name: Joshua
++- email: dan.pock@suse.com
++  name: Dan
 +name: rancher-project-monitoring
  sources:
  - https://github.com/prometheus-community/helm-charts
  - https://github.com/prometheus-operator/kube-prometheus
- type: application
--version: 104.0.0-rc1+up57.0.3
-+version: 0.2.0

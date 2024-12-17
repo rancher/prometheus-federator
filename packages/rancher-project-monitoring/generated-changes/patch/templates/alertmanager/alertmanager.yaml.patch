@@ -1,6 +1,6 @@
 --- charts-original/templates/alertmanager/alertmanager.yaml
 +++ charts/templates/alertmanager/alertmanager.yaml
-@@ -62,16 +62,11 @@
+@@ -66,16 +66,11 @@
  {{- end }}
  {{- if .Values.alertmanager.alertmanagerSpec.alertmanagerConfigSelector }}
    alertmanagerConfigSelector:

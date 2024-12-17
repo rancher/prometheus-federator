@@ -1,12 +1,5 @@
 --- charts-original/templates/prometheus/rules-1.14/alertmanager.rules.yaml
 +++ charts/templates/prometheus/rules-1.14/alertmanager.rules.yaml
-@@ -1,5 +1,5 @@
- {{- /*
--Generated from 'alertmanager.rules' group from https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/a8ba97a150c75be42010c75d10b720c55e182f1a/manifests/alertmanager-prometheusRule.yaml
-+Generated from 'alertmanager.rules' group from https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/main/manifests/alertmanager-prometheusRule.yaml
- Do not change in-place! In order to change this file first read following link:
- https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack/hack
- */ -}}
 @@ -206,8 +206,8 @@
          runbook_url: {{ .Values.defaultRules.runbookUrl }}/alertmanager/alertmanagerconfiginconsistent
          summary: Alertmanager instances within the same cluster have different configurations.

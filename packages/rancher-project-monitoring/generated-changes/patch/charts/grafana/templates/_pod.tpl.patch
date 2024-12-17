@@ -1,6 +1,6 @@
 --- charts-original/charts/grafana/templates/_pod.tpl
 +++ charts/charts/grafana/templates/_pod.tpl
-@@ -463,10 +463,8 @@
+@@ -468,10 +468,8 @@
        - name: UNIQUE_FILENAMES
          value: "{{ . }}"
        {{- end }}
@@ -12,7 +12,7 @@
        {{- with .Values.sidecar.skipTlsVerify }}
        - name: SKIP_TLS_VERIFY
          value: "{{ . }}"
-@@ -574,10 +572,8 @@
+@@ -584,10 +582,8 @@
        - name: UNIQUE_FILENAMES
          value: "{{ . }}"
        {{- end }}
@@ -24,7 +24,7 @@
        {{- if .Values.sidecar.skipTlsVerify }}
        - name: SKIP_TLS_VERIFY
          value: "{{ .Values.sidecar.skipTlsVerify }}"
-@@ -782,10 +778,8 @@
+@@ -792,10 +788,8 @@
        - name: UNIQUE_FILENAMES
          value: "{{ . }}"
        {{- end }}

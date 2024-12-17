@@ -9,7 +9,7 @@
   {{- $temp_registry := (include "system_default_registry" .) -}}
   {{- if $temp_registry -}}
     {{- trimSuffix "/" $temp_registry -}}
-  {{- else -}}
+  {{- else if .Values.global.imageRegistry -}}
     {{- .Values.global.imageRegistry -}}
   {{- end -}}
 {{- end -}}
