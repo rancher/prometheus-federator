@@ -76,7 +76,6 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     app: {{ .Chart.Name }}-patch-sa
-{{- if .Values.hardened.k3s.networkPolicy.enabled }}
 {{- range $_, $ns := $namespaces }}
 ---
 apiVersion: networking.k8s.io/v1
@@ -91,5 +90,4 @@ spec:
   policyTypes:
     - Ingress
     - Egress
-{{- end }}
 {{- end }}
