@@ -157,10 +157,12 @@ defaultRules:
 ##
 global:
   cattle:
-
+    psp:
+      enabled: false
     systemDefaultRegistry: ""
     projectNamespaceSelector: {}
     projectNamespaces: []
+  imageRegistry: docker.io
   kubectl:
      repository: rancher/kubectl
      tag: v1.20.2
