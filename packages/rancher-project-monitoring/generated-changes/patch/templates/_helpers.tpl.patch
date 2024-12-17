@@ -1,5 +1,14 @@
 --- charts-original/templates/_helpers.tpl
 +++ charts/templates/_helpers.tpl
+@@ -9,7 +9,7 @@
+   {{- $temp_registry := (include "system_default_registry" .) -}}
+   {{- if $temp_registry -}}
+     {{- trimSuffix "/" $temp_registry -}}
+-  {{- else -}}
++  {{- else if .Values.global.imageRegistry -}}
+     {{- .Values.global.imageRegistry -}}
+   {{- end -}}
+ {{- end -}}
 @@ -142,6 +142,11 @@
  
  # Prometheus Operator
