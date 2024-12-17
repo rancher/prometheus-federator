@@ -44,9 +44,11 @@ spec:
       targetLabel: cluster_name
       replacement: {{ .Values.global.cattle.clusterName }}
     {{- end }}
+    {{- if .Values.serviceMonitor.relabelings }}
     {{- with .Values.serviceMonitor.relabelings }}
     relabelings:
       {{- toYaml . | nindent 6 }}
+    {{- end }}
     {{- end }}
     {{- with .Values.serviceMonitor.metricRelabelings }}
     metricRelabelings:
