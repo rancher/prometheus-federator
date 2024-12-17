@@ -6,17 +6,18 @@ import (
 	"compress/gzip"
 	"encoding/base64"
 	"fmt"
-	"github.com/spf13/cobra"
 	"io"
 	"os"
 	"path/filepath"
+
+	"github.com/spf13/cobra"
 )
 
 func ChartDebugSubCommand(base64ChartTarball string) *cobra.Command {
 	return &cobra.Command{
 		Use:   "debug-chart",
 		Short: "This command helps debug the internal chart files",
-		Run: func(cmd *cobra.Command, args []string) {
+		Run: func(_ *cobra.Command, _ []string) {
 			fmt.Println("TODO debug")
 			// TODO: use straing data from base64ChartTarball to:
 			// Un-base64 the data to get a raw tgz file,
