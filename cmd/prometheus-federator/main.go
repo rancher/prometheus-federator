@@ -9,6 +9,7 @@ import (
 	_ "net/http/pprof"
 	"os"
 
+	"github.com/rancher/prometheus-federator/pkg/debug"
 	"github.com/rancher/prometheus-federator/pkg/helm-project-operator/controllers/common"
 	"github.com/rancher/prometheus-federator/pkg/helm-project-operator/operator"
 	"github.com/rancher/prometheus-federator/pkg/version"
@@ -84,5 +85,6 @@ func main() {
 		Version: version.FriendlyVersion(),
 	})
 	cmd = command.AddDebug(cmd, &debugConfig)
+	cmd.AddCommand(debug.ChartDebugSubCommand(base64TgzChart))
 	command.Main(cmd)
 }
