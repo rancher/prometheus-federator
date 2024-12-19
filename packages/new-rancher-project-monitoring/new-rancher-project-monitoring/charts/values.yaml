@@ -73,7 +73,7 @@ global:
     projectNamespaces: []
   kubectl:
      repository: rancher/kubectl
-     tag: v1.20.2
+     tag: v1.26.15
      pullPolicy: IfNotPresent
      securityContext:
        runAsNonRoot: true
@@ -445,7 +445,7 @@ alertmanager:
     ##
     image:
       repository: rancher/mirrored-prometheus-alertmanager
-      tag: v0.24.0
+      tag: v0.27.0
       sha: ""
 
     ## Secrets is a list of Secrets in the same namespace as the Alertmanager object, which shall be mounted into the
@@ -837,7 +837,7 @@ grafana:
   proxy:
     image:
       repository: rancher/mirrored-library-nginx
-      tag: 1.24.0-alpine
+      tag: 1.27.2-alpine
 
   ## Enable an Specify container in extraContainers. This is meant to allow adding an authentication proxy to a grafana pod
   extraContainers: |
@@ -1149,7 +1149,7 @@ prometheus:
     ##
     image:
       repository: rancher/mirrored-prometheus-prometheus
-      tag: v2.38.0
+      tag: v2.53.1
       sha: ""
 
     ## Tolerations for use with node taints
@@ -1444,7 +1444,7 @@ prometheus:
     proxy:
       image:
         repository: rancher/mirrored-library-nginx
-        tag: 1.24.0-alpine
+        tag: 1.27.2-alpine
 
     ## Containers allows injecting additional containers. This is meant to allow adding an authentication proxy to a Prometheus pod.
     ## if using proxy extraContainer update targetPort with proxy container port
