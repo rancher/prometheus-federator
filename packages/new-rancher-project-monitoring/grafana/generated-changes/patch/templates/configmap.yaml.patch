@@ -1,0 +1,11 @@
+--- charts-original/templates/configmap.yaml
++++ charts/templates/configmap.yaml
+@@ -103,7 +103,7 @@
+     -H "Content-Type: application/json;charset=UTF-8" \
+       {{ end }}
+     {{- $dpPath := "" -}}
+-    {{- range $kd := (index $dashboardProviders "dashboardproviders.yaml").providers -}}
++    {{- range $kd := (index $dashboardProviders "dashboardproviders.yaml").providers }}
+       {{- if eq $kd.name $provider -}}
+       {{- $dpPath = $kd.options.path -}}
+       {{- end -}}
