@@ -1,14 +1,25 @@
 --- charts-original/values.yaml
 +++ charts/values.yaml
-@@ -3,6 +3,7 @@
-     psp:
-       enabled: false
+@@ -1,6 +1,7 @@
+ global:
+   cattle:
      systemDefaultRegistry: ""
 +    projectNamespaces: []
  
- rbac:
-   create: true
-@@ -793,10 +794,6 @@
+   # To help compatibility with other charts which use global.imagePullSecrets.
+   # Allow either an array of {name: pullSecret} maps (k8s-style), or an array of strings (more common helm-style).
+@@ -882,10 +883,6 @@
+     labelValue: ""
+     # Log level. Can be one of: DEBUG, INFO, WARN, ERROR, CRITICAL.
+     # logLevel: INFO
+-    # If specified, the sidecar will search for alert config-maps inside this namespace.
+-    # Otherwise the namespace in which the sidecar is running will be used.
+-    # It's also possible to specify ALL to search in all namespaces
+-    searchNamespace: null
+     # Method to use to detect ConfigMap changes. With WATCH the sidecar will do a WATCH requests, with SLEEP it will list all ConfigMaps, then sleep for 60 seconds.
+     watchMethod: WATCH
+     # search in configmap, secret or both
+@@ -942,10 +939,6 @@
      folder: /tmp/dashboards
      # The default folder name, it will create a subfolder under the `folder` and put dashboards in there instead
      defaultFolderName: null
@@ -19,16 +30,7 @@
      # Method to use to detect ConfigMap changes. With WATCH the sidecar will do a WATCH requests, with SLEEP it will list all ConfigMaps, then sleep for 60 seconds.
      watchMethod: WATCH
      # search in configmap, secret or both
-@@ -807,7 +804,7 @@
-     # Absolute path to shell script to execute after a configmap got reloaded
-     script: null
-     # watchServerTimeout: request to the server, asking it to cleanly close the connection after that.
--    # defaults to 60sec; much higher values like 3600 seconds (1h) are feasible for non-Azure K8S
-+   # defaults to 60sec; much higher values like 3600 seconds (1h) are feasible for non-Azure K8S
-     # watchServerTimeout: 3600
-     #
-     # watchClientTimeout: is a client-side timeout, configuring your local socket.
-@@ -848,10 +845,6 @@
+@@ -1015,10 +1008,6 @@
      labelValue: ""
      # Log level. Can be one of: DEBUG, INFO, WARN, ERROR, CRITICAL.
      # logLevel: INFO
@@ -39,7 +41,7 @@
      # Method to use to detect ConfigMap changes. With WATCH the sidecar will do a WATCH requests, with SLEEP it will list all ConfigMaps, then sleep for 60 seconds.
      watchMethod: WATCH
      # search in configmap, secret or both
-@@ -888,10 +881,6 @@
+@@ -1055,10 +1044,6 @@
      labelValue: ""
      # Log level. Can be one of: DEBUG, INFO, WARN, ERROR, CRITICAL.
      # logLevel: INFO
@@ -50,7 +52,7 @@
      # Method to use to detect ConfigMap changes. With WATCH the sidecar will do a WATCH requests, with SLEEP it will list all ConfigMaps, then sleep for 60 seconds.
      watchMethod: WATCH
      # search in configmap, secret or both
-@@ -928,10 +917,6 @@
+@@ -1095,10 +1080,6 @@
      labelValue: ""
      # Log level. Can be one of: DEBUG, INFO, WARN, ERROR, CRITICAL.
      # logLevel: INFO
@@ -58,10 +60,10 @@
 -    # Otherwise the namespace in which the sidecar is running will be used.
 -    # It's also possible to specify ALL to search in all namespaces
 -    searchNamespace: null
+     # Method to use to detect ConfigMap changes. With WATCH the sidecar will do a WATCH requests, with SLEEP it will list all ConfigMaps, then sleep for 60 seconds.
+     watchMethod: WATCH
      # search in configmap, secret or both
-     resource: both
-     # Sets the size limit of the notifier sidecar emptyDir volume
-@@ -1075,14 +1060,3 @@
+@@ -1342,17 +1323,6 @@
  # Enable backward compatibility of kubernetes where version below 1.13 doesn't have the enableServiceLinks option
  enableKubeBackwardCompatibility: false
  useStatefulSet: false
@@ -76,3 +78,6 @@
 -  #     data:
 -  #       - key: grafana-admin-password
 -  #         name: adminPassword
+ 
+ # assertNoLeakedSecrets is a helper function defined in _helpers.tpl that checks if secret
+ # values are not exposed in the rendered grafana.ini configmap. It is enabled by default.
