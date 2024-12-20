@@ -15,11 +15,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var (
-	chartOnly bool
-)
-
 func ChartDebugSubCommand(base64ChartTarball string) *cobra.Command {
+	var chartOnly bool
 	chartDebug := &cobra.Command{
 		Use:   "debug-chart",
 		Short: "This command helps debug the internal chart files",
