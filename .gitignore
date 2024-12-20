@@ -19,3 +19,4 @@ kubeconfig*.yaml
 get_helm.sh
 Dockerfile.dapper*
 !Dockerfile.dapper
+/.debug
