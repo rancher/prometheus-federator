@@ -4,8 +4,7 @@ import (
 	"context"
 
 	"github.com/rancher/prometheus-federator/internal/helm-project-operator/controllers/common"
-
-	"github.com/rancher/wrangler/pkg/relatedresource"
+	"github.com/rancher/wrangler/v3/pkg/relatedresource"
 	corev1 "k8s.io/api/core/v1"
 	networkingv1 "k8s.io/api/networking/v1"
 	"k8s.io/apimachinery/pkg/runtime"

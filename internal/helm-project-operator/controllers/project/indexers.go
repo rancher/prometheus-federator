@@ -3,9 +3,8 @@ package project
 import (
 	"fmt"
 
-	"github.com/rancher/prometheus-federator/internal/helm-project-operator/apis/helm.cattle.io/v1alpha1"
-	common2 "github.com/rancher/prometheus-federator/internal/helm-project-operator/controllers/common"
-
+	v1alpha1 "github.com/rancher/prometheus-federator/internal/helm-project-operator/apis/helm.cattle.io/v1alpha1"
+	"github.com/rancher/prometheus-federator/internal/helm-project-operator/controllers/common"
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
 )
@@ -91,7 +90,7 @@ func (h *handler) roleBindingInRegistrationNamespaceToRoleRef(rb *rbacv1.RoleBin
 	if !isProjectRegistrationNamespace {
 		return nil, nil
 	}
-	_, isDefaultRoleRef := common2.IsDefaultClusterRoleRef(h.opts, rb.RoleRef.Name)
+	_, isDefaultRoleRef := common.IsDefaultClusterRoleRef(h.opts, rb.RoleRef.Name)
 	if !isDefaultRoleRef {
 		// we only care about rolebindings in the registration namespace that are tied to the default roles
 		// created by this operator
@@ -105,7 +104,7 @@ func (h *handler) clusterRoleBindingToRoleRef(crb *rbacv1.ClusterRoleBinding) ([
 	if crb == nil {
 		return nil, nil
 	}
-	_, isDefaultRoleRef := common2.IsDefaultClusterRoleRef(h.opts, crb.RoleRef.Name)
+	_, isDefaultRoleRef := common.IsDefaultClusterRoleRef(h.opts, crb.RoleRef.Name)
 	if !isDefaultRoleRef {
 		// we only care about rolebindings in the registration namespace that are tied to the default roles
 		// created by this operator
@@ -119,14 +118,14 @@ func (h *handler) roleInReleaseNamespaceToReleaseNamespaceName(role *rbacv1.Role
 	if role == nil {
 		return nil, nil
 	}
-	return h.getReleaseIndexFromNamespaceAndLabels(role.Namespace, role.Labels, common2.HelmProjectOperatorProjectHelmChartRoleLabel)
+	return h.getReleaseIndexFromNamespaceAndLabels(role.Namespace, role.Labels, common.HelmProjectOperatorProjectHelmChartRoleLabel)
 }
 
 func (h *handler) configMapInReleaseNamespaceToReleaseNamespaceName(configmap *corev1.ConfigMap) ([]string, error) {
 	if configmap == nil {
 		return nil, nil
 	}
-	return h.getReleaseIndexFromNamespaceAndLabels(configmap.Namespace, configmap.Labels, common2.HelmProjectOperatorDashboardValuesConfigMapLabel)
+	return h.getReleaseIndexFromNamespaceAndLabels(configmap.Namespace, configmap.Labels, common.HelmProjectOperatorDashboardValuesConfigMapLabel)
 }
 
 func (h *handler) getReleaseIndexFromNamespaceAndLabels(namespace string, labels map[string]string, releaseLabel string) ([]string, error) {

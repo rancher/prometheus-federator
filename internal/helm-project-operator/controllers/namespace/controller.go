@@ -5,11 +5,10 @@ import (
 	"fmt"
 
 	"github.com/rancher/prometheus-federator/internal/helm-project-operator/applier"
-	common2 "github.com/rancher/prometheus-federator/internal/helm-project-operator/controllers/common"
+	"github.com/rancher/prometheus-federator/internal/helm-project-operator/controllers/common"
 	helmprojectcontroller "github.com/rancher/prometheus-federator/internal/helm-project-operator/generated/controllers/helm.cattle.io/v1alpha1"
-
-	"github.com/rancher/wrangler/pkg/apply"
-	corecontroller "github.com/rancher/wrangler/pkg/generated/controllers/core/v1"
+	"github.com/rancher/wrangler/v3/pkg/apply"
+	corecontroller "github.com/rancher/wrangler/v3/pkg/generated/controllers/core/v1"
 	"github.com/sirupsen/logrus"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -24,7 +23,7 @@ type handler struct {
 	systemNamespace string
 	valuesYaml      string
 	questionsYaml   string
-	opts            common2.Options
+	opts            common.Options
 
 	systemNamespaceTracker              Tracker
 	projectRegistrationNamespaceTracker Tracker
@@ -42,7 +41,7 @@ func Register(
 	ctx context.Context,
 	apply apply.Apply,
 	systemNamespace, valuesYaml, questionsYaml string,
-	opts common2.Options,
+	opts common.Options,
 	namespaces corecontroller.NamespaceController,
 	namespaceCache corecontroller.NamespaceCache,
 	configmaps corecontroller.ConfigMapController,
@@ -107,7 +106,7 @@ func Register(
 
 // Single Namespace Handler
 
-func (h *handler) OnSingleNamespaceChange(_ string, namespace *corev1.Namespace) (*corev1.Namespace, error) {
+func (h *handler) OnSingleNamespaceChange( /*name*/ _ string, namespace *corev1.Namespace) (*corev1.Namespace, error) {
 	if namespace.Name != h.systemNamespace {
 		// enqueue system namespace to ensure that rolebindings are updated
 
@@ -130,7 +129,7 @@ func (h *handler) OnSingleNamespaceChange(_ string, namespace *corev1.Namespace)
 
 // Multiple Namespaces Handler
 
-func (h *handler) OnMultiNamespaceChange(_ string, namespace *corev1.Namespace) (*corev1.Namespace, error) {
+func (h *handler) OnMultiNamespaceChange( /*name*/ _ string, namespace *corev1.Namespace) (*corev1.Namespace, error) {
 	if namespace == nil {
 		logrus.Debugf("OnMultiNamespaceChange() called with no namespace.")
 		return namespace, nil
@@ -313,11 +312,11 @@ func (h *handler) updateNamespaceWithHelmOperatorProjectLabel(namespace *corev1.
 		if namespace.Labels == nil {
 			return nil
 		}
-		if _, ok := namespace.Labels[common2.HelmProjectOperatorProjectLabel]; !ok {
+		if _, ok := namespace.Labels[common.HelmProjectOperatorProjectLabel]; !ok {
 			return nil
 		}
 		namespaceCopy := namespace.DeepCopy()
-		delete(namespaceCopy.Labels, common2.HelmProjectOperatorProjectLabel)
+		delete(namespaceCopy.Labels, common.HelmProjectOperatorProjectLabel)
 		_, err := h.namespaces.Update(namespaceCopy)
 		if err != nil {
 			return err
@@ -328,9 +327,9 @@ func (h *handler) updateNamespaceWithHelmOperatorProjectLabel(namespace *corev1.
 	if namespaceCopy.Labels == nil {
 		namespaceCopy.Labels = map[string]string{}
 	}
-	currLabel, ok := namespaceCopy.Labels[common2.HelmProjectOperatorProjectLabel]
+	currLabel, ok := namespaceCopy.Labels[common.HelmProjectOperatorProjectLabel]
 	if !ok || currLabel != projectID {
-		namespaceCopy.Labels[common2.HelmProjectOperatorProjectLabel] = projectID
+		namespaceCopy.Labels[common.HelmProjectOperatorProjectLabel] = projectID
 	}
 	_, err := h.namespaces.Update(namespaceCopy)
 	if err != nil {

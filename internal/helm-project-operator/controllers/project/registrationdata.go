@@ -3,9 +3,8 @@ package project
 import (
 	"fmt"
 
-	"github.com/rancher/prometheus-federator/internal/helm-project-operator/apis/helm.cattle.io/v1alpha1"
+	v1alpha1 "github.com/rancher/prometheus-federator/internal/helm-project-operator/apis/helm.cattle.io/v1alpha1"
 	"github.com/rancher/prometheus-federator/internal/helm-project-operator/controllers/common"
-
 	"github.com/sirupsen/logrus"
 	rbacv1 "k8s.io/api/rbac/v1"
 )
