@@ -2,6 +2,8 @@
 
 BUILD_TARGET=${BUILD_TARGET:-"prometheus-federator"}
 
+export KUBECONFIG=$KUBECONFIG
+
 if [ -n "$(git status --porcelain --untracked-files=no)" ]; then
     DIRTY="-dirty"
 fi
