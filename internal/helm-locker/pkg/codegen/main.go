@@ -4,12 +4,12 @@ import (
 	"os"
 
 	v1alpha1 "github.com/rancher/helm-locker/pkg/apis/helm.cattle.io/v1alpha1"
-	"github.com/rancher/helm-locker/pkg/crd"
-	"github.com/sirupsen/logrus"
-
+	lockercrd "github.com/rancher/helm-locker/pkg/crd"
+	commoncrds "github.com/rancher/helmcommon/pkg/crds"
 	"github.com/rancher/wrangler/v3/pkg/cleanup"
 	controllergen "github.com/rancher/wrangler/v3/pkg/controller-gen"
 	"github.com/rancher/wrangler/v3/pkg/controller-gen/args"
+	"github.com/sirupsen/logrus"
 )
 
 func main() {
@@ -43,7 +43,11 @@ func main() {
 	})
 	crdPath := "./crds/crds.yaml"
 	logrus.Infof("Writing CRDS to %s", crdPath)
-	if err := crd.WriteFile(crdPath); err != nil {
+	tracker := commoncrds.NewCRDTracker(
+		lockercrd.Required(),
+	)
+
+	if err := commoncrds.WriteFiles(tracker, crdPath); err != nil {
 		logrus.Fatal(err)
 	}
 }

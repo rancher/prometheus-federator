@@ -7,7 +7,7 @@ import (
 
 	. "github.com/kralicky/kmatch"
 	"github.com/rancher/helm-locker/pkg/apis/helm.cattle.io/v1alpha1"
-	"github.com/rancher/helm-locker/pkg/crd"
+	lockercrd "github.com/rancher/helm-locker/pkg/crd"
 	"github.com/rancher/helm-locker/pkg/operator"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -55,7 +55,6 @@ var _ = Describe("E2E helm locker operator tests", Ordered, Label("integration")
 			Fail(fmt.Sprintf("Failed to create namespace %s", err))
 		}
 
-		Expect(crd.Create(testCtx, cfg)).To(Succeed())
 		go func() {
 			defer func() {
 				// recover from RunOrDie which will always cause a panic on os.Exit
@@ -64,18 +63,22 @@ var _ = Describe("E2E helm locker operator tests", Ordered, Label("integration")
 					GinkgoWriter.Write([]byte(fmt.Sprintf("Recovered from panic: %v", r)))
 				}
 			}()
-			operator.Run(testCtx, operator.ControllerOptions{
-				ClientConfig:   clientCmdCfg,
-				Namespace:      ns,
-				ControllerName: "helmlocker",
-				NodeName:       "node1",
-				PprofEnabled:   false,
-			})
+			operator.Init(
+				testCtx,
+				lockercrd.Required(),
+				operator.ControllerOptions{
+					ClientConfig:   clientCmdCfg,
+					Namespace:      ns,
+					ControllerName: "helmlocker",
+					NodeName:       "node1",
+					PprofEnabled:   false,
+				},
+			)
 		}()
 	})
 
 	When("we use the helm locker operator", func() {
-		Specify("Expect to find prerequisited CRDs in test cluster", func() {
+		Specify("Expect to find prerequisite CRDs in test cluster", func() {
 			// loosely checks that the embedded helm controller is installed
 			gvk := schema.GroupVersionKind{
 				Group:   "helm.cattle.io",
@@ -86,7 +89,7 @@ var _ = Describe("E2E helm locker operator tests", Ordered, Label("integration")
 			Eventually(GVK(gvk)).Should(Exist())
 		})
 
-		It("Should have applied the helmrelease CRD", func() {
+		It("Should have applied the helmrelease CRD during operator initialization", func() {
 			helmRelease := schema.GroupVersionKind{
 				Group:   "helm.cattle.io",
 				Version: "v1alpha1",

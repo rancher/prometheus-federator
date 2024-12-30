@@ -7,14 +7,15 @@ import (
 	"net/http"
 
 	"github.com/rancher/helm-locker/pkg/controllers"
-	"github.com/rancher/helm-locker/pkg/crd"
+	// "github.com/rancher/helm-locker/pkg/crd"
+	commoncrds "github.com/rancher/helmcommon/pkg/crds"
+	"github.com/rancher/wrangler/v3/pkg/crd"
 	"github.com/rancher/wrangler/v3/pkg/ratelimit"
 	"k8s.io/client-go/tools/clientcmd"
 )
 
 type ControllerOptions struct {
-	ClientConfig clientcmd.ClientConfig
-
+	ClientConfig   clientcmd.ClientConfig
 	Namespace      string
 	ControllerName string
 	NodeName       string
@@ -29,7 +30,11 @@ func (c ControllerOptions) Validate() error {
 	return nil
 }
 
-func Run(ctx context.Context, options ControllerOptions) error {
+func Init(
+	ctx context.Context,
+	crds []crd.CRD,
+	options ControllerOptions,
+) error {
 	if err := options.Validate(); err != nil {
 		return err
 	}
@@ -47,7 +52,7 @@ func Run(ctx context.Context, options ControllerOptions) error {
 
 	clientConfig.RateLimiter = ratelimit.None
 
-	if err := crd.Create(ctx, clientConfig); err != nil {
+	if err := commoncrds.CreateFrom(ctx, clientConfig, crds); err != nil {
 		return err
 	}
 

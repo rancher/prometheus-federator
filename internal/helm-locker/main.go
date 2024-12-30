@@ -4,6 +4,7 @@ import (
 	"context"
 	_ "net/http/pprof"
 
+	lockercrd "github.com/rancher/helm-locker/pkg/crd"
 	"github.com/rancher/helm-locker/pkg/operator"
 	_ "github.com/rancher/wrangler/v3/pkg/generated/controllers/apiextensions.k8s.io"
 	_ "github.com/rancher/wrangler/v3/pkg/generated/controllers/networking.k8s.io"
@@ -31,7 +32,11 @@ func BuildHelmLockerCommand() *cobra.Command {
 				ClientConfig:   cfg,
 				PprofEnabled:   pprofEnabled,
 			}
-			if err := operator.Run(cmd.Context(), options); err != nil {
+			if err := operator.Init(
+				cmd.Context(),
+				lockercrd.Required(),
+				options,
+			); err != nil {
 				return err
 			}
 			return nil
