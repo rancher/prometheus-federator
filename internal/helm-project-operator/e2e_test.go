@@ -18,9 +18,6 @@ import (
 	k3shelmv1 "github.com/k3s-io/helm-controller/pkg/apis/helm.cattle.io/v1"
 	lockerv1alpha1 "github.com/rancher/helm-locker/pkg/apis/helm.cattle.io/v1alpha1"
 	v1alpha1 "github.com/rancher/helm-project-operator/pkg/apis/helm.cattle.io/v1alpha1"
-	"github.com/rancher/helm-project-operator/pkg/controllers/common"
-	"github.com/rancher/helm-project-operator/pkg/operator"
-	"github.com/rancher/helm-project-operator/pkg/test"
 	appsv1 "k8s.io/api/apps/v1"
 
 	// "github.com/rancher/helm-project-operator/pkg/controllers/common"
@@ -197,33 +194,33 @@ var _ = Describe("E2E helm project operator tests", Ordered, Label("integration"
 		// TODO : then we can run this "in-tree" instead of importing images and deploying a chart
 
 		It("should install from the latest charts", func() {
-			go func() {
-				defer func() {
-					// recover from RunOrDie which will always cause a panic on os.Exit
-					r := recover()
-					if r != nil {
-						GinkgoWriter.Write([]byte(fmt.Sprintf("Recovered from panic: %v", r)))
-					}
-				}()
-				if false {
-					err := operator.Init(testCtx, "cattle-helm-system", clientC, common.Options{
-						OperatorOptions: common.OperatorOptions{
-							HelmAPIVersion:   DummyHelmAPIVersion,
-							ReleaseName:      DummyReleaseName,
-							SystemNamespaces: []string{"kube-system"},
-							ChartContent:     string(test.TestData("example-chart/example-chart.tgz.base64")),
-							Singleton:        false,
-						},
-						RuntimeOptions: common.RuntimeOptions{
-							Namespace:                     "cattle-helm-system",
-							DisableEmbeddedHelmController: true,
-						},
-					})
-					if err != nil {
-						GinkgoWriter.Write([]byte("hello"))
-					}
-				}
-			}()
+			// go func() {
+			// 	defer func() {
+			// 		// recover from RunOrDie which will always cause a panic on os.Exit
+			// 		r := recover()
+			// 		if r != nil {
+			// 			GinkgoWriter.Write([]byte(fmt.Sprintf("Recovered from panic: %v", r)))
+			// 		}
+			// 	}()
+			// if false {
+			// err := operator.Init(testCtx, "cattle-helm-system", clientC, common.Options{
+			// 	OperatorOptions: common.OperatorOptions{
+			// 		HelmAPIVersion:   DummyHelmAPIVersion,
+			// 		ReleaseName:      DummyReleaseName,
+			// 		SystemNamespaces: []string{"kube-system"},
+			// 		ChartContent:     string(test.TestData("example-chart/example-chart.tgz.base64")),
+			// 		Singleton:        false,
+			// 	},
+			// 	RuntimeOptions: common.RuntimeOptions{
+			// 		Namespace:                     "cattle-helm-system",
+			// 		DisableEmbeddedHelmController: true,
+			// 	},
+			// })
+			// if err != nil {
+			// 	GinkgoWriter.Write([]byte("hello"))
+			// }
+			// }
+			// }()
 			ctxT, ca := context.WithTimeout(testCtx, 5*time.Minute)
 			defer ca()
 			helmInstaller := newHelmInstaller(
