@@ -3,6 +3,8 @@ package main
 import (
 	"os"
 
+	helmcontrollercrd "github.com/k3s-io/helm-controller/pkg/crd"
+	lockercrd "github.com/rancher/helm-locker/pkg/crd"
 	v1alpha1 "github.com/rancher/helm-project-operator/pkg/apis/helm.cattle.io/v1alpha1"
 	helmprojectcrds "github.com/rancher/helm-project-operator/pkg/crd"
 	commoncrds "github.com/rancher/helmcommon/pkg/crds"
@@ -26,8 +28,8 @@ func generate() {
 
 		dependencies := commoncrds.NewCRDTracker(
 			append(
-				helmprojectcrds.RequiredEmbedded(),
-				helmprojectcrds.RequiredDependencies()...,
+				lockercrd.Required(),
+				helmcontrollercrd.List()...,
 			),
 		)
 		if len(os.Args) != 4 {

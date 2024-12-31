@@ -7,36 +7,31 @@ import (
 	"log"
 	"net/http"
 	_ "net/http/pprof"
-	"os"
 
-	"github.com/rancher/prometheus-federator/pkg/helm-project-operator/controllers/common"
-	"github.com/rancher/prometheus-federator/pkg/helm-project-operator/operator"
-
-	"github.com/rancher/prometheus-federator/pkg/version"
-	command "github.com/rancher/wrangler-cli"
-	_ "github.com/rancher/wrangler/pkg/generated/controllers/apiextensions.k8s.io"
-	_ "github.com/rancher/wrangler/pkg/generated/controllers/networking.k8s.io"
-	"github.com/rancher/wrangler/pkg/kubeconfig"
+	command "github.com/rancher/helm-project-operator/pkg/cli"
+	"github.com/rancher/helm-project-operator/pkg/controllers/common"
+	"github.com/rancher/helm-project-operator/pkg/operator"
+	"github.com/rancher/helm-project-operator/pkg/test"
+	"github.com/rancher/helm-project-operator/pkg/version"
+	_ "github.com/rancher/wrangler/v3/pkg/generated/controllers/apiextensions.k8s.io"
+	_ "github.com/rancher/wrangler/v3/pkg/generated/controllers/networking.k8s.io"
+	"github.com/rancher/wrangler/v3/pkg/kubeconfig"
 	"github.com/spf13/cobra"
 )
 
 const (
-	// DummyHelmAPIVersion is the spec.helmApiVersion corresponding to the dummy project-operator-example chart
+	// DummyHelmAPIVersion is the spec.helmApiVersion corresponding to the dummy example-chart
 	DummyHelmAPIVersion = "dummy.cattle.io/v1alpha1"
 
-	// DummyReleaseName is the release name corresponding to the operator that deploys the dummy project-operator-example chart
+	// DummyReleaseName is the release name corresponding to the operator that deploys the dummy example-chart
 	DummyReleaseName = "dummy"
 )
 
 var (
-	// DummySystemNamespaces is the system namespaces scoped for the dummy project-operator-example chart.
+	// DummySystemNamespaces is the system namespaces scoped for the dummy example-chart.
 	DummySystemNamespaces = []string{"kube-system"}
 
-	//go:embed fs/project-operator-example.tgz.base64
-	base64TgzChart string
-
 	debugConfig command.DebugConfig
-	updateCRDs  bool = false
 )
 
 type DummyOperator struct {
@@ -46,7 +41,7 @@ type DummyOperator struct {
 	Kubeconfig string `usage:"Kubeconfig file"`
 }
 
-func (o *DummyOperator) Run(cmd *cobra.Command, _ []string) error {
+func (o *DummyOperator) Run(cmd *cobra.Command, args []string) error {
 	go func() {
 		log.Println(http.ListenAndServe("localhost:6060", nil))
 	}()
@@ -56,21 +51,20 @@ func (o *DummyOperator) Run(cmd *cobra.Command, _ []string) error {
 
 	ctx := cmd.Context()
 
-	if os.Getenv("MANAGE_CRD_UPDATES") == "true" {
-		updateCRDs = true
-	}
+	managedCrds := common.ManagedCRDsFromRuntime(o.RuntimeOptions)
 
 	if err := operator.Init(ctx, o.Namespace, cfg, common.Options{
 		OperatorOptions: common.OperatorOptions{
 			HelmAPIVersion:   DummyHelmAPIVersion,
 			ReleaseName:      DummyReleaseName,
 			SystemNamespaces: DummySystemNamespaces,
-			ChartContent:     base64TgzChart,
+			ChartContent:     string(test.TestData("example-chart/example-chart.tgz.base64")),
 			Singleton:        false,
-			UpdateCRDs:       updateCRDs,
 		},
 		RuntimeOptions: o.RuntimeOptions,
-	}); err != nil {
+	},
+		managedCrds,
+	); err != nil {
 		return err
 	}
 

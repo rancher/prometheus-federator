@@ -3,7 +3,7 @@ package hack
 import (
 	"errors"
 
-	"github.com/rancher/wrangler/pkg/clients"
+	"github.com/rancher/wrangler/v3/pkg/clients"
 	"github.com/sirupsen/logrus"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/rest"
