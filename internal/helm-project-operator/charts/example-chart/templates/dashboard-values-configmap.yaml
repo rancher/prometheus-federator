@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: my-dashboard-values
+  namespace: {{ .Release.Namespace }}
+  labels:
+    helm.cattle.io/dashboard-values-configmap: {{ .Release.Name }}
+data:
+  data.json: |-
+{{ .Values.data | toJson | indent 4 }}

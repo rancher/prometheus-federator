@@ -1,0 +1,34 @@
+global:
+  cattle:
+    clusterID: ""
+    projectID: ""
+    projectNamespaces: []
+    projectNamespaceSelector: {}
+    releaseProjectID: ""
+    systemDefaultRegistry: ""
+    url: ""
+  rbac:
+    ## Create RBAC resources for ServiceAccounts and users
+    ##
+    create: true
+
+    userRoles:
+      ## Create default user Roles that the Helm Project Operator will automatically create RoleBindings for
+      ##
+      ## How does this work?
+      ##
+      ## The operator will watch for all subjects bound to each Kubernetes default ClusterRole in the project registration namespace
+      ## where the ProjectHelmChart that deployed this chart belongs to; if it observes a subject bound to a particular role in 
+      ## the project registration namespace (e.g. edit) and if a Role exists that is deployed by this chart with the label
+      ## 'helm.cattle.io/project-helm-chart-role-aggregate-from': '<role, e.g. edit>', it will automaticaly create a RoleBinding
+      ## in the release namespace binding all such subjects to that Role.
+      ##
+      ## Note: while the default behavior is to use the Kubernetes default ClusterRole, the operator deployment can be configured
+      ## to use a different set of ClusterRoles as the source of truth for admin, edit, and view permissions.
+      ## 
+      create: true
+      ## Add labels to Roles to have the operator pick them up
+      aggregateToDefaultRoles: true
+
+data:
+  hello: world

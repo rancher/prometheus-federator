@@ -11,17 +11,17 @@
 		]
 	},
 	"run": {
-		"deadline": "5m"
+		"timeout": "5m"
 	},
-    "issues": {
-        "exclude-rules": [
-            {
-                "linters": "revive",
-                "text": "should have comment or be unexported"
-            }
-        ],
+	"issues": {
+		"exclude-rules": [
+			{
+				"linters": "revive",
+				"text": "should have comment or be unexported"
+			}
+		],
 		"exclude-files": [
 			"/zz_generated_*"
 		]
-    }
+	}
 }

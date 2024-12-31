@@ -1,0 +1,7 @@
+questions:
+  - variable: data
+    label: mydata
+    description: My Data
+    type: string
+    required: true
+    group: Data

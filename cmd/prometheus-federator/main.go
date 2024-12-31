@@ -7,16 +7,15 @@ import (
 	"log"
 	"net/http"
 	_ "net/http/pprof"
-	"os"
 
+	command "github.com/rancher/helm-project-operator/pkg/cli"
+	"github.com/rancher/helm-project-operator/pkg/controllers/common"
+	"github.com/rancher/helm-project-operator/pkg/operator"
 	"github.com/rancher/prometheus-federator/pkg/debug"
-	"github.com/rancher/prometheus-federator/pkg/helm-project-operator/controllers/common"
-	"github.com/rancher/prometheus-federator/pkg/helm-project-operator/operator"
 	"github.com/rancher/prometheus-federator/pkg/version"
-	command "github.com/rancher/wrangler-cli"
-	_ "github.com/rancher/wrangler/pkg/generated/controllers/apiextensions.k8s.io"
-	_ "github.com/rancher/wrangler/pkg/generated/controllers/networking.k8s.io"
-	"github.com/rancher/wrangler/pkg/kubeconfig"
+	_ "github.com/rancher/wrangler/v3/pkg/generated/controllers/apiextensions.k8s.io"
+	_ "github.com/rancher/wrangler/v3/pkg/generated/controllers/networking.k8s.io"
+	"github.com/rancher/wrangler/v3/pkg/kubeconfig"
 	"github.com/spf13/cobra"
 )
 
@@ -58,9 +57,7 @@ func (f *PrometheusFederator) Run(cmd *cobra.Command, _ []string) error {
 
 	ctx := cmd.Context()
 
-	if os.Getenv("MANAGE_CRD_UPDATES") == "true" {
-		updateCRDs = true
-	}
+	managedCRDs := common.ManagedCRDsFromRuntime(f.RuntimeOptions)
 
 	if err := operator.Init(ctx, f.Namespace, cfg, common.Options{
 		OperatorOptions: common.OperatorOptions{
@@ -69,10 +66,11 @@ func (f *PrometheusFederator) Run(cmd *cobra.Command, _ []string) error {
 			SystemNamespaces: SystemNamespaces,
 			ChartContent:     base64TgzChart,
 			Singleton:        true, // indicates only one HelmChart can be registered per project defined
-			UpdateCRDs:       updateCRDs,
 		},
 		RuntimeOptions: f.RuntimeOptions,
-	}); err != nil {
+	},
+		managedCRDs,
+	); err != nil {
 		return err
 	}
 
