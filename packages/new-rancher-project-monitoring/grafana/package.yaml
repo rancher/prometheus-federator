@@ -1,0 +1,4 @@
+url: https://github.com/rancher/charts.git
+subdirectory: charts/rancher-monitoring/105.1.1+up61.3.2/charts/grafana
+commit: ff5445c31fd76d86f08cb84a6fabc3ee4f2ae916
+doNotRelease: true
