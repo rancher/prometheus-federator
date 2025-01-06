@@ -1,0 +1,87 @@
+#!/usr/bin/env bash
+
+function fetch-team-charts-index() {
+  TEAM_INDEX="https://raw.githubusercontent.com/mallardduck/ob-team-charts/refs/heads/main/index.yaml"
+  BUILD_DIR="./build"
+  LOCAL_FILE="$BUILD_DIR/charts-index.yaml"
+  LOCAL_ETAG_FILE="$BUILD_DIR/charts-index.etag"
+
+  # Ensure the build directory exists
+  mkdir -p "$BUILD_DIR"
+
+  # Fetch the ETag from the remote file headers
+  REMOTE_ETAG=$(curl -sI "$TEAM_INDEX" | grep -i "etag" | awk '{print $2}' | tr -d '\r')
+
+  if [[ -z "$REMOTE_ETAG" ]]; then
+    return 1
+  fi
+
+  # Check if a local ETag exists
+  if [[ -f "$LOCAL_ETAG_FILE" ]]; then
+    LOCAL_ETAG=$(cat "$LOCAL_ETAG_FILE")
+    # If the ETag matches, skip the download
+    if [[ "$REMOTE_ETAG" == "$LOCAL_ETAG" ]]; then
+      return 0
+    fi
+  fi
+
+  # Download the file as it is either outdated or does not exist
+  echo "Downloading file..."
+  if curl -s "$TEAM_INDEX" -o "$LOCAL_FILE"; then
+    # Save the new ETag
+    echo "$REMOTE_ETAG" > "$LOCAL_ETAG_FILE"
+    return 0
+  else
+    return 1
+  fi
+}
+
+function newest-chart-version() {
+  LOCAL_INDEX_FILE="./build/charts-index.yaml"
+  # Fetch the latest index
+  fetch-team-charts-index >/dev/null
+
+  CHART_TARGET=$1
+  YQ_QUERY=".entries[\"${CHART_TARGET}\"][0].version"
+  NEWEST_CHART=$(yq "$YQ_QUERY" "$LOCAL_INDEX_FILE")
+  echo "$NEWEST_CHART"
+}
+
+function fetch-team-chart() {
+  CHART_TARGET="${1}"
+  BASE_FETCH_URL="https://raw.githubusercontent.com/mallardduck/ob-team-charts/refs/heads/main/assets"
+  CHART_VERSION="${2}"
+  FETCH_URL="${BASE_FETCH_URL}/${CHART_TARGET}/${CHART_TARGET}-${CHART_VERSION}.tgz"
+  BUILD_DIR="./build"
+  LOCAL_FILE="$BUILD_DIR/charts/${CHART_TARGET}-${CHART_VERSION}.tgz"
+  LOCAL_ETAG_FILE="$LOCAL_FILE.etag"
+
+  # Ensure the build directory exists
+  mkdir -p "$BUILD_DIR"
+
+  # Fetch the ETag from the remote file headers
+  REMOTE_ETAG=$(curl -sI "$FETCH_URL" | grep -i "etag" | awk '{print $2}' | tr -d '\r')
+
+  if [[ -z "$REMOTE_ETAG" ]]; then
+    return 1
+  fi
+
+  # Check if a local ETag exists
+  if [[ -f "$LOCAL_ETAG_FILE" ]]; then
+    LOCAL_ETAG=$(cat "$LOCAL_ETAG_FILE")
+    # If the ETag matches, skip the download
+    if [[ "$REMOTE_ETAG" == "$LOCAL_ETAG" ]]; then
+      return 0
+    fi
+  fi
+
+  # Download the file as it is either outdated or does not exist
+  echo "Downloading file..."
+  if curl -s "$FETCH_URL" -o "$LOCAL_FILE"; then
+    # Save the new ETag
+    echo "$REMOTE_ETAG" > "$LOCAL_ETAG_FILE"
+    return 0
+  else
+    return 1
+  fi
+}
