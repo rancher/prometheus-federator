@@ -52,8 +52,9 @@ function fetch-team-chart() {
   BASE_FETCH_URL="https://raw.githubusercontent.com/mallardduck/ob-team-charts/refs/heads/main/assets"
   CHART_VERSION="${2}"
   FETCH_URL="${BASE_FETCH_URL}/${CHART_TARGET}/${CHART_TARGET}-${CHART_VERSION}.tgz"
-  BUILD_DIR="./build"
-  LOCAL_FILE="$BUILD_DIR/charts/${CHART_TARGET}-${CHART_VERSION}.tgz"
+  BUILD_DIR="./build/charts"
+  mkdir -p "$BUILD_DIR"
+  LOCAL_FILE="$BUILD_DIR/${CHART_TARGET}-${CHART_VERSION}.tgz"
   LOCAL_ETAG_FILE="$LOCAL_FILE.etag"
 
   # Ensure the build directory exists
