@@ -12,9 +12,6 @@ fetch-team-chart "helm-project-operator" "$NEWEST_CHART_VERSION"
 LATEST_CHART_PATH="./build/charts/helm-project-operator-${NEWEST_CHART_VERSION}.tgz"
 tar -xvzf "$LATEST_CHART_PATH" -C ./build/charts/
 
-helm upgrade --install --create-namespace -n cattle-helm-system helm-project-operator \
-  --set "image.registry='',image.repository=${REPO:-rancher}/helm-project-operator,image.tag=${TAG:-dev}" \
-  "${cluster_args}" "${RANCHER_HELM_ARGS}" \
-  ./build/charts/helm-project-operator
+helm upgrade --install --create-namespace -n cattle-helm-system helm-project-operator --set image.registry='',image.repository=${REPO:-rancher}/helm-project-operator,image.tag=${TAG:-dev} ${cluster_args} ${RANCHER_HELM_ARGS} ./build/charts/helm-project-operator
 
 echo "PASS: Helm Project Operator has been installed"
