@@ -5,7 +5,7 @@ source $(dirname $0)/entry
 source $(dirname $0)/cluster-args.sh
 
 cd $(dirname $0)/../../../..
-source "$(dirname "$0")/scripts/util-team-charts"
+source "$(pwd)/scripts/util-team-charts"
 
 NEWEST_CHART_VERSION=$(newest-chart-version "helm-project-operator")
 fetch-team-chart "helm-project-operator" "$NEWEST_CHART_VERSION"
