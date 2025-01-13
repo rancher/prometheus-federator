@@ -34,7 +34,7 @@ var (
 	base64TgzChart string
 
 	debugConfig command.DebugConfig
-	updateCRDs  bool = false
+	updateCRDs  = false
 )
 
 type DummyOperator struct {
