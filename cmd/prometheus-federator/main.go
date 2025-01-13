@@ -1,5 +1,3 @@
-//go:build prometheus_federator
-
 package main
 
 import (
