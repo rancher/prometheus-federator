@@ -1,14 +1,16 @@
 #!/usr/bin/env bash
 set -e
 
+source $(dirname $0)/version
 cd $(dirname $0)/..
 
 echo "Running validation"
 
+echo "Collecting packages to validate for target: ${BUILD_TARGET}"
 PKG_LIST=$(go list "./cmd/${BUILD_TARGET}/...")
 ALL_PKG_LIST=$(go list ./pkg/...)
 COMBINED_LIST="$PKG_LIST $ALL_PKG_LIST"
 
-echo Running: go fmt
+echo "Running: go fmt"
 test -z "$(go fmt ${COMBINED_LIST} | tee /dev/stderr)"
 echo "Validate passed"
