@@ -4,7 +4,11 @@ set -e
 cd $(dirname $0)/..
 
 echo "Running validation"
-PACKAGES="$(go list ./...)"
+
+PKG_LIST=$(go list "./cmd/${BUILD_TARGET}/...")
+ALL_PKG_LIST=$(go list ./pkg/...)
+COMBINED_LIST="$PKG_LIST $ALL_PKG_LIST"
+
 echo Running: go fmt
-test -z "$(go fmt ${PACKAGES} | tee /dev/stderr)"
+test -z "$(go fmt ${COMBINED_LIST} | tee /dev/stderr)"
 echo "Validate passed"
