@@ -1,5 +1,3 @@
-//go:build helm_project_operator
-
 package main
 
 import (
@@ -36,7 +34,7 @@ var (
 	base64TgzChart string
 
 	debugConfig command.DebugConfig
-	updateCRDs  bool = false
+	updateCRDs  = false
 )
 
 type DummyOperator struct {

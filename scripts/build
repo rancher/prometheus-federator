@@ -2,7 +2,7 @@
 set -e
 
 source $(dirname $0)/version
-BUILD_CMD_TARGET=${BUILD_CMD_TARGET:-"./cmd/${BUILD_TARGET}/main.go"}
+BUILD_CMD_TARGET=${BUILD_CMD_TARGET:-"./cmd/${BUILD_TARGET}/"}
 
 cd $(dirname $0)/..
 

@@ -6,7 +6,10 @@ cd $(dirname $0)/..
 
 echo "Starating tests"
 
-TARGET_TEST_TAG="${BUILD_TARGET/-/_}"
+echo "Running tests for ${BUILD_TARGET}"
 
-echo "Running tests for ${TARGET_TEST_TAG}"
-go test -cover -tags="test,${TARGET_TEST_TAG}" ./...
+PKG_LIST=$(go list "./cmd/${BUILD_TARGET}/...")
+ALL_PKG_LIST=$(go list ./pkg/...)
+COMBINED_LIST="$PKG_LIST $ALL_PKG_LIST"
+
+go test -cover $COMBINED_LIST

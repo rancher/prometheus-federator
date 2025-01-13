@@ -1,5 +1,3 @@
-//go:build helm_locker
-
 package main
 
 import (
