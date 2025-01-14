@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 function fetch-team-charts-index() {
-  TEAM_INDEX="https://raw.githubusercontent.com/mallardduck/ob-team-charts/refs/heads/main/index.yaml"
+  TEAM_INDEX="https://raw.githubusercontent.com/rancher/ob-team-charts/refs/heads/main/index.yaml"
   BUILD_DIR="./build"
   LOCAL_FILE="$BUILD_DIR/charts-index.yaml"
   LOCAL_ETAG_FILE="$BUILD_DIR/charts-index.etag"
@@ -49,7 +49,7 @@ function newest-chart-version() {
 
 function fetch-team-chart() {
   CHART_TARGET="${1}"
-  BASE_FETCH_URL="https://raw.githubusercontent.com/mallardduck/ob-team-charts/refs/heads/main/assets"
+  BASE_FETCH_URL="https://raw.githubusercontent.com/rancher/ob-team-charts/refs/heads/main/assets"
   CHART_VERSION="${2}"
   FETCH_URL="${BASE_FETCH_URL}/${CHART_TARGET}/${CHART_TARGET}-${CHART_VERSION}.tgz"
   BUILD_DIR="./build/charts"
