@@ -18,7 +18,7 @@ For more info on _Helm Locker_, see the [dedicated README file](README-helm-lock
 For more information, see the [Getting Started guide](docs/prometheus-federator/gettingstarted.md).
 
 ### Branches and Releases
-This is the current branch strategy for `rancher/backup-restore-operator`, it may change in the future.
+This is the current branch strategy for `rancher/prometheus-federator`, it may change in the future.
 
 | Branch         | Tag      | Rancher                |
 |----------------|----------|------------------------|
