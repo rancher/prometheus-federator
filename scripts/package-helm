@@ -11,6 +11,8 @@ source "$(dirname "$0")/version"
 source "$(dirname "$0")/util-chart"
 source "$(dirname "$0")/util-team-charts"
 
+cd "$(dirname "$0")/.."
+
 # We don't do the full process for prometheus-federator
 if [[ "${BUILD_TARGET}" == "prometheus-federator" ]]; then
   EMBEDDED_CHART_VERSION="0.3.4" # workaround until ready to remove chart lock
@@ -22,16 +24,14 @@ if [[ "${BUILD_TARGET}" == "prometheus-federator" ]]; then
   exit
 fi
 
-cd "$(dirname "$0")/.."
-
 if [ "$BUILD_TARGET" == "helm-project-operator" ]; then
   DEFAULT_CHART_SOURCE="./packages/$BUILD_TARGET/charts"
 elif [ "$BUILD_TARGET" == "helm-locker" ]; then
   DEFAULT_CHART_SOURCE="./examples/$BUILD_TARGET/helm-locker-chart-example"
 fi
 
-clean-old-chart "$BUILD_TARGET"
+clean-old-charts "$BUILD_TARGET"
 cp -rf "${DEFAULT_CHART_SOURCE}" "./build/charts/${BUILD_TARGET}"
 
-edit-charts "./build/charts/${BUILD_TARGET}/Chart.yaml" "${HELM_CHART_VERSION}" "${HELM_IMAGE_TAG}"
-package-charts "./build/charts/${BUILD_TARGET}"
+edit-chart "./build/charts/${BUILD_TARGET}/Chart.yaml" "${HELM_CHART_VERSION}" "${HELM_IMAGE_TAG}"
+package-chart "./build/charts/${BUILD_TARGET}"
