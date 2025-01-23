@@ -10,5 +10,11 @@ echo "Starting \`${DOCKER_TARGET}\` image packaging:";
 
 DOCKERFILE=package/Dockerfile${DOCKER_TARGET}
 echo "Building \`${IMAGE}\` from \`${DOCKERFILE}\`:";
-docker build -f "${DOCKERFILE}" -t "${IMAGE}" .
+
+if [[ ${USE_DOCKER_BUILDX} -eq 1 ]]; then
+  docker buildx build --platform linux/amd64,linux/arm64 -f "${DOCKERFILE}" . -t "${IMAGE}"
+else
+  docker build -f "${DOCKERFILE}" -t "${IMAGE}" .
+fi
+
 echo "Completed building ${IMAGE} container image"
