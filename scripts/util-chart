@@ -21,6 +21,12 @@ function edit-chart() {
         -e 's/^version:.*/version: '${2}'/' \
         -e 's/^appVersion:.*/appVersion: '${3}'/' \
         "${1}"
+
+  if [ $# -ge 4 ]; then  # Check if at least 4 arguments were passed
+    sed_i_wrapper -i \
+      -e "s#repository: rancher/prometheus-federator#repository: ${4}/prometheus-federator#" \
+      "${1/Chart.yaml/values.yaml}"
+  fi
 }
 
 function package-chart() {
