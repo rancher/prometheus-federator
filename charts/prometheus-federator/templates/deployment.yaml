@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
         - name: {{ template "prometheus-federator.name" . }}
-          image: "{{ template "prometheus-federator.imageRegistry" . }}{{ template "prometheus-federator.imageRepository" . }}:{{ template "prometheus-federator.imageTag" . | default .Chart.AppVersion }}"
+          image: "{{ template "prometheus-federator.imageRegistry" . }}{{ template "prometheus-federator.imageRepository" . }}:{{ template "prometheus-federator.imageTag" . }}"
           imagePullPolicy: "{{ .Values.helmProjectOperator.image.pullPolicy }}"
           args:
           - {{ template "prometheus-federator.name" . }}
