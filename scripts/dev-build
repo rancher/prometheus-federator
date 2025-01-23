@@ -1,9 +1,22 @@
 #!/usr/bin/env bash
 set -e
 
+source $(dirname $0)/version
 cd $(dirname $0)
 
 ./build
 ./test
 ./package
 ./package-helm
+
+echo "Don't forget to push your dev image to somewhere your cluster can reach it."
+echo "The Dev image tag is: ${HELM_IMAGE_TAG}"
+echo "The chart will expect the image as: ${IMAGE}"
+if [[ ${USE_DOCKER_BUILDX} -eq 1 ]]; then
+  echo "The image was built for all official supported rancher arches."
+else
+  echo "The image was only built for you local system's arch."
+fi
+echo "Remember to run: 'docker push ${IMAGE}' if the test cluster is remote to your workstation."
+echo "After that, to test an upgrade you can: 'helm upgrade -n cattle-monitoring-system prometheus-federator ./build/charts/prometheus-federator'"
+echo "Remember to append your current values file if needed; and you can change it to an install command if desired."
