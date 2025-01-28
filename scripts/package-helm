@@ -1,6 +1,5 @@
 #!/bin/bash
 set -e
-set -x
 
 if ! hash helm 2>/dev/null; then
     echo "Helm is not installed"
@@ -11,25 +10,34 @@ source "$(dirname "$0")/version"
 source "$(dirname "$0")/util-chart"
 source "$(dirname "$0")/util-team-charts"
 
-# We don't do the full process for prometheus-federator
-if [[ "${BUILD_TARGET}" == "prometheus-federator" ]]; then
-  # Fetch asset from github OB charts repo
-  fetch-team-chart "rancher-project-monitoring" "$RANCHER_PROJECT_MONITORING"
-  PROM_FED_CHART=$(newest-chart-version "prometheus-federator")
-  fetch-team-chart "prometheus-federator" "$PROM_FED_CHART"
-  exit
-fi
-
 cd "$(dirname "$0")/.."
 
 if [ "$BUILD_TARGET" == "helm-project-operator" ]; then
-  DEFAULT_CHART_SOURCE="./packages/$BUILD_TARGET/charts"
-elif [ "$BUILD_TARGET" == "helm-locker" ]; then
-  DEFAULT_CHART_SOURCE="./examples/$BUILD_TARGET/helm-locker-chart-example"
+  echo "$BUILD_TARGET is not a valid target for this script"
+  exit 1
 fi
 
-clean-old-chart "$BUILD_TARGET"
-cp -rf "${DEFAULT_CHART_SOURCE}" "./build/charts/${BUILD_TARGET}"
+if [ "$BUILD_TARGET" == "helm-locker" ]; then
+  echo "Preparing helm-locker dev chart"
+  DEFAULT_CHART_SOURCE="./examples/$BUILD_TARGET/helm-locker-chart-example"
+  clean-old-charts "$BUILD_TARGET"
+  cp -rf "${DEFAULT_CHART_SOURCE}" "./build/charts/${BUILD_TARGET}"
+  hl-edit-chart "./build/charts/${BUILD_TARGET}/Chart.yaml" "${HELM_CHART_VERSION}" "${HELM_IMAGE_TAG}"
+  package-chart "./build/charts/${BUILD_TARGET}"
+  exit 0
+fi
 
-edit-charts "./build/charts/${BUILD_TARGET}/Chart.yaml" "${HELM_CHART_VERSION}" "${HELM_IMAGE_TAG}"
-package-charts "./build/charts/${BUILD_TARGET}"
+echo "Preparing Prometheus Federator release chart"
+clean-old-charts "$BUILD_TARGET"
+cp -rf charts build/
+
+if [[ "$REPO" != "rancher" ]]; then
+  echo "Using custom repo: $REPO to build chart"
+  edit-chart ./build/charts/prometheus-federator/Chart.yaml "${HELM_CHART_VERSION}" "${HELM_IMAGE_TAG}" "${REPO}"
+else
+  edit-chart ./build/charts/prometheus-federator/Chart.yaml "${HELM_CHART_VERSION}" "${HELM_IMAGE_TAG}"
+fi
+if ! package-chart ./build/charts/prometheus-federator ./build/charts ; then
+  echo "package-chart failed..."
+  exit 1
+fi
