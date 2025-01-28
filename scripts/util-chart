@@ -18,9 +18,13 @@ function sed_i_wrapper(){
 
 function edit-chart() {
     sed_i_wrapper -i \
-        -e 's/^version:.*/version: '${2}'/' \
-        -e 's/^appVersion:.*/appVersion: '${3}'/' \
+        -e "s/^version:.*/version: ${2}/" \
+        -e "s/^appVersion:.*/appVersion: ${3}/" \
         "${1}"
+    sed_i_wrapper -i \
+        -e "s/tag: ''/tag: ${3}/" \
+        "${1/Chart.yaml/values.yaml}"
+
 
   if [ $# -ge 4 ]; then  # Check if at least 4 arguments were passed
     sed_i_wrapper -i \
@@ -28,6 +32,17 @@ function edit-chart() {
       "${1/Chart.yaml/values.yaml}"
   fi
 }
+
+function hl-edit-chart() {
+    sed_i_wrapper -i \
+        -e "s/^version:.*/version: ${2}/" \
+        -e "s/^appVersion:.*/appVersion: ${3}/" \
+        "${1}"
+    sed_i_wrapper -i \
+        -e "s/tag: head/tag: ${3}/" \
+        "${1/Chart.yaml/values.yaml}"
+}
+
 
 function package-chart() {
     helm package --debug "${1:-"./build/charts/helm-project-operator"}" -d "${2:-"./build/charts"}"
