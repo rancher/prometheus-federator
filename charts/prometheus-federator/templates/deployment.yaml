@@ -20,38 +20,38 @@ spec:
     spec:
       containers:
         - name: {{ template "prometheus-federator.name" . }}
-          image: "{{ template "prometheus-federator.imageRegistry" . }}{{ template "prometheus-federator.imageRepository" . }}:{{ template "prometheus-federator.imageTag" . }}"
+          image: "{{- template "prometheus-federator.imageRegistry" . -}}{{- template "prometheus-federator.imageRepository" . -}}:{{- template "prometheus-federator.imageTag" . -}}"
           imagePullPolicy: "{{ .Values.helmProjectOperator.image.pullPolicy }}"
           args:
           - {{ template "prometheus-federator.name" . }}
           - --namespace={{ template "prometheus-federator.namespace" . }}
           - --controller-name={{ template "prometheus-federator.name" . }}
           - --values-override-file=/etc/helmprojectoperator/config/values.yaml
-{{- if .Values.helmProjectOperator.global.cattle.systemDefaultRegistry }}
-          - --system-default-registry={{ .Values.helmProjectOperator.global.cattle.systemDefaultRegistry }}
+{{- if .Values.global.cattle.systemDefaultRegistry }}
+          - --system-default-registry={{ .Values.global.cattle.systemDefaultRegistry }}
 {{- end }}
-{{- if .Values.helmProjectOperator.global.cattle.url }}
-          - --cattle-url={{ .Values.helmProjectOperator.global.cattle.url }}
+{{- if .Values.global.cattle.url }}
+          - --cattle-url={{ .Values.global.cattle.url }}
 {{- end }}
-{{- if .Values.helmProjectOperator.global.cattle.projectLabel }}
-          - --project-label={{ .Values.helmProjectOperator.global.cattle.projectLabel }}
+{{- if .Values.global.cattle.projectLabel }}
+          - --project-label={{ .Values.global.cattle.projectLabel }}
 {{- end }}
 {{- if not .Values.helmProjectOperator.projectReleaseNamespaces.enabled }}
-          - --system-project-label-values={{ join "," (append .Values.helmProjectOperator.otherSystemProjectLabelValues .Values.helmProjectOperator.global.cattle.systemProjectId) }}
-{{- else if and (ne (len .Values.helmProjectOperator.global.cattle.systemProjectId) 0) (ne (len .Values.helmProjectOperator.projectReleaseNamespaces.labelValue) 0) (ne .Values.helmProjectOperator.projectReleaseNamespaces.labelValue .Values.helmProjectOperator.global.cattle.systemProjectId) }}
-          - --system-project-label-values={{ join "," (append .Values.helmProjectOperator.otherSystemProjectLabelValues .Values.helmProjectOperator.global.cattle.systemProjectId) }}
+          - --system-project-label-values={{ join "," (append .Values.helmProjectOperator.otherSystemProjectLabelValues .Values.global.cattle.systemProjectId) }}
+{{- else if and (ne (len .Values.global.cattle.systemProjectId) 0) (ne (len .Values.helmProjectOperator.projectReleaseNamespaces.labelValue) 0) (ne .Values.helmProjectOperator.projectReleaseNamespaces.labelValue .Values.global.cattle.systemProjectId) }}
+          - --system-project-label-values={{ join "," (append .Values.helmProjectOperator.otherSystemProjectLabelValues .Values.global.cattle.systemProjectId) }}
 {{- else if len .Values.helmProjectOperator.otherSystemProjectLabelValues }}
           - --system-project-label-values={{ join "," .Values.helmProjectOperator.otherSystemProjectLabelValues }}
 {{- end }}
 {{- if .Values.helmProjectOperator.projectReleaseNamespaces.enabled }}
 {{- if .Values.helmProjectOperator.projectReleaseNamespaces.labelValue }}
           - --project-release-label-value={{ .Values.helmProjectOperator.projectReleaseNamespaces.labelValue }}
-{{- else if .Values.helmProjectOperator.global.cattle.systemProjectId }}
-          - --project-release-label-value={{ .Values.helmProjectOperator.global.cattle.systemProjectId }}
+{{- else if .Values.global.cattle.systemProjectId }}
+          - --project-release-label-value={{ .Values.global.cattle.systemProjectId }}
 {{- end }}
 {{- end }}
-{{- if .Values.helmProjectOperator.global.cattle.clusterId }}
-          - --cluster-id={{ .Values.helmProjectOperator.global.cattle.clusterId }}
+{{- if .Values.global.cattle.clusterId }}
+          - --cluster-id={{ .Values.global.cattle.clusterId }}
 {{- end }}
 {{- if .Values.helmProjectOperator.releaseRoleBindings.aggregate }}
 {{- if .Values.helmProjectOperator.releaseRoleBindings.clusterRoleRefs }}
