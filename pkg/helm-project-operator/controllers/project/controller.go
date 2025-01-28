@@ -341,13 +341,17 @@ func (h *handler) OnChange(projectHelmChart *v1alpha2.ProjectHelmChart, projectH
 }
 
 func (h *handler) OnRemove(_ string, projectHelmChart *v1alpha2.ProjectHelmChart) (*v1alpha2.ProjectHelmChart, error) {
+	logrus.Infof("Handling ProjectHelmChart %s/%s removal.", projectHelmChart.Name, projectHelmChart.Namespace)
+
 	if projectHelmChart == nil {
+		logrus.Infof("ProjectHelmChart %s/%s is nil. Canceling removal.", projectHelmChart.Name, projectHelmChart.Namespace)
 		return nil, nil
 	}
 
 	// get information about the projectHelmChart
 	projectID, err := h.getProjectID(projectHelmChart)
 	if err != nil {
+		logrus.Errorf("Error getting projectID for projectHelmChart %s/%s: %v", projectHelmChart.Name, projectHelmChart.Namespace, err)
 		return projectHelmChart, err
 	}
 
@@ -365,7 +369,8 @@ func (h *handler) OnRemove(_ string, projectHelmChart *v1alpha2.ProjectHelmChart
 	// that will delete this projectReleaseNamespace on seeing it
 	err = h.apply.ApplyObjects(projectReleaseNamespace)
 	if err != nil {
-		return projectHelmChart, fmt.Errorf("unable to add orphaned annotation to project release namespace %s", projectReleaseNamespace.Name)
+		err = fmt.Errorf("unable to add orphaned annotation to project release namespace %s", projectReleaseNamespace.Name)
+		return projectHelmChart, err
 	}
 	return projectHelmChart, nil
 }
