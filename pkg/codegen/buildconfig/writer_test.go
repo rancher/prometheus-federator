@@ -6,8 +6,9 @@ import (
 	"testing"
 	"text/template"
 
-	"github.com/rancher/prometheus-federator/pkg/codegen/buildconfig"
 	"github.com/stretchr/testify/require"
+
+	mainpkg "github.com/rancher/prometheus-federator/pkg/codegen/buildconfig"
 )
 
 func TestGoConstantsWriterRun(t *testing.T) {
@@ -26,7 +27,7 @@ c: 3.14`
 	`
 	tmpl, err := template.New("").Parse(rawTemplate)
 	require.NoError(t, err)
-	w := &main.GoConstantsWriter{
+	w := &mainpkg.GoConstantsWriter{
 		Tmpl:   tmpl,
 		Input:  in,
 		Output: out,
@@ -106,7 +107,7 @@ c: 3.14`
 		test := test
 		t.Run(test.name, func(t *testing.T) {
 			t.Parallel()
-			w := main.GoConstantsWriter{
+			w := mainpkg.GoConstantsWriter{
 				Input:  test.input,
 				Output: test.output,
 				Tmpl:   test.tmpl,
