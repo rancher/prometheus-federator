@@ -1,3 +1,5 @@
+//go:generate go run pkg/codegen/buildconfig/writer.go pkg/codegen/buildconfig/main.go
+
 //go:generate go run pkg/helm-locker/codegen/cleanup/main.go
 //go:generate go run pkg/helm-locker/codegen/main.go
 //go:generate go run ./pkg/helm-locker/codegen crds ./crds/helm-locker/crds.yaml
