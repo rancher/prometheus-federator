@@ -11,7 +11,7 @@ on:
       - 'crds/helm-locker/**'
       - 'package/Dockerfile-helm-locker'
       - 'cmd/helm-locker/**'
-      - 'pkg/helm-locker/**'
+      - 'internal/helm-locker/**'
 
 env:
   CLUSTER_NAME : e2e-ci-helm-locker

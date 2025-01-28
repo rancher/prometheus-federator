@@ -7,8 +7,8 @@ import (
 	_ "net/http/pprof"
 	"os"
 
-	"github.com/rancher/prometheus-federator/pkg/helm-project-operator/controllers/common"
-	"github.com/rancher/prometheus-federator/pkg/helm-project-operator/operator"
+	"github.com/rancher/prometheus-federator/internal/helm-project-operator/controllers/common"
+	"github.com/rancher/prometheus-federator/internal/helm-project-operator/operator"
 
 	"github.com/rancher/prometheus-federator/pkg/version"
 	command "github.com/rancher/wrangler-cli"
