@@ -4,40 +4,6 @@ before:
   hooks:
     - go mod tidy
 builds:
-  - id: helm-locker
-    main: ./cmd/helm-locker/main.go
-    goos:
-      - linux
-    goarch:
-      - amd64
-      - arm64
-    binary: helm-locker
-    ldflags:
-      - -extldflags
-      - -static
-      - -s
-      - -X main.Version={{.Version}} -X main.GitCommit={{.Commit}}
-    flags:
-      - -trimpath
-    env:
-      - CGO_ENABLED=0
-  - id: helm-project-operator
-    main: ./cmd/helm-project-operator/main.go
-    goos:
-      - linux
-    goarch:
-      - amd64
-      - arm64
-    binary: helm-project-operator
-    ldflags:
-      - -extldflags
-      - -static
-      - -s
-      - -X main.Version={{.Version}} -X main.GitCommit={{.Commit}}
-    flags:
-      - -trimpath
-    env:
-      - CGO_ENABLED=0
   - id: prometheus-federator
     main: ./cmd/prometheus-federator/main.go
     goos:
@@ -59,14 +25,6 @@ archives:
   - id: prometheus-federator
     builds:
       - prometheus-federator
-    name_template: '{{ .Binary }}-{{ .Arch }}'
-  - id: helm-project-operator
-    builds:
-      - helm-project-operator
-    name_template: '{{ .Binary }}-{{ .Arch }}'
-  - id: helm-locker
-    builds:
-      - helm-locker
     name_template: '{{ .Binary }}-{{ .Arch }}'
 release:
   prerelease: auto
