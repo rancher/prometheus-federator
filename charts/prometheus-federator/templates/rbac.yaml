@@ -20,8 +20,8 @@ metadata:
   namespace: {{ template "prometheus-federator.namespace" . }}
   labels: {{ include "prometheus-federator.labels" . | indent 4 }}
     app: {{ template "prometheus-federator.name" . }}
-{{- if .Values.helmProjectOperator.global.imagePullSecrets }}
-imagePullSecrets: {{ toYaml .Values.helmProjectOperator.global.imagePullSecrets | nindent 2 }}
+{{- if .Values.global.imagePullSecrets }}
+imagePullSecrets: {{ toYaml .Values.global.imagePullSecrets | nindent 2 }}
 {{- end }}
 # ---
 # NOTE:

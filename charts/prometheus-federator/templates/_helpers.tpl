@@ -20,11 +20,11 @@
 {{- end }}
 
 {{- define "prometheus-federator.imageTag" -}}
-{{- if and .Values.image .Values.image.tag }}{{ .Values.image.tag }}
-{{- else if and .Values.helmProjectOperator.image.tag }}{{ .Values.helmProjectOperator.image.tag }}
-{{ else }}{{ .Chart.AppVersion }}
-{{- end }}
-{{- end }}
+{{- if and .Values.image .Values.image.tag -}}{{- .Values.image.tag -}}
+{{- else if and .Values.helmProjectOperator.image.tag -}}{{- .Values.helmProjectOperator.image.tag -}}
+{{- else -}}{{- .Chart.AppVersion -}}
+{{- end -}}
+{{- end -}}
 
 # Windows Support
 

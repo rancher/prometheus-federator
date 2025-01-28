@@ -1,10 +1,10 @@
-{{- if and .Values.helmProjectOperator.global.rbac.create .Values.helmProjectOperator.global.rbac.userRoles.create }}
+{{- if and .Values.global.rbac.create .Values.global.rbac.userRoles.create }}
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: {{ template "prometheus-federator.name" . }}-admin
   labels: {{ include "prometheus-federator.labels" . | indent 4 }}
-  {{- if .Values.helmProjectOperator.global.rbac.userRoles.aggregateToDefaultRoles }}
+  {{- if .Values.global.rbac.userRoles.aggregateToDefaultRoles }}
     rbac.authorization.k8s.io/aggregate-to-admin: "true"
   {{- end }}
 rules:
@@ -22,7 +22,7 @@ kind: ClusterRole
 metadata:
   name: {{ template "prometheus-federator.name" . }}-edit
   labels: {{ include "prometheus-federator.labels" . | indent 4 }}
-  {{- if .Values.helmProjectOperator.global.rbac.userRoles.aggregateToDefaultRoles }}
+  {{- if .Values.global.rbac.userRoles.aggregateToDefaultRoles }}
     rbac.authorization.k8s.io/aggregate-to-edit: "true"
   {{- end }}
 rules:
@@ -41,7 +41,7 @@ kind: ClusterRole
 metadata:
   name: {{ template "prometheus-federator.name" . }}-view
   labels: {{ include "prometheus-federator.labels" . | indent 4 }}
-  {{- if .Values.helmProjectOperator.global.rbac.userRoles.aggregateToDefaultRoles }}
+  {{- if .Values.global.rbac.userRoles.aggregateToDefaultRoles }}
     rbac.authorization.k8s.io/aggregate-to-view: "true"
   {{- end }}
 rules:
