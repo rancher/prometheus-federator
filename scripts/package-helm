@@ -13,10 +13,8 @@ source "$(dirname "$0")/util-team-charts"
 
 # We don't do the full process for prometheus-federator
 if [[ "${BUILD_TARGET}" == "prometheus-federator" ]]; then
-  EMBEDDED_CHART_VERSION="0.3.4" # workaround until ready to remove chart lock
-  CHART_VERSION=${EMBEDDED_CHART_VERSION:-$(newest-chart-version "rancher-project-monitoring")}
   # Fetch asset from github OB charts repo
-  fetch-team-chart "rancher-project-monitoring" "$CHART_VERSION"
+  fetch-team-chart "rancher-project-monitoring" "$RANCHER_PROJECT_MONITORING"
   PROM_FED_CHART=$(newest-chart-version "prometheus-federator")
   fetch-team-chart "prometheus-federator" "$PROM_FED_CHART"
   exit

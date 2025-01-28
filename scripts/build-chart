@@ -25,10 +25,8 @@ fi
 CHART=${CHART:-${DEFAULT_CHART_TARGET}}
 
 if [ "$BUILD_TARGET" == "prometheus-federator" ]; then
-  EMBEDDED_CHART_VERSION="0.3.4" # workaround until ready to remove chart lock
-  CHART_VERSION=${EMBEDDED_CHART_VERSION:-$(newest-chart-version "rancher-project-monitoring")}
   # Fetch asset from github OB charts repo
-  fetch-team-chart "rancher-project-monitoring" "$CHART_VERSION"
+  fetch-team-chart "rancher-project-monitoring" "$RANCHER_PROJECT_MONITORING"
   CHART_DESTINATION="./build/charts/${CHART}-${CHART_VERSION}.tgz"
 
   # Prepare chart for embedding location

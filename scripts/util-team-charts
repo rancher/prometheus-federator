@@ -52,6 +52,7 @@ function fetch-team-chart() {
   BASE_FETCH_URL="https://raw.githubusercontent.com/rancher/ob-team-charts/refs/heads/main/assets"
   CHART_VERSION="${2}"
   FETCH_URL="${BASE_FETCH_URL}/${CHART_TARGET}/${CHART_TARGET}-${CHART_VERSION}.tgz"
+  echo "Fetching version $CHART_VERSION of $CHART_TARGET"
   BUILD_DIR="./build/charts"
   mkdir -p "$BUILD_DIR"
   LOCAL_FILE="$BUILD_DIR/${CHART_TARGET}-${CHART_VERSION}.tgz"
