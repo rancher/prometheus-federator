@@ -6,8 +6,8 @@ import (
 	"net/http"
 	_ "net/http/pprof"
 
-	"github.com/rancher/prometheus-federator/pkg/helm-locker/controllers"
-	"github.com/rancher/prometheus-federator/pkg/helm-locker/crd"
+	"github.com/rancher/prometheus-federator/internal/helm-locker/controllers"
+	"github.com/rancher/prometheus-federator/internal/helm-locker/crd"
 	"github.com/rancher/prometheus-federator/pkg/version"
 	command "github.com/rancher/wrangler-cli"
 	_ "github.com/rancher/wrangler/pkg/generated/controllers/apiextensions.k8s.io"
