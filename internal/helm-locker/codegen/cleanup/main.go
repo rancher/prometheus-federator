@@ -8,10 +8,10 @@ import (
 )
 
 func main() {
-	if err := cleanup.Cleanup("./pkg/helm-locker/apis"); err != nil {
+	if err := cleanup.Cleanup("./internal/helm-locker/apis"); err != nil {
 		logrus.Fatal(err)
 	}
-	if err := os.RemoveAll("./pkg/helm-locker/generated"); err != nil {
+	if err := os.RemoveAll("./internal/helm-locker/generated"); err != nil {
 		logrus.Fatal(err)
 	}
 	if err := os.RemoveAll("./crds/helm-locker"); err != nil {
