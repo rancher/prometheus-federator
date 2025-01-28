@@ -9,12 +9,14 @@ fi
 
 source "$(dirname "$0")/version"
 source "$(dirname "$0")/util-chart"
+source "$(dirname "$0")/util-team-charts"
 
 # We don't do the full process for prometheus-federator
 if [[ "${BUILD_TARGET}" == "prometheus-federator" ]]; then
-  mkdir -p ./dist/artifacts/
-  CHART_VERSION=${EMBEDDED_CHART_VERSION:-$(find "./charts/${BUILD_TARGET}" -maxdepth 1 -mindepth 1 -type d | tr - \~ | sort -rV | tr \~ - | head -n1 | cut -d'/' -f4)}
-  cp -a "./assets/${BUILD_TARGET}/${BUILD_TARGET}-${CHART_VERSION}.tgz" ./build/charts/
+  # Fetch asset from github OB charts repo
+  fetch-team-chart "rancher-project-monitoring" "$RANCHER_PROJECT_MONITORING"
+  PROM_FED_CHART=$(newest-chart-version "prometheus-federator")
+  fetch-team-chart "prometheus-federator" "$PROM_FED_CHART"
   exit
 fi
 

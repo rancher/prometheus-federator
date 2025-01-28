@@ -7,7 +7,4 @@ cd $(dirname $0)
 ./test
 ./validate
 ./validate-ci
-./validate-packages
-./validate-chart
-./validate-charts
 ./package

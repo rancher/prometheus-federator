@@ -1,8 +1,5 @@
 #!/usr/bin/env bash
 
-CHARTS_BUILD_SCRIPTS_REPO=https://github.com/rancher/charts-build-scripts.git
-CHARTS_BUILD_SCRIPT_VERSION=v0.9.2
-
 BUILD_TARGET=${BUILD_TARGET:-"prometheus-federator"}
 
 if [ -n "$(git status --porcelain --untracked-files=no)" ]; then
@@ -42,6 +39,11 @@ if echo "$TAG" | grep -q dirty; then
 fi
 IMAGE=${IMAGE:-"$REPO/${BUILD_TARGET}:${TAG}"}
 
+# Fetch build.yaml path and constant defined in it
+ROOT_DIR=$(dirname "$(realpath "$(dirname "$0")")")
+BUILD_YAML_PATH="$ROOT_DIR/build.yaml"
+RANCHER_PROJECT_MONITORING=${RANCHER_PROJECT_MONITORING:-$(grep 'rancherProjectMonitoringVersion' "$BUILD_YAML_PATH"|cut -d: -f2|tr -d ' ')}
+
 function print_version_debug() {
     echo "DIRTY: $DIRTY"
     echo "BUILD_TARGET: $BUILD_TARGET";
@@ -50,5 +52,7 @@ function print_version_debug() {
     echo "HELM_CHART_VERSION: $HELM_CHART_VERSION";
     echo "REPO: $REPO; TAG: $TAG";
     echo "IMAGE: $IMAGE";
+    echo "BUILD_YAML_PATH: $BUILD_YAML_PATH"
+    echo "RANCHER PROJECT MONITORING: $RANCHER_PROJECT_MONITORING"
 }
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then print_version_debug "$1"; fi

@@ -1,8 +1,12 @@
 #!/usr/bin/env bash
 set -e
 
+# This actually prepares a chart for compile time embedding into the resulting binary.
+# This is always required even after splitting charts and app code.
+
 source $(dirname $0)/version
 source $(dirname $0)/util-chart
+source $(dirname $0)/util-team-charts
 
 # We don't do this for helm-locker
 if [[ "${BUILD_TARGET}" == "helm-locker" ]]; then
@@ -21,10 +25,12 @@ fi
 CHART=${CHART:-${DEFAULT_CHART_TARGET}}
 
 if [ "$BUILD_TARGET" == "prometheus-federator" ]; then
-  CHART_VERSION=${EMBEDDED_CHART_VERSION:-$(find "./charts/${CHART}" -maxdepth 1 -mindepth 1 -type d | tr - \~ | sort -rV | tr \~ - | head -n1 | cut -d'/' -f4)}
+  # Fetch asset from github OB charts repo
+  fetch-team-chart "rancher-project-monitoring" "$RANCHER_PROJECT_MONITORING"
+  CHART_DESTINATION="./build/charts/${CHART}-${CHART_VERSION}.tgz"
 
   # Prepare chart for embedding location
-  base64 -i "assets/${CHART}/${CHART}-${CHART_VERSION}.tgz" > "cmd/${BUILD_TARGET}/fs/${CHART}.tgz.base64"
+  base64 -i "${CHART_DESTINATION}" > "cmd/${BUILD_TARGET}/fs/${CHART}.tgz.base64"
 elif [ "$BUILD_TARGET" == "helm-project-operator" ]; then
   # Prepare base chart for build
   clean-old-chart "$CHART"
@@ -38,4 +44,4 @@ elif [ "$BUILD_TARGET" == "helm-project-operator" ]; then
   base64 -i "./build/charts/${CHART}-${HELM_CHART_VERSION}.tgz" > "cmd/${BUILD_TARGET}/fs/${CHART}.tgz.base64"
 fi
 
-echo "Completed ${CHART} (ver: ${HELM_CHART_VERSION:-"n/a"}) build process."
+echo "Completed ${CHART} (ver: ${HELM_CHART_VERSION:-"n/a"}) chart build process."
