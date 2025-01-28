@@ -9,6 +9,8 @@ cd $(dirname $0)
 ./package
 ./package-helm
 
+echo "----------------"
+
 echo "Don't forget to push your dev image to somewhere your cluster can reach it."
 echo "The Dev image tag is: ${HELM_IMAGE_TAG}"
 echo "The chart will expect the image as: ${IMAGE}"
