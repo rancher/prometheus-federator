@@ -5,9 +5,7 @@ on:
   pull_request:
     paths-ignore:
       - 'docs/**'
-      - 'scripts/**'
       - '*.md'
-      - '*.dapper'
       - '.gitignore'
       - 'CODEOWNERS'
       - 'LICENSE'
@@ -15,6 +13,14 @@ on:
   push:
     branches:
       - main
+      - release/v[0-9]+.x
+      - release/v[0-9]+.[0-9]+.[0-9]+
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+      - '.gitignore'
+      - 'CODEOWNERS'
+      - 'LICENSE'
 
 env:
   YQ_VERSION : v4.25.1
