@@ -6,6 +6,12 @@ env:
 
 on:
   pull_request:
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+      - '.gitignore'
+      - 'CODEOWNERS'
+      - 'LICENSE'
   workflow_call:
     inputs:
       skip_build:
