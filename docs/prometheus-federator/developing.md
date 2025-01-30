@@ -1,68 +1,59 @@
 # Developing Prometheus Federator
 
-The Prometheus Federator repository is primarily comprised of just two things:
-- A simple `main.go` that implements [Helm Project Operator](https://github.com/rancher/helm-project-operator) for the [`rancher-project-monitoring` chart](charts/rancher-project-monitoring)
-- A `packages/` directory that corresponds to a [`rancher/charts-build-scripts`](https://github.com/rancher/charts-build-scripts) repository
+The Prometheus Federator project is primarily composed of two components:
+- The golang code that implements a [Helm Project Operator](../../cmd/helm-project-operator/README.md), and
+- The charts used for `rancher-project-monitoring` which are ultimately based on `rancher-monitoring`
+  - This component heavily relies on [`rancher/charts-build-scripts`](https://github.com/rancher/charts-build-scripts) and mimics a smaller `rancher/charts` for O&B team.
 
-In **most** circumstances, you will only ever have to make changes to the `packages/` directory; if you need to make changes to the underlying code of the operator that is deployed, it is likely that you intend to make this change in [rancher/helm-project-operator](https://github.com/rancher/helm-project-operator) instead.
+The golang half can be found here in this repo and the Charts half in our [rancher/ob-team-charts](https://github.com/rancher/ob-team-charts) repo.
+
+In **most** circumstances, you will primarily make changes to the charts half and work in [rancher/ob-team-charts](https://github.com/rancher/ob-team-charts) repo first.
+Then, after that bump versions here in `build.yaml` and create your RC/alpha release after that. Finally, you can land that change in `rancher/charts`.
+
+When you want to make changes to Prometheus Federator directly you do not need to interact with [rancher/ob-team-charts](https://github.com/rancher/ob-team-charts) repo.
 
 ## Repository Structure
 
 ```bash
-## This directory is a [`rancher/charts-build-scripts`](https://github.com/rancher/charts-build-scripts) packages directory. See below for more details.
-packages/
-
-## This directory contains **auto-generated** Helm chart archives that can be used to deploy Prometheus Federator in a Kubernetes cluster in 
-## the cattle-monitoring-system namespace, which deploys rancher-project-monitoring (located under charts/rancher-project-monitoring) 
-## on seeing a ProjectHelmChart with spec.helmApiVersion: monitoring.cattle.io/v1alpha1.
+## This directory contains the source chart for the Prometheus Federator chart.
 ##
-## IMPORTANT: You should never modify the contents of this directory directly; you should always modify `packages` since that will 
-## overwrite the changes that are observed in this directory on running a `make charts`.
-##
-assets/
+## At build time it is used as a template to generate a 1:1 release chart to the image tag.
+## If you modify the Prometheus Federator chart you should consider if it needs to be back ported from `main` to other release branches.
+charts/prometheus-federator
 
-## This file is an **auto-generated** Helm index.yaml identifying this repository as a valid Helm repository that contains Helm charts.
-##
-## IMPORTANT: You should never modify the contents of this file directly; you should always modify `packages` since that will 
-## overwrite the changes that are observed in this directory on running a `make charts` or `make index`.
-##
-index.yaml
+## This directory contains all CLI entry points of the Prometheus Federator (and internal projects)
+cmd/
+  ## The directory contains the helm-locker cli entrypoint used by devs.
+  helm-locker
+  ## The directory contains the helm-project-operator cli entrypoint used by devs.
+  helm-project-operator
+  ## The directory contains the prometheus-federator cli entrypoint
+  prometheus-federator
 
-## This directory contains **auto-generated** Helm charts that can be used to deploy Prometheus Federator in a Kubernetes cluster in 
-## the cattle-monitoring-system namespace, which deploys rancher-project-monitoring (located under charts/rancher-project-monitoring) 
-## on seeing a ProjectHelmChart with spec.helmApiVersion: monitoring.cattle.io/v1alpha1.
-##
-## IMPORTANT: You should never modify the contents of this directory directly; you should always modify `packages` since that will 
-## overwrite the changes that are observed in this directory on running a `make charts`.
-charts/
-
-  ## The main chart that deploys Prometheus Federator in the cluster.
-  prometheus-federator/*
-  
-  ## A chart based on https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack that deploys a Project
-  ## Monitoring Stack onto the cluster on seeing a valid ProjectHelmChart (which means that it is contained within a Project Registration Namespace
-  ## with spec.helmApiVersion set to monitoring.cattle.io/v1alpha1)
-  ##
-  ## This chart is not expected to ever be deployed standalone; it is embedded into the Prometheus Federator binary itself.
-  rancher-project-monitoring/*
-
-## This directory will contain additional docs to assist users in getting started with using Helm Project Operator.
+## This directory will contain additional docs to assist users in getting started with using Prometheus Federator.
 docs/
 
 ## This directory contains an example ProjectHelmChart that can be deployed to create an example Project Monitoring Stack
 ## Note: the namespace needs to be modified to be a valid Project Registration Namespace, depending on how you deployed the operator.
 examples/
 
-## This directory contains the image that is used to build rancher/helm-project-operator, which is hosted on hub.docker.com.
+## This directory contains all the internal code used by Prometheus Federator
+internal/
+  ## The directory contains the helm-locker internal project code.
+  helm-locker
+  ## The directory contains the helm-project-operator internal project code.
+  helm-project-operator
+
+## This directory contains Dockerfile* to produce images for Prod and Dev
 package/
-  Dockerfile
-
-## The main entrypoint into Prometheus Federator that implements Helm Project Operator.
-main.go
-
-## The Dockerfile used to run CI and other scripts executed by make in a Docker container (powered by https://github.com/rancher/dapper)
-Dockerfile.dapper
+  Dockerfile-helm-locker
+  Dockerfile-helm-project-operator
+  Dockerfile-prometheus-federator
 ```
+
+---
+
+> TODO: Migrate the following content to [rancher/ob-team-charts](https://github.com/rancher/ob-team-charts) repo.
 
 ## Making changes to the Helm Charts (`packages/`)
 
