@@ -4,13 +4,11 @@
     "group:allNonMajor"
   ],
   "baseBranches": [
-    "main"
-  ],
-  "enabledManagers": [
-    "dockerfile",
-    "github-actions",
-    "helm-values",
-    "regex"
+    "main",
+    "release/v3.x",
+    "release/v2.x",
+    "release/v1.x",
+    "release/v0.x"
   ],
   "packageRules": [
     {
