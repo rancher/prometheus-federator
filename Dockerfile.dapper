@@ -14,10 +14,10 @@ ENV ARCH $DAPPER_HOST_ARCH
 RUN zypper -n install git docker vim less file curl wget patch
 RUN go install golang.org/x/tools/cmd/goimports@latest
 RUN if [ "${ARCH}" == "amd64" ]; then \
-        curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v1.51.2; \
+        curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v1.63.4; \
     fi
 
-ENV YQ_VERSION=v4.30.8
+ENV YQ_VERSION=v4.45.1
 RUN wget https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_${ARCH} -O /usr/bin/yq && chmod +x /usr/bin/yq;
 
 COPY --from=helm ./helm/bin/helm /usr/local/bin/

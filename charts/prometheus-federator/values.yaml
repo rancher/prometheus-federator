@@ -204,7 +204,7 @@ helmProjectOperator:
   cleanup:
     image:
       repository: rancher/shell
-      tag: v0.1.19
+      tag: v0.3.0
       pullPolicy: IfNotPresent
 
     ## Define which Nodes the Pods are scheduled on.
