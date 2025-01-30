@@ -1,7 +1,8 @@
 {
   "extends": [
     "github>rancher/renovate-config#release",
-    "group:allNonMajor"
+    "group:allNonMajor",
+    "helpers:pinGitHubActionDigests"
   ],
   "baseBranches": [
     "main",
@@ -9,6 +10,12 @@
     "release/v2.x",
     "release/v1.x",
     "release/v0.x"
+  ],
+  "enabledManagers": [
+    "dockerfile",
+    "github-actions",
+    "helm-values",
+    "regex"
   ],
   "packageRules": [
     {
