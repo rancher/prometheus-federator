@@ -8,13 +8,18 @@ This repo contains a set of two interlinked projects:
 
 **Note: These project are not intended for standalone use.** 
 
-For more info on _Helm Locker_, see the [dedicated README file](README-helm-locker.md).
+For more info on _Helm Locker_, see the [dedicated README file](../helm-locker/README.md).
 
 Helm Project Operator is intended to be implemented by a Project Operator (e.g. [`rancher/prometheus-federator`](https://github.com/rancher/prometheus-federator)) but provides a common definition for all Project Operators to use in order to support deploy specific, pre-bundled Helm charts (tied to a unique registered `spec.helmApiVersion` associated with the operator) across all project namespaces detected by this operator.
 
 ## Getting Started
 
-For more information, see the [Getting Started guide](docs/helm-project-operator/gettingstarted.md).
+For more information, see the [Getting Started guide](../../docs/helm-project-operator/gettingstarted.md).
+
+> [!WARN]
+> These directions are intended for development workflows/debugging.
+> They are not meant for standalone usage and come with no support.
+
 
 ## Developing
 
@@ -22,15 +27,15 @@ For more information, see the [Getting Started guide](docs/helm-project-operator
 
 Helm Project Operator is built and released off the contents of the `main` branch. To make a contribution, open up a PR to the `main` branch.
 
-For more information, see the [Developing guide](docs/helm-project-operator/developing.md).
+For more information, see the [Developing guide](../../docs/helm-project-operator/developing.md).
 
 ## Design
 
-Helm Project Operator is built on top of [k3s-io/helm-controller](https://github.com/k3s-io/helm-controller) and [rancher/helm-locker](https://github.com/rancher/helm-locker). For more information on the design of the underlying components, please see the `README.md` on their respective repositories.
+Helm Project Operator is built on top of [k3s-io/helm-controller](https://github.com/k3s-io/helm-controller) and [rancher/helm-locker](https://github.com/rancher/prometheus-federator/tree/main/internal/helm-locker). For more information on the design of the underlying components, please see the `README.md` on their respective repositories.
 
 For an example of how Helm Project Operator can be implemented, please see [`rancher/prometheus-federator`](https://github.com/rancher/prometheus-federator).
 
-For more information in general, please see [docs/design.md](docs/helm-project-operator/design.md).
+For more information in general, please see [docs/design.md](../../docs/helm-project-operator/design.md).
 
 ## Building
 

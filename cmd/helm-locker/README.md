@@ -11,7 +11,11 @@ Once created, the Helm Locker controllers will watch all resources tracked by th
 
 ## Getting Started
 
-For more information, see the [Getting Started guide](docs/gettingstarted.md).
+For more information, see the [Getting Started guide](../../docs/helm-locker/gettingstarted.md).
+
+> [!WARN]
+> These directions are intended for development workflows/debugging.
+> They are not meant for standalone usage and come with no support.
 
 ## Who needs Helm Locker?
 
