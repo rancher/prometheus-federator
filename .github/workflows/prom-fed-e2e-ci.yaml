@@ -81,14 +81,14 @@ jobs:
       TAG: ${{ needs.prebuild-env.outputs.branch_static_tag }}
     steps:
       -
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - uses: actions/setup-go@v4
         with:
           go-version: '>=1.20.0'
-      - uses: azure/setup-kubectl@v3
-      - uses: azure/setup-helm@v3
+      - uses: azure/setup-kubectl@v4
+      - uses: azure/setup-helm@v4
         with:
           version: v3.11.1
       -
@@ -170,7 +170,7 @@ jobs:
         run: ./.github/workflows/e2e/scripts/generate-artifacts.sh;
       - name: Upload logs and manifests on failure
         if: failure()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: artifacts-${{ matrix.arch }}-${{ matrix.k3s_version }}
           path: artifacts/
