@@ -50,12 +50,22 @@ For more information on ProjectHelmCharts and how to configure the underlying op
 For more information on how to configure the underlying Project Monitoring Stack, please read the [`README.md` of the underlying chart](packages/rancher-project-monitoring/charts/README.md) (`rancher-project-monitoring`).
 
 ## Developing
+For more information, see the [Developing guide](docs/prometheus-federator/developing.md).
 
 ### Which branch do I make changes on?
 
-Prometheus Federator is built and released off the contents of the `main` branch. To make a contribution, open up a PR to the `main` branch.
+This depends on the component of Prometheus Federator you're seeing to modify.
+Here's a good guide:
 
-For more information, see the [Developing guide](docs/prometheus-federator/developing.md).
+- Prometheus Federator directly: Target the `main` branch by default, unless change is specific to a Rancher Minor.
+- Rancher Project Monitoring:
+  1. Use the [rancher/ob-team-charts](https://github.com/rancher/ob-team-charts) repo `main` branch,
+  2. After chart updated in `ob-team-charts`, update `build.yaml` version on your target branch (likely main, then backport)
+
+### How do I know what version of Rancher Project Monitoring is used?
+There are a few options depending on where you're working.
+For compiled binaries, you can use the `debug-chart` command to dump the static chart.
+Or, you can check `build.yaml` on the target branch/tag you're curious about.
 
 ## Building
 
