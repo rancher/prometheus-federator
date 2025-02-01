@@ -96,6 +96,8 @@ func Register(
 }
 
 func (h *handler) OnObjectSetChange(setID string, obj runtime.Object) (runtime.Object, error) {
+	logrus.Infof("Handling ObjectSet %s", setID)
+	
 	helmReleases, err := h.helmReleaseCache.GetByIndex(HelmReleaseByReleaseKey, setID)
 	if err != nil {
 		return nil, fmt.Errorf("unable to find HelmReleases for objectset %s to trigger event", setID)
