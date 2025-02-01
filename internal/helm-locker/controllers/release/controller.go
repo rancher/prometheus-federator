@@ -101,7 +101,7 @@ func (h *handler) OnObjectSetChange(setID string, obj runtime.Object) (runtime.O
 	helmReleases, err := h.helmReleaseCache.GetByIndex(HelmReleaseByReleaseKey, setID)
 	if err != nil {
 		err = fmt.Errorf("unable to find HelmReleases for objectset %s to trigger event", setID)
-		logrus.Errorf("%v", err)
+		logrus.Warnf("%v", err)
 		return nil, err
 	}
 	for _, helmRelease := range helmReleases {
@@ -183,6 +183,7 @@ func (h *handler) OnHelmReleaseRemove(_ string, helmRelease *v1alpha1.HelmReleas
 	}
 	if helmRelease.Status.State == v1alpha1.SecretNotFoundState || helmRelease.Status.State == v1alpha1.UninstalledState {
 		// HelmRelease was not tracking any underlying objectSet
+		logrus.Warnf("HelmRelease %s was removed. It was not tracking an objectset. State was: %s.", helmRelease.GetName(), helmRelease.Status.State)
 		return helmRelease, nil
 	}
 	// HelmRelease CRs are only pointers to Helm releases... if the HelmRelease CR is removed, we should do nothing, but should warn the user
