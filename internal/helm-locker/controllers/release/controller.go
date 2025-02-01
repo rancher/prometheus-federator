@@ -199,6 +199,7 @@ func (h *handler) OnHelmRelease(_ string, helmRelease *v1alpha1.HelmRelease) (*v
 	if shouldManage, err := h.shouldManage(helmRelease); err != nil {
 		return helmRelease, err
 	} else if !shouldManage {
+		logrus.Debugf("HelmRelease %s/%s will not be managed by this operator.", helmRelease.Name, helmRelease.Namespace)
 		return helmRelease, nil
 	}
 	if helmRelease.DeletionTimestamp != nil {
