@@ -199,10 +199,11 @@ func (h *handler) OnHelmRelease(_ string, helmRelease *v1alpha1.HelmRelease) (*v
 	if shouldManage, err := h.shouldManage(helmRelease); err != nil {
 		return helmRelease, err
 	} else if !shouldManage {
-		logrus.Debugf("HelmRelease %s/%s will not be managed by this operator.", helmRelease.Name, helmRelease.Namespace)
+		//logrus.Infof("HelmRelease %s/%s will not be managed by this operator.", helmRelease.Name, helmRelease.Namespace)
 		return helmRelease, nil
 	}
 	if helmRelease.DeletionTimestamp != nil {
+		//logrus.Infof("HelmRelease %s/%s has a non-nil deletion timestamp.", helmRelease.Name, helmRelease.Namespace)
 		return helmRelease, nil
 	}
 	releaseKey := releaseKeyFromRelease(helmRelease)
@@ -217,7 +218,9 @@ func (h *handler) OnHelmRelease(_ string, helmRelease *v1alpha1.HelmRelease) (*v
 			helmRelease.Status.Notes = ""
 			return h.helmReleases.UpdateStatus(helmRelease)
 		}
-		return helmRelease, fmt.Errorf("unable to find latest Helm Release Secret tied to Helm Release %s: %s", helmRelease.GetName(), err)
+		err = fmt.Errorf("unable to find latest Helm Release Secret tied to Helm Release %s: %s", helmRelease.GetName(), err)
+		logrus.Infof("%v", err)
+		return helmRelease, err
 	}
 	logrus.Infof("loading latest release version %d of HelmRelease %s", latestRelease.Version, helmRelease.GetName())
 	releaseInfo := newReleaseInfo(latestRelease)
