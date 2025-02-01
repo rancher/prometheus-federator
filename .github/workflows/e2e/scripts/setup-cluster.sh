@@ -24,7 +24,7 @@ wait_for_nodes(){
     current_time=$(date +%s)
     elapsed_time=$((current_time - start_time))
     if [ $elapsed_time -ge $timeout ]; then
-        echo "Timeout reached, exiting..."
+        echo "Timeout reached, exiting... "
         exit 1
     fi
 
