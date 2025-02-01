@@ -175,6 +175,9 @@ func (c *lockableObjectSetRegisterAndCache) Lock(key relatedresource.Key) {
 		// nothing to lock
 		return
 	}
+
+	s.mutateMu.RLock()
+	defer s.mutateMu.RUnlock()
 	if s.ObjectSet == nil {
 		// nothing to lock
 		return
@@ -285,7 +288,9 @@ func (c *lockableObjectSetRegisterAndCache) deleteState(key relatedresource.Key)
 	delete(c.stateByKey, key)
 	c.stateMapLock.Unlock()
 
+	s.mutateMu.Lock()
 	s.ObjectSet = nil
+	s.mutateMu.Unlock()
 	s.Locked = false
 	c.stateChanges <- watch.Event{Type: watch.Deleted, Object: s}
 }
