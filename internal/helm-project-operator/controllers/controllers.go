@@ -144,6 +144,7 @@ func Register(ctx context.Context, systemNamespace string, cfg clientcmd.ClientC
 	if err != nil {
 		return err
 	}
+	logrus.Infof("Registering Project Controller...")
 	project.Register(ctx,
 		systemNamespace,
 		opts,
