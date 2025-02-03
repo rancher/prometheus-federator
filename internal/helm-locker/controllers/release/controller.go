@@ -215,17 +215,13 @@ func (h *handler) OnHelmReleaseRemove(_ string, helmRelease *v1alpha1.HelmReleas
 }
 
 func (h *handler) OnHelmRelease(_ string, helmRelease *v1alpha1.HelmRelease) (*v1alpha1.HelmRelease, error) {
-	logrus.Debugf("Handling HelmRelease %s", helmRelease.GetName())
 
 	if shouldManage, err := h.shouldManage(helmRelease); err != nil {
-		logrus.Warnf("error on running shoulManage for HelmRelease %s: %s", helmRelease.GetName(), err)
 		return helmRelease, err
 	} else if !shouldManage {
-		logrus.Debugf("HelmRelease %s will not be managed by this operator.", helmRelease.GetName())
 		return helmRelease, nil
 	}
 	if helmRelease.DeletionTimestamp != nil {
-		logrus.Debugf("HelmRelease %s has a non-nil deletion timestamp.", helmRelease.GetName())
 		return helmRelease, nil
 	}
 	releaseKey := releaseKeyFromRelease(helmRelease)
