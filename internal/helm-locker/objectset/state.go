@@ -1,6 +1,8 @@
 package objectset
 
 import (
+	"sync"
+
 	"time"
 
 	"github.com/google/uuid"
@@ -52,7 +54,7 @@ type objectSetState struct {
 	ObjectSet *objectset.ObjectSet `json:"objectSet,omitempty"`
 
 	mutateMu *sync.RWMutex
-	
+
 	// Locked represents whether the ObjectSet should be locked in the cluster or not
 	Locked bool `json:"locked"`
 }
