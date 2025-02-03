@@ -38,6 +38,7 @@ func newObjectSetState(namespace, name string, obj objectSetState) *objectSetSta
 	obj.UID = types.UID(uuid.New().String())
 	obj.CreationTimestamp = metav1.NewTime(time.Now())
 	obj.ResourceVersion = "0"
+	obj.mutateMu = &sync.RWMutex{}
 	return &obj
 }
 
@@ -50,6 +51,8 @@ type objectSetState struct {
 	// ObjectSet is a pointer to the underlying ObjectSet whose state is being tracked
 	ObjectSet *objectset.ObjectSet `json:"objectSet,omitempty"`
 
+	mutateMu *sync.RWMutex
+	
 	// Locked represents whether the ObjectSet should be locked in the cluster or not
 	Locked bool `json:"locked"`
 }
