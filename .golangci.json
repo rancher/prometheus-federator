@@ -11,17 +11,21 @@
 		]
 	},
 	"run": {
-		"deadline": "5m"
+		"timeout": "5m"
 	},
-    "issues": {
-        "exclude-rules": [
-            {
-                "linters": "revive",
-                "text": "should have comment or be unexported"
-            }
-        ],
+	"issues": {
+		"exclude-rules": [
+			{
+				"linters": "revive",
+				"text": "should have comment or be unexported"
+			},
+			{
+				"path": "_test.go",
+				"linters": "revive"
+			}
+		],
 		"exclude-files": [
 			"/zz_generated_*"
 		]
-    }
+	}
 }

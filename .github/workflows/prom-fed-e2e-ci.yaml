@@ -1,6 +1,7 @@
 name: "[prom-fed] E2E CI"
 
 on:
+  workflow_call:
   workflow_dispatch:
     inputs:
       debug:
