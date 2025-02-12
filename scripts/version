@@ -40,7 +40,7 @@ fi
 IMAGE=${IMAGE:-"$REPO/${BUILD_TARGET}:${TAG}"}
 
 # Fetch build.yaml path and constant defined in it
-ROOT_DIR=$(dirname "$(realpath "$(dirname "$0")")")
+ROOT_DIR=$(dirname "$(realpath "$(dirname "${BASH_SOURCE[0]}")")")
 BUILD_YAML_PATH="$ROOT_DIR/build.yaml"
 RANCHER_PROJECT_MONITORING=${RANCHER_PROJECT_MONITORING:-$(grep 'rancherProjectMonitoringVersion' "$BUILD_YAML_PATH"|cut -d: -f2|tr -d ' ')}
 
