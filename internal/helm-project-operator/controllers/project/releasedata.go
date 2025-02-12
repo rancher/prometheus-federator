@@ -5,10 +5,9 @@ import (
 	"fmt"
 	"strings"
 
-	v1alpha2 "github.com/rancher/prometheus-federator/internal/helm-project-operator/apis/helm.cattle.io/v1alpha1"
-	common2 "github.com/rancher/prometheus-federator/internal/helm-project-operator/controllers/common"
-
-	"github.com/rancher/wrangler/pkg/data"
+	v1alpha1 "github.com/rancher/prometheus-federator/internal/helm-project-operator/apis/helm.cattle.io/v1alpha1"
+	"github.com/rancher/prometheus-federator/internal/helm-project-operator/controllers/common"
+	"github.com/rancher/wrangler/v3/pkg/data"
 	"github.com/sirupsen/logrus"
 	rbacv1 "k8s.io/api/rbac/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -21,7 +20,7 @@ import (
 //
 // Generally, these ConfigMaps should be part of the deployed Helm chart and should not have conflicts with each other
 // It's also a common pattern to only have a single ConfigMap that this refers to.
-func (h *handler) getDashboardValuesFromConfigmaps(projectHelmChart *v1alpha2.ProjectHelmChart) (v1alpha2.GenericMap, error) {
+func (h *handler) getDashboardValuesFromConfigmaps(projectHelmChart *v1alpha1.ProjectHelmChart) (v1alpha1.GenericMap, error) {
 	releaseNamespace, releaseName := h.getReleaseNamespaceAndName(projectHelmChart)
 	exists, err := h.verifyReleaseNamespaceExists(releaseNamespace)
 	if err != nil {
@@ -34,7 +33,7 @@ func (h *handler) getDashboardValuesFromConfigmaps(projectHelmChart *v1alpha2.Pr
 	if err != nil {
 		return nil, err
 	}
-	var values v1alpha2.GenericMap
+	var values v1alpha1.GenericMap
 	for _, configMap := range configMaps {
 		if configMap == nil {
 			continue
@@ -58,9 +57,9 @@ func (h *handler) getDashboardValuesFromConfigmaps(projectHelmChart *v1alpha2.Pr
 
 // getSubjectRoleToRoleRefsFromRoles gets all Roles in the Project Release Namespace that need RoleBindings to be created automatically
 // based on permissions set in the Project Registration namespace. See pkg/controllers/project/resources.go for more information on how this is used
-func (h *handler) getSubjectRoleToRoleRefsFromRoles(projectHelmChart *v1alpha2.ProjectHelmChart) (map[string][]rbacv1.RoleRef, error) {
+func (h *handler) getSubjectRoleToRoleRefsFromRoles(projectHelmChart *v1alpha1.ProjectHelmChart) (map[string][]rbacv1.RoleRef, error) {
 	subjectRoleToRoleRefs := make(map[string][]rbacv1.RoleRef)
-	for subjectRole := range common2.GetDefaultClusterRoles(h.opts) {
+	for subjectRole := range common.GetDefaultClusterRoles(h.opts) {
 		subjectRoleToRoleRefs[subjectRole] = []rbacv1.RoleRef{}
 	}
 	if len(subjectRoleToRoleRefs) == 0 {
@@ -83,7 +82,7 @@ func (h *handler) getSubjectRoleToRoleRefsFromRoles(projectHelmChart *v1alpha2.P
 		if role == nil {
 			continue
 		}
-		subjectRole, ok := role.Labels[common2.HelmProjectOperatorProjectHelmChartRoleAggregateFromLabel]
+		subjectRole, ok := role.Labels[common.HelmProjectOperatorProjectHelmChartRoleAggregateFromLabel]
 		if !ok {
 			// cannot assign roles if this label is not provided
 			continue

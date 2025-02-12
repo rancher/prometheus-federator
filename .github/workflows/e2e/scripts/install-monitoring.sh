@@ -5,12 +5,13 @@ set -x
 source $(dirname $0)/entry
 
 HELM_REPO="rancher-charts"
+HELM_REPO_URL="https://charts.rancher.io"
 
 cd $(dirname $0)/../../../..
 
 helm version
 
-helm repo add ${HELM_REPO} https://charts.rancher.io
+helm repo add ${HELM_REPO} $HELM_REPO_URL
 helm repo update
 
 echo "Create required \`cattle-fleet-system\` namespace"
