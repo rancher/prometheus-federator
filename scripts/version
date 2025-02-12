@@ -2,12 +2,14 @@
 
 BUILD_TARGET=${BUILD_TARGET:-"prometheus-federator"}
 
+export KUBECONFIG=$KUBECONFIG
+
 if [ -n "$(git status --porcelain --untracked-files=no)" ]; then
     DIRTY="-dirty"
 fi
 
 COMMIT=$(git rev-parse --short HEAD)
-GIT_TAG=$(git tag -l --contains HEAD | head -n 1)
+GIT_TAG=${GIT_TAG:-$(git tag -l --contains HEAD | tail -n 1)}
 
 if [[ -z "$DIRTY" && -n "$GIT_TAG" ]]; then
     VERSION=$GIT_TAG
@@ -27,7 +29,7 @@ REPO=${REPO:-rancher}
 
 HELM_IMAGE_TAG=${HELM_IMAGE_TAG:-${TAG}}
 if [ "$TAG" == "$COMMIT" ]; then
-  HELM_CHART_VERSION="0.0.0-dev.${COMMIT}"
+  HELM_CHART_VERSION="0.0.0-dev+${COMMIT}"
 else
   HELM_CHART_VERSION=${HELM_IMAGE_TAG/v/}
 fi
@@ -40,9 +42,10 @@ fi
 IMAGE=${IMAGE:-"$REPO/${BUILD_TARGET}:${TAG}"}
 
 # Fetch build.yaml path and constant defined in it
-ROOT_DIR=$(dirname "$(realpath "$(dirname "$0")")")
+ROOT_DIR=$(dirname "$(realpath "$(dirname "${BASH_SOURCE[0]}")")")
 BUILD_YAML_PATH="$ROOT_DIR/build.yaml"
 RANCHER_PROJECT_MONITORING=${RANCHER_PROJECT_MONITORING:-$(grep 'rancherProjectMonitoringVersion' "$BUILD_YAML_PATH"|cut -d: -f2|tr -d ' ')}
+RANCHER_MONITORING=${RANCHER_MONITORING:-$(grep 'rancherMonitoringVersion' "$BUILD_YAML_PATH"|cut -d: -f2|tr -d ' ')}
 
 function print_version_debug() {
     echo "DIRTY: $DIRTY"
@@ -54,5 +57,6 @@ function print_version_debug() {
     echo "IMAGE: $IMAGE";
     echo "BUILD_YAML_PATH: $BUILD_YAML_PATH"
     echo "RANCHER PROJECT MONITORING: $RANCHER_PROJECT_MONITORING"
+    echo "RANCHER MONITORING: $RANCHER_MONITORING"
 }
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then print_version_debug "$1"; fi

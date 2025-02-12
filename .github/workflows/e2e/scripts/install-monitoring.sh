@@ -5,12 +5,13 @@ set -x
 source $(dirname $0)/entry
 
 HELM_REPO="rancher-charts"
+HELM_REPO_URL="https://charts.rancher.io"
 
 cd $(dirname $0)/../../../..
 
 helm version
 
-helm repo add ${HELM_REPO} https://charts.rancher.io
+helm repo add ${HELM_REPO} $HELM_REPO_URL
 helm repo update
 
 echo "Create required \`cattle-fleet-system\` namespace"
@@ -20,7 +21,7 @@ echo "Installing rancher monitoring crd with :\n"
 
 helm search repo ${HELM_REPO}/rancher-monitoring-crd --versions --max-col-width=0 | head -n 2
 
-helm upgrade --install --create-namespace -n cattle-monitoring-system rancher-monitoring-crd ${HELM_REPO}/rancher-monitoring-crd
+helm upgrade --install --create-namespace -n cattle-monitoring-system ${RANCHER_MONITORING_VERSION_HELM_ARGS} rancher-monitoring-crd ${HELM_REPO}/rancher-monitoring-crd
 
 if [[ "${E2E_CI}" == "true" ]]; then
     e2e_args="--set grafana.resources=null --set prometheus.prometheusSpec.resources=null --set alertmanager.alertmanagerSpec.resources=null"

@@ -30,6 +30,11 @@ global:
   imagePullSecrets: []
   # - name: "image-pull-secret"
 
+## Prometheus Federator Specific
+priorityClassName: ""
+
+
+## Start of old helm-project-operator subchart configs
 helmProjectOperator:
   # ensures that all resources created by subchart show up as prometheus-federator
   helmApiVersion: dummy.cattle.io/v1alpha1
@@ -148,7 +153,7 @@ helmProjectOperator:
     job:
       image:
         repository: rancher/klipper-helm
-        tag: v0.7.0-build20220315
+        tag: v0.9.4-build20250113
 
   helmLocker:
     enabled: true
@@ -203,8 +208,8 @@ helmProjectOperator:
 
   cleanup:
     image:
-      repository: rancher/shell
-      tag: v0.1.19
+      repository: rancher/kuberlr-kubectl
+      tag: v4.0.2
       pullPolicy: IfNotPresent
 
     ## Define which Nodes the Pods are scheduled on.
@@ -240,3 +245,17 @@ helmProjectOperator:
       # requests:
       #   memory: 100Mi
       #   cpu: 100m
+
+namespaceRegistration:
+  ## namespaceRegistration.workers defines the number of threads dedicated to handling namespace updates in
+  ## the prometheus-federator namespace controller.
+  ## If the operator is failing on startup due to a timeout in namespace registration, increasing this value is recommended.
+  workers: 2
+
+  ## namespaceRegistration.retryMax sets the limit of retries performed during the Namespace Controller initialization to make sure all Project Registration Namespaces are tracked
+  ## If the pod is failing to initialize due to a timout in registering namespaces, tweaking this setting and NamespaceRegistrationRetryWaitMilliseconds should fix it
+  retryMax: 10
+
+  ## namespaceRegistration.retryWaitMilliseconds sets the time between each retry performed during the Namespace Controller initialization to make sure all Project Registration Namespaces are tracked
+  ## If the pod is failing to initialize due to a timout in registering namespaces, tweaking this setting and NamespaceRegistrationRetryMax should fix it
+  retryWaitMilliseconds: 5000
