@@ -3,5 +3,5 @@
 package buildconfig
 
 const (
-	RancherProjectMonitoringVersion = "0.5.0"
+	RancherProjectMonitoringVersion = "0.5.1"
 )
