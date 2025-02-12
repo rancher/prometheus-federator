@@ -6,13 +6,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/rancher/prometheus-federator/internal/helm-project-operator/controllers/common"
-	"github.com/rancher/prometheus-federator/internal/helm-project-operator/controllers/hardened"
-	"github.com/rancher/prometheus-federator/internal/helm-project-operator/controllers/namespace"
-	"github.com/rancher/prometheus-federator/internal/helm-project-operator/controllers/project"
-	helmproject "github.com/rancher/prometheus-federator/internal/helm-project-operator/generated/controllers/helm.cattle.io"
-	helmprojectcontroller "github.com/rancher/prometheus-federator/internal/helm-project-operator/generated/controllers/helm.cattle.io/v1alpha1"
-
 	"github.com/k3s-io/helm-controller/pkg/controllers/chart"
 	k3shelm "github.com/k3s-io/helm-controller/pkg/generated/controllers/helm.cattle.io"
 	k3shelmcontroller "github.com/k3s-io/helm-controller/pkg/generated/controllers/helm.cattle.io/v1"
@@ -23,20 +16,26 @@ import (
 	helmlocker "github.com/rancher/prometheus-federator/internal/helm-locker/generated/controllers/helm.cattle.io"
 	helmlockercontroller "github.com/rancher/prometheus-federator/internal/helm-locker/generated/controllers/helm.cattle.io/v1alpha1"
 	"github.com/rancher/prometheus-federator/internal/helm-locker/objectset"
-	"github.com/rancher/wrangler/pkg/apply"
-	batch "github.com/rancher/wrangler/pkg/generated/controllers/batch"
-	batchcontroller "github.com/rancher/wrangler/pkg/generated/controllers/batch/v1"
-	"github.com/rancher/wrangler/pkg/generated/controllers/core"
-	corecontroller "github.com/rancher/wrangler/pkg/generated/controllers/core/v1"
-	"github.com/rancher/wrangler/pkg/generated/controllers/networking.k8s.io"
-	networkingcontroller "github.com/rancher/wrangler/pkg/generated/controllers/networking.k8s.io/v1"
-	rbac "github.com/rancher/wrangler/pkg/generated/controllers/rbac"
-	rbaccontroller "github.com/rancher/wrangler/pkg/generated/controllers/rbac/v1"
-	"github.com/rancher/wrangler/pkg/generic"
-	"github.com/rancher/wrangler/pkg/leader"
-	"github.com/rancher/wrangler/pkg/ratelimit"
-	"github.com/rancher/wrangler/pkg/schemes"
-	"github.com/rancher/wrangler/pkg/start"
+	"github.com/rancher/prometheus-federator/internal/helm-project-operator/controllers/common"
+	"github.com/rancher/prometheus-federator/internal/helm-project-operator/controllers/hardened"
+	"github.com/rancher/prometheus-federator/internal/helm-project-operator/controllers/namespace"
+	"github.com/rancher/prometheus-federator/internal/helm-project-operator/controllers/project"
+	helmproject "github.com/rancher/prometheus-federator/internal/helm-project-operator/generated/controllers/helm.cattle.io"
+	helmprojectcontroller "github.com/rancher/prometheus-federator/internal/helm-project-operator/generated/controllers/helm.cattle.io/v1alpha1"
+	"github.com/rancher/wrangler/v3/pkg/apply"
+	batch "github.com/rancher/wrangler/v3/pkg/generated/controllers/batch"
+	batchcontroller "github.com/rancher/wrangler/v3/pkg/generated/controllers/batch/v1"
+	"github.com/rancher/wrangler/v3/pkg/generated/controllers/core"
+	corecontroller "github.com/rancher/wrangler/v3/pkg/generated/controllers/core/v1"
+	"github.com/rancher/wrangler/v3/pkg/generated/controllers/networking.k8s.io"
+	networkingcontroller "github.com/rancher/wrangler/v3/pkg/generated/controllers/networking.k8s.io/v1"
+	rbac "github.com/rancher/wrangler/v3/pkg/generated/controllers/rbac"
+	rbaccontroller "github.com/rancher/wrangler/v3/pkg/generated/controllers/rbac/v1"
+	"github.com/rancher/wrangler/v3/pkg/generic"
+	"github.com/rancher/wrangler/v3/pkg/leader"
+	"github.com/rancher/wrangler/v3/pkg/ratelimit"
+	"github.com/rancher/wrangler/v3/pkg/schemes"
+	"github.com/rancher/wrangler/v3/pkg/start"
 	"github.com/sirupsen/logrus"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/discovery"
@@ -121,6 +120,7 @@ func Register(ctx context.Context, systemNamespace string, cfg clientcmd.ClientC
 		)
 	}
 
+	logrus.Debug("Registering namespace controller...")
 	projectGetter := namespace.Register(ctx,
 		appCtx.Apply,
 		systemNamespace,
@@ -145,6 +145,7 @@ func Register(ctx context.Context, systemNamespace string, cfg clientcmd.ClientC
 	if err != nil {
 		return err
 	}
+	logrus.Infof("Registering Project Controller...")
 	project.Register(ctx,
 		systemNamespace,
 		opts,
@@ -190,6 +191,9 @@ func Register(ctx context.Context, systemNamespace string, cfg clientcmd.ClientC
 		chart.Register(ctx,
 			systemNamespace,
 			opts.ControllerName,
+			// this has to be cluster-admin for k3s reasons
+			"cluster-admin",
+			"6443",
 			appCtx.K8s,
 			appCtx.Apply,
 			recorder,
@@ -201,7 +205,9 @@ func Register(ctx context.Context, systemNamespace string, cfg clientcmd.ClientC
 			appCtx.Batch.Job().Cache(),
 			appCtx.RBAC.ClusterRoleBinding(),
 			appCtx.Core.ServiceAccount(),
-			appCtx.Core.ConfigMap())
+			appCtx.Core.ConfigMap(),
+			appCtx.Core.Secret(),
+		)
 	}
 
 	leader.RunOrDie(ctx, systemNamespace, fmt.Sprintf("helm-project-operator-%s-lock", opts.ReleaseName), appCtx.K8s, func(ctx context.Context) {

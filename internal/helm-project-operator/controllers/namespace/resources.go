@@ -4,8 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	common2 "github.com/rancher/prometheus-federator/internal/helm-project-operator/controllers/common"
-
+	"github.com/rancher/prometheus-federator/internal/helm-project-operator/controllers/common"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -21,11 +20,17 @@ func (h *handler) getProjectRegistrationNamespace(projectID string, isOrphaned b
 	}
 	return &corev1.Namespace{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:        fmt.Sprintf(common2.ProjectRegistrationNamespaceFmt, projectID),
-			Annotations: common2.GetProjectNamespaceAnnotations(projectID, h.opts.ProjectLabel, h.opts.ClusterID),
-			Labels:      common2.GetProjectNamespaceLabels(projectID, h.opts.ProjectLabel, projectID, isOrphaned),
+			Name:        fmt.Sprintf(common.ProjectRegistrationNamespaceFmt, projectID),
+			Annotations: common.GetProjectNamespaceAnnotations(projectID, h.opts.ProjectLabel, h.opts.ClusterID),
+			Labels:      common.GetProjectNamespaceLabels(projectID, h.opts.ProjectLabel, projectID, isOrphaned),
 		},
 	}
+}
+
+// getProjectRegistrationNamespaceName returns the name of the project registration namespace for a given project ID
+// following the format 'cattle-project-projectID'
+func (h *handler) getProjectRegistrationNamespaceName(projectID string) string {
+	return fmt.Sprintf(common.ProjectRegistrationNamespaceFmt, projectID)
 }
 
 // getConfigMap returns the values.yaml and questions.yaml ConfigMap that is expected to be created in all Project Registration Namespaces
@@ -34,7 +39,7 @@ func (h *handler) getConfigMap(projectID string, namespace *corev1.Namespace) *c
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      h.getConfigMapName(),
 			Namespace: namespace.Name,
-			Labels:    common2.GetCommonLabels(projectID),
+			Labels:    common.GetCommonLabels(projectID),
 		},
 		Data: map[string]string{
 			"values.yaml":    h.valuesYaml,

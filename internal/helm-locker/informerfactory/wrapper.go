@@ -2,7 +2,7 @@ package informerfactory
 
 import (
 	"github.com/rancher/lasso/pkg/controller"
-	"github.com/rancher/wrangler/pkg/apply"
+	"github.com/rancher/wrangler/v3/pkg/apply"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/tools/cache"
 )

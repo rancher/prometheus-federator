@@ -3,18 +3,21 @@ package namespace
 import (
 	"context"
 	"fmt"
+	"slices"
+	"time"
 
 	"github.com/rancher/prometheus-federator/internal/helm-project-operator/applier"
-	common2 "github.com/rancher/prometheus-federator/internal/helm-project-operator/controllers/common"
+	"github.com/rancher/prometheus-federator/internal/helm-project-operator/controllers/common"
 	helmprojectcontroller "github.com/rancher/prometheus-federator/internal/helm-project-operator/generated/controllers/helm.cattle.io/v1alpha1"
-
-	"github.com/rancher/wrangler/pkg/apply"
-	corecontroller "github.com/rancher/wrangler/pkg/generated/controllers/core/v1"
+	"github.com/rancher/wrangler/v3/pkg/apply"
+	corecontroller "github.com/rancher/wrangler/v3/pkg/generated/controllers/core/v1"
 	"github.com/sirupsen/logrus"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/dynamic"
+	"k8s.io/client-go/util/retry"
 )
 
 type handler struct {
@@ -24,10 +27,11 @@ type handler struct {
 	systemNamespace string
 	valuesYaml      string
 	questionsYaml   string
-	opts            common2.Options
+	opts            common.Options
 
-	systemNamespaceTracker              Tracker
-	projectRegistrationNamespaceTracker Tracker
+	systemNamespaceTracker                         Tracker
+	projectRegistrationNamespaceTracker            Tracker
+	projectRegistrationNamespaceInitializationList []string
 
 	namespaces            corecontroller.NamespaceController
 	namespaceCache        corecontroller.NamespaceCache
@@ -42,7 +46,7 @@ func Register(
 	ctx context.Context,
 	apply apply.Apply,
 	systemNamespace, valuesYaml, questionsYaml string,
-	opts common2.Options,
+	opts common.Options,
 	namespaces corecontroller.NamespaceController,
 	namespaceCache corecontroller.NamespaceCache,
 	configmaps corecontroller.ConfigMapController,
@@ -61,17 +65,19 @@ func Register(
 		opts:                                opts,
 		systemNamespaceTracker:              NewTracker(),
 		projectRegistrationNamespaceTracker: NewTracker(),
-		namespaces:                          namespaces,
-		namespaceCache:                      namespaceCache,
-		configmaps:                          configmaps,
-		projectHelmCharts:                   projectHelmCharts,
-		projectHelmChartCache:               projectHelmChartCache,
+		projectRegistrationNamespaceInitializationList: []string{},
+		namespaces:            namespaces,
+		namespaceCache:        namespaceCache,
+		configmaps:            configmaps,
+		projectHelmCharts:     projectHelmCharts,
+		projectHelmChartCache: projectHelmChartCache,
 	}
 
 	// note: this implements a workqueue that ensures that applies only happen once at a time even if a bunch of namespaces in a project
 	// are all re-enqueued at the exact same time
 	h.projectRegistrationNamespaceApplyinator = applier.NewApplyinator("project-registration-namespace-applyinator", h.applyProjectRegistrationNamespace, nil)
-	h.projectRegistrationNamespaceApplyinator.Run(ctx, 2)
+	h.projectRegistrationNamespaceApplyinator.Run(ctx, opts.NamespaceRegistrationWorkers)
+	logrus.Debugf("Initializing namespace applyinator with %d namespace registration workers", opts.NamespaceRegistrationWorkers)
 
 	h.apply = h.addReconcilers(h.apply, dynamic)
 
@@ -102,12 +108,30 @@ func Register(
 		logrus.Fatal(err)
 	}
 
+	compareNamespaceErr := retry.OnError(
+		wait.Backoff{
+			Steps:    opts.NamespaceRegistrationRetryMax,
+			Duration: time.Duration(opts.NamespaceRegistrationRetryWaitMilliseconds) * time.Millisecond,
+			Factor:   1.0,
+		},
+		func(_ error) bool {
+			logrus.Warnf("Registered Project Registration namespaces don't match expected, will retry. Registered: %v. Expected: %v.", h.projectRegistrationNamespaceTracker.List(), h.projectRegistrationNamespaceInitializationList)
+			return true
+		}, func() error {
+			return h.projectRegistrationNamespaceTracker.Compare(h.projectRegistrationNamespaceInitializationList)
+		})
+	if compareNamespaceErr != nil {
+		logrus.Fatal("The operator has failed registering all project registration namespace into its Tracker in a timely manner. Please bump the number of namespace registration workers or increase the number of retries.")
+	}
+
+	logrus.Infof("Initializing namespace controller with the following namespaces tracked as Project Registration namespaces: %v", h.projectRegistrationNamespaceTracker.List())
+
 	return NewLabelBasedProjectGetter(h.opts.ProjectLabel, h.isProjectRegistrationNamespace, h.isSystemNamespace, h.namespaces)
 }
 
 // Single Namespace Handler
 
-func (h *handler) OnSingleNamespaceChange(_ string, namespace *corev1.Namespace) (*corev1.Namespace, error) {
+func (h *handler) OnSingleNamespaceChange( /*name*/ _ string, namespace *corev1.Namespace) (*corev1.Namespace, error) {
 	if namespace.Name != h.systemNamespace {
 		// enqueue system namespace to ensure that rolebindings are updated
 
@@ -130,7 +154,7 @@ func (h *handler) OnSingleNamespaceChange(_ string, namespace *corev1.Namespace)
 
 // Multiple Namespaces Handler
 
-func (h *handler) OnMultiNamespaceChange(_ string, namespace *corev1.Namespace) (*corev1.Namespace, error) {
+func (h *handler) OnMultiNamespaceChange( /*name*/ _ string, namespace *corev1.Namespace) (*corev1.Namespace, error) {
 	if namespace == nil {
 		logrus.Debugf("OnMultiNamespaceChange() called with no namespace.")
 		return namespace, nil
@@ -143,6 +167,7 @@ func (h *handler) OnMultiNamespaceChange(_ string, namespace *corev1.Namespace) 
 	// namespace, which will cause it to be ignored and left in the System Project unless
 	// we apply the ProjectRegistrationNamespace logic first.
 	case h.isProjectRegistrationNamespace(namespace):
+		logrus.Debugf("Detected \"%s\" as a project registration namespace. Enqueueing it.", namespace.Name)
 		err := h.enqueueProjectNamespaces(namespace)
 		if err != nil {
 			logrus.Debugf("Error in call to isProjectRegistrationNamespace() while enqueuing project namespace %s: %s", namespace, err)
@@ -154,10 +179,11 @@ func (h *handler) OnMultiNamespaceChange(_ string, namespace *corev1.Namespace) 
 		}
 		return namespace, nil
 	case h.isSystemNamespace(namespace):
+		logrus.Infof("Detected \"%s\" as a system namespace. Ignoring it.", namespace.Name)
 		// nothing to do, we always ignore system namespaces
-		logrus.Debugf("Ignoring system namespace: %s", namespace)
 		return namespace, nil
 	default:
+		logrus.Infof("Detected \"%s\" as a regular namespace. Handling it", namespace.Name)
 		err := h.applyProjectRegistrationNamespaceForNamespace(namespace)
 		if err != nil {
 			logrus.Debugf("Default error in isProjectRegistrationNamespace() %s: %s", namespace, err)
@@ -196,6 +222,7 @@ func (h *handler) enqueueProjectNamespaces(projectRegistrationNamespace *corev1.
 func (h *handler) applyProjectRegistrationNamespaceForNamespace(namespace *corev1.Namespace) error {
 	// get the project ID and generate the namespace object to be applied
 	projectID, inProject := h.getProjectIDFromNamespaceLabels(namespace)
+	logrus.Debugf("Found namespace %s to be part of the project %s. inProject = %v. Labels will be updated accordingly.", namespace.Name, projectID, inProject)
 
 	// update the namespace with the appropriate label on it
 	err := h.updateNamespaceWithHelmOperatorProjectLabel(namespace, projectID, inProject)
@@ -226,6 +253,29 @@ func (h *handler) applyProjectRegistrationNamespaceForNamespace(namespace *corev
 	// will only happen once, regardless of how many enqueues, which prevents us
 	// from hammering wrangler.Apply operations and forcing wrangler.Apply to engage
 	// in rate limiting (and output noisy logs)
+
+	// Every namespace named as 'cattle-project-projectID' will be handled as a Project Registration
+	// namespace and added to a list that synchronously tracks every project
+	// registration namespace name.
+
+	// An extra synchronous list is important because
+	// 'h.projectRegistrationNamespaceApplyinator.Apply(projectID)' will add to an asynchronous workqueue
+	// and the controller has to wait until all of them have been registered to initialize properly.
+	// Thus, the synchronous list works as a way to compare which namespaces should be found
+	// in the asynchronous tracker and prevent controller initialization
+	// until both match.
+
+	// The asynchronous tracker has to be kept asynchronous because it stores
+	// not only the names, but the current state of the namespaces
+	// as well. So they have to be updated before getting added to
+	// the tracker
+	projectRegistrationNamespace := h.getProjectRegistrationNamespaceName(projectID)
+	if !slices.Contains(h.projectRegistrationNamespaceInitializationList, projectRegistrationNamespace) {
+		logrus.Debugf("Triggered by namespace %s", namespace.Name)
+		logrus.Debugf("Project %s found to have %s as its project registration namespace. %s will be synchronously added to the projectRegistrationNamespaceInitializationList", projectID, projectRegistrationNamespace, projectRegistrationNamespace)
+		h.projectRegistrationNamespaceInitializationList = append(h.projectRegistrationNamespaceInitializationList, projectRegistrationNamespace)
+	}
+
 	h.projectRegistrationNamespaceApplyinator.Apply(projectID)
 
 	return nil
@@ -250,9 +300,11 @@ func (h *handler) applyProjectRegistrationNamespace(projectID string) error {
 		// add orphaned label and trigger a warning
 		isOrphaned = true
 	}
+	logrus.Debugf("Calculated 'isOrphaned' to %v for %s", isOrphaned, projectID)
 
 	// get the resources and validate them
 	projectRegistrationNamespace := h.getProjectRegistrationNamespace(projectID, isOrphaned)
+	logrus.Debugf("Got project registration namespace '%s' for project %s", projectRegistrationNamespace.Name, projectID)
 	// ensure that the projectRegistrationNamespace created from this projectID is valid
 	if len(projectRegistrationNamespace.Name) > 63 {
 		// ensure that we don't try to create a namespace with too big of a name
@@ -271,6 +323,7 @@ func (h *handler) applyProjectRegistrationNamespace(projectID string) error {
 	if err != nil {
 		return fmt.Errorf("unable to get project registration namespace from cache after create: %s", err)
 	}
+	logrus.Debugf("Adding namespace %s to the global Project Registration namespace tracker", projectRegistrationNamespace.Name)
 	h.projectRegistrationNamespaceTracker.Set(projectRegistrationNamespace)
 
 	if projectRegistrationNamespace.DeletionTimestamp != nil {
@@ -313,11 +366,11 @@ func (h *handler) updateNamespaceWithHelmOperatorProjectLabel(namespace *corev1.
 		if namespace.Labels == nil {
 			return nil
 		}
-		if _, ok := namespace.Labels[common2.HelmProjectOperatorProjectLabel]; !ok {
+		if _, ok := namespace.Labels[common.HelmProjectOperatorProjectLabel]; !ok {
 			return nil
 		}
 		namespaceCopy := namespace.DeepCopy()
-		delete(namespaceCopy.Labels, common2.HelmProjectOperatorProjectLabel)
+		delete(namespaceCopy.Labels, common.HelmProjectOperatorProjectLabel)
 		_, err := h.namespaces.Update(namespaceCopy)
 		if err != nil {
 			return err
@@ -328,9 +381,9 @@ func (h *handler) updateNamespaceWithHelmOperatorProjectLabel(namespace *corev1.
 	if namespaceCopy.Labels == nil {
 		namespaceCopy.Labels = map[string]string{}
 	}
-	currLabel, ok := namespaceCopy.Labels[common2.HelmProjectOperatorProjectLabel]
+	currLabel, ok := namespaceCopy.Labels[common.HelmProjectOperatorProjectLabel]
 	if !ok || currLabel != projectID {
-		namespaceCopy.Labels[common2.HelmProjectOperatorProjectLabel] = projectID
+		namespaceCopy.Labels[common.HelmProjectOperatorProjectLabel] = projectID
 	}
 	_, err := h.namespaces.Update(namespaceCopy)
 	if err != nil {
