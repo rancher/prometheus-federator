@@ -2,6 +2,7 @@ package project
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/rancher/prometheus-federator/internal/helm-project-operator/apis/helm.cattle.io/v1alpha1"
 	"github.com/rancher/prometheus-federator/internal/helm-project-operator/controllers/common"
@@ -25,30 +26,45 @@ func (h *handler) getSubjectRoleToSubjectsFromBindings(projectHelmChart *v1alpha
 	for subjectRole := range defaultClusterRoles {
 		subjectRoleToSubjectMap[subjectRole] = make(map[string]rbacv1.Subject)
 	}
-	roleBindings, err := h.rolebindingCache.GetByIndex(
-		RoleBindingInRegistrationNamespaceByRoleRef,
-		NamespacedBindingReferencesDefaultOperatorRole(projectHelmChart.Namespace),
-	)
-	if err != nil {
-		return nil, err
+	
+	// apoorva debug
+	maxRetries := 5
+	retryDelay := 500 * time.Millisecond
+	
+	for i:=0; i<maxRetries; i++{
+		roleBindings, err := h.rolebindingCache.GetByIndex(
+				RoleBindingInRegistrationNamespaceByRoleRef,
+				NamespacedBindingReferencesDefaultOperatorRole(projectHelmChart.Namespace),
+		)
+		if err != nil {
+			return nil, err
+		}
+		
+		if len(roleBindings) > 0{
+			for _, rb := range roleBindings {
+				if rb == nil {
+					continue
+				}
+				subjectRole, isDefaultRoleRef := common.IsDefaultClusterRoleRef(h.opts, rb.RoleRef.Name)
+				if !isDefaultRoleRef {
+					logrus.Debugf("Role %s is not a default role for %s", subjectRole, projectHelmChart.Namespace)
+					continue
+				}
+				filteredSubjects := common.FilterToUsersAndGroups(rb.Subjects)
+				currSubjects := subjectRoleToSubjectMap[subjectRole]
+				for _, filteredSubject := range filteredSubjects {
+					// collect into a map to avoid putting duplicates of the same subject
+					// we use an index of kind and name since a Group can have the same name as a User, but should be considered separate
+					currSubjects[fmt.Sprintf("%s-%s", filteredSubject.Kind, filteredSubject.Name)] = filteredSubject
+				}
+			}
+		}
+		
+		logrus.Debugf("Retrying cache sync in %v for %v time", retryDelay, i)
+		time.Sleep(retryDelay)
 	}
-	for _, rb := range roleBindings {
-		if rb == nil {
-			continue
-		}
-		subjectRole, isDefaultRoleRef := common.IsDefaultClusterRoleRef(h.opts, rb.RoleRef.Name)
-		if !isDefaultRoleRef {
-			logrus.Debugf("Role %s is not a default role for %s", subjectRole, projectHelmChart.Namespace)
-			continue
-		}
-		filteredSubjects := common.FilterToUsersAndGroups(rb.Subjects)
-		currSubjects := subjectRoleToSubjectMap[subjectRole]
-		for _, filteredSubject := range filteredSubjects {
-			// collect into a map to avoid putting duplicates of the same subject
-			// we use an index of kind and name since a Group can have the same name as a User, but should be considered separate
-			currSubjects[fmt.Sprintf("%s-%s", filteredSubject.Kind, filteredSubject.Name)] = filteredSubject
-		}
-	}
+	
+	// Apoorva todo: Add same retry logic for clusterorlebinding cache sync too?
 	clusterRoleBindings, err := h.clusterrolebindingCache.GetByIndex(ClusterRoleBindingByRoleRef, BindingReferencesDefaultOperatorRole)
 	if err != nil {
 		return nil, err
