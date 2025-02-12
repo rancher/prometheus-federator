@@ -137,6 +137,8 @@ jobs:
           username: ${{ env.DOCKER_USERNAME }}
           password: ${{ env.DOCKER_PASSWORD }}
       - name : Export image version
+        env:
+          GIT_TAG: ${{ github.ref_name }}
         run : |
           source ./scripts/version
           echo IMAGE=$IMAGE >> $GITHUB_ENV
