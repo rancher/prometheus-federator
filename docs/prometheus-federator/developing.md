@@ -93,7 +93,7 @@ If you don't want to run all the steps in CI every time you make a change, you c
 REPO=<my-repo>
 TAG=<my-tag>
 
-./scripts/build-chart && GOOS=linux CGO_ENABLED=0 go build -ldflags "-extldflags -static -s" -o build/bin/prometheus-federator && REPO=${REPO} TAG=${TAG} make package
+./scripts/build-chart && GOOS=linux CGO_ENABLED=0 go build -ldflags "-extldflags -static -s" -o build/bin/prometheus-federator cmd/prometheus-federator/main.go && REPO=${REPO} TAG=${TAG} make package
 ```
 
 Once the image is successfully packaged, simply run `docker push ${REPO}/prometheus-federator:${TAG}` to push your image to your Docker repository.
@@ -101,6 +101,7 @@ Once the image is successfully packaged, simply run `docker push ${REPO}/prometh
 ## Testing a custom Docker image build
 
 1. Ensure that your `KUBECONFIG` environment variable is pointing to your cluster (e.g. `export KUBECONFIG=<path-to-kubeconfig>; kubectl get nodes` should show the nodes of your cluster) and pull in this repository locally
-2. Go to the root of your local copy of this repository and deploy the Prometheus Federator chart as a Helm 3 chart onto your cluster after overriding the image and tag values with your Docker repository and tag: run `helm upgrade --install --set image.repository="${REPO}/prometheus-federator" --set image.tag="${TAG}" --set image.pullPolicy=Always prometheus-federator -n cattle-monitoring-system charts/prometheus-federator`
+2. Go to the root of your local copy of this repository and deploy the Prometheus Federator chart as a Helm 3 chart onto your cluster after overriding the image and tag values with your Docker repository and tag: run `helm upgrade --install --set global.cattle.clusterId="local" --set image.repository="${REPO}/prometheus-federator" --set image.tag="${TAG}" --set image.pullPolicy=Always prometheus-federator -n cattle-monitoring-system charts/prometheus-federator`
 > Note: Why do we set the Image Pull Policy to `Always`? If you update the Docker image on your fork, setting the Image Pull Policy to `Always` ensures that running `kubectl rollout restart -n cattle-monitoring-system deployment/prometheus-federator` is all you need to do to update your running deployment to the new image, since this would ensure redeploying a deployment triggers a image pull that uses your most up-to-date Docker image. Also, since the underlying Helm chart deployed by the operator (e.g. `example-chart`) is directly embedded into the Helm Project Operator image, you also do not need to update the Deployment object itself to see all the HelmCharts in your cluster automatically be updated to the latest embedded version of the chart.
+> Note: Set the value of `global.cattle.clusterId` to the cluster in which you expect Prometheus Federator to be deployed (with the above `helm upgrade` command, we expect the chart to be deployed in `local` cluster).
 3. Profit!
