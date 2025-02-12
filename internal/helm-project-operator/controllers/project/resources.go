@@ -5,8 +5,8 @@ import (
 	"github.com/k3s-io/helm-controller/pkg/controllers/chart"
 	helmlockerv1alpha1 "github.com/rancher/prometheus-federator/internal/helm-locker/apis/helm.cattle.io/v1alpha1"
 	"github.com/rancher/prometheus-federator/internal/helm-locker/controllers/release"
-	"github.com/rancher/prometheus-federator/internal/helm-project-operator/apis/helm.cattle.io/v1alpha1"
-	common2 "github.com/rancher/prometheus-federator/internal/helm-project-operator/controllers/common"
+	v1alpha1 "github.com/rancher/prometheus-federator/internal/helm-project-operator/apis/helm.cattle.io/v1alpha1"
+	"github.com/rancher/prometheus-federator/internal/helm-project-operator/controllers/common"
 	v1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -33,13 +33,13 @@ func (h *handler) getHelmChart(projectID string, valuesContent string, projectHe
 			ValuesContent:   valuesContent,
 		},
 	})
-	helmChart.SetLabels(common2.GetHelmResourceLabels(projectID, projectHelmChart.Spec.HelmAPIVersion))
-	helmChartManagedByName := h.opts.ControllerName
-	if h.opts.DisableEmbeddedHelmController {
-		helmChartManagedByName = "helm-controller"
+	helmChart.SetLabels(common.GetHelmResourceLabels(projectID, projectHelmChart.Spec.HelmAPIVersion))
+	managedBy := "helm-controller"
+	if !h.opts.DisableEmbeddedHelmController {
+		managedBy = h.opts.ControllerName
 	}
 	helmChart.SetAnnotations(map[string]string{
-		chart.ManagedBy: helmChartManagedByName,
+		chart.ManagedBy: managedBy,
 	})
 	return helmChart
 }
@@ -56,7 +56,7 @@ func (h *handler) getHelmRelease(projectID string, projectHelmChart *v1alpha1.Pr
 			},
 		},
 	})
-	helmRelease.SetLabels(common2.GetHelmResourceLabels(projectID, projectHelmChart.Spec.HelmAPIVersion))
+	helmRelease.SetLabels(common.GetHelmResourceLabels(projectID, projectHelmChart.Spec.HelmAPIVersion))
 	helmRelease.SetAnnotations(map[string]string{
 		release.ManagedBy: h.opts.ControllerName,
 	})
@@ -72,8 +72,8 @@ func (h *handler) getProjectReleaseNamespace(projectID string, isOrphaned bool, 
 	projectReleaseNamespace := &v1.Namespace{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        releaseNamespace,
-			Annotations: common2.GetProjectNamespaceAnnotations(h.opts.ProjectReleaseLabelValue, h.opts.ProjectLabel, h.opts.ClusterID),
-			Labels:      common2.GetProjectNamespaceLabels(projectID, h.opts.ProjectLabel, h.opts.ProjectReleaseLabelValue, isOrphaned),
+			Annotations: common.GetProjectNamespaceAnnotations(h.opts.ProjectReleaseLabelValue, h.opts.ProjectLabel, h.opts.ClusterID),
+			Labels:      common.GetProjectNamespaceLabels(projectID, h.opts.ProjectLabel, h.opts.ProjectReleaseLabelValue, isOrphaned),
 		},
 	}
 	return projectReleaseNamespace
@@ -89,7 +89,7 @@ func (h *handler) getRoleBindings(projectID string, k8sRoleToRoleRefs map[string
 	var objs []runtime.Object
 	releaseNamespace, _ := h.getReleaseNamespaceAndName(projectHelmChart)
 
-	for subjectRole := range common2.GetDefaultClusterRoles(h.opts) {
+	for subjectRole := range common.GetDefaultClusterRoles(h.opts) {
 		// note: these role refs point to roles in the release namespace
 		roleRefs := k8sRoleToRoleRefs[subjectRole]
 		// note: these subjects are inferred from the rolebindings tied to the default roles in the registration namespace
@@ -103,7 +103,7 @@ func (h *handler) getRoleBindings(projectID string, k8sRoleToRoleRefs map[string
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      roleRef.Name,
 					Namespace: releaseNamespace,
-					Labels:    common2.GetCommonLabels(projectID),
+					Labels:    common.GetCommonLabels(projectID),
 				},
 				RoleRef:  roleRef,
 				Subjects: subjects,
