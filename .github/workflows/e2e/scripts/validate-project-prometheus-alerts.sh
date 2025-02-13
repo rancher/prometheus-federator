@@ -11,8 +11,8 @@ tmp_alert_rules_yaml=$(mktemp)
 trap 'cleanup' EXIT
 cleanup() {
     set +e
-    rm ${tmp_rules_yaml}
-    rm ${tmp_alert_rules_yaml}
+    rm "${tmp_rules_yaml}"
+    rm "${tmp_alert_rules_yaml}"
 }
 
 checkData() {
