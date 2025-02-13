@@ -44,8 +44,8 @@ else
       branchTag="${gitTag}"
       branchStaticTag="${gitTag}-${commitSha}"
   else
-      branchTag="dev-${commitSha}"
-      branchStaticTag="dev-${commitSha}"
+      branchTag="0.0.0-dev"
+      branchStaticTag="0.0.0-dev-${commitSha}"
   fi
 fi
 

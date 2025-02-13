@@ -136,12 +136,8 @@ jobs:
         name: Check if the Project Prometheus Stack is up
         run: ./.github/workflows/e2e/scripts/validate-project-monitoring.sh;
       -
-        name: Wait for 8 minutes for enough scraping to be done to continue
-        run: |
-          for i in {1..48}; do sleep 10; echo "Waited $((i*10)) seconds for metrics to be populated"...; done;
-      -
         name: Validate Project Prometheus Targets
-        run: ./.github/workflows/e2e/scripts/validate-project-prometheus-targets.sh;
+        run: KUBECTL_WAIT_TIMEOUT=480 ./.github/workflows/e2e/scripts/validate-project-prometheus-targets.sh;
       -
         name: Validate Project Grafana Datasources
         run: ./.github/workflows/e2e/scripts/validate-project-grafana-datasource.sh;
@@ -155,7 +151,7 @@ jobs:
       #    run: ./.github/workflows/e2e/scripts/validate-project-grafana-dashboard-data.sh;
       -
         name: Validate Project Prometheus Alerts
-        run: ./.github/workflows/e2e/scripts/validate-project-prometheus-alerts.sh;
+        run: KUBECTL_WAIT_TIMEOUT=480 ./.github/workflows/e2e/scripts/validate-project-prometheus-alerts.sh;
       -
         name: Validate Project Alertmanager
         run: ./.github/workflows/e2e/scripts/validate-project-alertmanager.sh;
