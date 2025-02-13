@@ -58,6 +58,13 @@ while true; do
           sleep "$DEFAULT_SLEEP_TIMEOUT_SECONDS"
           break
       fi
+      if ! grep "${expected_target}" "${tmp_targets_up_yaml}" | grep up; then
+          echo "ERROR: Expected '${expected_target}' to exist in 'up' state"
+
+          echo "Retrying in $DEFAULT_SLEEP_TIMEOUT_SECONDS seconds..."
+          sleep "$DEFAULT_SLEEP_TIMEOUT_SECONDS"
+          break
+      fi
       FOUND_TARGETS=$((FOUND_TARGETS+1))
   done
 
