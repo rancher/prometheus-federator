@@ -29,6 +29,7 @@ WAIT_TIMEOUT="${KUBECTL_WAIT_TIMEOUT%s}"
 START_TIME=$(date +%s)
 while true; do
   checkData
+  CHECKS_PASSED=0
 
   # Check if timeout has been reached
   CURRENT_TIME=$(date +%s)
@@ -47,6 +48,8 @@ while true; do
     sleep "$DEFAULT_SLEEP_TIMEOUT_SECONDS"
     continue
   fi
+  CHECKS_PASSED=$((CHECKS_PASSED+1))
+
 
   if [[ $(yq '.[0].labels.alertname' "${tmp_alert_rules_yaml}") != "Watchdog" ]]; then
       echo "ERROR: Expected the only alert to be triggered on the Project Prometheus to be 'Watchdog'"
@@ -57,8 +60,9 @@ while true; do
       sleep "$DEFAULT_SLEEP_TIMEOUT_SECONDS"
       continue
   fi
+  CHECKS_PASSED=$((CHECKS_PASSED+1))
 
-  if [[ $FOUND_TARGETS -eq 4 ]];then
+  if [[ $CHECKS_PASSED -eq 2 ]];then
     # Get final elapsed time
     ELAPSED_TIME=$((CURRENT_TIME - START_TIME))
     break
