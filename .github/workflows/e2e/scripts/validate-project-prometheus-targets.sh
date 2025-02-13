@@ -34,7 +34,7 @@ while true; do
   CURRENT_TIME=$(date +%s)
   ELAPSED_TIME=$((CURRENT_TIME - START_TIME))
   if [[ $ELAPSED_TIME -ge $WAIT_TIMEOUT ]]; then
-      echo "Error: Timeout reached, condition not met."
+      echo "ERROR: Timeout reached, condition not met."
       exit 1
   fi
 
@@ -53,6 +53,13 @@ while true; do
   for expected_target in federate cattle-project-p-example-m-alertmanager cattle-project-p-example-m-prometheus cattle-project-p-example-monitoring-grafana; do
       if ! grep "${expected_target}" "${tmp_targets_up_yaml}"; then
           echo "ERROR: Expected '${expected_target}' to exist amongst 4 targets in Project Prometheus"
+
+          echo "Retrying in $DEFAULT_SLEEP_TIMEOUT_SECONDS seconds..."
+          sleep "$DEFAULT_SLEEP_TIMEOUT_SECONDS"
+          break
+      fi
+      if ! grep "${expected_target}" "${tmp_targets_up_yaml}" | grep up; then
+          echo "ERROR: Expected '${expected_target}' to exist in 'up' state"
 
           echo "Retrying in $DEFAULT_SLEEP_TIMEOUT_SECONDS seconds..."
           sleep "$DEFAULT_SLEEP_TIMEOUT_SECONDS"

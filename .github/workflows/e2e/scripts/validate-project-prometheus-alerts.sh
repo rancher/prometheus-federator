@@ -35,7 +35,7 @@ while true; do
   CURRENT_TIME=$(date +%s)
   ELAPSED_TIME=$((CURRENT_TIME - START_TIME))
   if [[ $ELAPSED_TIME -ge $WAIT_TIMEOUT ]]; then
-      echo "Error: Timeout reached, condition not met."
+      echo "ERROR: Timeout reached, condition not met."
       exit 1
   fi
 
