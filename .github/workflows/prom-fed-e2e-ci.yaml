@@ -46,28 +46,7 @@ permissions:
   contents: write
 
 jobs:
-  prebuild-env:
-    name: Prebuild needed Env vars
-    strategy:
-      matrix:
-        arch:
-          - x64
-          - arm64
-    runs-on : runs-on,image=ubuntu22-full-${{ matrix.arch }},runner=4cpu-linux-${{ matrix.arch }},run-id=${{ github.run_id }}
-    steps:
-      - name: Check out the repository to the runner
-        uses: actions/checkout@v4
-      - name: Set Branch Tag and Other Variables
-        id: set-vars
-        run: bash ./.github/scripts/branch-tags.sh >> $GITHUB_OUTPUT
-    outputs:
-      branch_tag: ${{ steps.set-vars.outputs.branch_tag }}
-      branch_static_tag: ${{ steps.set-vars.outputs.branch_static_tag }}
-      prev_tag: ${{ steps.set-vars.outputs.prev_tag }}
   e2e-prometheus-federator:
-    needs: [
-      prebuild-env,
-    ]
     strategy:
       matrix:
         arch:
