@@ -75,6 +75,7 @@ jobs:
       - name : Export image version
         run : |
           source ./scripts/version
+          echo TAG=$TAG >> $GITHUB_ENV
           echo IMAGE=$IMAGE >> $GITHUB_ENV
       -
         name: Perform pre-e2e image build
