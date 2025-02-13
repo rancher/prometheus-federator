@@ -154,7 +154,7 @@ jobs:
         run: ./.github/workflows/e2e/scripts/validate-project-prometheus-alerts.sh;
       -
         name: Validate Project Alertmanager
-        run: ./.github/workflows/e2e/scripts/validate-project-alertmanager.sh;
+        run: KUBECTL_WAIT_TIMEOUT=480 ./.github/workflows/e2e/scripts/validate-project-alertmanager.sh;
       -
         name: Delete Project Prometheus Stack
         run: ./.github/workflows/e2e/scripts/delete-projecthelmchart.sh;
