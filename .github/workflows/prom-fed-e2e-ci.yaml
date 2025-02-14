@@ -52,9 +52,6 @@ jobs:
         arch:
           - x64
           - arm64
-        k3s_version:
-          # k3d version list k3s | sed 's/+/-/' | sort -h
-          - ${{ github.event.inputs.k3s_version || 'v1.28.14-k3s1' }}
     runs-on : runs-on,image=ubuntu22-full-${{ matrix.arch }},runner=4cpu-linux-${{ matrix.arch }},run-id=${{ github.run_id }}
     steps:
       -
@@ -77,6 +74,10 @@ jobs:
           source ./scripts/version
           echo TAG=$TAG >> $GITHUB_ENV
           echo IMAGE=$IMAGE >> $GITHUB_ENV
+      - name: Set K3S Min/Max Versions
+        run: bash ./scripts/k3s-version >> $GITHUB_ENV
+      - name: Set K3S_VERSION
+        run: echo "K3S_VERSION=${{ inputs.k3s_version || env.K3S_MIN_VERSION_TAG }}" >> $GITHUB_ENV
       -
         name: Perform pre-e2e image build
         run: |
@@ -87,7 +88,7 @@ jobs:
         run : ./.github/workflows/e2e/scripts/install-k3d.sh
       -
         name : Setup k3d cluster
-        run : K3S_VERSION=${{ matrix.k3s_version }} ./.github/workflows/e2e/scripts/setup-cluster.sh
+        run : ./.github/workflows/e2e/scripts/setup-cluster.sh
       -
         name: Import Images Into k3d
         run: |

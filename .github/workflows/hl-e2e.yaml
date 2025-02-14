@@ -23,7 +23,7 @@ on:
 
 env:
   CLUSTER_NAME : e2e-ci-helm-locker
-  K3S_VERSION : v1.27.9-k3s1
+  YQ_VERSION: v4.25.1
 
 jobs:
   build:
@@ -45,6 +45,13 @@ jobs:
       - uses: azure/setup-helm@v3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Install mikefarah/yq
+        run: |
+          sudo wget https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_${{ matrix.arch == 'x64' && 'amd64' || matrix.arch  }} -O /usr/bin/yq && sudo chmod +x /usr/bin/yq;
+      - name: Set K3S Min/Max Versions
+        run: bash ./scripts/k3s-version >> $GITHUB_ENV
+      - name: Set K3S_VERSION
+        run: echo "K3S_VERSION=$K3S_MIN_VERSION_TAG" >> $GITHUB_ENV
       - name: build
         run: BUILD_TARGET=helm-locker make build
       - name : Install k3d
