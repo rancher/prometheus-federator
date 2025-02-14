@@ -111,7 +111,7 @@ header "Check if the Project Prometheus Stack is up"
 
 # Validate Project Prometheus Targets
 header "Validate Project Prometheus Targets"
-KUBECTL_WAIT_TIMEOUT=480 ./.github/workflows/e2e/scripts/validate-project-prometheus-targets.sh;
+KUBECTL_WAIT_TIMEOUT=480s ./.github/workflows/e2e/scripts/validate-project-prometheus-targets.sh;
 
 # Validate Project Grafana Datasources
 header "Validate Project Grafana Datasources"
@@ -119,7 +119,7 @@ header "Validate Project Grafana Datasources"
 
 # Validate Project Grafana Dashboards
 header "Validate Project Grafana Dashboards"
-KUBECTL_WAIT_TIMEOUT=480 ./.github/workflows/e2e/scripts/validate-project-grafana-dashboards.sh;
+KUBECTL_WAIT_TIMEOUT=480s ./.github/workflows/e2e/scripts/validate-project-grafana-dashboards.sh;
 
 # Validate Project Prometheus Alerts
 header "Validate Project Prometheus Alerts"
