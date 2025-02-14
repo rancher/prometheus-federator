@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-DONT_CLEAN=false
+DONT_CLEAN=${DONT_CLEAN:-false}
 
 header() {
   local text="$1"
@@ -22,7 +22,7 @@ cleanupTest() {
 }
 
 onExit() {
-  if [[ "$?" -eq 0 ]]; then
+  if [[ "$?" -eq 0 ]] || [ "$DONT_CLEAN" == true ]; then
     exit 0
   fi
 
@@ -30,14 +30,15 @@ onExit() {
 }
 trap onExit EXIT
 
-source $(dirname $0)/version
+source "$(dirname "$0")/version"
+source "$(dirname "$0")/k3s-version"
 
-cd $(dirname $0)/..
+cd "$(dirname "$0")/.."
 
 # Setup CI specific Vars
 export CLUSTER_NAME='e2e-ci-prometheus-federator'
 export E2E_CI=true
-export K3S_VERSION=${K3S_VERSION:-v1.28.14-k3s1}
+export K3S_VERSION=${K3S_VERSION:-${K3S_MIN_VERSION/+/-}}
 
 if k3d cluster list $CLUSTER_NAME 2> /dev/null; then
   echo "The test cluster '$CLUSTER_NAME' already exists for some reason"
@@ -128,6 +129,13 @@ header "Validate Project Prometheus Alerts"
 header "Validate Project Alertmanager"
 ./.github/workflows/e2e/scripts/validate-project-alertmanager.sh;
 
+### ALL LOGIC ABOVE THIS
+if [ "$DONT_CLEAN" == true ]; then
+  header "Local e2e testing was a SUCCESS"
+  header "Exiting early, to leave cluster for testing"
+  exit;
+fi
+
 # Delete Project Prometheus Stack
 header "Delete Project Prometheus Stack"
 ./.github/workflows/e2e/scripts/delete-projecthelmchart.sh;
@@ -137,8 +145,4 @@ header "Uninstall Prometheus Federator"
 ./.github/workflows/e2e/scripts/uninstall-federator.sh;
 
 header "Local e2e testing was a SUCCESS"
-### ALL LOGIC ABOVE THIS
-if [ "$DONT_CLEAN" = true ]; then
-  exit;
-fi
 cleanupTest
