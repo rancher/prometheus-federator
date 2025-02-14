@@ -62,9 +62,10 @@ jobs:
         with:
           go-version: '>=1.20.0'
       - uses: azure/setup-kubectl@v4
-      - uses: azure/setup-helm@v4
+      - name : Install helm
+        uses: azure/setup-helm@v3
         with:
-          version: v3.11.1
+          token: ${{ secrets.GITHUB_TOKEN }}
       -
         name: Install mikefarah/yq
         run: |
