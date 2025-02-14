@@ -50,12 +50,6 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Set K3S Min/Max Versions
-        id: set-vars
-        run: bash ./scripts/k3s-version >> $GITHUB_ENV
-      - name: Set K3S_VERSION
-        id: set-vars
-        run: echo "K3S_VERSION=${{ inputs.k3s_version || env.K3S_MIN_VERSION }}" >> $GITHUB_ENV
       - name : setup Go
         uses : actions/setup-go@v5
         with:
@@ -63,6 +57,12 @@ jobs:
       - name: Install mikefarah/yq
         run: |
           sudo wget https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_${{ matrix.arch == 'x64' && 'amd64' || matrix.arch  }} -O /usr/bin/yq && sudo chmod +x /usr/bin/yq;
+      - name: Set K3S Min/Max Versions
+        id: set-vars
+        run: bash ./scripts/k3s-version >> $GITHUB_ENV
+      - name: Set K3S_VERSION
+        id: set-vars
+        run: echo "K3S_VERSION=${{ inputs.k3s_version || env.K3S_MIN_VERSION }}" >> $GITHUB_ENV
       - name: Perform pre-e2e image build
         run: |
           BUILD_TARGET=helm-project-operator REPO=${REPO} TAG=${TAG} ./scripts/build;
