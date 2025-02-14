@@ -114,7 +114,7 @@ jobs:
         run: ./.github/workflows/e2e/scripts/create-project-namespace.sh;
       -
         name: Create Project Monitoring Stack via ProjectHelmChart CR
-        run: DEFAULT_SLEEP_TIMEOUT_SECONDS=20 ./.github/workflows/e2e/scripts/create-projecthelmchart.sh;
+        run: DEFAULT_SLEEP_TIMEOUT_SECONDS=20 KUBECTL_WAIT_TIMEOUT=480s ./.github/workflows/e2e/scripts/create-projecthelmchart.sh;
       -
         name: Check if the Project Prometheus Stack is up
         run: ./.github/workflows/e2e/scripts/validate-project-monitoring.sh;
