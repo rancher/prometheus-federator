@@ -44,8 +44,6 @@ jobs:
           - x64
           - arm64
     runs-on : runs-on,image=ubuntu22-full-${{ matrix.arch }},runner=4cpu-linux-${{ matrix.arch }},run-id=${{ github.run_id }}
-    env:
-      K3S_VERSION: ${{ matrix.k3s_version }}
     steps:
       - uses: actions/checkout@v4
         with:
