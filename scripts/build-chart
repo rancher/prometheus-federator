@@ -19,7 +19,7 @@ cd $(dirname $0)/..
 if [ "$BUILD_TARGET" == "prometheus-federator" ]; then
   DEFAULT_CHART_TARGET="rancher-project-monitoring"
 elif [ "$BUILD_TARGET" == "helm-project-operator" ]; then
-  DEFAULT_CHART_TARGET="project-operator-example"
+  DEFAULT_CHART_TARGET="example-chart"
 fi
 
 CHART=${CHART:-${DEFAULT_CHART_TARGET}}
@@ -30,18 +30,17 @@ if [ "$BUILD_TARGET" == "prometheus-federator" ]; then
   CHART_DESTINATION="./build/charts/${CHART}-${CHART_VERSION}.tgz"
 
   # Prepare chart for embedding location
-  base64 -i "${CHART_DESTINATION}" > "cmd/${BUILD_TARGET}/fs/${CHART}.tgz.base64"
+  base64 -i $CHART_DESTINATION > "cmd/prometheus-federator/fs/${CHART}.tgz.base64"
 elif [ "$BUILD_TARGET" == "helm-project-operator" ]; then
   # Prepare base chart for build
   clean-old-charts "$CHART"
   cp -rf "examples/${BUILD_TARGET}/${CHART}" build/charts/
-
+  CHART_DESTINATION="./build/charts/${CHART}-${HELM_CHART_VERSION}.tgz"
   # Update the chart placeholders
   edit-chart "build/charts/${CHART}/Chart.yaml" "${HELM_CHART_VERSION}" "${HELM_IMAGE_TAG}"
   package-chart "./build/charts/${CHART}" ./build/charts
-
   # Prepare chart for embedding location
-  base64 -i "./build/charts/${CHART}-${HELM_CHART_VERSION}.tgz" > "cmd/${BUILD_TARGET}/fs/${CHART}.tgz.base64"
+  base64 -i $CHART_DESTINATION > "cmd/helm-project-operator/fs/${CHART}.tgz.base64"
 fi
 
 echo "Completed ${CHART} (ver: ${HELM_CHART_VERSION:-"n/a"}) chart build process."
