@@ -151,7 +151,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: artifacts-${{ matrix.arch }}-${{ matrix.k3s_version }}
+          name: artifacts-${{ matrix.arch }}-${{ inputs.k3s_version || env.K3S_MIN_VERSION_TAG }}
           path: artifacts/
           retention-days: 1
       - 
