@@ -38,7 +38,7 @@ cd "$(dirname "$0")/.."
 # Setup CI specific Vars
 export CLUSTER_NAME='e2e-ci-prometheus-federator'
 export E2E_CI=true
-export K3S_VERSION=${K3S_VERSION:-${K3S_MIN_VERSION/+/-}}
+export K3S_VERSION=${K3S_VERSION:-$K3S_MIN_VERSION_TAG}
 
 if k3d cluster list $CLUSTER_NAME 2> /dev/null; then
   echo "The test cluster '$CLUSTER_NAME' already exists for some reason"

@@ -10,6 +10,8 @@ export K3S_MIN_VERSION=$(yq '.k3sTestingMinVersion' $BUILD_YAML)
 
 function print_version_debug() {
     echo "K3S_MAX_VERSION=$K3S_MAX_VERSION"
+    echo "K3S_MAX_VERSION_TAG=${K3S_MAX_VERSION/+/-}"
     echo "K3S_MIN_VERSION=$K3S_MIN_VERSION"
+    echo "K3S_MIN_VERSION_TAG=${K3S_MIN_VERSION/+/-}"
 }
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then print_version_debug "$1"; fi
