@@ -51,7 +51,7 @@ jobs:
       - name: Set K3S Min/Max Versions
         run: bash ./scripts/k3s-version >> $GITHUB_ENV
       - name: Set K3S_VERSION
-        run: echo "K3S_VERSION=$K3S_MIN_VERSION" >> $GITHUB_ENV
+        run: echo "K3S_VERSION=$K3S_MIN_VERSION_TAG" >> $GITHUB_ENV
       - name: build
         run: BUILD_TARGET=helm-locker make build
       - name : Install k3d

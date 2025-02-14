@@ -77,7 +77,7 @@ jobs:
       - name: Set K3S Min/Max Versions
         run: bash ./scripts/k3s-version >> $GITHUB_ENV
       - name: Set K3S_VERSION
-        run: echo "K3S_VERSION=${{ inputs.k3s_version || env.K3S_MIN_VERSION }}" >> $GITHUB_ENV
+        run: echo "K3S_VERSION=${{ inputs.k3s_version || env.K3S_MIN_VERSION_TAG }}" >> $GITHUB_ENV
       -
         name: Perform pre-e2e image build
         run: |
