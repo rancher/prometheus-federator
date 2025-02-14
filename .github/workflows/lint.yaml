@@ -23,12 +23,9 @@ jobs:
         with:
           go-version: '1.22'
       - name : Install helm
-        run : |
-          curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
-          chmod 700 get_helm.sh
-          ./get_helm.sh
-          helm version
-          rm get_helm.sh
+        uses: azure/setup-helm@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
       - name: Package helm chart
         run : ./scripts/build-chart && BUILD_TARGET=helm-project-operator ./scripts/build-chart
       - name: golangci-lint
