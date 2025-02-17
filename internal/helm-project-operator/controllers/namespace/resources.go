@@ -27,6 +27,22 @@ func (h *handler) getProjectRegistrationNamespace(projectID string, isOrphaned b
 	}
 }
 
+// isNamedAsProjectRegistrationNamespace checks if a namespace is named as a project registration namespace 'cattle-project-projectID'
+func (h *handler) isNamedAsProjectRegistrationNamespace(ns *corev1.Namespace) bool {
+	projectID := ns.Labels[common.HelmProjectOperatorProjectLabel]
+	if projectID == "" {
+		return false
+	}
+
+	expectedProjectRegistrationNamespaceName := fmt.Sprintf(common.ProjectRegistrationNamespaceFmt, projectID)
+
+	if expectedProjectRegistrationNamespaceName != ns.Name {
+		return false
+	}
+
+	return true
+}
+
 // getConfigMap returns the values.yaml and questions.yaml ConfigMap that is expected to be created in all Project Registration Namespaces
 func (h *handler) getConfigMap(projectID string, namespace *corev1.Namespace) *corev1.ConfigMap {
 	return &corev1.ConfigMap{
