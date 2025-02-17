@@ -103,7 +103,7 @@ header "Verifying Prom Fed is UP"
 
 # Create Project Monitoring Stack via ProjectHelmChart CR
 header "Create Project Monitoring Stack via ProjectHelmChart CR"
-DEFAULT_SLEEP_TIMEOUT_SECONDS=20 ./.github/workflows/e2e/scripts/create-projecthelmchart.sh;
+DEFAULT_SLEEP_TIMEOUT_SECONDS=20 KUBECTL_WAIT_TIMEOUT=480s ./.github/workflows/e2e/scripts/create-projecthelmchart.sh;
 
 # Check if the Project Prometheus Stack is up
 header "Check if the Project Prometheus Stack is up"
