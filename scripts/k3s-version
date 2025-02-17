@@ -6,12 +6,14 @@ PROJECT_ROOT="$(dirname $(dirname $SCRIPT_PATH))"
 BUILD_YAML="$PROJECT_ROOT/build.yaml"
 
 export K3S_MAX_VERSION=$(yq '.k3sTestingMaxVersion' $BUILD_YAML)
+export K3S_MAX_VERSION_TAG=${K3S_MAX_VERSION/+/-}
 export K3S_MIN_VERSION=$(yq '.k3sTestingMinVersion' $BUILD_YAML)
+export K3S_MIN_VERSION_TAG=${K3S_MIN_VERSION/+/-}
 
 function print_version_debug() {
     echo "K3S_MAX_VERSION=$K3S_MAX_VERSION"
-    echo "K3S_MAX_VERSION_TAG=${K3S_MAX_VERSION/+/-}"
+    echo "K3S_MAX_VERSION_TAG=$K3S_MAX_VERSION_TAG"
     echo "K3S_MIN_VERSION=$K3S_MIN_VERSION"
-    echo "K3S_MIN_VERSION_TAG=${K3S_MIN_VERSION/+/-}"
+    echo "K3S_MIN_VERSION_TAG=$K3S_MIN_VERSION_TAG"
 }
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then print_version_debug "$1"; fi
