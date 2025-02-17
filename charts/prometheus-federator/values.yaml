@@ -203,8 +203,8 @@ helmProjectOperator:
 
   cleanup:
     image:
-      repository: rancher/shell
-      tag: v0.1.19
+      repository: rancher/kuberlr-kubectl
+      tag: v4.0.2
       pullPolicy: IfNotPresent
 
     ## Define which Nodes the Pods are scheduled on.
