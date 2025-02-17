@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/rancher/prometheus-federator/internal/helm-project-operator/controllers/common"
 	common2 "github.com/rancher/prometheus-federator/internal/helm-project-operator/controllers/common"
 
 	corev1 "k8s.io/api/core/v1"
@@ -26,6 +27,22 @@ func (h *handler) getProjectRegistrationNamespace(projectID string, isOrphaned b
 			Labels:      common2.GetProjectNamespaceLabels(projectID, h.opts.ProjectLabel, projectID, isOrphaned),
 		},
 	}
+}
+
+// isNamedAsProjectRegistrationNamespace checks if a namespace is named as a project registration namespace 'cattle-project-projectID'
+func (h *handler) isNamedAsProjectRegistrationNamespace(ns *corev1.Namespace) bool {
+	projectID := ns.Labels[common.HelmProjectOperatorProjectLabel]
+	if projectID == "" {
+		return false
+	}
+
+	expectedProjectRegistrationNamespaceName := fmt.Sprintf(common.ProjectRegistrationNamespaceFmt, projectID)
+
+	if expectedProjectRegistrationNamespaceName != ns.Name {
+		return false
+	}
+
+	return true
 }
 
 // getConfigMap returns the values.yaml and questions.yaml ConfigMap that is expected to be created in all Project Registration Namespaces

@@ -161,13 +161,13 @@ func (h *handler) shouldManage(projectHelmChart *v1alpha2.ProjectHelmChart) bool
 		//
 		// Note: we know that this error would only happen if the namespace is not found since the only valid error returned from this
 		// call is errors.NewNotFound(c.resource, name)
-		logrus.Warnf("ProjectHelmChart %s/%s has invalid namespace. It will not be managed by this controller.", projectHelmChart.Name, projectHelmChart.Namespace)
+		logrus.Debugf("ProjectHelmChart %s/%s has invalid namespace. It will not be managed by this controller.", projectHelmChart.Name, projectHelmChart.Namespace)
 		return false
 	}
 	isProjectRegistrationNamespace := h.projectGetter.IsProjectRegistrationNamespace(namespace)
 	if !isProjectRegistrationNamespace {
 		// only watching resources in registered namespaces
-		logrus.Warnf("ProjectHelmChart %s/%s does not live in a project registration namespace. It will not be managed by this controller.", projectHelmChart.Name, projectHelmChart.Namespace)
+		logrus.Debugf("ProjectHelmChart %s/%s does not live in a project registration namespace. It will not be managed by this controller.", projectHelmChart.Name, projectHelmChart.Namespace)
 		return false
 	}
 	if projectHelmChart.Spec.HelmAPIVersion != h.opts.HelmAPIVersion {
@@ -349,7 +349,6 @@ func (h *handler) OnRemove(_ string, projectHelmChart *v1alpha2.ProjectHelmChart
 	logrus.Debugf("Handling ProjectHelmChart %s/%s removal.", projectHelmChart.Name, projectHelmChart.Namespace)
 
 	if projectHelmChart == nil {
-		logrus.Debugf("ProjectHelmChart %s/%s is nil. Canceling removal.", projectHelmChart.Name, projectHelmChart.Namespace)
 		return nil, nil
 	}
 
