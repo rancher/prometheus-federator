@@ -76,7 +76,7 @@ func Register(
 	// note: this implements a workqueue that ensures that applies only happen once at a time even if a bunch of namespaces in a project
 	// are all re-enqueued at the exact same time
 	h.projectRegistrationNamespaceApplyinator = applier.NewApplyinator("project-registration-namespace-applyinator", h.applyProjectRegistrationNamespace, nil)
-	h.projectRegistrationNamespaceApplyinator.Run(ctx, 2)
+	h.projectRegistrationNamespaceApplyinator.Run(ctx, 3)
 	// TODO: make number of workers configurable via charts
 
 	h.apply = h.addReconcilers(h.apply, dynamic)
@@ -110,7 +110,7 @@ func Register(
 
 	compareNamespaceErr := retry.OnError(
 		wait.Backoff{
-			Steps:    10,               // number of retries TODO: make this configurable via charts
+			Steps:    20,               // number of retries TODO: make this configurable via charts
 			Duration: 10 * time.Second, // wait between each retry
 			Factor:   1.0,
 		},
@@ -274,12 +274,13 @@ func (h *handler) applyProjectRegistrationNamespaceForNamespace(namespace *corev
 	// not only the names, but the current state of the namespaces
 	// as well. So they have to be updated before getting added to
 	// the tracker
-	if h.isNamedAsProjectRegistrationNamespace(namespace) {
-		if !slices.Contains(h.projectRegistrationNamespaceSynchronousList, namespace.Name) {
-			logrus.Debugf("Namespace %s is named as a project registration namespace and will be synchronously added to the projectRegistrationNamespaceSynchronousList", namespace.Name)
-			h.projectRegistrationNamespaceSynchronousList = append(h.projectRegistrationNamespaceSynchronousList, namespace.Name)
-		}
+	projectRegistrationNamespace := h.getProjectRegistrationNamespaceName(projectID)
+	if !slices.Contains(h.projectRegistrationNamespaceSynchronousList, projectRegistrationNamespace) {
+		logrus.Debugf("Triggered by namespace %s", namespace.Name)
+		logrus.Debugf("Project %s found to have %s as its project registration namespace. %s will be synchronously added to the projectRegistrationNamespaceSynchronousList", projectID, projectRegistrationNamespace, projectRegistrationNamespace)
+		h.projectRegistrationNamespaceSynchronousList = append(h.projectRegistrationNamespaceSynchronousList, projectRegistrationNamespace)
 	}
+
 	h.projectRegistrationNamespaceApplyinator.Apply(projectID)
 
 	return nil
