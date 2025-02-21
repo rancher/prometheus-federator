@@ -120,7 +120,7 @@ func Register(ctx context.Context, systemNamespace string, cfg clientcmd.ClientC
 		)
 	}
 
-	logrus.Debug("Registering namespace controller")
+	logrus.Debug("Registering namespace controller...")
 	projectGetter := namespace.Register(ctx,
 		appCtx.Apply,
 		systemNamespace,
