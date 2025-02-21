@@ -69,8 +69,6 @@ func Register(
 	rolebindingCache rbaccontroller.RoleBindingCache,
 	projectGetter namespace.ProjectGetter,
 ) {
-
-	logrus.Debugf("running apply inside Project Controller register")
 	apply = apply.
 		// Why do we need the release name?
 		// To ensure that we don't override the set created by another instance of the Project Operator
@@ -105,10 +103,8 @@ func Register(
 		projectGetter:           projectGetter,
 	}
 
-	logrus.Debugf("Initializing indexers inside Project Controller register")
 	h.initIndexers()
 
-	logrus.Debugf("Initializing resolvers inside Project Controller register")
 	h.initResolvers(ctx)
 
 	// Why do we need to add the managedBy string to the generatingHandlerName?
@@ -220,7 +216,7 @@ func (h *handler) OnChange(projectHelmChart *v1alpha2.ProjectHelmChart, projectH
 	// get information about the projectHelmChart
 	projectID, err := h.getProjectID(projectHelmChart)
 	if err != nil {
-		logrus.Errorf("failed to get project id from project helm chart : %s", err)
+		logrus.Warnf("failed to get project id from project helm chart : %s", err)
 		return nil, projectHelmChartStatus, err
 	}
 	releaseNamespace, releaseName := h.getReleaseNamespaceAndName(projectHelmChart)

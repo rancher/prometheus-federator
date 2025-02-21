@@ -29,9 +29,9 @@ type handler struct {
 	questionsYaml   string
 	opts            common.Options
 
-	systemNamespaceTracker                      Tracker
-	projectRegistrationNamespaceTracker         Tracker
-	projectRegistrationNamespaceSynchronousList []string
+	systemNamespaceTracker                         Tracker
+	projectRegistrationNamespaceTracker            Tracker
+	projectRegistrationNamespaceInitializationList []string
 
 	namespaces            corecontroller.NamespaceController
 	namespaceCache        corecontroller.NamespaceCache
@@ -65,7 +65,7 @@ func Register(
 		opts:                                opts,
 		systemNamespaceTracker:              NewTracker(),
 		projectRegistrationNamespaceTracker: NewTracker(),
-		projectRegistrationNamespaceSynchronousList: []string{},
+		projectRegistrationNamespaceInitializationList: []string{},
 		namespaces:            namespaces,
 		namespaceCache:        namespaceCache,
 		configmaps:            configmaps,
@@ -115,10 +115,10 @@ func Register(
 			Factor:   1.0,
 		},
 		func(err error) bool {
-			logrus.Warnf("Registered Project Registration namespaces don't match expected, will retry. Registered: %v. Expected: %v.", h.projectRegistrationNamespaceTracker.List(), h.projectRegistrationNamespaceSynchronousList)
+			logrus.Warnf("Registered Project Registration namespaces don't match expected, will retry. Registered: %v. Expected: %v.", h.projectRegistrationNamespaceTracker.List(), h.projectRegistrationNamespaceInitializationList)
 			return true
 		}, func() error {
-			return h.projectRegistrationNamespaceTracker.Compare(h.projectRegistrationNamespaceSynchronousList)
+			return h.projectRegistrationNamespaceTracker.Compare(h.projectRegistrationNamespaceInitializationList)
 		})
 	if compareNamespaceErr != nil {
 		logrus.Fatal("The operator has failed registering all project registration namespace into its Tracker in a timely manner. Please bump the number of namespace workers or increase the number of retries.")
@@ -176,11 +176,6 @@ func (h *handler) OnMultiNamespaceChange( /*name*/ _ string, namespace *corev1.N
 		if namespace.DeletionTimestamp != nil {
 			logrus.Debugf("%s has deletion timestamp %v in isProjectRegistrationNamespace()", namespace, namespace.DeletionTimestamp)
 			h.projectRegistrationNamespaceTracker.Delete(namespace)
-			for i, v := range h.projectRegistrationNamespaceSynchronousList {
-				if v == namespace.Name {
-					h.projectRegistrationNamespaceSynchronousList = slices.Delete(h.projectRegistrationNamespaceSynchronousList, i, i+1)
-				}
-			}
 		}
 		return namespace, nil
 	case h.isSystemNamespace(namespace):
@@ -275,10 +270,10 @@ func (h *handler) applyProjectRegistrationNamespaceForNamespace(namespace *corev
 	// as well. So they have to be updated before getting added to
 	// the tracker
 	projectRegistrationNamespace := h.getProjectRegistrationNamespaceName(projectID)
-	if !slices.Contains(h.projectRegistrationNamespaceSynchronousList, projectRegistrationNamespace) {
+	if !slices.Contains(h.projectRegistrationNamespaceInitializationList, projectRegistrationNamespace) {
 		logrus.Debugf("Triggered by namespace %s", namespace.Name)
-		logrus.Debugf("Project %s found to have %s as its project registration namespace. %s will be synchronously added to the projectRegistrationNamespaceSynchronousList", projectID, projectRegistrationNamespace, projectRegistrationNamespace)
-		h.projectRegistrationNamespaceSynchronousList = append(h.projectRegistrationNamespaceSynchronousList, projectRegistrationNamespace)
+		logrus.Debugf("Project %s found to have %s as its project registration namespace. %s will be synchronously added to the projectRegistrationNamespaceInitializationList", projectID, projectRegistrationNamespace, projectRegistrationNamespace)
+		h.projectRegistrationNamespaceInitializationList = append(h.projectRegistrationNamespaceInitializationList, projectRegistrationNamespace)
 	}
 
 	h.projectRegistrationNamespaceApplyinator.Apply(projectID)
