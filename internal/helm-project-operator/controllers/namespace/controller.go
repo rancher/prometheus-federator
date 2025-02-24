@@ -76,8 +76,8 @@ func Register(
 	// note: this implements a workqueue that ensures that applies only happen once at a time even if a bunch of namespaces in a project
 	// are all re-enqueued at the exact same time
 	h.projectRegistrationNamespaceApplyinator = applier.NewApplyinator("project-registration-namespace-applyinator", h.applyProjectRegistrationNamespace, nil)
-	h.projectRegistrationNamespaceApplyinator.Run(ctx, 3)
-	// TODO: make number of workers configurable via charts
+	h.projectRegistrationNamespaceApplyinator.Run(ctx, opts.NamespaceWorkers)
+	logrus.Debugf("Initializing namespace applyinator with %d namespace workers", opts.NamespaceWorkers)
 
 	h.apply = h.addReconcilers(h.apply, dynamic)
 
@@ -110,8 +110,8 @@ func Register(
 
 	compareNamespaceErr := retry.OnError(
 		wait.Backoff{
-			Steps:    20,               // number of retries TODO: make this configurable via charts
-			Duration: 10 * time.Second, // wait between each retry
+			Steps:    opts.NamespaceRegistrationRetryMax,
+			Duration: time.Duration(opts.NamespaceRegistrationRetryWaitMilliseconds) * time.Millisecond,
 			Factor:   1.0,
 		},
 		func(err error) bool {
