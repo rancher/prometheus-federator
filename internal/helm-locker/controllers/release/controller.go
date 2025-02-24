@@ -215,6 +215,9 @@ func (h *handler) OnHelmReleaseRemove(_ string, helmRelease *v1alpha1.HelmReleas
 }
 
 func (h *handler) OnHelmRelease(_ string, helmRelease *v1alpha1.HelmRelease) (*v1alpha1.HelmRelease, error) {
+	if helmRelease == nil {
+		return helmRelease, nil
+	}
 
 	if shouldManage, err := h.shouldManage(helmRelease); err != nil {
 		logrus.Warnf("error on running shoulManage for HelmRelease %s: %s", helmRelease.GetName(), err)
