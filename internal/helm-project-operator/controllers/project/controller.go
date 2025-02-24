@@ -189,7 +189,7 @@ func (h *handler) shouldManage(projectHelmChart *v1alpha1.ProjectHelmChart) bool
 	return true
 }
 
-func (h *handler) OnChange(projectHelmChart *v1alpha2.ProjectHelmChart, projectHelmChartStatus v1alpha2.ProjectHelmChartStatus) ([]runtime.Object, v1alpha2.ProjectHelmChartStatus, error) {
+func (h *handler) OnChange(projectHelmChart *v1alpha1.ProjectHelmChart, projectHelmChartStatus v1alpha1.ProjectHelmChartStatus) ([]runtime.Object, v1alpha1.ProjectHelmChartStatus, error) {
 	logrus.Debugf("Handling ProjectHelmChart %s/%s.", projectHelmChart.Name, projectHelmChart.Namespace)
 
 	var objs []runtime.Object
