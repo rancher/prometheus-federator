@@ -114,7 +114,7 @@ func Register(
 			Duration: time.Duration(opts.NamespaceRegistrationRetryWaitMilliseconds) * time.Millisecond,
 			Factor:   1.0,
 		},
-		func(err error) bool {
+		func(_ error) bool {
 			logrus.Warnf("Registered Project Registration namespaces don't match expected, will retry. Registered: %v. Expected: %v.", h.projectRegistrationNamespaceTracker.List(), h.projectRegistrationNamespaceInitializationList)
 			return true
 		}, func() error {
