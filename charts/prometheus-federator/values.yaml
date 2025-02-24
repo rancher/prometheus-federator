@@ -74,6 +74,19 @@ helmProjectOperator:
       edit: edit
       view: view
 
+  ## namespaceWorkers defines the number of threads dedicated to handling namespace updates in
+  ## the helm-project-operator namespace controller.
+  ## If the operator is failing on startup due to a timeout in namespace registration, increasing this value is recommended.
+  namespaceWorkers: 2
+
+  ## namespaceRegistrationRetryMax sets the limit of retries performed during the Namespace Controller initialization to make sure all Project Registration Namespaces are tracked
+  ## If the pod is failing to initialize due to a timout in registering namespaces, tweaking this setting and NamespaceRegistrationRetryWaitMilliseconds should fix it
+  namespaceRegistrationRetryMax: 10
+
+  ## namespaceRegistrationRetryWaitMilliseconds sets the time between each retry performed during the Namespace Controller initialization to make sure all Project Registration Namespaces are tracked
+  ## If the pod is failing to initialize due to a timout in registering namespaces, tweaking this setting and NamespaceRegistrationRetryMax should fix it
+  namespaceRegistrationRetryWaitMilliseconds: 5000
+
   hardenedNamespaces:
     # Whether to automatically manage the configuration of the default ServiceAccount and
     # auto-create a NetworkPolicy for each namespace created by this operator
