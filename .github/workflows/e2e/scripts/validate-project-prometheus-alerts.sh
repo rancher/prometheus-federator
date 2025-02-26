@@ -25,6 +25,10 @@ checkData() {
   yq '.data.alerts' "${tmp_rules_yaml}" > "${tmp_alert_rules_yaml}"
 }
 
+# Define allowed alerts
+# TODO: consider if this should also test based on context of what container? "Name:container" maybe?
+ALLOWED_ALERTS=("Watchdog" "InfoInhibitor" "PrometheusOutOfOrderTimestamps")
+
 WAIT_TIMEOUT="${KUBECTL_WAIT_TIMEOUT%s}"
 START_TIME=$(date +%s)
 while true; do
@@ -39,7 +43,12 @@ while true; do
       exit 1
   fi
 
-  if [[ $(yq '. | length' "${tmp_alert_rules_yaml}") != "1" ]]; then
+  # Extract alert names from the YAML
+  ALERT_NAMES=($(yq '.[].labels.alertname' "${tmp_alert_rules_yaml}"))
+
+  # Count alerts
+  ALERT_COUNT=${#ALERT_NAMES[@]}
+  if (( ALERT_COUNT == 0 || ALERT_COUNT > 3 )); then
     echo "ERROR: Found the wrong number of alerts in Project Prometheus, expected only 'Watchdog'"
     echo "ALERT RULES:"
     cat "${tmp_alert_rules_yaml}"
@@ -50,9 +59,17 @@ while true; do
   fi
   CHECKS_PASSED=$((CHECKS_PASSED+1))
 
+  # Ensure "Watchdog" is present
+  WATCHDOG_PRESENT=false
+  for alert in "${ALERT_NAMES[@]}"; do
+      if [[ "$alert" == "Watchdog" ]]; then
+          WATCHDOG_PRESENT=true
+          break
+      fi
+  done
 
-  if [[ $(yq '.[0].labels.alertname' "${tmp_alert_rules_yaml}") != "Watchdog" ]]; then
-      echo "ERROR: Expected the only alert to be triggered on the Project Prometheus to be 'Watchdog'"
+  if [[ "$WATCHDOG_PRESENT" == false ]]; then
+      echo "ERROR: Expected the at least one alert triggered on the Project Prometheus to be 'Watchdog'"
       echo "ALERT RULES:"
       cat "${tmp_alert_rules_yaml}"
 
@@ -62,7 +79,28 @@ while true; do
   fi
   CHECKS_PASSED=$((CHECKS_PASSED+1))
 
-  if [[ $CHECKS_PASSED -eq 2 ]];then
+  # Check if all alerts are in the allowed list
+  for alert in "${ALERT_NAMES[@]}"; do
+      FOUND=false
+      for allowed in "${ALLOWED_ALERTS[@]}"; do
+          if [[ "$alert" == "$allowed" ]]; then
+              FOUND=true
+              break
+          fi
+      done
+      if [[ "$FOUND" == false ]]; then
+          echo "ERROR: Unexpected alert (${alert}) found that is not defined in ALLOWED_ALERTS"
+          echo "ALERT RULES:"
+          cat "${tmp_alert_rules_yaml}"
+
+          echo "Retrying in $DEFAULT_SLEEP_TIMEOUT_SECONDS seconds..."
+          sleep "$DEFAULT_SLEEP_TIMEOUT_SECONDS"
+          continue 2  # Skip to next outer loop iteration
+      fi
+  done
+  CHECKS_PASSED=$((CHECKS_PASSED+1))
+
+  if [[ $CHECKS_PASSED -eq 3 ]];then
     # Get final elapsed time
     ELAPSED_TIME=$((CURRENT_TIME - START_TIME))
     break
