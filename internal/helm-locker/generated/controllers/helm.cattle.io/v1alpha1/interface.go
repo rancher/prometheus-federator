@@ -21,7 +21,8 @@ package v1alpha1
 import (
 	"github.com/rancher/lasso/pkg/controller"
 	v1alpha1 "github.com/rancher/prometheus-federator/internal/helm-locker/apis/helm.cattle.io/v1alpha1"
-	"github.com/rancher/wrangler/pkg/schemes"
+	"github.com/rancher/wrangler/v3/pkg/generic"
+	"github.com/rancher/wrangler/v3/pkg/schemes"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
@@ -43,6 +44,6 @@ type version struct {
 	controllerFactory controller.SharedControllerFactory
 }
 
-func (c *version) HelmRelease() HelmReleaseController {
-	return NewHelmReleaseController(schema.GroupVersionKind{Group: "helm.cattle.io", Version: "v1alpha1", Kind: "HelmRelease"}, "helmreleases", true, c.controllerFactory)
+func (v *version) HelmRelease() HelmReleaseController {
+	return generic.NewController[*v1alpha1.HelmRelease, *v1alpha1.HelmReleaseList](schema.GroupVersionKind{Group: "helm.cattle.io", Version: "v1alpha1", Kind: "HelmRelease"}, "helmreleases", true, v.controllerFactory)
 }
