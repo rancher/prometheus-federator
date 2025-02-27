@@ -63,9 +63,10 @@ jobs:
         with:
           go-version: '>=1.20.0'
       - uses: azure/setup-kubectl@v4
-      - uses: azure/setup-helm@v4
+      - name : Install helm
+        uses: azure/setup-helm@v3
         with:
-          version: v3.11.1
+          token: ${{ secrets.GITHUB_TOKEN }}
       -
         name: Install mikefarah/yq
         run: |
@@ -115,13 +116,13 @@ jobs:
         run: ./.github/workflows/e2e/scripts/create-project-namespace.sh;
       -
         name: Create Project Monitoring Stack via ProjectHelmChart CR
-        run: DEFAULT_SLEEP_TIMEOUT_SECONDS=20 ./.github/workflows/e2e/scripts/create-projecthelmchart.sh;
+        run: DEFAULT_SLEEP_TIMEOUT_SECONDS=20 KUBECTL_WAIT_TIMEOUT=480s ./.github/workflows/e2e/scripts/create-projecthelmchart.sh;
       -
         name: Check if the Project Prometheus Stack is up
         run: ./.github/workflows/e2e/scripts/validate-project-monitoring.sh;
       -
         name: Validate Project Prometheus Targets
-        run: KUBECTL_WAIT_TIMEOUT=480 ./.github/workflows/e2e/scripts/validate-project-prometheus-targets.sh;
+        run: KUBECTL_WAIT_TIMEOUT=480s ./.github/workflows/e2e/scripts/validate-project-prometheus-targets.sh;
       -
         name: Validate Project Grafana Datasources
         run: ./.github/workflows/e2e/scripts/validate-project-grafana-datasource.sh;
@@ -135,10 +136,10 @@ jobs:
       #    run: ./.github/workflows/e2e/scripts/validate-project-grafana-dashboard-data.sh;
       -
         name: Validate Project Prometheus Alerts
-        run: KUBECTL_WAIT_TIMEOUT=480 ./.github/workflows/e2e/scripts/validate-project-prometheus-alerts.sh;
+        run: KUBECTL_WAIT_TIMEOUT=480s ./.github/workflows/e2e/scripts/validate-project-prometheus-alerts.sh;
       -
         name: Validate Project Alertmanager
-        run: KUBECTL_WAIT_TIMEOUT=480 ./.github/workflows/e2e/scripts/validate-project-alertmanager.sh;
+        run: KUBECTL_WAIT_TIMEOUT=480s ./.github/workflows/e2e/scripts/validate-project-alertmanager.sh;
       -
         name: Delete Project Prometheus Stack
         run: ./.github/workflows/e2e/scripts/delete-projecthelmchart.sh;
@@ -152,7 +153,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: artifacts-${{ matrix.arch }}-${{ matrix.k3s_version }}
+          name: artifacts-${{ matrix.arch }}-${{ inputs.k3s_version || env.K3S_MIN_VERSION_TAG }}
           path: artifacts/
           retention-days: 1
       - 

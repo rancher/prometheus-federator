@@ -34,6 +34,7 @@ case "${KUBERNETES_DISTRIBUTION_TYPE}" in
 esac
 
 ARTIFACT_DIRECTORY=artifacts
+DESCRIBE_DIRECTORY=${ARTIFACT_DIRECTORY}/described
 MANIFEST_DIRECTORY=${ARTIFACT_DIRECTORY}/manifests
 LOG_DIRECTORY=${ARTIFACT_DIRECTORY}/logs
 
@@ -114,3 +115,11 @@ kubectl logs deployment/cattle-project-p-example-monitoring-grafana -n cattle-pr
 kubectl logs deployment/cattle-project-p-example-monitoring-grafana -n cattle-project-p-example -c grafana-sc-dashboard > ${LOG_DIRECTORY}/project-monitoring/grafana_sc_dashboard.log || true
 kubectl logs deployment/cattle-project-p-example-monitoring-grafana -n cattle-project-p-example -c grafana-sc-datasources > ${LOG_DIRECTORY}/project-monitoring/grafana_sc_datasources.log || true
 kubectl logs deployment/cattle-project-p-example-monitoring-grafana -n cattle-project-p-example -c grafana-init-sc-datasources > ${LOG_DIRECTORY}/project-monitoring/grafana_init_sc_datasources.log || true
+
+# Resource Descriptions
+
+mkdir -p ${DESCRIBE_DIRECTORY}
+
+## Additional Context
+kubectl describe jobs -n cattle-monitoring-system helm-install-cattle-project-p-example-monitoring > ${DESCRIBE_DIRECTORY}/project-monitoring-helm-install-job.log
+kubectl describe pods -n cattle-monitoring-system -l job-name=helm-install-cattle-project-p-example-monitoring > ${DESCRIBE_DIRECTORY}/project-monitoring-helm-install-pod.log
