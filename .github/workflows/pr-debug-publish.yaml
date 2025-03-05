@@ -29,7 +29,7 @@ jobs:
     steps:
       # Checkout the code at the head of the specified PR
       - name: Checkout the repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
       - name: Get Pull Request Head SHA
         id: get_head_sha
         run: |
@@ -56,28 +56,28 @@ jobs:
     steps:
       # Checkout the code at the head of the specified PR
       - name: Checkout PR Head
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           ref: ${{ needs.prepare_pr_info.outputs.head_sha }}
       # Proceed to build images
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2 # v3
       - name: Log in to the Container registry
-        uses: docker/login-action@v3
+        uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3
         with:
           registry: ${{ env.GHCR_REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Extract metadata (tags, labels) for Helm-Project-Operator image
         id: meta-helm-project-operator
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@902fa8ec7d6ecbf8d84d538b9b233a880e428804 # v5
         with:
           images: ${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}/helm-project-operator
           tags: |
             type=raw,value=pr-${{ github.event.inputs.pr_number }}-${{ needs.prepare_pr_info.outputs.head_sha_short }}
             type=raw,value=pr-${{ github.event.inputs.pr_number }}
       - name: Build Helm-Project-Operator image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@ca052bb54ab0790a636c9b5f226502c73d547a25 # v5
         with:
           context: .
           file: ./package/Dockerfile-helm-project-operator
@@ -99,28 +99,28 @@ jobs:
     steps:
       # Checkout the code at the head of the specified PR
       - name: Checkout PR Head
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           ref: ${{ needs.prepare_pr_info.outputs.head_sha }}
       # Proceed to build images
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2 # v3
       - name: Log in to the Container registry
-        uses: docker/login-action@v3
+        uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3
         with:
           registry: ${{ env.GHCR_REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Extract metadata (tags, labels) for Prometheus Federator image
         id: meta-prometheus-federator
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@902fa8ec7d6ecbf8d84d538b9b233a880e428804 # v5
         with:
           images: ${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
             type=raw,value=pr-${{ github.event.inputs.pr_number }}-${{ needs.prepare_pr_info.outputs.head_sha_short }}
             type=raw,value=pr-${{ github.event.inputs.pr_number }}
       - name: Build prometheus-federator image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@ca052bb54ab0790a636c9b5f226502c73d547a25 # v5
         with:
           context: .
           file: ./package/Dockerfile-prometheus-federator
@@ -141,7 +141,7 @@ jobs:
       pull-requests: write
     steps:
       - name: Comment on PR with image details
-        uses: actions/github-script@v6
+        uses: actions/github-script@d7906e4ad0b1822421a7e6a35d5ca353c962f410 # v6
         env:
           # meta-helm-locker: ${{ needs.build_dev_helm_locker.outputs.tags }}
           meta-helm-project-operator: ${{ needs.build_dev_helm_project_operator.outputs.tags }}
