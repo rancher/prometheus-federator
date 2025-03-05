@@ -6,7 +6,7 @@ RUN go mod download
 COPY . .
 RUN BUILD_TARGET=helm-locker make build
 
-FROM registry.suse.com/bci/bci-micro:15.5
+FROM registry.suse.com/bci/bci-micro:15.6
 RUN echo 'helmlocker:x:1000:1000::/home/helmlocker:/bin/bash' >> /etc/passwd && \
     echo 'helmlocker:x:1000:' >> /etc/group && \
     mkdir /home/helmlocker && \
