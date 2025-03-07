@@ -53,7 +53,7 @@ jobs:
         arch:
           - x64
           - arm64
-    runs-on: ${{ github.repository == 'rancher/prometheus-federator' && format('runs-on,image=ubuntu22-full-x64,runner=4cpu-linux-x64,run-id={0}', github.run_id) || 'ubuntu-latest' }}
+    runs-on: ${{ github.repository == 'rancher/prometheus-federator' && format('runs-on,image=ubuntu22-full-{1},runner=4cpu-linux-{1},run-id={0}', github.run_id, matrix.arch) || 'ubuntu-latest' }}
     steps:
       -
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
