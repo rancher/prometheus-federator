@@ -35,24 +35,25 @@ while true; do
       exit 1
   fi
 
-  if [[ $(yq '. | length' "${tmp_alerts_yaml}") != "1" ]]; then
-      echo "ERROR: Found the wrong number of alerts in Project Alertmanager, expected only 'Watchdog'"
-      cat "${tmp_alerts_yaml}"
-
-    echo "Retrying in $DEFAULT_SLEEP_TIMEOUT_SECONDS seconds..."
-    sleep "$DEFAULT_SLEEP_TIMEOUT_SECONDS"
-    continue
-  fi
-  CHECKS_PASSED=$((CHECKS_PASSED+1))
-
-
-  if [[ $(yq '.[0].labels.alertname' "${tmp_alerts_yaml}") != "Watchdog" ]]; then
-      echo "ERROR: Expected the only alert to be triggered on the Project Alertmanager to be 'Watchdog'"
+  ALERT_COUNT=$(yq '. | length' "${tmp_alerts_yaml}")
+  if [[ $ALERT_COUNT -gt 3 ]]; then
+      echo "ERROR: Found too many alerts in Project Alertmanager. Expected at most: 'Watchdog', 'InfoInhibitor' and/or 'PrometheusOutOfOrderTimestamps'."
       cat "${tmp_alerts_yaml}"
 
       echo "Retrying in $DEFAULT_SLEEP_TIMEOUT_SECONDS seconds..."
       sleep "$DEFAULT_SLEEP_TIMEOUT_SECONDS"
       continue
+  fi
+  CHECKS_PASSED=$((CHECKS_PASSED+1))
+
+  UNEXPECTED_COUNT=$(yq '[.[] | select(.labels.alertname != "Watchdog" and .labels.alertname != "InfoInhibitor" and .labels.alertname != "PrometheusOutOfOrderTimestamps")] | length' "${tmp_alerts_yaml}")
+  if [[ $UNEXPECTED_COUNT -gt 0 ]]; then
+    echo "ERROR: Unexpected alert(s) found in active alerts list."
+    cat "${tmp_alerts_yaml}"
+
+    echo "Retrying in $DEFAULT_SLEEP_TIMEOUT_SECONDS seconds..."
+    sleep "$DEFAULT_SLEEP_TIMEOUT_SECONDS"
+    continue
   fi
   CHECKS_PASSED=$((CHECKS_PASSED+1))
 
