@@ -58,7 +58,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: Prepare helm charts (needed for build)
         run: |
-          BUILD_TARGET=prometheus-federator make package-helm && echo "pf: release chart prepared"
+          GIT_TAG=${{ github.ref_name }} BUILD_TARGET=prometheus-federator make package-helm && echo "pf: release chart prepared"
           BUILD_TARGET=prometheus-federator make build-chart && echo "pf: embedded project-monitoring chart prepared"
       - uses: goreleaser/goreleaser-action@90a3faa9d0182683851fbfa97ca1a2cb983bfca3 # v6
         with:
