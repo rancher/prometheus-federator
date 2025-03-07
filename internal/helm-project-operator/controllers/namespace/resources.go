@@ -27,6 +27,12 @@ func (h *handler) getProjectRegistrationNamespace(projectID string, isOrphaned b
 	}
 }
 
+// getProjectRegistrationNamespaceName returns the name of the project registration namespace for a given project ID
+// following the format 'cattle-project-projectID'
+func (h *handler) getProjectRegistrationNamespaceName(projectID string) string {
+	return fmt.Sprintf(common.ProjectRegistrationNamespaceFmt, projectID)
+}
+
 // getConfigMap returns the values.yaml and questions.yaml ConfigMap that is expected to be created in all Project Registration Namespaces
 func (h *handler) getConfigMap(projectID string, namespace *corev1.Namespace) *corev1.ConfigMap {
 	return &corev1.ConfigMap{

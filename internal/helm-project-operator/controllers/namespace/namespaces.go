@@ -22,6 +22,7 @@ func (h *handler) initProjectRegistrationNamespaces() error {
 	if err != nil {
 		return fmt.Errorf("unable to list namespaces to enqueue all Helm charts: %s", err)
 	}
+	logrus.Debugf("")
 	if namespaceList != nil {
 		logrus.Infof("Identifying and registering projectRegistrationNamespaces...")
 		// trigger the OnChange events for all namespaces before returning on a register
@@ -36,6 +37,7 @@ func (h *handler) initProjectRegistrationNamespaces() error {
 		// will happen before this function exits, which is what we need to guarantee here.
 		// As a result, we explicitly call OnChange here to force the apply to happen and wait for it to finish
 		for _, ns := range namespaceList.Items {
+			logrus.Debugf("Processing namespace for controller initialization %s", ns.Name)
 			_, err := h.OnMultiNamespaceChange(ns.Name, &ns)
 			if err != nil {
 				// encountered some error, just fail to start
