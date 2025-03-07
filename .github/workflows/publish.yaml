@@ -98,6 +98,7 @@ jobs:
   publish-images:
     name: Publish prometheus-federator image
     runs-on: ubuntu-latest
+    continue-on-error: true
     needs: [
       ci,
       integration,
@@ -107,8 +108,9 @@ jobs:
       contents : read
       id-token: write
     steps:
-      - name : "Read Secrets"
-        uses : rancher-eio/read-vault-secrets@main
+      - name: "Read Secrets"
+        if: github.repository == 'rancher/prometheus-federator'
+        uses: rancher-eio/read-vault-secrets@main
         with:
           secrets: |
             secret/data/github/repo/${{ github.repository }}/dockerhub/rancher/credentials username | DOCKER_USERNAME ;
