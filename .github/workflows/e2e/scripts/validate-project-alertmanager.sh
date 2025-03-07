@@ -37,7 +37,7 @@ while true; do
 
   ALERT_COUNT=$(yq '. | length' "${tmp_alerts_yaml}")
   if [[ $ALERT_COUNT -gt 3 ]]; then
-      echo "ERROR: Found too many alerts in Project Alertmanager. Expected at most 3."
+      echo "ERROR: Found too many alerts in Project Alertmanager. Expected at most: 'Watchdog', 'InfoInhibitor' and/or 'PrometheusOutOfOrderTimestamps'."
       cat "${tmp_alerts_yaml}"
 
       echo "Retrying in $DEFAULT_SLEEP_TIMEOUT_SECONDS seconds..."
@@ -46,56 +46,18 @@ while true; do
   fi
   CHECKS_PASSED=$((CHECKS_PASSED+1))
 
-  # Gather alert names into an array
-  ALERT_NAMES=($(yq '.[].labels.alertname' "${tmp_alerts_yaml}"))
+  UNEXPECTED_COUNT=$(yq '[.[] | select(.labels.alertname != "Watchdog" and .labels.alertname != "InfoInhibitor" and .labels.alertname != "PrometheusOutOfOrderTimestamps")] | length' "${tmp_alerts_yaml}")
+  if [[ $UNEXPECTED_COUNT -gt 0 ]]; then
+    echo "ERROR: Unexpected alert(s) found in active alerts list."
+    cat "${tmp_alerts_yaml}"
 
-  # Verify watchdog exists in list of Alert names
-  if ! printf '%s\n' "$ALERT_NAMES[@]" | grep -Fxq "Watchdog"; then
-      echo "ERROR: Expected the 'Watchdog' alert to be triggered on the Project Alertmanager"
-      cat "${tmp_alerts_yaml}"
-
-      echo "Retrying in $DEFAULT_SLEEP_TIMEOUT_SECONDS seconds..."
-      sleep "$DEFAULT_SLEEP_TIMEOUT_SECONDS"
-      continue
+    echo "Retrying in $DEFAULT_SLEEP_TIMEOUT_SECONDS seconds..."
+    sleep "$DEFAULT_SLEEP_TIMEOUT_SECONDS"
+    continue
   fi
   CHECKS_PASSED=$((CHECKS_PASSED+1))
 
-  if [[ $ALERT_COUNT -gt 1 ]]; then
-    ALLOWED_ALERTS=("InfoInhibitor" "PrometheusOutOfOrderTimestamps")
-    # Remove Watchdog from the list
-    filteredArray=()
-    for item in "${ALERT_NAMES[@]}"; do
-      [[ "$item" != "Watchdog" ]] && filteredArray+=("$item")
-    done
-
-    # Now verify that the only items in `filteredArray` are also in ALLOWED_ALERTS
-    OKAY=true
-    for alert in "${filteredArray[@]}"; do
-        found=false
-        for allowed in "${ALLOWED_ALERTS[@]}"; do
-            if [[ "$alert" == "$allowed" ]]; then
-                found=true
-                break
-            fi
-        done
-
-        if [[ "$found" == false ]]; then
-            OKAY=false
-        fi
-    done
-
-    if [[ $OKAY == false ]]; then
-      echo "ERROR: Unexpected alert found in active alerts list."
-      cat "${tmp_alerts_yaml}"
-
-      echo "Retrying in $DEFAULT_SLEEP_TIMEOUT_SECONDS seconds..."
-      sleep "$DEFAULT_SLEEP_TIMEOUT_SECONDS"
-      continue
-    fi
-  fi
-  CHECKS_PASSED=$((CHECKS_PASSED+1))
-
-  if [[ $CHECKS_PASSED -eq 3 ]];then
+  if [[ $CHECKS_PASSED -eq 2 ]];then
     # Get final elapsed time
     ELAPSED_TIME=$((CURRENT_TIME - START_TIME))
     break
