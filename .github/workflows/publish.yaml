@@ -20,7 +20,7 @@ jobs:
     uses : ./.github/workflows/prom-fed-e2e-ci.yaml
   goreleaser:
     name: Build go binaries and helm chart
-    runs-on : runs-on,image=ubuntu22-full-x64,runner=4cpu-linux-x64,run-id=${{ github.run_id }}
+    runs-on: ${{ github.repository == 'rancher/prometheus-federator' && format('runs-on,image=ubuntu22-full-x64,runner=4cpu-linux-x64,run-id={0}', github.run_id) || 'ubuntu-latest' }}
     needs: [
       ci,
       integration,
@@ -59,7 +59,7 @@ jobs:
           GORELEASER_CURRENT_TAG: ${{ github.ref_name }}
   push-dev-images:
     name : Build and push helm-locker & Helm-Project-Operator images
-    runs-on : runs-on,image=ubuntu22-full-x64,runner=4cpu-linux-x64,run-id=${{ github.run_id }}
+    runs-on: ${{ github.repository == 'rancher/prometheus-federator' && format('runs-on,image=ubuntu22-full-x64,runner=4cpu-linux-x64,run-id={0}', github.run_id) || 'ubuntu-latest' }}
     needs: [
       ci,
       integration,

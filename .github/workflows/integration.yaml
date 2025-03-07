@@ -36,7 +36,7 @@ jobs:
           - v1.30.9-k3s1
           - v1.32.1-k3s1
     name : integration-test
-    runs-on : runs-on,image=ubuntu22-full-${{ matrix.arch }},runner=4cpu-linux-${{ matrix.arch }},run-id=${{ github.run_id }}
+    runs-on: ${{ github.repository == 'rancher/prometheus-federator' && format('runs-on,image=ubuntu22-full-x64,runner=4cpu-linux-x64,run-id={0}', github.run_id) || 'ubuntu-latest' }}
     steps:
     - name : Checkout repository
       uses : actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
