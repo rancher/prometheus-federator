@@ -53,7 +53,7 @@ jobs:
         arch:
           - x64
           - arm64
-    runs-on : runs-on,image=ubuntu22-full-${{ matrix.arch }},runner=4cpu-linux-${{ matrix.arch }},run-id=${{ github.run_id }}
+    runs-on: ${{ github.repository == 'rancher/prometheus-federator' && format('runs-on,image=ubuntu22-full-{1},runner=4cpu-linux-{1},run-id={0}', github.run_id, matrix.arch) || 'ubuntu-latest' }}
     steps:
       -
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
@@ -67,8 +67,20 @@ jobs:
         uses: azure/setup-helm@5119fcb9089d432beecbf79bb2c7915207344b78 # v3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-      -
-        name: Install mikefarah/yq
+      - name: Check if yq is installed
+        id: check_yq
+        run: |
+          if ! command -v yq &> /dev/null; then
+            echo "yq not found, installing..."
+            echo "::set-output name=install_yq::true"
+          else
+            echo "yq is already installed"
+            YQ_BIN=$(which yq)
+            echo "::set-output name=install_yq::false"
+            echo "::set-output name=yq_path::$YQ_BIN"
+          fi
+      - name : Install YQ
+        if: steps.check_yq.outputs.install_yq == 'true'
         run: |
           sudo wget https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_${{ matrix.arch == 'x64' && 'amd64' || matrix.arch  }} -O /usr/bin/yq && sudo chmod +x /usr/bin/yq;
       - name : Export image version

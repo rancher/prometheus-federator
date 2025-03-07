@@ -20,7 +20,7 @@ jobs:
     uses : ./.github/workflows/prom-fed-e2e-ci.yaml
   goreleaser:
     name: Build go binaries and helm chart
-    runs-on : runs-on,image=ubuntu22-full-x64,runner=4cpu-linux-x64,run-id=${{ github.run_id }}
+    runs-on: ${{ github.repository == 'rancher/prometheus-federator' && format('runs-on,image=ubuntu22-full-x64,runner=4cpu-linux-x64,run-id={0}', github.run_id) || 'ubuntu-latest' }}
     needs: [
       ci,
       integration,
@@ -37,7 +37,18 @@ jobs:
         uses : actions/setup-go@f111f3307d8850f501ac008e886eec1fd1932a34 # v5
         with:
           go-version: 1.22
-      - name: Install mikefarah/yq
+      - name: Check if yq is installed
+        id: check_yq
+        run: |
+          if ! command -v yq &> /dev/null; then
+            echo "yq not found, installing..."
+            echo "::set-output name=install_yq::true"
+          else
+            echo "yq is already installed"
+            echo "::set-output name=install_yq::false"
+          fi
+      - name : Install YQ
+        if: steps.check_yq.outputs.install_yq == 'true'
         run: |
           sudo wget https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_amd64 -O /usr/bin/yq && sudo chmod +x /usr/bin/yq;
       - uses: azure/setup-kubectl@901a10e89ea615cf61f57ac05cecdf23e7de06d8 # v3
@@ -47,7 +58,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: Prepare helm charts (needed for build)
         run: |
-          BUILD_TARGET=prometheus-federator make package-helm && echo "pf: release chart prepared"
+          GIT_TAG=${{ github.ref_name }} BUILD_TARGET=prometheus-federator make package-helm && echo "pf: release chart prepared"
           BUILD_TARGET=prometheus-federator make build-chart && echo "pf: embedded project-monitoring chart prepared"
       - uses: goreleaser/goreleaser-action@90a3faa9d0182683851fbfa97ca1a2cb983bfca3 # v6
         with:
@@ -59,7 +70,7 @@ jobs:
           GORELEASER_CURRENT_TAG: ${{ github.ref_name }}
   push-dev-images:
     name : Build and push helm-locker & Helm-Project-Operator images
-    runs-on : runs-on,image=ubuntu22-full-x64,runner=4cpu-linux-x64,run-id=${{ github.run_id }}
+    runs-on: ${{ github.repository == 'rancher/prometheus-federator' && format('runs-on,image=ubuntu22-full-x64,runner=4cpu-linux-x64,run-id={0}', github.run_id) || 'ubuntu-latest' }}
     needs: [
       ci,
       integration,
@@ -98,6 +109,7 @@ jobs:
   publish-images:
     name: Publish prometheus-federator image
     runs-on: ubuntu-latest
+    continue-on-error: true
     needs: [
       ci,
       integration,
@@ -107,8 +119,9 @@ jobs:
       contents : read
       id-token: write
     steps:
-      - name : "Read Secrets"
-        uses : rancher-eio/read-vault-secrets@main
+      - name: "Read Secrets"
+        if: github.repository == 'rancher/prometheus-federator'
+        uses: rancher-eio/read-vault-secrets@main
         with:
           secrets: |
             secret/data/github/repo/${{ github.repository }}/dockerhub/rancher/credentials username | DOCKER_USERNAME ;
