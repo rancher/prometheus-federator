@@ -41,8 +41,8 @@ jobs:
         uses : actions/setup-go@v5
         with:
           go-version: 1.22
-      - uses: azure/setup-kubectl@v3
-      - uses: azure/setup-helm@v3
+      - uses: azure/setup-kubectl@3e0aec4d80787158d308d7b364cb1b702e7feb7f # v4
+      - uses: azure/setup-helm@b9e51907a09c216f16ebe8536097933489208112 # v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: build
