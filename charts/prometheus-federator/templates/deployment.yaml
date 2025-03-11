@@ -116,6 +116,9 @@ spec:
           volumeMounts:
           - name: config
             mountPath: "/etc/helmprojectoperator/config"
+      {{- if .Values.priorityClassName }}
+      priorityClassName: {{ .Values.priorityClassName }}
+      {{- end }}
       serviceAccountName: {{ template "prometheus-federator.name" . }}
 {{- if .Values.helmProjectOperator.securityContext }}
       securityContext: {{ toYaml .Values.helmProjectOperator.securityContext | nindent 8 }}
