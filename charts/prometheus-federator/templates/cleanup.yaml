@@ -55,12 +55,29 @@ spec:
           command:
           - /bin/sh
           - -c
-          - >
+          - |
+            echo "Checking if HelmCharts and HelmReleases CRDs exist...";
+            CRD_HELMCHARTS=$(kubectl get crd helmcharts.helm.cattle.io --ignore-not-found)
+            CRD_HELMRELEASES=$(kubectl get crd helmreleases.helm.cattle.io --ignore-not-found)
+            if [ -z "$CRD_HELMCHARTS" ] && [ -z "$CRD_HELMRELEASES" ]; then
+              echo "Neither HelmCharts nor HelmReleases CRDs exist in cluster, nothing to clean.";
+              exit 0;
+            fi
+            RESOURCE_LIST=""
+            if [ -n "$CRD_HELMCHARTS" ]; then
+              RESOURCE_LIST="helmcharts"
+            fi
+            if [ -n "$CRD_HELMRELEASES" ]; then
+              if [ -n "$RESOURCE_LIST" ]; then
+                RESOURCE_LIST="$RESOURCE_LIST,"
+              fi
+              RESOURCE_LIST="${RESOURCE_LIST}helmreleases"
+            fi
             SYSTEM_NAMESPACE={{ .Release.Namespace }}
             EXPECTED_HELM_API_VERSION={{ .Values.helmProjectOperator.helmApiVersion }};
             HELM_API_VERSION_TRUNCATED=$(echo ${EXPECTED_HELM_API_VERSION} | cut -d'/' -f0);
             echo "Ensuring HelmCharts and HelmReleases are deleted from ${SYSTEM_NAMESPACE}...";
-            while [[ "$(kubectl get helmcharts,helmreleases -l helm.cattle.io/helm-api-version=${HELM_API_VERSION_TRUNCATED} -n ${SYSTEM_NAMESPACE} 2>&1)" != "No resources found in ${SYSTEM_NAMESPACE} namespace." ]]; do
+            while [[ "$(kubectl get ${RESOURCE_LIST} -l helm.cattle.io/helm-api-version=${HELM_API_VERSION_TRUNCATED} -n ${SYSTEM_NAMESPACE} 2>&1)" != "No resources found in ${SYSTEM_NAMESPACE} namespace." ]]; do
               echo "waiting for HelmCharts and HelmReleases to be deleted from ${SYSTEM_NAMESPACE}... sleeping 3 seconds";
               sleep 3;
             done;
