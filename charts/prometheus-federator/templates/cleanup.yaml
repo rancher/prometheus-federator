@@ -55,7 +55,7 @@ spec:
           command:
           - /bin/sh
           - -c
-          - >
+          - |
             echo "Checking if HelmCharts and HelmReleases CRDs exist...";
             CRD_HELMCHARTS=$(kubectl get crd helmcharts.helm.cattle.io --ignore-not-found)
             CRD_HELMRELEASES=$(kubectl get crd helmreleases.helm.cattle.io --ignore-not-found)
