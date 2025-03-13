@@ -24,6 +24,30 @@
         "/^github.com/rancher/wrangler/"
       ],
       "matchUpdateTypes": ["minor","patch"]
+    },
+    {
+      "matchBaseBranches": ["main"],
+      "matchPackageNames": [
+        "golang",
+        "go",
+        "/registry.suse.com/bci/golang/"
+      ],
+      "allowedVersions": "<1.24.0"
+    },
+    {
+      "matchBaseBranches": ["main"],
+      "matchDatasources": [
+        "golang-version"
+      ],
+      "allowedVersions": "<1.24.0"
+    },
+    {
+      "matchBaseBranches": ["main"],
+      "allowedVersions": "<1.33.0",
+      "matchPackageNames": [
+        "/kubernetes/kubernetes/",
+        "/rancher/kubectl/"
+      ]
     }
   ]
 }
