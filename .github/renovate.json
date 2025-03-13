@@ -11,26 +11,19 @@
     "release/v1.x",
     "release/v0.x"
   ],
-  "enabledManagers": [
-    "dockerfile",
-    "github-actions",
-    "helm-values",
-    "custom.regex"
-  ],
   "packageRules": [
-    {
-      "groupName": "GitHub Workflow Actions",
-      "groupSlug": "gha-deps",
-      "matchManagers": [
-        "github-actions"
-      ]
-    },
     {
       "groupName": "Docker File Deps",
       "groupSlug": "docker-bumps",
       "matchManagers": [
         "dockerfile"
       ]
+    },
+    {
+      "matchPackageNames": [
+        "/^github.com/rancher/wrangler/"
+      ],
+      "matchUpdateTypes": ["minor","patch"]
     }
   ]
 }
