@@ -60,6 +60,14 @@
         "/rancher/kubectl/"
       ],
       "allowedVersions": "<1.33.0"
+    },
+    {
+      "matchBaseBranches": ["release/v1.x"],
+      "matchPackageNames": [
+        "/kubernetes/kubernetes/",
+        "/rancher/kubectl/"
+      ],
+      "allowedVersions": "<1.32.0"
     }
   ]
 }
