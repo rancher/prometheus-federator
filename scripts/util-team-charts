@@ -5,11 +5,11 @@ set -x
 CHARTS_REPO="https://raw.githubusercontent.com/rancher/ob-team-charts"
 CHARTS_BRANCH="main"
 
-if grep 'devChartsSource' "$BUILD_YAML_PATH"; then
+if grep -v "#" "$BUILD_YAML_PATH"| grep 'devChartsSource'; then
   TMP_CHARTS_REPO=$(grep 'devChartsSource' "$BUILD_YAML_PATH"|cut -d" " -f2|tr -d ' ')
   CHARTS_REPO=$(echo "$TMP_CHARTS_REPO" | sed 's/github\.com/raw\.githubusercontent\.com/g')
 fi
-if grep 'devChartsBranch' "$BUILD_YAML_PATH"; then
+if grep -v "#" "$BUILD_YAML_PATH"| grep 'devChartsBranch'; then
   CHARTS_BRANCH=$(grep 'devChartsBranch' "$BUILD_YAML_PATH"|cut -d: -f2|tr -d ' ')
 fi
 
