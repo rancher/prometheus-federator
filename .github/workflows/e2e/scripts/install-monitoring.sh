@@ -21,7 +21,7 @@ echo "Installing rancher monitoring crd with :\n"
 
 helm search repo ${HELM_REPO}/rancher-monitoring-crd --versions --max-col-width=0 | head -n 2
 
-helm upgrade --install --create-namespace -n cattle-monitoring-system rancher-monitoring-crd ${HELM_REPO}/rancher-monitoring-crd
+helm upgrade --install --create-namespace -n cattle-monitoring-system ${RANCHER_MONITORING_VERSION_HELM_ARGS} rancher-monitoring-crd ${HELM_REPO}/rancher-monitoring-crd
 
 if [[ "${E2E_CI}" == "true" ]]; then
     e2e_args="--set grafana.resources=null --set prometheus.prometheusSpec.resources=null --set alertmanager.alertmanagerSpec.resources=null"
