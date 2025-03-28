@@ -1,7 +1,18 @@
 #!/usr/bin/env bash
 
+CHARTS_REPO="https://raw.githubusercontent.com/rancher/ob-team-charts"
+CHARTS_BRANCH="main"
+
+if grep 'chartsSource' "$BUILD_YAML_PATH"; then
+  CHARTS_REPO=$(grep 'chartsSource' "$BUILD_YAML_PATH"|cut -d: -f2|tr -d ' ')
+fi
+if grep 'chartsBranch' "$BUILD_YAML_PATH"; then
+  CHARTS_BRANCH=$(grep 'chartsBranch' "$BUILD_YAML_PATH"|cut -d: -f2|tr -d ' ')
+fi
+
+
 function fetch-team-charts-index() {
-  TEAM_INDEX="https://raw.githubusercontent.com/rancher/ob-team-charts/refs/heads/main/index.yaml"
+  TEAM_INDEX="$CHARTS_REPO/refs/heads/$CHARTS_BRANCH/index.yaml"
   BUILD_DIR="./build"
   LOCAL_FILE="$BUILD_DIR/charts-index.yaml"
   LOCAL_ETAG_FILE="$BUILD_DIR/charts-index.etag"
@@ -49,7 +60,7 @@ function newest-chart-version() {
 
 function fetch-team-chart() {
   CHART_TARGET="${1}"
-  BASE_FETCH_URL="https://raw.githubusercontent.com/rancher/ob-team-charts/refs/heads/main/assets"
+  BASE_FETCH_URL="$CHARTS_REPO/refs/heads/$CHARTS_BRANCH/assets"
   CHART_VERSION="${2}"
   FETCH_URL="${BASE_FETCH_URL}/${CHART_TARGET}/${CHART_TARGET}-${CHART_VERSION}.tgz"
   echo "Fetching version $CHART_VERSION of $CHART_TARGET"
