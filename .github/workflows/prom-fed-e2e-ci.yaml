@@ -88,6 +88,7 @@ jobs:
           source ./scripts/version
           echo TAG=$TAG >> $GITHUB_ENV
           echo IMAGE=$IMAGE >> $GITHUB_ENV
+          echo RANCHER_MONITORING=$RANCHER_MONITORING >> $GITHUB_ENV
       - name: Set K3S Min/Max Versions
         run: bash ./scripts/k3s-version >> $GITHUB_ENV
       - name: Set K3S_VERSION

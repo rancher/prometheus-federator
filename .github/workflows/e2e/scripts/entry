@@ -12,6 +12,12 @@ if [[ ${DEBUG} == "true" ]]; then
     set -x
 fi
 
+echo "Using rancher monitoring version : ${RANCHER_MONITORING}"
+
+if [ "$RANCHER_MONITORING" != "latest" ]; then
+    RANCHER_MONITORING_VERSION_HELM_ARGS="--version ${RANCHER_MONITORING}"
+fi
+
 if [[ "${E2E_CI}" == "true" ]]; then
     KUBERNETES_DISTRIBUTION_TYPE=k3s
 fi
@@ -23,9 +29,11 @@ if [[ -n ${RANCHER_URL} ]] && [[ -n ${RANCHER_CLUSTER} ]] && [[ -n ${RANCHER_TOK
         API_SERVER_URL=${RANCHER_URL}
     fi 
     API_SERVER_CURL_AUTH_HEADERS="-k -H 'Authorization: Bearer ${RANCHER_TOKEN}'"
-    RANCHER_HELM_ARGS="--set global.cattle.url=${RANCHER_URL} --set global.cattle.clusterId=${RANCHER_CLUSTER}"
+    RANCHER_CLUSTER_HELM_ARGS="--set global.cattle.url=${RANCHER_URL} --set global.cattle.clusterId=${RANCHER_CLUSTER}"
 else
     kubectl proxy --port=${APISERVER_PORT:-8001} 2>/dev/null &
     API_SERVER_URL=http://localhost:${APISERVER_PORT:-8001}
     sleep 5
 fi
+
+RANCHER_HELM_ARGS="${RANCHER_CLUSTER_HELM_ARGS} ${RANCHER_MONITORING_VERSION_HELM_ARGS}"
