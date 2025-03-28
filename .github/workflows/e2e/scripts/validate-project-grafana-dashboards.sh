@@ -13,11 +13,13 @@ cleanup() {
     rm ${tmp_dashboards_yaml}
 }
 
-if [[ -z "${RANCHER_TOKEN}" ]]; then
-    curl -s ${API_SERVER_URL}/api/v1/namespaces/cattle-project-p-example/services/http:cattle-project-p-example-monitoring-grafana:80/proxy/api/search | yq -P - > ${tmp_dashboards_yaml}
-else
-    curl -s ${API_SERVER_URL}/api/v1/namespaces/cattle-project-p-example/services/http:cattle-project-p-example-monitoring-grafana:80/proxy/api/search -k -H "Authorization: Bearer ${RANCHER_TOKEN}" | yq -P - > ${tmp_dashboards_yaml}
-fi
+checkData() {
+  if [[ -z "${RANCHER_TOKEN}" ]]; then
+      curl -s ${API_SERVER_URL}/api/v1/namespaces/cattle-project-p-example/services/http:cattle-project-p-example-monitoring-grafana:80/proxy/api/search | yq -P - > ${tmp_dashboards_yaml}
+  else
+      curl -s ${API_SERVER_URL}/api/v1/namespaces/cattle-project-p-example/services/http:cattle-project-p-example-monitoring-grafana:80/proxy/api/search -k -H "Authorization: Bearer ${RANCHER_TOKEN}" | yq -P - > ${tmp_dashboards_yaml}
+  fi
+}
 
 expected_dashboards=(
     db/alertmanager-overview
@@ -41,18 +43,42 @@ expected_dashboards=(
     db/rancher-workload-pods
 );
 
-if [[ $(yq '.[].uri' ${tmp_dashboards_yaml} | wc -l | xargs) != "${#expected_dashboards[@]}" ]]; then
-    echo "ERROR: Found the wrong number of dashboards in Project Grafana, expected only the following: ${expected_dashboards[@]}"
-    cat ${tmp_dashboards_yaml}
-    exit 1
-fi      
+WAIT_TIMEOUT="${KUBECTL_WAIT_TIMEOUT%s}"
+START_TIME=$(date +%s)
+while true; do
+  checkData
 
-for dashboard in "${expected_dashboards[@]}"; do
-    if ! yq '.[].uri' ${tmp_dashboards_yaml} | grep "${dashboard}" 1>/dev/null; then
-        echo "ERROR: Expected '${dashboard}' to exist amongst ${#expected_dashboards[@]} dashboards in Project Grafana"
-        cat ${tmp_dashboards_yaml}
-        exit 1
-    fi
+  # Check if timeout has been reached
+  CURRENT_TIME=$(date +%s)
+  ELAPSED_TIME=$((CURRENT_TIME - START_TIME))
+  if [[ $ELAPSED_TIME -ge $WAIT_TIMEOUT ]]; then
+      echo "ERROR: Timeout reached, condition not met."
+      exit 1
+  fi
+
+  if [[ $(yq '.[].uri' ${tmp_dashboards_yaml} | wc -l | xargs) != "${#expected_dashboards[@]}" ]]; then
+    echo "Retrying in $DEFAULT_SLEEP_TIMEOUT_SECONDS seconds..."
+    sleep "$DEFAULT_SLEEP_TIMEOUT_SECONDS"
+    continue
+  fi
+
+  FOUND_DASHBOARDS=0
+  for dashboard in "${expected_dashboards[@]}"; do
+      if ! yq '.[].uri' ${tmp_dashboards_yaml} | grep "${dashboard}" 1>/dev/null; then
+          echo "ERROR: Expected '${dashboard}' to exist amongst ${#expected_dashboards[@]} dashboards in Project Grafana"
+          cat ${tmp_dashboards_yaml}
+          echo "Retrying in $DEFAULT_SLEEP_TIMEOUT_SECONDS seconds..."
+          sleep "$DEFAULT_SLEEP_TIMEOUT_SECONDS"
+          break
+      fi
+      FOUND_DASHBOARDS=$((FOUND_DASHBOARDS+1))
+  done
+
+  if [[ FOUND_DASHBOARDS -eq 19 ]];then
+    # Get final elapsed time
+    ELAPSED_TIME=$((CURRENT_TIME - START_TIME))
+    break
+  fi
 done
 
 cat ${tmp_dashboards_yaml}

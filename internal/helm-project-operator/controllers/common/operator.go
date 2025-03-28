@@ -26,9 +26,6 @@ type OperatorOptions struct {
 	// the name provided on the ProjectHelmChart, which is what triggers an UnableToCreateHelmRelease status
 	// on the ProjectHelmChart created after this one
 	Singleton bool
-
-	// UpdateCRDs determines if the controller should update CRDs (which it's responsible for) that already exist in the cluster
-	UpdateCRDs bool
 }
 
 // Validate validates the provided OperatorOptions

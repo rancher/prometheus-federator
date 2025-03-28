@@ -7,8 +7,8 @@ import (
 	"github.com/rancher/lasso/pkg/controller"
 	"github.com/rancher/prometheus-federator/internal/helm-locker/gvk"
 	"github.com/rancher/prometheus-federator/internal/helm-locker/informerfactory"
-	"github.com/rancher/wrangler/pkg/apply"
-	"github.com/rancher/wrangler/pkg/start"
+	"github.com/rancher/wrangler/v3/pkg/apply"
+	"github.com/rancher/wrangler/v3/pkg/start"
 	"k8s.io/client-go/discovery"
 	"k8s.io/client-go/util/workqueue"
 )

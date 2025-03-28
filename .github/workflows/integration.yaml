@@ -1,0 +1,76 @@
+name : Integration test
+
+permissions:
+  contents : read
+
+on:
+  workflow_call:
+  push:
+    branches:
+      - main
+      - release/v[0-9]+.(0|x)
+      - release/v[0-9]+.[0-9]+.[0-9]+
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+      - '.gitignore'
+      - 'CODEOWNERS'
+      - 'LICENSE'
+  pull_request:
+    paths-ignore:
+    - 'docs/**'
+    - '*.md'
+    - '.gitignore'
+    - 'CODEOWNERS'
+    - 'LICENSE'
+
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        arch:
+          - x64
+          - arm64
+        K3S_VERSION :
+          - v1.30.9-k3s1
+          - v1.32.1-k3s1
+    name : integration-test
+    runs-on: ${{ github.repository == 'rancher/prometheus-federator' && format('runs-on,image=ubuntu22-full-{1},runner=4cpu-linux-{1},run-id={0}', github.run_id, matrix.arch) || 'ubuntu-latest' }}
+    steps:
+    - name : Checkout repository
+      uses : actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+    - name: Install go
+      uses: actions/setup-go@f111f3307d8850f501ac008e886eec1fd1932a34 # v5
+      with:
+        go-version: 1.23
+    - name : Install helm
+      uses: azure/setup-helm@5119fcb9089d432beecbf79bb2c7915207344b78 # v3
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2 # v3
+    - name : Install k3d
+      run : ./.github/workflows/e2e/scripts/install-k3d.sh
+    - name : Setup test environment
+      run : |
+        CLUSTER_NAME=test-cluster K3S_VERSION=${{ matrix.K3S_VERSION }} ./.github/workflows/e2e/scripts/setup-cluster.sh
+        k3d kubeconfig get test-cluster > kubeconfig.yaml
+    - name : Debug kubeconfig
+      run : cat kubeconfig.yaml 
+    - name : Build helm-project-operator
+      run : BUILD_TARGET=helm-project-operator ./scripts/build
+    - name : Validate build
+      run : ./scripts/validate-ci
+    - name : Package helm-project-operator
+      run : |
+        BUILD_TARGET=helm-project-operator ./scripts/package
+        BUILD_TARGET=helm-project-operator source ./scripts/version
+        k3d image import -c test-cluster $IMAGE
+    - name : Debug k3d images 
+      run : docker exec k3d-test-cluster-server-0 crictl images
+    - name : Run e2e tests
+      run : |
+        KUBECONFIG=$KUBECONFIG ./scripts/integration
+      env:
+        KUBECONFIG: ${{ github.workspace }}/kubeconfig.yaml

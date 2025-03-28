@@ -8,8 +8,8 @@ import (
 
 	"github.com/rancher/lasso/pkg/controller"
 	"github.com/rancher/prometheus-federator/internal/helm-locker/gvk"
-	"github.com/rancher/wrangler/pkg/objectset"
-	"github.com/rancher/wrangler/pkg/relatedresource"
+	"github.com/rancher/wrangler/v3/pkg/objectset"
+	"github.com/rancher/wrangler/v3/pkg/relatedresource"
 	"github.com/sirupsen/logrus"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -175,6 +175,8 @@ func (c *lockableObjectSetRegisterAndCache) Lock(key relatedresource.Key) {
 		// nothing to lock
 		return
 	}
+	s.mutateMu.RLock()
+	defer s.mutateMu.RUnlock()
 	if s.ObjectSet == nil {
 		// nothing to lock
 		return
@@ -284,8 +286,9 @@ func (c *lockableObjectSetRegisterAndCache) deleteState(key relatedresource.Key)
 	c.stateMapLock.Lock()
 	delete(c.stateByKey, key)
 	c.stateMapLock.Unlock()
-
+	s.mutateMu.Lock()
 	s.ObjectSet = nil
+	s.mutateMu.Unlock()
 	s.Locked = false
 	c.stateChanges <- watch.Event{Type: watch.Deleted, Object: s}
 }

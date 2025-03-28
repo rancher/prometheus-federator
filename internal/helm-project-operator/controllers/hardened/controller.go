@@ -3,18 +3,17 @@ package hardened
 import (
 	"context"
 
-	common2 "github.com/rancher/prometheus-federator/internal/helm-project-operator/controllers/common"
-
-	"github.com/rancher/wrangler/pkg/apply"
-	corecontroller "github.com/rancher/wrangler/pkg/generated/controllers/core/v1"
-	networkingcontroller "github.com/rancher/wrangler/pkg/generated/controllers/networking.k8s.io/v1"
+	"github.com/rancher/prometheus-federator/internal/helm-project-operator/controllers/common"
+	"github.com/rancher/wrangler/v3/pkg/apply"
+	corecontroller "github.com/rancher/wrangler/v3/pkg/generated/controllers/core/v1"
+	networkingcontroller "github.com/rancher/wrangler/v3/pkg/generated/controllers/networking.k8s.io/v1"
 	corev1 "k8s.io/api/core/v1"
 )
 
 type handler struct {
 	apply apply.Apply
 
-	opts common2.HardeningOptions
+	opts common.HardeningOptions
 
 	namespaces      corecontroller.NamespaceController
 	namespaceCache  corecontroller.NamespaceCache
@@ -25,7 +24,7 @@ type handler struct {
 func Register(
 	ctx context.Context,
 	apply apply.Apply,
-	_ common2.HardeningOptions,
+	_ common.HardeningOptions,
 	namespaces corecontroller.NamespaceController,
 	namespaceCache corecontroller.NamespaceCache,
 	serviceaccounts corecontroller.ServiceAccountController,
@@ -49,7 +48,7 @@ func Register(
 	namespaces.OnChange(ctx, "harden-hpo-operated-namespace", h.OnChange)
 }
 
-func (h *handler) OnChange(_ string, namespace *corev1.Namespace) (*corev1.Namespace, error) {
+func (h *handler) OnChange( /*name*/ _ string, namespace *corev1.Namespace) (*corev1.Namespace, error) {
 	if namespace == nil {
 		return namespace, nil
 	}
@@ -59,7 +58,7 @@ func (h *handler) OnChange(_ string, namespace *corev1.Namespace) (*corev1.Names
 		// a resource to a namespace that is being terminated
 		return namespace, nil
 	}
-	if !common2.HasHelmProjectOperatedLabel(namespace.Labels) {
+	if !common.HasHelmProjectOperatedLabel(namespace.Labels) {
 		// only harden operated namespaces
 		return namespace, nil
 	}

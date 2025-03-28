@@ -6,13 +6,21 @@ import (
 
 	"github.com/rancher/prometheus-federator/internal/helm-project-operator/controllers"
 	"github.com/rancher/prometheus-federator/internal/helm-project-operator/controllers/common"
-	"github.com/rancher/prometheus-federator/internal/helm-project-operator/crd"
-	"github.com/rancher/wrangler/pkg/ratelimit"
+	"github.com/rancher/wrangler/v3/pkg/crd"
+	"github.com/rancher/wrangler/v3/pkg/ratelimit"
 	"k8s.io/client-go/tools/clientcmd"
+
+	commoncrds "github.com/rancher/prometheus-federator/internal/helmcommon/pkg/crds"
 )
 
 // Init sets up a new Helm Project Operator with the provided options and configuration
-func Init(ctx context.Context, systemNamespace string, cfg clientcmd.ClientConfig, opts common.Options) error {
+func Init(
+	ctx context.Context,
+	systemNamespace string,
+	cfg clientcmd.ClientConfig,
+	opts common.Options,
+	crds []crd.CRD,
+) error {
 	if systemNamespace == "" {
 		return fmt.Errorf("system namespace was not specified, unclear where to place HelmCharts or HelmReleases")
 	}
@@ -26,9 +34,8 @@ func Init(ctx context.Context, systemNamespace string, cfg clientcmd.ClientConfi
 	}
 	clientConfig.RateLimiter = ratelimit.None
 
-	if err := crd.Create(ctx, clientConfig, opts.UpdateCRDs); err != nil {
+	if err := commoncrds.CreateFrom(ctx, clientConfig, crds); err != nil {
 		return err
 	}
-
 	return controllers.Register(ctx, systemNamespace, cfg, opts)
 }

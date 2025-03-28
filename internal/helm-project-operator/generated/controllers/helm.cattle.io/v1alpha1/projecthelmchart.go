@@ -20,262 +20,54 @@ package v1alpha1
 
 import (
 	"context"
+	"sync"
 	"time"
 
-	"github.com/rancher/lasso/pkg/client"
-	"github.com/rancher/lasso/pkg/controller"
 	v1alpha1 "github.com/rancher/prometheus-federator/internal/helm-project-operator/apis/helm.cattle.io/v1alpha1"
-	"github.com/rancher/wrangler/pkg/apply"
-	"github.com/rancher/wrangler/pkg/condition"
-	"github.com/rancher/wrangler/pkg/generic"
-	"github.com/rancher/wrangler/pkg/kv"
+	"github.com/rancher/wrangler/v3/pkg/apply"
+	"github.com/rancher/wrangler/v3/pkg/condition"
+	"github.com/rancher/wrangler/v3/pkg/generic"
+	"github.com/rancher/wrangler/v3/pkg/kv"
 	"k8s.io/apimachinery/pkg/api/equality"
 	"k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/apimachinery/pkg/types"
-	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
-	"k8s.io/apimachinery/pkg/watch"
-	"k8s.io/client-go/tools/cache"
 )
 
-type ProjectHelmChartHandler func(string, *v1alpha1.ProjectHelmChart) (*v1alpha1.ProjectHelmChart, error)
-
+// ProjectHelmChartController interface for managing ProjectHelmChart resources.
 type ProjectHelmChartController interface {
-	generic.ControllerMeta
-	ProjectHelmChartClient
-
-	OnChange(ctx context.Context, name string, sync ProjectHelmChartHandler)
-	OnRemove(ctx context.Context, name string, sync ProjectHelmChartHandler)
-	Enqueue(namespace, name string)
-	EnqueueAfter(namespace, name string, duration time.Duration)
-
-	Cache() ProjectHelmChartCache
+	generic.ControllerInterface[*v1alpha1.ProjectHelmChart, *v1alpha1.ProjectHelmChartList]
 }
 
+// ProjectHelmChartClient interface for managing ProjectHelmChart resources in Kubernetes.
 type ProjectHelmChartClient interface {
-	Create(*v1alpha1.ProjectHelmChart) (*v1alpha1.ProjectHelmChart, error)
-	Update(*v1alpha1.ProjectHelmChart) (*v1alpha1.ProjectHelmChart, error)
-	UpdateStatus(*v1alpha1.ProjectHelmChart) (*v1alpha1.ProjectHelmChart, error)
-	Delete(namespace, name string, options *metav1.DeleteOptions) error
-	Get(namespace, name string, options metav1.GetOptions) (*v1alpha1.ProjectHelmChart, error)
-	List(namespace string, opts metav1.ListOptions) (*v1alpha1.ProjectHelmChartList, error)
-	Watch(namespace string, opts metav1.ListOptions) (watch.Interface, error)
-	Patch(namespace, name string, pt types.PatchType, data []byte, subresources ...string) (result *v1alpha1.ProjectHelmChart, err error)
+	generic.ClientInterface[*v1alpha1.ProjectHelmChart, *v1alpha1.ProjectHelmChartList]
 }
 
+// ProjectHelmChartCache interface for retrieving ProjectHelmChart resources in memory.
 type ProjectHelmChartCache interface {
-	Get(namespace, name string) (*v1alpha1.ProjectHelmChart, error)
-	List(namespace string, selector labels.Selector) ([]*v1alpha1.ProjectHelmChart, error)
-
-	AddIndexer(indexName string, indexer ProjectHelmChartIndexer)
-	GetByIndex(indexName, key string) ([]*v1alpha1.ProjectHelmChart, error)
+	generic.CacheInterface[*v1alpha1.ProjectHelmChart]
 }
 
-type ProjectHelmChartIndexer func(obj *v1alpha1.ProjectHelmChart) ([]string, error)
-
-type projectHelmChartController struct {
-	controller    controller.SharedController
-	client        *client.Client
-	gvk           schema.GroupVersionKind
-	groupResource schema.GroupResource
-}
-
-func NewProjectHelmChartController(gvk schema.GroupVersionKind, resource string, namespaced bool, controller controller.SharedControllerFactory) ProjectHelmChartController {
-	c := controller.ForResourceKind(gvk.GroupVersion().WithResource(resource), gvk.Kind, namespaced)
-	return &projectHelmChartController{
-		controller: c,
-		client:     c.Client(),
-		gvk:        gvk,
-		groupResource: schema.GroupResource{
-			Group:    gvk.Group,
-			Resource: resource,
-		},
-	}
-}
-
-func FromProjectHelmChartHandlerToHandler(sync ProjectHelmChartHandler) generic.Handler {
-	return func(key string, obj runtime.Object) (ret runtime.Object, err error) {
-		var v *v1alpha1.ProjectHelmChart
-		if obj == nil {
-			v, err = sync(key, nil)
-		} else {
-			v, err = sync(key, obj.(*v1alpha1.ProjectHelmChart))
-		}
-		if v == nil {
-			return nil, err
-		}
-		return v, err
-	}
-}
-
-func (c *projectHelmChartController) Updater() generic.Updater {
-	return func(obj runtime.Object) (runtime.Object, error) {
-		newObj, err := c.Update(obj.(*v1alpha1.ProjectHelmChart))
-		if newObj == nil {
-			return nil, err
-		}
-		return newObj, err
-	}
-}
-
-func UpdateProjectHelmChartDeepCopyOnChange(client ProjectHelmChartClient, obj *v1alpha1.ProjectHelmChart, handler func(obj *v1alpha1.ProjectHelmChart) (*v1alpha1.ProjectHelmChart, error)) (*v1alpha1.ProjectHelmChart, error) {
-	if obj == nil {
-		return obj, nil
-	}
-
-	copyObj := obj.DeepCopy()
-	newObj, err := handler(copyObj)
-	if newObj != nil {
-		copyObj = newObj
-	}
-	if obj.ResourceVersion == copyObj.ResourceVersion && !equality.Semantic.DeepEqual(obj, copyObj) {
-		return client.Update(copyObj)
-	}
-
-	return copyObj, err
-}
-
-func (c *projectHelmChartController) AddGenericHandler(ctx context.Context, name string, handler generic.Handler) {
-	c.controller.RegisterHandler(ctx, name, controller.SharedControllerHandlerFunc(handler))
-}
-
-func (c *projectHelmChartController) AddGenericRemoveHandler(ctx context.Context, name string, handler generic.Handler) {
-	c.AddGenericHandler(ctx, name, generic.NewRemoveHandler(name, c.Updater(), handler))
-}
-
-func (c *projectHelmChartController) OnChange(ctx context.Context, name string, sync ProjectHelmChartHandler) {
-	c.AddGenericHandler(ctx, name, FromProjectHelmChartHandlerToHandler(sync))
-}
-
-func (c *projectHelmChartController) OnRemove(ctx context.Context, name string, sync ProjectHelmChartHandler) {
-	c.AddGenericHandler(ctx, name, generic.NewRemoveHandler(name, c.Updater(), FromProjectHelmChartHandlerToHandler(sync)))
-}
-
-func (c *projectHelmChartController) Enqueue(namespace, name string) {
-	c.controller.Enqueue(namespace, name)
-}
-
-func (c *projectHelmChartController) EnqueueAfter(namespace, name string, duration time.Duration) {
-	c.controller.EnqueueAfter(namespace, name, duration)
-}
-
-func (c *projectHelmChartController) Informer() cache.SharedIndexInformer {
-	return c.controller.Informer()
-}
-
-func (c *projectHelmChartController) GroupVersionKind() schema.GroupVersionKind {
-	return c.gvk
-}
-
-func (c *projectHelmChartController) Cache() ProjectHelmChartCache {
-	return &projectHelmChartCache{
-		indexer:  c.Informer().GetIndexer(),
-		resource: c.groupResource,
-	}
-}
-
-func (c *projectHelmChartController) Create(obj *v1alpha1.ProjectHelmChart) (*v1alpha1.ProjectHelmChart, error) {
-	result := &v1alpha1.ProjectHelmChart{}
-	return result, c.client.Create(context.TODO(), obj.Namespace, obj, result, metav1.CreateOptions{})
-}
-
-func (c *projectHelmChartController) Update(obj *v1alpha1.ProjectHelmChart) (*v1alpha1.ProjectHelmChart, error) {
-	result := &v1alpha1.ProjectHelmChart{}
-	return result, c.client.Update(context.TODO(), obj.Namespace, obj, result, metav1.UpdateOptions{})
-}
-
-func (c *projectHelmChartController) UpdateStatus(obj *v1alpha1.ProjectHelmChart) (*v1alpha1.ProjectHelmChart, error) {
-	result := &v1alpha1.ProjectHelmChart{}
-	return result, c.client.UpdateStatus(context.TODO(), obj.Namespace, obj, result, metav1.UpdateOptions{})
-}
-
-func (c *projectHelmChartController) Delete(namespace, name string, options *metav1.DeleteOptions) error {
-	if options == nil {
-		options = &metav1.DeleteOptions{}
-	}
-	return c.client.Delete(context.TODO(), namespace, name, *options)
-}
-
-func (c *projectHelmChartController) Get(namespace, name string, options metav1.GetOptions) (*v1alpha1.ProjectHelmChart, error) {
-	result := &v1alpha1.ProjectHelmChart{}
-	return result, c.client.Get(context.TODO(), namespace, name, result, options)
-}
-
-func (c *projectHelmChartController) List(namespace string, opts metav1.ListOptions) (*v1alpha1.ProjectHelmChartList, error) {
-	result := &v1alpha1.ProjectHelmChartList{}
-	return result, c.client.List(context.TODO(), namespace, result, opts)
-}
-
-func (c *projectHelmChartController) Watch(namespace string, opts metav1.ListOptions) (watch.Interface, error) {
-	return c.client.Watch(context.TODO(), namespace, opts)
-}
-
-func (c *projectHelmChartController) Patch(namespace, name string, pt types.PatchType, data []byte, subresources ...string) (*v1alpha1.ProjectHelmChart, error) {
-	result := &v1alpha1.ProjectHelmChart{}
-	return result, c.client.Patch(context.TODO(), namespace, name, pt, data, result, metav1.PatchOptions{}, subresources...)
-}
-
-type projectHelmChartCache struct {
-	indexer  cache.Indexer
-	resource schema.GroupResource
-}
-
-func (c *projectHelmChartCache) Get(namespace, name string) (*v1alpha1.ProjectHelmChart, error) {
-	obj, exists, err := c.indexer.GetByKey(namespace + "/" + name)
-	if err != nil {
-		return nil, err
-	}
-	if !exists {
-		return nil, errors.NewNotFound(c.resource, name)
-	}
-	return obj.(*v1alpha1.ProjectHelmChart), nil
-}
-
-func (c *projectHelmChartCache) List(namespace string, selector labels.Selector) (ret []*v1alpha1.ProjectHelmChart, err error) {
-
-	err = cache.ListAllByNamespace(c.indexer, namespace, selector, func(m interface{}) {
-		ret = append(ret, m.(*v1alpha1.ProjectHelmChart))
-	})
-
-	return ret, err
-}
-
-func (c *projectHelmChartCache) AddIndexer(indexName string, indexer ProjectHelmChartIndexer) {
-	utilruntime.Must(c.indexer.AddIndexers(map[string]cache.IndexFunc{
-		indexName: func(obj interface{}) (strings []string, e error) {
-			return indexer(obj.(*v1alpha1.ProjectHelmChart))
-		},
-	}))
-}
-
-func (c *projectHelmChartCache) GetByIndex(indexName, key string) (result []*v1alpha1.ProjectHelmChart, err error) {
-	objs, err := c.indexer.ByIndex(indexName, key)
-	if err != nil {
-		return nil, err
-	}
-	result = make([]*v1alpha1.ProjectHelmChart, 0, len(objs))
-	for _, obj := range objs {
-		result = append(result, obj.(*v1alpha1.ProjectHelmChart))
-	}
-	return result, nil
-}
-
+// ProjectHelmChartStatusHandler is executed for every added or modified ProjectHelmChart. Should return the new status to be updated
 type ProjectHelmChartStatusHandler func(obj *v1alpha1.ProjectHelmChart, status v1alpha1.ProjectHelmChartStatus) (v1alpha1.ProjectHelmChartStatus, error)
 
+// ProjectHelmChartGeneratingHandler is the top-level handler that is executed for every ProjectHelmChart event. It extends ProjectHelmChartStatusHandler by a returning a slice of child objects to be passed to apply.Apply
 type ProjectHelmChartGeneratingHandler func(obj *v1alpha1.ProjectHelmChart, status v1alpha1.ProjectHelmChartStatus) ([]runtime.Object, v1alpha1.ProjectHelmChartStatus, error)
 
+// RegisterProjectHelmChartStatusHandler configures a ProjectHelmChartController to execute a ProjectHelmChartStatusHandler for every events observed.
+// If a non-empty condition is provided, it will be updated in the status conditions for every handler execution
 func RegisterProjectHelmChartStatusHandler(ctx context.Context, controller ProjectHelmChartController, condition condition.Cond, name string, handler ProjectHelmChartStatusHandler) {
 	statusHandler := &projectHelmChartStatusHandler{
 		client:    controller,
 		condition: condition,
 		handler:   handler,
 	}
-	controller.AddGenericHandler(ctx, name, FromProjectHelmChartHandlerToHandler(statusHandler.sync))
+	controller.AddGenericHandler(ctx, name, generic.FromObjectHandlerToHandler(statusHandler.sync))
 }
 
+// RegisterProjectHelmChartGeneratingHandler configures a ProjectHelmChartController to execute a ProjectHelmChartGeneratingHandler for every events observed, passing the returned objects to the provided apply.Apply.
+// If a non-empty condition is provided, it will be updated in the status conditions for every handler execution
 func RegisterProjectHelmChartGeneratingHandler(ctx context.Context, controller ProjectHelmChartController, apply apply.Apply,
 	condition condition.Cond, name string, handler ProjectHelmChartGeneratingHandler, opts *generic.GeneratingHandlerOptions) {
 	statusHandler := &projectHelmChartGeneratingHandler{
@@ -297,6 +89,7 @@ type projectHelmChartStatusHandler struct {
 	handler   ProjectHelmChartStatusHandler
 }
 
+// sync is executed on every resource addition or modification. Executes the configured handlers and sends the updated status to the Kubernetes API
 func (a *projectHelmChartStatusHandler) sync(key string, obj *v1alpha1.ProjectHelmChart) (*v1alpha1.ProjectHelmChart, error) {
 	if obj == nil {
 		return obj, nil
@@ -342,8 +135,10 @@ type projectHelmChartGeneratingHandler struct {
 	opts  generic.GeneratingHandlerOptions
 	gvk   schema.GroupVersionKind
 	name  string
+	seen  sync.Map
 }
 
+// Remove handles the observed deletion of a resource, cascade deleting every associated resource previously applied
 func (a *projectHelmChartGeneratingHandler) Remove(key string, obj *v1alpha1.ProjectHelmChart) (*v1alpha1.ProjectHelmChart, error) {
 	if obj != nil {
 		return obj, nil
@@ -353,12 +148,17 @@ func (a *projectHelmChartGeneratingHandler) Remove(key string, obj *v1alpha1.Pro
 	obj.Namespace, obj.Name = kv.RSplit(key, "/")
 	obj.SetGroupVersionKind(a.gvk)
 
+	if a.opts.UniqueApplyForResourceVersion {
+		a.seen.Delete(key)
+	}
+
 	return nil, generic.ConfigureApplyForObject(a.apply, obj, &a.opts).
 		WithOwner(obj).
 		WithSetID(a.name).
 		ApplyObjects()
 }
 
+// Handle executes the configured ProjectHelmChartGeneratingHandler and pass the resulting objects to apply.Apply, finally returning the new status of the resource
 func (a *projectHelmChartGeneratingHandler) Handle(obj *v1alpha1.ProjectHelmChart, status v1alpha1.ProjectHelmChartStatus) (v1alpha1.ProjectHelmChartStatus, error) {
 	if !obj.DeletionTimestamp.IsZero() {
 		return status, nil
@@ -368,9 +168,41 @@ func (a *projectHelmChartGeneratingHandler) Handle(obj *v1alpha1.ProjectHelmChar
 	if err != nil {
 		return newStatus, err
 	}
+	if !a.isNewResourceVersion(obj) {
+		return newStatus, nil
+	}
 
-	return newStatus, generic.ConfigureApplyForObject(a.apply, obj, &a.opts).
+	err = generic.ConfigureApplyForObject(a.apply, obj, &a.opts).
 		WithOwner(obj).
 		WithSetID(a.name).
 		ApplyObjects(objs...)
+	if err != nil {
+		return newStatus, err
+	}
+	a.storeResourceVersion(obj)
+	return newStatus, nil
+}
+
+// isNewResourceVersion detects if a specific resource version was already successfully processed.
+// Only used if UniqueApplyForResourceVersion is set in generic.GeneratingHandlerOptions
+func (a *projectHelmChartGeneratingHandler) isNewResourceVersion(obj *v1alpha1.ProjectHelmChart) bool {
+	if !a.opts.UniqueApplyForResourceVersion {
+		return true
+	}
+
+	// Apply once per resource version
+	key := obj.Namespace + "/" + obj.Name
+	previous, ok := a.seen.Load(key)
+	return !ok || previous != obj.ResourceVersion
+}
+
+// storeResourceVersion keeps track of the latest resource version of an object for which Apply was executed
+// Only used if UniqueApplyForResourceVersion is set in generic.GeneratingHandlerOptions
+func (a *projectHelmChartGeneratingHandler) storeResourceVersion(obj *v1alpha1.ProjectHelmChart) {
+	if !a.opts.UniqueApplyForResourceVersion {
+		return
+	}
+
+	key := obj.Namespace + "/" + obj.Name
+	a.seen.Store(key, obj.ResourceVersion)
 }

@@ -1,6 +1,6 @@
 package project
 
-// Copied from https://github.com/rancher/wrangler/blob/004e382969b42fb2f538ffd6699569d30e490428/pkg/data/merge.go#L3-L24
+// Copied from https://github.com/rancher/wrangler/v3/blob/004e382969b42fb2f538ffd6699569d30e490428/pkg/data/merge.go#L3-L24
 // Why did we copy the code? The logic for checking bothMaps needs to account for more possible types than map[string]interface{},
 // namely v1alpha1.GenericMap and map[interface{}]interface{}
 
