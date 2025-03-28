@@ -3,12 +3,11 @@ package project
 import (
 	"context"
 
-	common2 "github.com/rancher/prometheus-federator/internal/helm-project-operator/controllers/common"
-
 	helmcontrollerv1 "github.com/k3s-io/helm-controller/pkg/apis/helm.cattle.io/v1"
 	helmlockerv1alpha1 "github.com/rancher/prometheus-federator/internal/helm-locker/apis/helm.cattle.io/v1alpha1"
-	"github.com/rancher/wrangler/pkg/apply"
-	"github.com/rancher/wrangler/pkg/relatedresource"
+	"github.com/rancher/prometheus-federator/internal/helm-project-operator/controllers/common"
+	"github.com/rancher/wrangler/v3/pkg/apply"
+	"github.com/rancher/wrangler/v3/pkg/relatedresource"
 	"github.com/sirupsen/logrus"
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
@@ -47,7 +46,7 @@ func (h *handler) initResolvers(ctx context.Context) {
 
 // Project Release Namespace
 
-func (h *handler) resolveProjectReleaseNamespace(_, _ string, obj runtime.Object) ([]relatedresource.Key, error) {
+func (h *handler) resolveProjectReleaseNamespace( /*namespace, name*/ _, _ string, obj runtime.Object) ([]relatedresource.Key, error) {
 	if obj == nil {
 		return nil, nil
 	}
@@ -63,7 +62,7 @@ func (h *handler) resolveProjectReleaseNamespace(_, _ string, obj runtime.Object
 
 // System Namespace Data
 
-func (h *handler) resolveSystemNamespaceData(namespace, _ string, obj runtime.Object) ([]relatedresource.Key, error) {
+func (h *handler) resolveSystemNamespaceData(namespace /* name*/, _ string, obj runtime.Object) ([]relatedresource.Key, error) {
 	if namespace != h.systemNamespace {
 		return nil, nil
 	}
@@ -99,7 +98,7 @@ func (h *handler) resolveProjectRegistrationNamespaceData(namespace, name string
 	return nil, nil
 }
 
-func (h *handler) resolveProjectRegistrationNamespaceRoleBinding(namespace, _ string, rb *rbacv1.RoleBinding) ([]relatedresource.Key, error) {
+func (h *handler) resolveProjectRegistrationNamespaceRoleBinding(namespace /*name*/, _ string, rb *rbacv1.RoleBinding) ([]relatedresource.Key, error) {
 	namespaceObj, err := h.namespaceCache.Get(namespace)
 	if err != nil {
 		logrus.Debugf("Namespace not found %s: ", namespace)
@@ -112,7 +111,7 @@ func (h *handler) resolveProjectRegistrationNamespaceRoleBinding(namespace, _ st
 	}
 
 	// we want to re-enqueue the ProjectHelmChart if the rolebinding's ref points to one of the operator default roles
-	_, isDefaultRoleRef := common2.IsDefaultClusterRoleRef(h.opts, rb.RoleRef.Name)
+	_, isDefaultRoleRef := common.IsDefaultClusterRoleRef(h.opts, rb.RoleRef.Name)
 	if !isDefaultRoleRef {
 		return nil, nil
 	}
@@ -135,9 +134,9 @@ func (h *handler) resolveProjectRegistrationNamespaceRoleBinding(namespace, _ st
 	return keys, nil
 }
 
-func (h *handler) resolveClusterRoleBinding(_, _ string, crb *rbacv1.ClusterRoleBinding) ([]relatedresource.Key, error) {
+func (h *handler) resolveClusterRoleBinding( /*namespace, name*/ _, _ string, crb *rbacv1.ClusterRoleBinding) ([]relatedresource.Key, error) {
 	// we want to re-enqueue the ProjectHelmChart if the rolebinding's ref points to one of the operator default roles
-	_, isDefaultRoleRef := common2.IsDefaultClusterRoleRef(h.opts, crb.RoleRef.Name)
+	_, isDefaultRoleRef := common.IsDefaultClusterRoleRef(h.opts, crb.RoleRef.Name)
 	if !isDefaultRoleRef {
 		return nil, nil
 	}
@@ -175,7 +174,7 @@ func (h *handler) resolveClusterRoleBinding(_, _ string, crb *rbacv1.ClusterRole
 
 // Project Release Namespace Data
 
-func (h *handler) resolveProjectReleaseNamespaceData(_, _ string, obj runtime.Object) ([]relatedresource.Key, error) {
+func (h *handler) resolveProjectReleaseNamespaceData( /*namespace, name*/ _, _ string, obj runtime.Object) ([]relatedresource.Key, error) {
 	if obj == nil {
 		return nil, nil
 	}
@@ -185,10 +184,10 @@ func (h *handler) resolveProjectReleaseNamespaceData(_, _ string, obj runtime.Ob
 		return h.resolveProjectHelmChartOwned(rb.Annotations)
 	}
 	if configmap, ok := obj.(*corev1.ConfigMap); ok {
-		return h.resolveByProjectReleaseLabelValue(configmap.Labels, common2.HelmProjectOperatorDashboardValuesConfigMapLabel)
+		return h.resolveByProjectReleaseLabelValue(configmap.Labels, common.HelmProjectOperatorDashboardValuesConfigMapLabel)
 	}
 	if role, ok := obj.(*rbacv1.Role); ok {
-		return h.resolveByProjectReleaseLabelValue(role.Labels, common2.HelmProjectOperatorProjectHelmChartRoleLabel)
+		return h.resolveByProjectReleaseLabelValue(role.Labels, common.HelmProjectOperatorProjectHelmChartRoleLabel)
 	}
 	return nil, nil
 }

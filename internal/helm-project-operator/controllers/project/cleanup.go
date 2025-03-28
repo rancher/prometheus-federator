@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/rancher/prometheus-federator/internal/helm-project-operator/controllers/common"
-
 	"github.com/sirupsen/logrus"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )

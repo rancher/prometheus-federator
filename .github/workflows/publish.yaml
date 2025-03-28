@@ -12,44 +12,55 @@ env:
   YQ_VERSION: v4.44.3
 
 jobs:
-  helm-locker-ci:
-    uses: ./.github/workflows/hl-ci.yaml
-  helm-project-operator-ci:
-    uses: ./.github/workflows/hpo-ci.yaml
-    with:
-      skip_build: 'true'
+  ci:
+    uses: ./.github/workflows/ci.yaml
+  integration:
+    uses: ./.github/workflows/integration.yaml
+  e2e:
+    uses : ./.github/workflows/prom-fed-e2e-ci.yaml
   goreleaser:
     name: Build go binaries and helm chart
-    runs-on : runs-on,image=ubuntu22-full-x64,runner=4cpu-linux-x64,run-id=${{ github.run_id }}
+    runs-on: ${{ github.repository == 'rancher/prometheus-federator' && format('runs-on,image=ubuntu22-full-x64,runner=4cpu-linux-x64,run-id={0}', github.run_id) || 'ubuntu-latest' }}
     needs: [
-      helm-locker-ci,
-      helm-project-operator-ci,
+      ci,
+      integration,
     ]
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       GORELEASER_CURRENT_TAG: ${{ github.ref_name }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           fetch-depth: 0
       - run: git fetch --force --tags
       - name : setup Go
-        uses : actions/setup-go@v5
+        uses : actions/setup-go@f111f3307d8850f501ac008e886eec1fd1932a34 # v5
         with:
           go-version: 1.22
-      - name: Install mikefarah/yq
+      - name: Check if yq is installed
+        id: check_yq
+        run: |
+          if ! command -v yq &> /dev/null; then
+            echo "yq not found, installing..."
+            echo "::set-output name=install_yq::true"
+          else
+            echo "yq is already installed"
+            echo "::set-output name=install_yq::false"
+          fi
+      - name : Install YQ
+        if: steps.check_yq.outputs.install_yq == 'true'
         run: |
           sudo wget https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_amd64 -O /usr/bin/yq && sudo chmod +x /usr/bin/yq;
-      - uses: azure/setup-kubectl@v3
+      - uses: azure/setup-kubectl@901a10e89ea615cf61f57ac05cecdf23e7de06d8 # v3
       - name : Install helm
-        uses: azure/setup-helm@v3
+        uses: azure/setup-helm@5119fcb9089d432beecbf79bb2c7915207344b78 # v3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: Prepare helm charts (needed for build)
         run: |
-          BUILD_TARGET=prometheus-federator make package-helm && echo "pf: release chart prepared"
+          GIT_TAG=${{ github.ref_name }} BUILD_TARGET=prometheus-federator make package-helm && echo "pf: release chart prepared"
           BUILD_TARGET=prometheus-federator make build-chart && echo "pf: embedded project-monitoring chart prepared"
-      - uses: goreleaser/goreleaser-action@v6
+      - uses: goreleaser/goreleaser-action@90a3faa9d0182683851fbfa97ca1a2cb983bfca3 # v6
         with:
           distribution: goreleaser
           version: latest
@@ -59,10 +70,10 @@ jobs:
           GORELEASER_CURRENT_TAG: ${{ github.ref_name }}
   push-dev-images:
     name : Build and push helm-locker & Helm-Project-Operator images
-    runs-on : runs-on,image=ubuntu22-full-x64,runner=4cpu-linux-x64,run-id=${{ github.run_id }}
+    runs-on: ${{ github.repository == 'rancher/prometheus-federator' && format('runs-on,image=ubuntu22-full-x64,runner=4cpu-linux-x64,run-id={0}', github.run_id) || 'ubuntu-latest' }}
     needs: [
-      helm-locker-ci,
-      helm-project-operator-ci,
+      ci,
+      integration,
     ]
     permissions:
       contents: read
@@ -71,37 +82,22 @@ jobs:
       id-token: write
     steps:
       - name : Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2 # v3
       - name: Log in to the Container registry
-        uses: docker/login-action@v3
+        uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3
         with:
           registry: ${{ env.GHCR_REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Extract metadata (tags, labels) for helm-locker image
-        id: meta-locker
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}/helm-locker
-      - name: Build and push helm-locker image
-        id: push
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: ./package/Dockerfile-helm-locker
-          push: true
-          tags: ${{ steps.meta-locker.outputs.tags }}
-          labels: ${{ steps.meta-locker.outputs.labels }}
-          platforms : linux/amd64,linux/arm64
       - name: Extract metadata (tags, labels) for Helm-Project-Operator image
         id: meta-hpo
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@902fa8ec7d6ecbf8d84d538b9b233a880e428804 # v5
         with:
           images: ${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}/helm-project-operator
       - name: Build Helm-Project-Operator image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@ca052bb54ab0790a636c9b5f226502c73d547a25 # v5
         with:
           context: .
           file: ./package/Dockerfile-helm-project-operator
@@ -113,37 +109,42 @@ jobs:
   publish-images:
     name: Publish prometheus-federator image
     runs-on: ubuntu-latest
+    continue-on-error: true
     needs: [
-      helm-locker-ci,
-      helm-project-operator-ci,
+      ci,
+      integration,
+      e2e,
     ]
     permissions:
       contents : read
       id-token: write
     steps:
-      - name : "Read Secrets"
-        uses : rancher-eio/read-vault-secrets@main
+      - name: "Read Secrets"
+        if: github.repository == 'rancher/prometheus-federator'
+        uses: rancher-eio/read-vault-secrets@main
         with:
           secrets: |
             secret/data/github/repo/${{ github.repository }}/dockerhub/rancher/credentials username | DOCKER_USERNAME ;
             secret/data/github/repo/${{ github.repository }}/dockerhub/rancher/credentials password | DOCKER_PASSWORD
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           fetch-depth: 0
       - name: Log in to the Container registry
-        uses: docker/login-action@v3
+        uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ env.DOCKER_USERNAME }}
           password: ${{ env.DOCKER_PASSWORD }}
       - name : Export image version
+        env:
+          GIT_TAG: ${{ github.ref_name }}
         run : |
           source ./scripts/version
           echo IMAGE=$IMAGE >> $GITHUB_ENV
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3 
+        uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2 # v3 
       - name: Build Prometheus Federator image 
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@ca052bb54ab0790a636c9b5f226502c73d547a25 # v5
         with:
           context: .
           file: ./package/Dockerfile-prometheus-federator

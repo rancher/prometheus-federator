@@ -1,7 +1,7 @@
 package objectset
 
 import (
-	"github.com/rancher/wrangler/pkg/relatedresource"
+	"github.com/rancher/wrangler/v3/pkg/relatedresource"
 )
 
 // keyFunc is a utility function that returns a relatedresource.Key from a namespace and a name

@@ -1,11 +1,11 @@
 package project
 
 import (
-	v1alpha2 "github.com/rancher/prometheus-federator/internal/helm-project-operator/apis/helm.cattle.io/v1alpha1"
+	v1alpha1 "github.com/rancher/prometheus-federator/internal/helm-project-operator/apis/helm.cattle.io/v1alpha1"
 )
 
 // getValues returns the values.yaml that should be applied for this ProjectHelmChart after processing default and required overrides
-func (h *handler) getValues(projectHelmChart *v1alpha2.ProjectHelmChart, projectID string, targetProjectNamespaces []string) v1alpha2.GenericMap {
+func (h *handler) getValues(projectHelmChart *v1alpha1.ProjectHelmChart, projectID string, targetProjectNamespaces []string) v1alpha1.GenericMap {
 	// default values that are set if the user does not provide them
 	values := map[string]interface{}{
 		"global": map[string]interface{}{

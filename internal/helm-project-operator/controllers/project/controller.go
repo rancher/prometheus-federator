@@ -4,19 +4,18 @@ import (
 	"context"
 	"fmt"
 
-	v1alpha2 "github.com/rancher/prometheus-federator/internal/helm-project-operator/apis/helm.cattle.io/v1alpha1"
-	common2 "github.com/rancher/prometheus-federator/internal/helm-project-operator/controllers/common"
-	"github.com/rancher/prometheus-federator/internal/helm-project-operator/controllers/namespace"
-	helmprojectcontroller "github.com/rancher/prometheus-federator/internal/helm-project-operator/generated/controllers/helm.cattle.io/v1alpha1"
-
 	"github.com/k3s-io/helm-controller/pkg/controllers/chart"
 	k3shelmcontroller "github.com/k3s-io/helm-controller/pkg/generated/controllers/helm.cattle.io/v1"
 	helmlockercontroller "github.com/rancher/prometheus-federator/internal/helm-locker/generated/controllers/helm.cattle.io/v1alpha1"
-	"github.com/rancher/prometheus-federator/pkg/remove"
-	"github.com/rancher/wrangler/pkg/apply"
-	corecontroller "github.com/rancher/wrangler/pkg/generated/controllers/core/v1"
-	rbaccontroller "github.com/rancher/wrangler/pkg/generated/controllers/rbac/v1"
-	"github.com/rancher/wrangler/pkg/generic"
+	v1alpha1 "github.com/rancher/prometheus-federator/internal/helm-project-operator/apis/helm.cattle.io/v1alpha1"
+	"github.com/rancher/prometheus-federator/internal/helm-project-operator/controllers/common"
+	"github.com/rancher/prometheus-federator/internal/helm-project-operator/controllers/namespace"
+	helmprojectcontroller "github.com/rancher/prometheus-federator/internal/helm-project-operator/generated/controllers/helm.cattle.io/v1alpha1"
+	"github.com/rancher/prometheus-federator/internal/helm-project-operator/remove"
+	"github.com/rancher/wrangler/v3/pkg/apply"
+	corecontroller "github.com/rancher/wrangler/v3/pkg/generated/controllers/core/v1"
+	rbaccontroller "github.com/rancher/wrangler/v3/pkg/generated/controllers/rbac/v1"
+	"github.com/rancher/wrangler/v3/pkg/generic"
 	"github.com/sirupsen/logrus"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -28,8 +27,8 @@ var (
 
 type handler struct {
 	systemNamespace         string
-	opts                    common2.Options
-	valuesOverride          v1alpha2.GenericMap
+	opts                    common.Options
+	valuesOverride          v1alpha1.GenericMap
 	apply                   apply.Apply
 	projectHelmCharts       helmprojectcontroller.ProjectHelmChartController
 	projectHelmChartCache   helmprojectcontroller.ProjectHelmChartCache
@@ -51,8 +50,8 @@ type handler struct {
 func Register(
 	ctx context.Context,
 	systemNamespace string,
-	opts common2.Options,
-	valuesOverride v1alpha2.GenericMap,
+	opts common.Options,
+	valuesOverride v1alpha1.GenericMap,
 	apply apply.Apply,
 	projectHelmCharts helmprojectcontroller.ProjectHelmChartController,
 	projectHelmChartCache helmprojectcontroller.ProjectHelmChartCache,
@@ -129,17 +128,17 @@ func Register(
 		})
 
 	remove.RegisterScopedOnRemoveHandler(ctx, projectHelmCharts, "on-project-helm-chart-remove",
-		func(_ string, obj runtime.Object) (bool, error) {
+		func( /* key */ _ string, obj runtime.Object) (bool, error) {
 			if obj == nil {
 				return false, nil
 			}
-			projectHelmChart, ok := obj.(*v1alpha2.ProjectHelmChart)
+			projectHelmChart, ok := obj.(*v1alpha1.ProjectHelmChart)
 			if !ok {
 				return false, nil
 			}
 			return h.shouldManage(projectHelmChart), nil
 		},
-		helmprojectcontroller.FromProjectHelmChartHandlerToHandler(h.OnRemove),
+		fromProjectHelmChartHandlerToHandler(h.OnRemove),
 	)
 
 	err := h.initRemoveCleanupLabels()
@@ -148,7 +147,23 @@ func Register(
 	}
 }
 
-func (h *handler) shouldManage(projectHelmChart *v1alpha2.ProjectHelmChart) bool {
+// FIXME: hack porting old wrangler generic handler wrappers to this function
+func fromProjectHelmChartHandlerToHandler(sync func(string, *v1alpha1.ProjectHelmChart) (*v1alpha1.ProjectHelmChart, error)) generic.Handler {
+	return func(key string, obj runtime.Object) (ret runtime.Object, err error) {
+		var v *v1alpha1.ProjectHelmChart
+		if obj == nil {
+			v, err = sync(key, nil)
+		} else {
+			v, err = sync(key, obj.(*v1alpha1.ProjectHelmChart))
+		}
+		if v == nil {
+			return nil, err
+		}
+		return v, err
+	}
+}
+
+func (h *handler) shouldManage(projectHelmChart *v1alpha1.ProjectHelmChart) bool {
 	if projectHelmChart == nil {
 		return false
 	}
@@ -172,12 +187,13 @@ func (h *handler) shouldManage(projectHelmChart *v1alpha2.ProjectHelmChart) bool
 	return true
 }
 
-func (h *handler) OnChange(projectHelmChart *v1alpha2.ProjectHelmChart, projectHelmChartStatus v1alpha2.ProjectHelmChartStatus) ([]runtime.Object, v1alpha2.ProjectHelmChartStatus, error) {
+func (h *handler) OnChange(projectHelmChart *v1alpha1.ProjectHelmChart, projectHelmChartStatus v1alpha1.ProjectHelmChartStatus) ([]runtime.Object, v1alpha1.ProjectHelmChartStatus, error) {
 	var objs []runtime.Object
 
 	// initial checks to see if we should handle this
 	shouldManage := h.shouldManage(projectHelmChart)
 	if !shouldManage {
+		logrus.Infof("should not manage project helm-chart %s%s", projectHelmChart.Namespace, projectHelmChart.Name)
 		return nil, projectHelmChartStatus, nil
 	}
 	if projectHelmChart.DeletionTimestamp != nil {
@@ -185,7 +201,7 @@ func (h *handler) OnChange(projectHelmChart *v1alpha2.ProjectHelmChart, projectH
 	}
 
 	// handle charts with cleanup label
-	if common2.HasCleanupLabel(projectHelmChart) {
+	if common.HasCleanupLabel(projectHelmChart) {
 		projectHelmChartStatus = h.getCleanupStatus(projectHelmChart, projectHelmChartStatus)
 		logrus.Infof("Cleaning up HelmChart and HelmRelease for ProjectHelmChart %s/%s", projectHelmChart.Namespace, projectHelmChart.Name)
 		return nil, projectHelmChartStatus, nil
@@ -194,6 +210,7 @@ func (h *handler) OnChange(projectHelmChart *v1alpha2.ProjectHelmChart, projectH
 	// get information about the projectHelmChart
 	projectID, err := h.getProjectID(projectHelmChart)
 	if err != nil {
+		logrus.Errorf("failed to get project id from project helm chart : %s", err)
 		return nil, projectHelmChartStatus, err
 	}
 	releaseNamespace, releaseName := h.getReleaseNamespaceAndName(projectHelmChart)
@@ -201,6 +218,7 @@ func (h *handler) OnChange(projectHelmChart *v1alpha2.ProjectHelmChart, projectH
 	// check if the releaseName is already tracked by another ProjectHelmChart
 	projectHelmCharts, err := h.projectHelmChartCache.GetByIndex(ProjectHelmChartByReleaseName, releaseName)
 	if err != nil {
+		logrus.Errorf("unable to get ProjectHelmCharts to verify if release is already tracked %s", err)
 		return nil, projectHelmChartStatus, fmt.Errorf("unable to get ProjectHelmCharts to verify if release is already tracked: %s", err)
 	}
 	for _, conflictingProjectHelmChart := range projectHelmCharts {
@@ -208,14 +226,17 @@ func (h *handler) OnChange(projectHelmChart *v1alpha2.ProjectHelmChart, projectH
 			continue
 		}
 		if projectHelmChart.Name == conflictingProjectHelmChart.Name && projectHelmChart.Namespace == conflictingProjectHelmChart.Namespace {
+			logrus.Info("conflicting ProjectHelmChart is the same as we have found")
 			// looking at the same projectHelmChart that we have at hand
 			continue
 		}
 		if len(conflictingProjectHelmChart.Status.Status) == 0 {
 			// the other ProjectHelmChart hasn't been processed yet, so let it fail out whenever it is processed
+			logrus.Info("ProjectHelmChart hasn't been processed, delegating processing to whoever manages it?")
 			continue
 		}
 		if conflictingProjectHelmChart.Status.Status == "UnableToCreateHelmRelease" {
+			logrus.Infof("conflicting ProjectHelmChart status failed to deploy, continuing with given version")
 			// the other ProjectHelmChart is the one that will not be able to progress, so we can continue to update this one
 			continue
 		}
@@ -225,6 +246,7 @@ func (h *handler) OnChange(projectHelmChart *v1alpha2.ProjectHelmChart, projectH
 			conflictingProjectHelmChart.Namespace, conflictingProjectHelmChart.Name,
 			releaseName, releaseNamespace,
 		)
+		logrus.Error(err.Error())
 		projectHelmChartStatus = h.getUnableToCreateHelmReleaseStatus(projectHelmChart, projectHelmChartStatus, err)
 		return nil, projectHelmChartStatus, nil
 	}
@@ -237,6 +259,7 @@ func (h *handler) OnChange(projectHelmChart *v1alpha2.ProjectHelmChart, projectH
 	// gather target project namespaces
 	targetProjectNamespaces, err := h.projectGetter.GetTargetProjectNamespaces(projectHelmChart)
 	if err != nil {
+		logrus.Errorf("unable to find project namespaces to deploy ProjectHelmChart: %s", err)
 		return nil, projectHelmChartStatus, fmt.Errorf("unable to find project namespaces to deploy ProjectHelmChart: %s", err)
 	}
 	if len(targetProjectNamespaces) == 0 {
@@ -316,7 +339,7 @@ func (h *handler) OnChange(projectHelmChart *v1alpha2.ProjectHelmChart, projectH
 	return objs, projectHelmChartStatus, nil
 }
 
-func (h *handler) OnRemove(_ string, projectHelmChart *v1alpha2.ProjectHelmChart) (*v1alpha2.ProjectHelmChart, error) {
+func (h *handler) OnRemove( /* key */ _ string, projectHelmChart *v1alpha1.ProjectHelmChart) (*v1alpha1.ProjectHelmChart, error) {
 	if projectHelmChart == nil {
 		return nil, nil
 	}
@@ -327,7 +350,7 @@ func (h *handler) OnRemove(_ string, projectHelmChart *v1alpha2.ProjectHelmChart
 		return projectHelmChart, err
 	}
 
-	// Get orphaned release namespace and apply it; if another ProjectHelmChart exists in this namespace, it will automatically remove
+	// Get orphaned release namsepace and apply it; if another ProjectHelmChart exists in this namespace, it will automatically remove
 	// the orphaned label on enqueuing the namespace since that will enqueue all ProjectHelmCharts associated with it
 	projectReleaseNamespace := h.getProjectReleaseNamespace(projectID, true, projectHelmChart)
 	if projectReleaseNamespace == nil {

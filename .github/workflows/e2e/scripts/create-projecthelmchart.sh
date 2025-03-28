@@ -11,7 +11,7 @@ if [[ "${E2E_CI}" == "true" ]]; then
 else
     kubectl apply -f ./examples/prometheus-federator/project-helm-chart.yaml
 fi
-sleep ${DEFAULT_SLEEP_TIMEOUT_SECONDS};
+sleep "${DEFAULT_SLEEP_TIMEOUT_SECONDS}";
 
 if ! kubectl get -n cattle-monitoring-system job/helm-install-cattle-project-p-example-monitoring; then
     echo "ERROR: Helm Install Job for Project Monitoring Stack was never created after ${DEFAULT_SLEEP_TIMEOUT_SECONDS} seconds"

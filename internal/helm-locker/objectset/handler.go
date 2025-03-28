@@ -5,8 +5,8 @@ import (
 
 	"github.com/rancher/lasso/pkg/controller"
 	"github.com/rancher/prometheus-federator/internal/helm-locker/gvk"
-	"github.com/rancher/wrangler/pkg/apply"
-	"github.com/rancher/wrangler/pkg/relatedresource"
+	"github.com/rancher/wrangler/v3/pkg/apply"
+	"github.com/rancher/wrangler/v3/pkg/relatedresource"
 	"github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/runtime"
 )

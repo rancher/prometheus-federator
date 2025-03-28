@@ -4,8 +4,8 @@ import (
 	"context"
 
 	"github.com/rancher/lasso/pkg/controller"
-	"github.com/rancher/wrangler/pkg/generic"
-	"github.com/rancher/wrangler/pkg/relatedresource"
+	"github.com/rancher/wrangler/v3/pkg/generic"
+	"github.com/rancher/wrangler/v3/pkg/relatedresource"
 )
 
 // sharedControllerToWrapper converts a SharedController to a relatedresource.ControllerWrapper
