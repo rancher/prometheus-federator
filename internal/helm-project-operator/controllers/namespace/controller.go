@@ -76,8 +76,8 @@ func Register(
 	// note: this implements a workqueue that ensures that applies only happen once at a time even if a bunch of namespaces in a project
 	// are all re-enqueued at the exact same time
 	h.projectRegistrationNamespaceApplyinator = applier.NewApplyinator("project-registration-namespace-applyinator", h.applyProjectRegistrationNamespace, nil)
-	h.projectRegistrationNamespaceApplyinator.Run(ctx, opts.NamespaceWorkers)
-	logrus.Debugf("Initializing namespace applyinator with %d namespace workers", opts.NamespaceWorkers)
+	h.projectRegistrationNamespaceApplyinator.Run(ctx, opts.NamespaceRegistrationWorkers)
+	logrus.Debugf("Initializing namespace applyinator with %d namespace registration workers", opts.NamespaceRegistrationWorkers)
 
 	h.apply = h.addReconcilers(h.apply, dynamic)
 
@@ -121,7 +121,7 @@ func Register(
 			return h.projectRegistrationNamespaceTracker.Compare(h.projectRegistrationNamespaceInitializationList)
 		})
 	if compareNamespaceErr != nil {
-		logrus.Fatal("The operator has failed registering all project registration namespace into its Tracker in a timely manner. Please bump the number of namespace workers or increase the number of retries.")
+		logrus.Fatal("The operator has failed registering all project registration namespace into its Tracker in a timely manner. Please bump the number of namespace registration workers or increase the number of retries.")
 	}
 
 	logrus.Infof("Initializing namespace controller with the following namespaces tracked as Project Registration namespaces: %v", h.projectRegistrationNamespaceTracker.List())
