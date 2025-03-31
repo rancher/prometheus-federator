@@ -18,7 +18,7 @@ require (
 	github.com/k3s-io/helm-controller v0.13.1
 	github.com/rancher/lasso v0.0.0-20220303220127-8cf5555ec03c
 	github.com/rancher/wrangler v0.8.11-0.20220217210408-3ecd23dfea3b
-	github.com/rancher/wrangler-cli v0.0.0-20211112052728-f172e9bf59af
+	github.com/rancher/wrangler-cli v0.0.0-20220624114648-479c5692ba22
 	github.com/sirupsen/logrus v1.8.1
 	github.com/spf13/cobra v1.4.0
 	github.com/stretchr/testify v1.7.0
@@ -28,7 +28,7 @@ require (
 	helm.sh/helm/v3 v3.8.0
 	k8s.io/api v0.23.3
 	k8s.io/apiextensions-apiserver v0.23.1
-	k8s.io/apimachinery v0.23.3
+	k8s.io/apimachinery v0.24.2
 	k8s.io/client-go v0.23.3
 )
 
@@ -41,7 +41,7 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/evanphx/json-patch v4.12.0+incompatible // indirect
 	github.com/ghodss/yaml v1.0.0 // indirect
-	github.com/go-logr/logr v1.2.0 // indirect
+	github.com/go-logr/logr v1.2.3 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
@@ -88,7 +88,7 @@ require (
 	k8s.io/code-generator v0.23.3 // indirect
 	k8s.io/gengo v0.0.0-20210813121822-485abfe95c7c // indirect
 	k8s.io/klog v1.0.0 // indirect
-	k8s.io/klog/v2 v2.30.0 // indirect
+	k8s.io/klog/v2 v2.60.1 // indirect
 	k8s.io/kube-aggregator v0.18.0 // indirect
 	k8s.io/kube-openapi v0.0.0-20211115234752-e816edb12b65 // indirect
 	k8s.io/utils v0.0.0-20220210201930-3a6ce19ff2f9 // indirect
