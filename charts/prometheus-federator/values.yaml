@@ -75,7 +75,7 @@ helmProjectOperator:
       view: view
 
   ## namespaceWorkers defines the number of threads dedicated to handling namespace updates in
-  ## the helm-project-operator namespace controller.
+  ## the prometheus-federator namespace controller.
   ## If the operator is failing on startup due to a timeout in namespace registration, increasing this value is recommended.
   namespaceWorkers: 2
 
