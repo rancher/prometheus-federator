@@ -66,14 +66,14 @@ spec:
 {{- end }}
 {{- end }}
 {{- end }}
-{{- if .Values.helmProjectOperator.namespaceWorkers  }}
-          - --namespace-workers={{- .Values.helmProjectOperator.namespaceWorkers }}
+{{- if .Values.namespaceRegistrationWorkers  }}
+          - --namespace-registration-workers={{- .Values.namespaceRegistrationWorkers }}
 {{- end }}
-{{- if .Values.helmProjectOperator.namespaceRegistrationRetryMax  }}
-          - --namespace-registration-retry-max={{- .Values.helmProjectOperator.namespaceRegistrationRetryMax }}
+{{- if .Values.namespaceRegistrationRetryMax  }}
+          - --namespace-registration-retry-max={{- .Values.namespaceRegistrationRetryMax }}
 {{- end }}
-{{- if .Values.helmProjectOperator.namespaceRegistrationRetryWaitMilliseconds  }}
-          - --namespace-registration-retry-wait-milliseconds={{- .Values.helmProjectOperator.namespaceRegistrationRetryWaitMilliseconds }}
+{{- if .Values.namespaceRegistrationRetryWaitMilliseconds  }}
+          - --namespace-registration-retry-wait-milliseconds={{- .Values.namespaceRegistrationRetryWaitMilliseconds }}
 {{- end }}
 {{- if .Values.helmProjectOperator.hardenedNamespaces.enabled }}
           - --hardening-options-file=/etc/helmprojectoperator/config/hardening.yaml

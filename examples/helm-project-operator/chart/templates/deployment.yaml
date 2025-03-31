@@ -66,15 +66,6 @@ spec:
 {{- end }}
 {{- end }}
 {{- end }}
-{{- if .Values.namespaceWorkers  }}
-          - --namespace-workers={{- .Values.namespaceWorkers }}
-{{- end }}
-{{- if .Values.namespaceRegistrationRetryMax  }}
-          - --namespace-registration-retry-max={{- .Values.namespaceRegistrationRetryMax }}
-{{- end }}
-{{- if .Values.namespaceRegistrationRetryWaitMilliseconds  }}
-          - --namespace-registration-retry-wait-milliseconds={{- .Values.namespaceRegistrationRetryWaitMilliseconds }}
-{{- end }}
 {{- if .Values.hardenedNamespaces.enabled }}
           - --hardening-options-file=/etc/helmprojectoperator/config/hardening.yaml
 {{- else }}

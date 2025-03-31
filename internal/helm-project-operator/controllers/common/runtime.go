@@ -99,9 +99,9 @@ type RuntimeOptions struct {
 	// This should be the default in most RKE2 clusters since the RKE2 server binary already embeds a Helm Controller instance that manages HelmCharts
 	DisableEmbeddedHelmController bool `usage:"Whether to disable embedded Helm Controller controller in favor of external Helm Controller (recommended for RKE2 clusters)" env:"DISABLE_EMBEDDED_HELM_CONTROLLER"`
 
-	// NamespaceWorkers sets the number of workers to be run in the Namespace Controller
+	// NamespaceRegistrationWorkers sets the number of workers to be run in the Namespace Controller
 	// Useful in large clusters or high-latency environments that reach the operator initialization timeout before all namespaces have been registered
-	NamespaceWorkers int `usage:"Set the number of workers to be run in the Namespace Controller" default:"2" env:"NAMESPACE_WORKERS"`
+	NamespaceRegistrationWorkers int `usage:"Set the number of workers to be run in the Namespace Controller" default:"2" env:"NAMESPACE_REGISTRATION_WORKERS"`
 
 	// NamespaceRegistrationRetryMax sets the limit of retries performed during the Namespace Controller initialization to make sure all Project Registration Namespaces are tracked
 	// If the pod is failing to initialize due to a timout in registering namespaces, tweaking this setting and NamespaceRegistrationRetryWaitMilliseconds should fix it
