@@ -6,7 +6,7 @@ toolchain go1.23.1
 
 require (
 	github.com/caarlos0/env/v11 v11.0.0
-	github.com/kralicky/kmatch v0.0.0-20240530002100-abef8971a37b
+	github.com/kralicky/kmatch v0.0.0-20241208031153-01f2c564e46f
 	github.com/onsi/ginkgo/v2 v2.17.3
 	github.com/onsi/gomega v1.33.1
 	github.com/rancher/helm-locker v0.0.1
