@@ -22,7 +22,6 @@ func (h *handler) initProjectRegistrationNamespaces() error {
 	if err != nil {
 		return fmt.Errorf("unable to list namespaces to enqueue all Helm charts: %s", err)
 	}
-	logrus.Debugf("")
 	if namespaceList != nil {
 		logrus.Infof("Identifying and registering projectRegistrationNamespaces...")
 		// trigger the OnChange events for all namespaces before returning on a register
