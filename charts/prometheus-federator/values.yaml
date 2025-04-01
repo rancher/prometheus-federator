@@ -241,15 +241,16 @@ helmProjectOperator:
       #   memory: 100Mi
       #   cpu: 100m
 
-## namespaceRegistrationWorkers defines the number of threads dedicated to handling namespace updates in
-## the prometheus-federator namespace controller.
-## If the operator is failing on startup due to a timeout in namespace registration, increasing this value is recommended.
-namespaceRegistrationWorkers: 2
+namespaceRegistration:
+  ## namespaceRegistration.workers defines the number of threads dedicated to handling namespace updates in
+  ## the prometheus-federator namespace controller.
+  ## If the operator is failing on startup due to a timeout in namespace registration, increasing this value is recommended.
+  workers: 2
 
-## namespaceRegistrationRetryMax sets the limit of retries performed during the Namespace Controller initialization to make sure all Project Registration Namespaces are tracked
-## If the pod is failing to initialize due to a timout in registering namespaces, tweaking this setting and NamespaceRegistrationRetryWaitMilliseconds should fix it
-namespaceRegistrationRetryMax: 10
+  ## namespaceRegistration.retryMax sets the limit of retries performed during the Namespace Controller initialization to make sure all Project Registration Namespaces are tracked
+  ## If the pod is failing to initialize due to a timout in registering namespaces, tweaking this setting and NamespaceRegistrationRetryWaitMilliseconds should fix it
+  retryMax: 10
 
-## namespaceRegistrationRetryWaitMilliseconds sets the time between each retry performed during the Namespace Controller initialization to make sure all Project Registration Namespaces are tracked
-## If the pod is failing to initialize due to a timout in registering namespaces, tweaking this setting and NamespaceRegistrationRetryMax should fix it
-namespaceRegistrationRetryWaitMilliseconds: 5000
+  ## namespaceRegistration.retryWaitMilliseconds sets the time between each retry performed during the Namespace Controller initialization to make sure all Project Registration Namespaces are tracked
+  ## If the pod is failing to initialize due to a timout in registering namespaces, tweaking this setting and NamespaceRegistrationRetryMax should fix it
+  retryWaitMilliseconds: 5000
