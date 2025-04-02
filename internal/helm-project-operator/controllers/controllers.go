@@ -120,6 +120,7 @@ func Register(ctx context.Context, systemNamespace string, cfg clientcmd.ClientC
 		)
 	}
 
+	logrus.Debug("Registering namespace controller...")
 	projectGetter := namespace.Register(ctx,
 		appCtx.Apply,
 		systemNamespace,
@@ -144,6 +145,7 @@ func Register(ctx context.Context, systemNamespace string, cfg clientcmd.ClientC
 	if err != nil {
 		return err
 	}
+	logrus.Infof("Registering Project Controller...")
 	project.Register(ctx,
 		systemNamespace,
 		opts,
