@@ -115,9 +115,13 @@ func fromHelmReleaseHandlerToHandler(sync func(string, *v1alpha1.HelmRelease) (*
 }
 
 func (h *handler) OnObjectSetChange(setID string, obj runtime.Object) (runtime.Object, error) {
+	logrus.Debugf("Handling ObjectSet %s", setID)
+
 	helmReleases, err := h.helmReleaseCache.GetByIndex(HelmReleaseByReleaseKey, setID)
 	if err != nil {
-		return nil, fmt.Errorf("unable to find HelmReleases for objectset %s to trigger event", setID)
+		err = fmt.Errorf("unable to find HelmReleases for objectset %s to trigger event", setID)
+		logrus.Warnf("%v", err)
+		return nil, err
 	}
 	for _, helmRelease := range helmReleases {
 		if helmRelease == nil {
@@ -198,6 +202,7 @@ func (h *handler) OnHelmReleaseRemove(_ string, helmRelease *v1alpha1.HelmReleas
 	}
 	if helmRelease.Status.State == v1alpha1.SecretNotFoundState || helmRelease.Status.State == v1alpha1.UninstalledState {
 		// HelmRelease was not tracking any underlying objectSet
+		logrus.Warnf("HelmRelease %s was removed. It was not tracking an objectset. State was: %s.", helmRelease.GetName(), helmRelease.Status.State)
 		return helmRelease, nil
 	}
 	// HelmRelease CRs are only pointers to Helm releases... if the HelmRelease CR is removed, we should do nothing, but should warn the user
@@ -210,12 +215,19 @@ func (h *handler) OnHelmReleaseRemove(_ string, helmRelease *v1alpha1.HelmReleas
 }
 
 func (h *handler) OnHelmRelease(_ string, helmRelease *v1alpha1.HelmRelease) (*v1alpha1.HelmRelease, error) {
+	if helmRelease == nil {
+		return helmRelease, nil
+	}
+
 	if shouldManage, err := h.shouldManage(helmRelease); err != nil {
+		logrus.Warnf("error on running shoulManage for HelmRelease %s: %s", helmRelease.GetName(), err)
 		return helmRelease, err
 	} else if !shouldManage {
+		logrus.Debugf("HelmRelease %s will not be managed by this operator.", helmRelease.GetName())
 		return helmRelease, nil
 	}
 	if helmRelease.DeletionTimestamp != nil {
+		logrus.Debugf("HelmRelease %s has a non-nil deletion timestamp.", helmRelease.GetName())
 		return helmRelease, nil
 	}
 	releaseKey := releaseKeyFromRelease(helmRelease)
@@ -230,7 +242,9 @@ func (h *handler) OnHelmRelease(_ string, helmRelease *v1alpha1.HelmRelease) (*v
 			helmRelease.Status.Notes = ""
 			return h.helmReleases.UpdateStatus(helmRelease)
 		}
-		return helmRelease, fmt.Errorf("unable to find latest Helm Release Secret tied to Helm Release %s: %s", helmRelease.GetName(), err)
+		err = fmt.Errorf("unable to find latest Helm Release Secret tied to Helm Release %s: %s", helmRelease.GetName(), err)
+		logrus.Warnf("%v", err)
+		return helmRelease, err
 	}
 	logrus.Infof("loading latest release version %d of HelmRelease %s", latestRelease.Version, helmRelease.GetName())
 	releaseInfo := newReleaseInfo(latestRelease)
