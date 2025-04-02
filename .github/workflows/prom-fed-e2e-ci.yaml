@@ -59,12 +59,12 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           fetch-depth: 0
-      - uses: actions/setup-go@93397bea11091df50f3d7e59dc26a7711a8bcfbe # v4
+      - uses: actions/setup-go@0aaccfd150d50ccaeb58ebd88d36e91967a5f35b # v5
         with:
           go-version: '>=1.20.0'
       - uses: azure/setup-kubectl@3e0aec4d80787158d308d7b364cb1b702e7feb7f # v4
       - name : Install helm
-        uses: azure/setup-helm@5119fcb9089d432beecbf79bb2c7915207344b78 # v3
+        uses: azure/setup-helm@b9e51907a09c216f16ebe8536097933489208112 # v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: Check if yq is installed
@@ -88,6 +88,7 @@ jobs:
           source ./scripts/version
           echo TAG=$TAG >> $GITHUB_ENV
           echo IMAGE=$IMAGE >> $GITHUB_ENV
+          echo RANCHER_MONITORING=$RANCHER_MONITORING >> $GITHUB_ENV
       - name: Set K3S Min/Max Versions
         run: bash ./scripts/k3s-version >> $GITHUB_ENV
       - name: Set K3S_VERSION
