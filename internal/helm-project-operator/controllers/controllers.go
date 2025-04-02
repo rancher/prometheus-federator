@@ -154,6 +154,7 @@ func Register(ctx context.Context, systemNamespace string, cfg clientcmd.ClientC
 		// watches
 		appCtx.ProjectHelmChart(),
 		appCtx.ProjectHelmChart().Cache(),
+		appCtx.Core,
 		appCtx.Core.ConfigMap(),
 		appCtx.Core.ConfigMap().Cache(),
 		appCtx.RBAC.Role(),

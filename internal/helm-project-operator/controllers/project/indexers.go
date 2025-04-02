@@ -1,7 +1,12 @@
 package project
 
 import (
+	"context"
 	"fmt"
+	"github.com/rancher/wrangler/v3/pkg/generic"
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/tools/cache"
+	"sync"
 
 	v1alpha1 "github.com/rancher/prometheus-federator/internal/helm-project-operator/apis/helm.cattle.io/v1alpha1"
 	"github.com/rancher/prometheus-federator/internal/helm-project-operator/controllers/common"
@@ -50,12 +55,41 @@ const (
 	ConfigMapInReleaseNamespaceByReleaseNamespaceName = "helm.cattle.io/configmap-in-release-ns-by-release-namespace-name"
 )
 
+// onNamespaceCacheSynced is a generic wrapper function that ensures the namespace cache is synced before executing
+// the provided indexer functions. This prevents race conditions and stale data issues by guaranteeing that the cache is
+// populated before performing lookups.
+// This function is intended to be used with AddIndexer to improve lookup efficiency.
+func onNamespaceCacheSynced[T runtime.Object](ctx context.Context, nsInformer cache.SharedIndexInformer, indexerFunc generic.Indexer[T]) generic.Indexer[T] {
+	return func(resource T) ([]string, error) {
+		var syncErr error
+		var namespaceCacheSyncOnce sync.Once
+		// Ensure to wait for namespace cache sync only once across all indexers
+		namespaceCacheSyncOnce.Do(func() {
+			if !cache.WaitForCacheSync(ctx.Done(), nsInformer.HasSynced) {
+				if ctx.Err() != nil {
+					syncErr = fmt.Errorf("namespace cache sync failed: %w", ctx.Err())
+				} else {
+					syncErr = fmt.Errorf("timed out waiting for namespace cache to sync")
+				}
+			}
+		})
+		if syncErr != nil {
+			return nil, syncErr
+		}
+		return indexerFunc(resource)
+	}
+}
+
 // initIndexers initializes indexers that allow for more efficient computations on related resources without relying on additional
 // calls to be made to the Kubernetes API by referencing the cache instead
-func (h *handler) initIndexers() {
-	h.projectHelmChartCache.AddIndexer(ProjectHelmChartByReleaseName, h.projectHelmChartToReleaseName)
+func (h *handler) initIndexers(ctx context.Context) {
+	nsInformer := h.core.Namespace().Informer()
 
-	h.rolebindingCache.AddIndexer(RoleBindingInRegistrationNamespaceByRoleRef, h.roleBindingInRegistrationNamespaceToRoleRef)
+	h.projectHelmChartCache.AddIndexer(ProjectHelmChartByReleaseName,
+		onNamespaceCacheSynced(ctx, nsInformer, h.projectHelmChartToReleaseName))
+
+	h.rolebindingCache.AddIndexer(RoleBindingInRegistrationNamespaceByRoleRef,
+		onNamespaceCacheSynced(ctx, nsInformer, h.roleBindingInRegistrationNamespaceToRoleRef))
 
 	h.clusterrolebindingCache.AddIndexer(ClusterRoleBindingByRoleRef, h.clusterRoleBindingToRoleRef)
 

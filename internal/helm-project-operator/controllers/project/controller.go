@@ -32,6 +32,7 @@ type handler struct {
 	apply                   apply.Apply
 	projectHelmCharts       helmprojectcontroller.ProjectHelmChartController
 	projectHelmChartCache   helmprojectcontroller.ProjectHelmChartCache
+	core                    corecontroller.Interface
 	configmaps              corecontroller.ConfigMapController
 	configmapCache          corecontroller.ConfigMapCache
 	roles                   rbaccontroller.RoleController
@@ -55,6 +56,7 @@ func Register(
 	apply apply.Apply,
 	projectHelmCharts helmprojectcontroller.ProjectHelmChartController,
 	projectHelmChartCache helmprojectcontroller.ProjectHelmChartCache,
+	core corecontroller.Interface,
 	configmaps corecontroller.ConfigMapController,
 	configmapCache corecontroller.ConfigMapCache,
 	roles rbaccontroller.RoleController,
@@ -88,6 +90,7 @@ func Register(
 		apply:                   apply,
 		projectHelmCharts:       projectHelmCharts,
 		projectHelmChartCache:   projectHelmChartCache,
+		core:                    core,
 		configmaps:              configmaps,
 		configmapCache:          configmapCache,
 		roles:                   roles,
@@ -103,7 +106,7 @@ func Register(
 		projectGetter:           projectGetter,
 	}
 
-	h.initIndexers()
+	h.initIndexers(ctx)
 
 	h.initResolvers(ctx)
 
