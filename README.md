@@ -21,15 +21,13 @@ For more information, see the [Getting Started guide](docs/prometheus-federator/
 ### Branches and Releases
 This is the current branch strategy for `rancher/prometheus-federator`, it may change in the future.
 
-| Branch         | Tag              | Rancher                |
-|----------------|------------------|------------------------|
-| `main` (v3.x)  | `head`, `v3.x.x` | `main` branch (`head`) |
-| `release/v1.x` | `v1.x.x`         | `v2.10.x`, `v2.9.x`    |
-| `release/v0.x` | `v0.x.x`         | Legacy Branch          |
-
-> [!NOTE]
-> We are still adopting our new Branch strategy. Soon all Rancher Minors will have a branch targeting them.
-> When a Branch for v2.x is created 2.10 will be updated to use that rather than v1.x.
+| Branch         | Tag      | Rancher                |
+|----------------|----------|------------------------|
+| `main`         | `head`   | `main` branch (`head`) |
+| `release/v3.x` | `v3.x.x` | `v2.11.x`              |
+| `release/v2.x` | `v2.x.x` | `v2.10.x`              |
+| `release/v1.x` | `v1.x.x` | `v2.9.x`               |
+| `release/v0.x` | `v0.x.x` | Legacy Branch          |
 
 
 ## More Info
