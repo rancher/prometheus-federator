@@ -8,7 +8,7 @@ replace (
 	k8s.io/api => k8s.io/api v0.22.3
 	k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.22.3
 	k8s.io/apimachinery => k8s.io/apimachinery v0.22.3
-	k8s.io/client-go => github.com/rancher/client-go v1.22.3-rancher.1
+	k8s.io/client-go => github.com/rancher/client-go v11.0.0+incompatible
 	k8s.io/code-generator => k8s.io/code-generator v0.22.3
 )
 
