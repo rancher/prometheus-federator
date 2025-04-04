@@ -5,11 +5,11 @@ go 1.22
 toolchain go1.22.8
 
 replace (
-	k8s.io/api => k8s.io/api v0.22.3
-	k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.22.3
-	k8s.io/apimachinery => k8s.io/apimachinery v0.22.3
+	k8s.io/api => k8s.io/api v0.30.11
+	k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.30.11
+	k8s.io/apimachinery => k8s.io/apimachinery v0.30.11
 	k8s.io/client-go => github.com/rancher/client-go v1.22.3-rancher.1
-	k8s.io/code-generator => k8s.io/code-generator v0.22.3
+	k8s.io/code-generator => k8s.io/code-generator v0.30.11
 )
 
 require (
@@ -26,10 +26,10 @@ require (
 	gopkg.in/yaml.v2 v2.4.0
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
 	helm.sh/helm/v3 v3.8.0
-	k8s.io/api v0.23.3
-	k8s.io/apiextensions-apiserver v0.23.1
-	k8s.io/apimachinery v0.23.3
-	k8s.io/client-go v0.23.3
+	k8s.io/api v0.30.11
+	k8s.io/apiextensions-apiserver v0.30.11
+	k8s.io/apimachinery v0.30.11
+	k8s.io/client-go v0.30.11
 )
 
 require (

@@ -10,10 +10,10 @@ require (
 	github.com/onsi/ginkgo/v2 v2.17.3
 	github.com/onsi/gomega v1.33.1
 	github.com/rancher/helm-locker v0.0.1
-	k8s.io/api v0.30.1
-	k8s.io/apiextensions-apiserver v0.30.0
-	k8s.io/apimachinery v0.30.1
-	k8s.io/client-go v0.30.0
+	k8s.io/api v0.30.11
+	k8s.io/apiextensions-apiserver v0.30.11
+	k8s.io/apimachinery v0.30.11
+	k8s.io/client-go v0.30.11
 	sigs.k8s.io/controller-runtime v0.18.2
 )
 
