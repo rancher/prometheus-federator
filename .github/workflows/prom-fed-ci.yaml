@@ -37,14 +37,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name : Set up Go
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@0aaccfd150d50ccaeb58ebd88d36e91967a5f35b # v5
         with:
           go-version: '1.22'
       - name : Install YQ
         run: |
           sudo wget https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_${{ matrix.arch == 'x64' && 'amd64' || matrix.arch  }} -O /usr/bin/yq && sudo chmod +x /usr/bin/yq;
       - name : Install helm
-        uses: azure/setup-helm@v3
+        uses: azure/setup-helm@b9e51907a09c216f16ebe8536097933489208112 # v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: Run CI
