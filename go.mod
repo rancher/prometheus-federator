@@ -2,7 +2,7 @@ module github.com/rancher/prometheus-federator
 
 go 1.22
 
-toolchain go1.22.8
+toolchain go1.22.12
 
 replace (
 	k8s.io/api => k8s.io/api v0.22.3
@@ -13,19 +13,19 @@ replace (
 )
 
 require (
-	github.com/google/uuid v1.2.0
-	github.com/hashicorp/go-multierror v1.1.0
-	github.com/k3s-io/helm-controller v0.13.1
-	github.com/rancher/lasso v0.0.0-20220303220127-8cf5555ec03c
-	github.com/rancher/wrangler v0.8.11-0.20220217210408-3ecd23dfea3b
+	github.com/google/uuid v1.6.0
+	github.com/hashicorp/go-multierror v1.1.1
+	github.com/k3s-io/helm-controller v0.16.10
+	github.com/rancher/lasso v0.2.1
+	github.com/rancher/wrangler v0.8.11
 	github.com/rancher/wrangler-cli v0.0.0-20211112052728-f172e9bf59af
-	github.com/sirupsen/logrus v1.8.1
-	github.com/spf13/cobra v1.4.0
-	github.com/stretchr/testify v1.7.0
-	golang.org/x/text v0.7.0
+	github.com/sirupsen/logrus v1.9.3
+	github.com/spf13/cobra v1.9.1
+	github.com/stretchr/testify v1.10.0
+	golang.org/x/text v0.24.0
 	gopkg.in/yaml.v2 v2.4.0
-	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
-	helm.sh/helm/v3 v3.8.0
+	gopkg.in/yaml.v3 v3.0.1
+	helm.sh/helm/v3 v3.17.2
 	k8s.io/api v0.23.3
 	k8s.io/apiextensions-apiserver v0.23.1
 	k8s.io/apimachinery v0.23.3
