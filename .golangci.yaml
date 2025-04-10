@@ -1,0 +1,40 @@
+version: "2"
+run:
+  timeout : 5m
+linters:
+  default: none
+  enable:
+    - govet
+    - ineffassign
+    - misspell
+    - revive
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    rules:
+      - linters:
+          - revive
+        text: should have comment or be unexported
+      - linters:
+          - revive
+        path: _test.go
+    paths:
+      - /zz_generated_*
+      - third_party$
+      - builtin$
+      - examples$
+formatters:
+  enable:
+    - gofmt
+    - goimports
+  exclusions:
+    generated: lax
+    paths:
+      - /zz_generated_*
+      - third_party$
+      - builtin$
+      - examples$
