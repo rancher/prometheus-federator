@@ -29,7 +29,7 @@ REPO=${REPO:-rancher}
 
 HELM_IMAGE_TAG=${HELM_IMAGE_TAG:-${TAG}}
 if [ "$TAG" == "$COMMIT" ]; then
-  HELM_CHART_VERSION="0.0.0-dev.${COMMIT}"
+  HELM_CHART_VERSION="0.0.0-dev+${COMMIT}"
 else
   HELM_CHART_VERSION=${HELM_IMAGE_TAG/v/}
 fi
