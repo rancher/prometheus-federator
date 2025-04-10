@@ -104,7 +104,7 @@ func Register(
 		projectGetter:           projectGetter,
 	}
 
-	h.initIndexers()
+	h.initIndexers(ctx)
 
 	h.initResolvers(ctx)
 
