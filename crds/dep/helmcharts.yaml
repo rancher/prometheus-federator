@@ -109,9 +109,6 @@ spec:
                   runAsUser:
                     nullable: true
                     type: integer
-                  seLinuxChangePolicy:
-                    nullable: true
-                    type: string
                   seLinuxOptions:
                     nullable: true
                     properties:
@@ -143,9 +140,6 @@ spec:
                       type: integer
                     nullable: true
                     type: array
-                  supplementalGroupsPolicy:
-                    nullable: true
-                    type: string
                   sysctls:
                     items:
                       properties:
