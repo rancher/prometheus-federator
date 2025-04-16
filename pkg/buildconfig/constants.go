@@ -3,8 +3,8 @@
 package buildconfig
 
 const (
-	K3sTestingMaxVersion            = "v1.32.1+k3s1"
-	K3sTestingMinVersion            = "v1.30.9+k3s1"
-	RancherMonitoringVersion        = "latest"
-	RancherProjectMonitoringVersion = "0.5.1"
+	K3sTestingMaxVersion            = "v1.30.11-k3s1"
+	K3sTestingMinVersion            = "v1.27.16-k3s1"
+	RancherMonitoringVersion        = "104.1.4+up57.0.3"
+	RancherProjectMonitoringVersion = "0.3.4"
 )
