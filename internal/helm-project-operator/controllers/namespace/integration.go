@@ -3,14 +3,17 @@ package namespace
 import (
 	"context"
 	"fmt"
+	"time"
 
 	. "github.com/kralicky/kmatch"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	v1alpha1 "github.com/rancher/prometheus-federator/internal/helm-project-operator/apis/helm.cattle.io/v1alpha1"
 	"github.com/rancher/prometheus-federator/internal/helm-project-operator/controllers/common"
 	"github.com/rancher/prometheus-federator/internal/helm-project-operator/controllers/setup"
 	"github.com/rancher/prometheus-federator/internal/helmcommon/pkg/crds"
 	"github.com/rancher/prometheus-federator/internal/test"
+	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -168,6 +171,117 @@ func MultiNamespaceTest(
 				Eventually(projectGetter.IsProjectRegistrationNamespace(dummyRegistrationNamespace)).Should(BeTrue())
 			})
 
+			Specify("when we add namespaces to a project", func() {
+				By("manually adding namespaces to a project")
+
+				nss := []*corev1.Namespace{
+					{
+						ObjectMeta: metav1.ObjectMeta{
+							Name: fmt.Sprintf("project-%s-ns-1", targetProjectId),
+							Labels: map[string]string{
+								opts.ProjectLabel: targetProjectId,
+							},
+						},
+					},
+					{
+						ObjectMeta: metav1.ObjectMeta{
+							Name: fmt.Sprintf("project-%s-ns-2", targetProjectId),
+							Labels: map[string]string{
+								opts.ProjectLabel: targetProjectId,
+							},
+						},
+					},
+				}
+				for _, ns := range nss {
+					t.ObjectTracker().Add(ns)
+					Expect(t.K8sClient().Create(t.Context(), ns)).To(Succeed())
+				}
+
+				By("verifying the project getter tracks them correctly")
+				Eventually(func() []string {
+					tracker, err := projectGetter.GetTargetProjectNamespaces(&v1alpha1.ProjectHelmChart{
+						ObjectMeta: metav1.ObjectMeta{
+							Namespace: fmt.Sprintf(common.ProjectRegistrationNamespaceFmt, targetProjectId),
+						},
+					})
+					if err != nil {
+						return []string{err.Error()}
+					}
+					return tracker
+				}).Should(ConsistOf(
+					lo.Map(nss, func(ns *corev1.Namespace, _ int) string {
+						return ns.Name
+					}),
+				))
+
+				Consistently(func() []string {
+					tracker, err := projectGetter.GetTargetProjectNamespaces(&v1alpha1.ProjectHelmChart{
+						ObjectMeta: metav1.ObjectMeta{
+							Namespace: fmt.Sprintf(common.ProjectRegistrationNamespaceFmt, targetProjectId),
+						},
+					})
+					if err != nil {
+						return []string{err.Error()}
+					}
+					return tracker
+				}, 1*time.Second, 200*time.Millisecond).Should(ConsistOf(
+					lo.Map(nss, func(ns *corev1.Namespace, _ int) string {
+						return ns.Name
+					}),
+				))
+			})
+
+			Specify("when we delete the namespaces associated to a project", func() {
+
+				By("manually deleting namespaces associated to a project")
+				nss := []*corev1.Namespace{
+					{
+						ObjectMeta: metav1.ObjectMeta{
+							Name: fmt.Sprintf("project-%s-ns-1", targetProjectId),
+							Labels: map[string]string{
+								opts.ProjectLabel: targetProjectId,
+							},
+						},
+					},
+					{
+						ObjectMeta: metav1.ObjectMeta{
+							Name: fmt.Sprintf("project-%s-ns-2", targetProjectId),
+							Labels: map[string]string{
+								opts.ProjectLabel: targetProjectId,
+							},
+						},
+					},
+				}
+				for _, ns := range nss {
+					Expect(t.K8sClient().Delete(t.Context(), ns)).To(Succeed())
+				}
+
+				By("verifying the project getter stops tracking them")
+				Eventually(func() []string {
+					tracker, err := projectGetter.GetTargetProjectNamespaces(&v1alpha1.ProjectHelmChart{
+						ObjectMeta: metav1.ObjectMeta{
+							Namespace: fmt.Sprintf(common.ProjectRegistrationNamespaceFmt, targetProjectId),
+						},
+					})
+					if err != nil {
+						return []string{err.Error()}
+					}
+					return tracker
+				}).Should(ConsistOf([]string{}))
+
+				Consistently(func() []string {
+					tracker, err := projectGetter.GetTargetProjectNamespaces(&v1alpha1.ProjectHelmChart{
+						ObjectMeta: metav1.ObjectMeta{
+							Namespace: fmt.Sprintf(common.ProjectRegistrationNamespaceFmt, targetProjectId),
+						},
+					})
+					if err != nil {
+						return []string{err.Error()}
+					}
+					return tracker
+				}, 1*time.Second, 200*time.Millisecond).Should(ConsistOf([]string{}))
+			})
+
 			Specify("when we delete the project registration namespace, it should cleanup related resources", func() {
 				dummyRegistrationNamespace := &corev1.Namespace{
 					ObjectMeta: metav1.ObjectMeta{
@@ -181,11 +295,11 @@ func MultiNamespaceTest(
 				By("verifying the registration namespace is deleted")
 
 				Eventually(Object(dummyRegistrationNamespace)).ShouldNot(Exist())
-				Consistently(Object(dummyRegistrationNamespace)).ShouldNot(Exist())
+				Consistently(Object(dummyRegistrationNamespace), 1*time.Millisecond*50).ShouldNot(Exist())
 
 				By("verifying the tracker eventually stops tracking the namespace")
 				Eventually(projectGetter.IsProjectRegistrationNamespace(dummyRegistrationNamespace)).Should(BeFalse())
-				Consistently(projectGetter.IsProjectRegistrationNamespace(dummyRegistrationNamespace)).Should(BeFalse())
+				Consistently(projectGetter.IsProjectRegistrationNamespace(dummyRegistrationNamespace), 1*time.Second, 10*time.Millisecond).Should(BeFalse())
 			})
 		})
 	}
