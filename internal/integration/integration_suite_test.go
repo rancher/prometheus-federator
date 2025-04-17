@@ -6,6 +6,7 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/rancher/prometheus-federator/internal/test"
 )
 
 func TestIntegration(t *testing.T) {
@@ -16,3 +17,6 @@ func TestIntegration(t *testing.T) {
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "Integration Suite")
 }
+
+// Initialize clients, object trackers and contexts used by the tests
+var _ = BeforeSuite(test.Setup)

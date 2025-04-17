@@ -10,11 +10,13 @@ import (
 	. "github.com/onsi/gomega"
 	lockerv1alpha1 "github.com/rancher/prometheus-federator/internal/helm-locker/apis/helm.cattle.io/v1alpha1"
 	v1alpha1 "github.com/rancher/prometheus-federator/internal/helm-project-operator/apis/helm.cattle.io/v1alpha1"
+	"github.com/rancher/prometheus-federator/internal/helm-project-operator/controllers/common"
 	"github.com/rancher/wrangler/v3/pkg/kubeconfig"
 	"github.com/sirupsen/logrus"
 
 	env "github.com/caarlos0/env/v11"
 	"github.com/kralicky/kmatch"
+	commoncrds "github.com/rancher/prometheus-federator/internal/helmcommon/pkg/crds"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
@@ -144,6 +146,13 @@ func Setup() {
 	DeferCleanup(func() {
 		o.DeleteAll()
 	})
+
+	managedCrds := common.ManagedCRDsFromRuntime(common.RuntimeOptions{
+		DisableEmbeddedHelmLocker:     false,
+		DisableEmbeddedHelmController: false,
+	})
+
+	Expect(commoncrds.CreateFrom(ctxCa, restConfig, managedCrds)).To(Succeed(), "Failed to create required CRDs for e2e testing")
 
 	testInterface := &testInterfaceImpl{
 		testCtx:   ctxCa,

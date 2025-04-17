@@ -6,18 +6,15 @@ import (
 	"fmt"
 	"os/exec"
 
-	"github.com/google/uuid"
 	. "github.com/kralicky/kmatch"
 	"github.com/rancher/prometheus-federator/internal/helm-locker/apis/helm.cattle.io/v1alpha1"
-	lockercrd "github.com/rancher/prometheus-federator/internal/helm-locker/crd"
-	"github.com/rancher/prometheus-federator/internal/helm-locker/operator"
 	"github.com/rancher/prometheus-federator/internal/test"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
@@ -37,11 +34,11 @@ const (
 	exampleReleaseNs   = "foo"
 )
 
-func E2eTest() func() {
+func E2eTest(systemNamespace, operatorName, nodeName string) func() {
 	return func() {
 		var (
-			t                test.TestInterface
-			operatorName     = "helm-locker-" + uuid.New().String()
+			t test.TestInterface
+			// operatorName     = "helm-locker-" + uuid.New().String()
 			createIfNotExist = func(obj client.Object) {
 				err := t.K8sClient().Create(t.Context(), obj)
 				if err != nil && !apierrors.IsAlreadyExists(err) {
@@ -54,39 +51,37 @@ func E2eTest() func() {
 		BeforeAll(func() {
 			t = test.GetTestInterface()
 			By("setting up and running the helm locker operator")
-			ns := "cattle-helm-system"
-			err := t.K8sClient().Create(t.Context(), &corev1.Namespace{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: ns,
-				},
-			})
-			if err != nil && !apierrors.IsAlreadyExists(err) {
-				Fail(fmt.Sprintf("Failed to create namespace %s", err))
-			}
+			// ns := "cattle-helm-system"
+			// err := t.K8sClient().Create(t.Context(), &corev1.Namespace{
+			// 	ObjectMeta: metav1.ObjectMeta{
+			// 		Name: ns,
+			// 	},
+			// })
+			// if err != nil && !apierrors.IsAlreadyExists(err) {
+			// 	Fail(fmt.Sprintf("Failed to create namespace %s", err))
+			// }
 
-			ctxca, ca := context.WithCancel(t.Context())
-			stopController = ca
+			// go func() {
+			// 	defer func() {
+			// 		// recover from RunOrDie which will always cause a panic on os.Exit
+			// 		r := recover()
+			// 		if r != nil {
+			// 			GinkgoWriter.Write([]byte(fmt.Sprintf("Recovered from panic: %v", r)))
+			// 		}
+			// 	}()
 
-			go func() {
-				defer func() {
-					// recover from RunOrDie which will always cause a panic on os.Exit
-					r := recover()
-					if r != nil {
-						GinkgoWriter.Write([]byte(fmt.Sprintf("Recovered from panic: %v", r)))
-					}
-				}()
-				operator.Init(
-					ctxca,
-					lockercrd.Required(),
-					operator.ControllerOptions{
-						ClientConfig:   t.ClientConfig(),
-						Namespace:      ns,
-						ControllerName: operatorName,
-						NodeName:       "node1",
-						PprofEnabled:   false,
-					},
-				)
-			}()
+			// 	// operator.Init(
+			// 	// 	ctxca,
+			// 	// 	lockercrd.Required(),
+			// 	// 	operator.ControllerOptions{
+			// 	// 		ClientConfig:   t.ClientConfig(),
+			// 	// 		Namespace:      ns,
+			// 	// 		ControllerName: operatorName,
+			// 	// 		NodeName:       "node1",
+			// 	// 		PprofEnabled:   false,
+			// 	// 	},
+			// 	// )
+			// }()
 		})
 		AfterAll(func() {
 			if stopController != nil {
@@ -95,7 +90,7 @@ func E2eTest() func() {
 			t.ObjectTracker().DeleteAll()
 		})
 
-		When("we use the helm locker operator", func() {
+		Context("test sanity checkup", func() {
 			Specify("Expect to find prerequisite CRDs in test cluster", func() {
 				// loosely checks that the embedded helm controller is installed
 				gvk := schema.GroupVersionKind{
@@ -116,6 +111,18 @@ func E2eTest() func() {
 
 				Eventually(GVK(helmRelease)).Should(Exist())
 			})
+
+			Specify("Expect the system namespace to exist", func() {
+				ns := &corev1.Namespace{
+					ObjectMeta: metav1.ObjectMeta{
+						Name: systemNamespace,
+					},
+				}
+				Eventually(Object(ns)).Should(Exist())
+			})
+		})
+
+		When("we use the helm locker operator", func() {
 
 			It("should install an example helm chart", func() {
 				cmd := exec.CommandContext(
@@ -167,7 +174,7 @@ func E2eTest() func() {
 					release := &v1alpha1.HelmRelease{
 						ObjectMeta: metav1.ObjectMeta{
 							Name:      "test-release",
-							Namespace: "cattle-helm-system",
+							Namespace: systemNamespace,
 						},
 						Spec: v1alpha1.HelmReleaseSpec{
 							Release: v1alpha1.ReleaseKey{
@@ -396,7 +403,7 @@ func E2eTest() func() {
 					release := &v1alpha1.HelmRelease{
 						ObjectMeta: metav1.ObjectMeta{
 							Name:      "test-release",
-							Namespace: "cattle-helm-system",
+							Namespace: systemNamespace,
 						},
 					}
 					err := t.K8sClient().Delete(t.Context(), release)

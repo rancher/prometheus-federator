@@ -2,11 +2,9 @@ package integration
 
 import (
 	. "github.com/onsi/ginkgo/v2"
-	helm_locker "github.com/rancher/prometheus-federator/internal/helm-locker"
 	"github.com/rancher/prometheus-federator/internal/helm-project-operator/controllers/common"
 	"github.com/rancher/prometheus-federator/internal/helm-project-operator/controllers/namespace"
 	"github.com/rancher/prometheus-federator/internal/helm-project-operator/controllers/project"
-	"github.com/rancher/prometheus-federator/internal/test"
 	"github.com/rancher/prometheus-federator/pkg/instrumentation"
 )
 
@@ -17,11 +15,9 @@ func init() {
 const projectIdLabel = "field.cattle.io/projectId"
 const overrideProjectLabel = "x.y.z/projectId"
 
-// Initialize clients, object trackers and contexts used by the tests
-var _ = BeforeSuite(test.Setup)
-
-var _ = Describe("Prometheus Federator integration tests", Ordered, func() {
+var _ = Describe("Prometheus Federator integration tests", func() {
 	Describe("HPO/NamespaceController/Single", Ordered, namespace.SingleNamespaceTest())
+
 	Describe("HPO/NamespaceController/InvalidYaml", Ordered, namespace.MultiNamespaceTest(
 		"cattle-helm-system",
 		common.Options{
@@ -86,7 +82,7 @@ var _ = Describe("Prometheus Federator integration tests", Ordered, func() {
 			map[string][]string{},
 		),
 	))
-	Describe("HelmLocker/e2e", Ordered, helm_locker.E2eTest())
+	// Describe("HelmLocker/e2e", Ordered, helm_locker.E2eTest())
 })
 
 const validValuesYaml = `
