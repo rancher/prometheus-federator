@@ -3,7 +3,6 @@ package namespace
 import (
 	"context"
 	"fmt"
-	"time"
 
 	. "github.com/kralicky/kmatch"
 	. "github.com/onsi/ginkgo/v2"
@@ -17,68 +16,34 @@ import (
 )
 
 func SingleNamespaceTest() func() {
+	// TODO : potential exercise for the avid reader
 	return func() {
-		When("we inject the namespace controller test with a delay", func() {
-			It("should sleep arbitrarily", func() {
-				time.Sleep(5 * time.Second)
+		When("we do something", func() {
+			It("should do something else", func() {
 				Expect(true).To(BeTrue())
 			})
 		})
 	}
 }
 
-func MultiNamespaceTest() func() {
+func MultiNamespaceTest(
+	operatorNamespace string,
+	opts common.Options,
+	questionsYaml string,
+	valuesYaml string,
+	targetProjectId string,
+) func() {
 	return func() {
-		const (
-			testSystemNamespace = "cattle-helm-system"
-			projectIdLabel      = "field.cattle.io/projectId"
-		)
-		const (
-			projectDataConfigmap = "v1"
-			projectQuestions     = "questions?"
-			projectValues        = "values?"
-		)
-
 		var (
-			DummySystemNamespaces = []string{"kube-system"}
-			opts                  = common.Options{
-				OperatorOptions: common.OperatorOptions{
-					HelmAPIVersion:   projectDataConfigmap,
-					SystemNamespaces: DummySystemNamespaces,
-				},
-				RuntimeOptions: common.RuntimeOptions{
-					Namespace:                     "helm-project-operator-test",
-					ControllerName:                "helm-project-operator-test",
-					HelmJobImage:                  "rancher/klipper-helm:v0.9.4-build20250113",
-					ProjectLabel:                  projectIdLabel,
-					ProjectReleaseLabelValue:      "p-test-release",
-					DisableEmbeddedHelmLocker:     true,
-					DisableEmbeddedHelmController: true,
-				},
-			}
 			projectGetter  ProjectGetter
 			appCtx         *setup.AppContext
 			t              test.TestInterface
 			controllerStop context.CancelFunc
 		)
+
 		BeforeAll(func() {
 			t = test.GetTestInterface()
 
-			opts := common.Options{
-				OperatorOptions: common.OperatorOptions{
-					HelmAPIVersion:   projectDataConfigmap,
-					SystemNamespaces: DummySystemNamespaces,
-				},
-				RuntimeOptions: common.RuntimeOptions{
-					Namespace:                     "helm-project-operator-test",
-					ControllerName:                "helm-project-operator-test",
-					HelmJobImage:                  "rancher/klipper-helm:v0.9.4-build20250113",
-					ProjectLabel:                  projectIdLabel,
-					ProjectReleaseLabelValue:      "p-test-release",
-					DisableEmbeddedHelmLocker:     true,
-					DisableEmbeddedHelmController: true,
-				},
-			}
 			By("creating required CRDs")
 
 			managedCrds := common.ManagedCRDsFromRuntime(opts.RuntimeOptions)
@@ -87,7 +52,7 @@ func MultiNamespaceTest() func() {
 
 			By("setting up the app context")
 
-			a, err := setup.NewAppContext(t.ClientConfig(), testSystemNamespace, common.Options{})
+			a, err := setup.NewAppContext(t.ClientConfig(), operatorNamespace, common.Options{})
 			Expect(err).To(Succeed())
 			appCtx = a
 		})
@@ -103,15 +68,16 @@ func MultiNamespaceTest() func() {
 		})
 
 		When("we initialize the namespace controller", func() {
-			It("should have correctly tracked the project registration namespaces / system namespaces before the reconcilers run", func() {
+
+			It("should have correctly tracked namespaces", func() {
 				// TODO : https://github.com/rancher/prometheus-federator/pull/175
 				By("registering the namespace controller")
 				projectGetter = Register(
 					t.Context(),
 					appCtx.Apply,
-					testSystemNamespace,
-					projectValues,
-					projectQuestions,
+					operatorNamespace,
+					valuesYaml,
+					questionsYaml,
 					opts,
 					// watches and generates
 					appCtx.Core.Namespace(),
@@ -122,6 +88,18 @@ func MultiNamespaceTest() func() {
 					appCtx.ProjectHelmChart().Cache(),
 					appCtx.Dynamic,
 				)
+
+				By("verifying system namespaces are tracked")
+				for _, systemNs := range opts.OperatorOptions.SystemNamespaces {
+					ns := &corev1.Namespace{
+						ObjectMeta: metav1.ObjectMeta{
+							Name: systemNs,
+						},
+					}
+					Eventually(projectGetter.IsSystemNamespace(ns)).Should(BeTrue())
+				}
+
+				By("verifying project registration namespaces are tracked")
 
 				// TODO : create some clear project registration namespaces
 
@@ -144,7 +122,7 @@ func MultiNamespaceTest() func() {
 				GinkgoWriter.Write([]byte("Waiting for namespace controller to create the system namespace\n"))
 				ns := &corev1.Namespace{
 					ObjectMeta: metav1.ObjectMeta{
-						Name: testSystemNamespace,
+						Name: operatorNamespace,
 					},
 				}
 				Eventually(Object(ns)).Should(Exist())
@@ -157,12 +135,11 @@ func MultiNamespaceTest() func() {
 			})
 
 			It("should do something with project-registration namespaces", func() {
-				const projectId = "dummy-project-id"
 				dummyRegistrationNamespace := &corev1.Namespace{
 					ObjectMeta: metav1.ObjectMeta{
-						Name: fmt.Sprintf(common.ProjectRegistrationNamespaceFmt, projectId),
+						Name: fmt.Sprintf(common.ProjectRegistrationNamespaceFmt, targetProjectId),
 						Labels: map[string]string{
-							projectIdLabel: projectId,
+							opts.ProjectLabel: targetProjectId,
 						},
 					},
 				}
@@ -175,14 +152,14 @@ func MultiNamespaceTest() func() {
 				By("verifying the project namespace has the helm values and questions configmap associate with the chart")
 				configmap := &corev1.ConfigMap{
 					ObjectMeta: metav1.ObjectMeta{
-						Name:      projectDataConfigmap,
+						Name:      opts.OperatorOptions.HelmAPIVersion,
 						Namespace: dummyRegistrationNamespace.Name,
 					},
 				}
 				Eventually(Object(configmap)).Should(ExistAnd(
 					HaveData(
-						"values.yaml", projectValues,
-						"questions.yaml", projectQuestions,
+						"values.yaml", valuesYaml,
+						"questions.yaml", questionsYaml,
 					),
 					HaveOwner(dummyRegistrationNamespace),
 				))
@@ -192,12 +169,11 @@ func MultiNamespaceTest() func() {
 			})
 
 			Specify("when we delete the project registration namespace, it should cleanup related resources", func() {
-				const projectId = "dummy-project-id"
 				dummyRegistrationNamespace := &corev1.Namespace{
 					ObjectMeta: metav1.ObjectMeta{
-						Name: fmt.Sprintf(common.ProjectRegistrationNamespaceFmt, projectId),
+						Name: fmt.Sprintf(common.ProjectRegistrationNamespaceFmt, targetProjectId),
 						Labels: map[string]string{
-							projectIdLabel: projectId,
+							opts.ProjectLabel: targetProjectId,
 						},
 					},
 				}
@@ -207,10 +183,7 @@ func MultiNamespaceTest() func() {
 				Eventually(Object(dummyRegistrationNamespace)).ShouldNot(Exist())
 				Consistently(Object(dummyRegistrationNamespace)).ShouldNot(Exist())
 
-				Expect(t.K8sClient().Delete(t.Context(), dummyRegistrationNamespace)).Should(Succeed())
-
 				By("verifying the tracker eventually stops tracking the namespace")
-				Eventually(Object(dummyRegistrationNamespace)).ShouldNot(Exist())
 				Eventually(projectGetter.IsProjectRegistrationNamespace(dummyRegistrationNamespace)).Should(BeFalse())
 				Consistently(projectGetter.IsProjectRegistrationNamespace(dummyRegistrationNamespace)).Should(BeFalse())
 			})
