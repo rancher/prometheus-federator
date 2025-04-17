@@ -5,6 +5,7 @@ import (
 	helm_locker "github.com/rancher/prometheus-federator/internal/helm-locker"
 	"github.com/rancher/prometheus-federator/internal/helm-project-operator/controllers/common"
 	"github.com/rancher/prometheus-federator/internal/helm-project-operator/controllers/namespace"
+	"github.com/rancher/prometheus-federator/internal/helm-project-operator/controllers/project"
 	"github.com/rancher/prometheus-federator/internal/test"
 	"github.com/rancher/prometheus-federator/pkg/instrumentation"
 )
@@ -20,10 +21,8 @@ const overrideProjectLabel = "x.y.z/projectId"
 var _ = BeforeSuite(test.Setup)
 
 var _ = Describe("Prometheus Federator integration tests", Ordered, func() {
-	Describe("HPO/SingleNamespaceController", Ordered, namespace.SingleNamespaceTest())
-	// TODO : discuss whether or not we should allow helm-project-operator to sync invalid yaml
-	// to questions/values project registration namespaces
-	Describe("HPO/MultiNamespaceController/InvalidYaml", Ordered, namespace.MultiNamespaceTest(
+	Describe("HPO/NamespaceController/Single", Ordered, namespace.SingleNamespaceTest())
+	Describe("HPO/NamespaceController/InvalidYaml", Ordered, namespace.MultiNamespaceTest(
 		"cattle-helm-system",
 		common.Options{
 			OperatorOptions: common.OperatorOptions{
@@ -44,7 +43,7 @@ var _ = Describe("Prometheus Federator integration tests", Ordered, func() {
 		"questions?",
 		"project-id-1",
 	))
-	Describe("HPO/MultiNamespaceController/ValidYaml", Ordered, namespace.MultiNamespaceTest(
+	Describe("HPO/NamespaceController/ValidYaml", Ordered, namespace.MultiNamespaceTest(
 		"cattle-helm-system",
 		common.Options{
 			OperatorOptions: common.OperatorOptions{
@@ -64,8 +63,29 @@ var _ = Describe("Prometheus Federator integration tests", Ordered, func() {
 		validValuesYaml,
 		emptyQuestions,
 		"project-id-2",
-	),
-	)
+	))
+	Describe("HPO/ProjectController", Ordered, project.ProjectControllerTest(
+		"cattle-helm-system",
+		common.Options{
+			OperatorOptions: common.OperatorOptions{
+				HelmAPIVersion: "v1",
+				ReleaseName:    "test-1",
+				// TODO : set this to a valid chart content
+				ChartContent: "",
+			},
+			RuntimeOptions: common.RuntimeOptions{
+				ProjectLabel: projectIdLabel,
+			},
+		},
+		map[string]interface{}{
+			"contents2": "alwaysOverriden",
+		},
+		projectGetter(
+			[]string{},
+			[]string{},
+			map[string][]string{},
+		),
+	))
 	Describe("HelmLocker/e2e", Ordered, helm_locker.E2eTest())
 })
 
