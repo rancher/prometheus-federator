@@ -16,7 +16,6 @@ import (
 	"github.com/rancher/wrangler/v3/pkg/generated/controllers/core"
 	corecontroller "github.com/rancher/wrangler/v3/pkg/generated/controllers/core/v1"
 	"github.com/rancher/wrangler/v3/pkg/generic"
-	"github.com/rancher/wrangler/v3/pkg/leader"
 	"github.com/rancher/wrangler/v3/pkg/ratelimit"
 	"github.com/rancher/wrangler/v3/pkg/schemes"
 	"github.com/rancher/wrangler/v3/pkg/start"
@@ -31,7 +30,7 @@ import (
 	"k8s.io/client-go/util/workqueue"
 )
 
-type appContext struct {
+type AppContext struct {
 	helmcontroller.Interface
 
 	K8s  kubernetes.Interface
@@ -47,18 +46,18 @@ type appContext struct {
 	starters []start.Starter
 }
 
-func (a *appContext) start(ctx context.Context) error {
+func (a *AppContext) Start(ctx context.Context) error {
 	return start.All(ctx, 50, a.starters...)
 }
 
-func Register(ctx context.Context, systemNamespace, controllerName, nodeName string, cfg clientcmd.ClientConfig) error {
+func Register(
+	ctx context.Context,
+	appCtx *AppContext,
+	systemNamespace, controllerName, nodeName string,
+	cfg clientcmd.ClientConfig,
+) error {
 	if len(systemNamespace) == 0 {
 		return errors.New("cannot start controllers on system namespace: system namespace not provided")
-	}
-
-	appCtx, err := newContext(ctx, systemNamespace, cfg)
-	if err != nil {
-		return err
 	}
 
 	appCtx.EventBroadcaster.StartLogging(logrus.Debugf)
@@ -74,7 +73,6 @@ func Register(ctx context.Context, systemNamespace, controllerName, nodeName str
 		controllerName = "helm-locker"
 	}
 
-	// TODO: Register all controllers
 	release.Register(ctx,
 		systemNamespace,
 		controllerName,
@@ -87,13 +85,6 @@ func Register(ctx context.Context, systemNamespace, controllerName, nodeName str
 		appCtx.ObjectSetHandler,
 		recorder,
 	)
-
-	leader.RunOrDie(ctx, systemNamespace, "helm-locker-lock", appCtx.K8s, func(ctx context.Context) {
-		if err := appCtx.start(ctx); err != nil {
-			logrus.Fatal(err)
-		}
-		logrus.Info("All controllers have been started")
-	})
 
 	return nil
 }
@@ -112,7 +103,7 @@ func controllerFactory(rest *rest.Config) (controller.SharedControllerFactory, e
 	}), nil
 }
 
-func newContext(_ context.Context, systemNamespace string, cfg clientcmd.ClientConfig) (*appContext, error) {
+func NewContext(_ context.Context, systemNamespace string, cfg clientcmd.ClientConfig) (*AppContext, error) {
 	client, err := cfg.ClientConfig()
 	if err != nil {
 		return nil, err
@@ -155,7 +146,7 @@ func newContext(_ context.Context, systemNamespace string, cfg clientcmd.ClientC
 
 	objectSet, objectSetRegister, objectSetHandler := objectset.NewLockableRegister("object-set-register", apply, scf, discovery, nil)
 
-	return &appContext{
+	return &AppContext{
 		Interface: helmv,
 
 		K8s:  k8s,

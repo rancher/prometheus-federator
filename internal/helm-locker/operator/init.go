@@ -7,9 +7,12 @@ import (
 	"net/http"
 
 	"github.com/rancher/prometheus-federator/internal/helm-locker/controllers"
+	"github.com/sirupsen/logrus"
+
 	// "github.com/rancher/prometheus-federator/internal/helm-locker/crd"
 	commoncrds "github.com/rancher/prometheus-federator/internal/helmcommon/pkg/crds"
 	"github.com/rancher/wrangler/v3/pkg/crd"
+	"github.com/rancher/wrangler/v3/pkg/leader"
 	"github.com/rancher/wrangler/v3/pkg/ratelimit"
 	"k8s.io/client-go/tools/clientcmd"
 )
@@ -55,9 +58,14 @@ func Init(
 	if err := commoncrds.CreateFrom(ctx, clientConfig, crds); err != nil {
 		return err
 	}
+	appCtx, err := controllers.NewContext(ctx, options.Namespace, options.ClientConfig)
+	if err != nil {
+		return err
+	}
 
 	if err := controllers.Register(
 		ctx,
+		appCtx,
 		options.Namespace,
 		options.ControllerName,
 		options.NodeName,
@@ -65,6 +73,13 @@ func Init(
 	); err != nil {
 		return err
 	}
+
+	leader.RunOrDie(ctx, options.Namespace, "helm-locker-lock", appCtx.K8s, func(ctx context.Context) {
+		if err := appCtx.Start(ctx); err != nil {
+			logrus.Fatal(err)
+		}
+		logrus.Info("All controllers have been started")
+	})
 
 	<-ctx.Done()
 	return nil
