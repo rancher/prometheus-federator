@@ -36,6 +36,7 @@ func (h *handler) initProjectRegistrationNamespaces() error {
 		// will happen before this function exits, which is what we need to guarantee here.
 		// As a result, we explicitly call OnChange here to force the apply to happen and wait for it to finish
 		for _, ns := range namespaceList.Items {
+			logrus.Debugf("Processing namespace for controller initialization %s", ns.Name)
 			_, err := h.OnMultiNamespaceChange(ns.Name, &ns)
 			if err != nil {
 				// encountered some error, just fail to start

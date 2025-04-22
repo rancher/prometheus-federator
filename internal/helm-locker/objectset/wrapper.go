@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/rancher/lasso/pkg/controller"
-	"github.com/rancher/wrangler/pkg/start"
+	"github.com/rancher/wrangler/v3/pkg/start"
 )
 
 // controllerToStarterWrapper wraps the generic controller.Controller interface with a dummy call for Sync

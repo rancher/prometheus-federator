@@ -1,1 +1,8 @@
 rancherProjectMonitoringVersion: 0.3.4
+rancherMonitoringVersion : 104.1.4+up57.0.3
+k3sTestingMaxVersion: v1.30.11-k3s1
+k3sTestingMinVersion: v1.27.16-k3s1
+
+# Dev use only
+# devChartsSource: https://github.com/{Dev}/ob-team-charts
+# devChartsBranch: {your branch}

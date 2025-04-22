@@ -115,7 +115,7 @@ If you don't want to run all the steps in CI every time you make a change, you c
 REPO=<my-repo>
 TAG=<my-tag>
 
-./scripts/build-chart && GOOS=linux CGO_ENABLED=0 go build -ldflags "-extldflags -static -s" -o bin/helm-project-operator && REPO=${REPO} TAG=${TAG} make package
+./scripts/build-chart && GOOS=linux CGO_ENABLED=0 go build -ldflags "-extldflags -static -s" -o bin/helm-project-operator cmd/helm-project-operator/main.go && REPO=${REPO} TAG=${TAG} make package
 ```
 
 Once the image is successfully packaged, simply run `docker push ${REPO}/helm-project-operator:${TAG}` to push your image to your Docker repository.

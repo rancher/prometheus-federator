@@ -1,6 +1,7 @@
 name: "[prom-fed] E2E CI"
 
 on:
+  workflow_call:
   workflow_dispatch:
     inputs:
       debug:
@@ -46,70 +47,67 @@ permissions:
   contents: write
 
 jobs:
-  prebuild-env:
-    name: Prebuild needed Env vars
-    strategy:
-      matrix:
-        arch:
-          - x64
-          - arm64
-    runs-on : runs-on,image=ubuntu22-full-${{ matrix.arch }},runner=4cpu-linux-${{ matrix.arch }},run-id=${{ github.run_id }}
-    steps:
-      - name: Check out the repository to the runner
-        uses: actions/checkout@v4
-      - name: Set Branch Tag and Other Variables
-        id: set-vars
-        run: bash ./.github/scripts/branch-tags.sh >> $GITHUB_OUTPUT
-    outputs:
-      branch_tag: ${{ steps.set-vars.outputs.branch_tag }}
-      branch_static_tag: ${{ steps.set-vars.outputs.branch_static_tag }}
-      prev_tag: ${{ steps.set-vars.outputs.prev_tag }}
   e2e-prometheus-federator:
-    needs: [
-      prebuild-env,
-    ]
     strategy:
       matrix:
         arch:
           - x64
           - arm64
-        k3s_version:
-          # k3d version list k3s | sed 's/+/-/' | sort -h
-          - ${{ github.event.inputs.k3s_version || 'v1.28.14-k3s1' }}
-    runs-on : runs-on,image=ubuntu22-full-${{ matrix.arch }},runner=4cpu-linux-${{ matrix.arch }},run-id=${{ github.run_id }}
-    env:
-      TAG: ${{ needs.prebuild-env.outputs.branch_static_tag }}
+    runs-on: ${{ github.repository == 'rancher/prometheus-federator' && format('runs-on,image=ubuntu22-full-{1},runner=4cpu-linux-{1},run-id={0}', github.run_id, matrix.arch) || 'ubuntu-latest' }}
     steps:
       -
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           fetch-depth: 0
-      - uses: actions/setup-go@v4
+      - uses: actions/setup-go@0aaccfd150d50ccaeb58ebd88d36e91967a5f35b # v5
         with:
           go-version: '>=1.20.0'
-      - uses: azure/setup-kubectl@v4
-      - uses: azure/setup-helm@v4
+      - uses: azure/setup-kubectl@3e0aec4d80787158d308d7b364cb1b702e7feb7f # v4
+      - name : Install helm
+        uses: azure/setup-helm@b9e51907a09c216f16ebe8536097933489208112 # v4
         with:
-          version: v3.11.1
-      -
-        name: Install mikefarah/yq
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Check if yq is installed
+        id: check_yq
+        run: |
+          if ! command -v yq &> /dev/null; then
+            echo "yq not found, installing..."
+            echo "::set-output name=install_yq::true"
+          else
+            echo "yq is already installed"
+            YQ_BIN=$(which yq)
+            echo "::set-output name=install_yq::false"
+            echo "::set-output name=yq_path::$YQ_BIN"
+          fi
+      - name : Install YQ
+        if: steps.check_yq.outputs.install_yq == 'true'
         run: |
           sudo wget https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_${{ matrix.arch == 'x64' && 'amd64' || matrix.arch  }} -O /usr/bin/yq && sudo chmod +x /usr/bin/yq;
+      - name : Export image version
+        run : |
+          source ./scripts/version
+          echo TAG=$TAG >> $GITHUB_ENV
+          echo IMAGE=$IMAGE >> $GITHUB_ENV
+          echo RANCHER_MONITORING=$RANCHER_MONITORING >> $GITHUB_ENV
+      - name: Set K3S Min/Max Versions
+        run: bash ./scripts/k3s-version >> $GITHUB_ENV
+      - name: Set K3S_VERSION
+        run: echo "K3S_VERSION=${{ inputs.k3s_version || env.K3S_MIN_VERSION_TAG }}" >> $GITHUB_ENV
       -
         name: Perform pre-e2e image build
         run: |
-          REPO=${REPO} TAG=${TAG} make build;
-          REPO=${REPO} TAG=${TAG} make package;
+          make build;
+          make package;
       -
         name : Install k3d
         run : ./.github/workflows/e2e/scripts/install-k3d.sh
       -
         name : Setup k3d cluster
-        run : K3S_VERSION=${{ matrix.k3s_version }} ./.github/workflows/e2e/scripts/setup-cluster.sh
+        run : ./.github/workflows/e2e/scripts/setup-cluster.sh
       -
         name: Import Images Into k3d
         run: |
-          k3d image import ${REPO}/prometheus-federator:${TAG} -c $CLUSTER_NAME;
+          k3d image import ${IMAGE} -c $CLUSTER_NAME;
       -
         name: Setup kubectl context
         run: |
@@ -131,17 +129,13 @@ jobs:
         run: ./.github/workflows/e2e/scripts/create-project-namespace.sh;
       -
         name: Create Project Monitoring Stack via ProjectHelmChart CR
-        run: DEFAULT_SLEEP_TIMEOUT_SECONDS=20 ./.github/workflows/e2e/scripts/create-projecthelmchart.sh;
+        run: DEFAULT_SLEEP_TIMEOUT_SECONDS=20 KUBECTL_WAIT_TIMEOUT=480s ./.github/workflows/e2e/scripts/create-projecthelmchart.sh;
       -
         name: Check if the Project Prometheus Stack is up
         run: ./.github/workflows/e2e/scripts/validate-project-monitoring.sh;
       -
-        name: Wait for 8 minutes for enough scraping to be done to continue
-        run: |
-          for i in {1..48}; do sleep 10; echo "Waited $((i*10)) seconds for metrics to be populated"...; done;
-      -
         name: Validate Project Prometheus Targets
-        run: ./.github/workflows/e2e/scripts/validate-project-prometheus-targets.sh;
+        run: KUBECTL_WAIT_TIMEOUT=480s ./.github/workflows/e2e/scripts/validate-project-prometheus-targets.sh;
       -
         name: Validate Project Grafana Datasources
         run: ./.github/workflows/e2e/scripts/validate-project-grafana-datasource.sh;
@@ -155,10 +149,10 @@ jobs:
       #    run: ./.github/workflows/e2e/scripts/validate-project-grafana-dashboard-data.sh;
       -
         name: Validate Project Prometheus Alerts
-        run: ./.github/workflows/e2e/scripts/validate-project-prometheus-alerts.sh;
+        run: KUBECTL_WAIT_TIMEOUT=480s ./.github/workflows/e2e/scripts/validate-project-prometheus-alerts.sh;
       -
         name: Validate Project Alertmanager
-        run: ./.github/workflows/e2e/scripts/validate-project-alertmanager.sh;
+        run: KUBECTL_WAIT_TIMEOUT=480s ./.github/workflows/e2e/scripts/validate-project-alertmanager.sh;
       -
         name: Delete Project Prometheus Stack
         run: ./.github/workflows/e2e/scripts/delete-projecthelmchart.sh;
@@ -170,9 +164,9 @@ jobs:
         run: ./.github/workflows/e2e/scripts/generate-artifacts.sh;
       - name: Upload logs and manifests on failure
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4
         with:
-          name: artifacts-${{ matrix.arch }}-${{ matrix.k3s_version }}
+          name: artifacts-${{ matrix.arch }}-${{ inputs.k3s_version || env.K3S_MIN_VERSION_TAG }}
           path: artifacts/
           retention-days: 1
       - 
