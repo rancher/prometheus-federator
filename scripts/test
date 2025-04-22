@@ -4,12 +4,5 @@ set -e
 source $(dirname $0)/version
 cd $(dirname $0)/..
 
-echo "Starating tests"
-
-echo "Running tests for ${BUILD_TARGET}"
-
-PKG_LIST=$(go list "./cmd/${BUILD_TARGET}/...")
-ALL_PKG_LIST=$(go list ./pkg/...)
-COMBINED_LIST="$PKG_LIST $ALL_PKG_LIST"
-
-go test -cover $COMBINED_LIST
+echo "Running unit tests for $BUILD_TARGET"
+CGO_ENABLED=1 go test -cover -race $(go list ./... | grep -v -E "internal/helm-locker$|internal/helm-project-operator$")

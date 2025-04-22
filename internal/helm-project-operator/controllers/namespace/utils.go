@@ -3,7 +3,7 @@ package namespace
 import (
 	"fmt"
 
-	"github.com/rancher/wrangler/pkg/apply"
+	"github.com/rancher/wrangler/v3/pkg/apply"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/labels"
 )
