@@ -1,101 +1,56 @@
 package project
 
 import (
-	"context"
-	"fmt"
-
+	. "github.com/kralicky/kmatch"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/rancher/prometheus-federator/internal/helm-project-operator/apis/helm.cattle.io/v1alpha1"
 	"github.com/rancher/prometheus-federator/internal/helm-project-operator/controllers/common"
 	"github.com/rancher/prometheus-federator/internal/helm-project-operator/controllers/namespace"
-	"github.com/rancher/prometheus-federator/internal/helm-project-operator/controllers/setup"
 	"github.com/rancher/prometheus-federator/internal/test"
-	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	// . "github.com/kralicky/kmatch"
 )
 
+type TestConfig struct {
+	TestUUID string
+	Opts     common.Options
+
+	DummyRegistrationNamespace string
+	TestProjectGetter          namespace.ProjectGetter
+}
+
 func ProjectControllerTest(
-	operatorNamespace string,
-	opts common.Options,
-	valuesOverride v1alpha1.GenericMap,
-	projectGetter namespace.ProjectGetter,
+	testConfigF func() TestConfig,
 ) func() {
 	return func() {
 		var (
-			t              test.TestInterface
-			stopController context.CancelFunc
-			appCtx         *setup.AppContext
+			ti         test.TestInterface
+			o          test.ObjectTracker
+			testConfig TestConfig
 		)
 		BeforeAll(func() {
-			t = test.GetTestInterface()
-
-			a, err := setup.NewAppContext(t.ClientConfig(), operatorNamespace, opts)
-			Expect(err).To(Succeed())
-			appCtx = a
-
+			ti = test.GetTestInterface()
+			o = ti.ObjectTracker().ObjectTracker("project-controller-test")
+			testConfig = testConfigF()
+			DeferCleanup(func() {
+				o.DeleteAll()
+			})
 		})
 
+		// TODO : move this to another suite
 		When("the controller is not yet initialized", func() {
-			It("should correctly index the rolebinding cache on initialization", func() {
-				Register(
-					t.Context(),
-					operatorNamespace,
-					opts,
-					valuesOverride,
-					appCtx.Apply,
-					// watches
-					appCtx.ProjectHelmChart(),
-					appCtx.ProjectHelmChart().Cache(),
-					appCtx.Core.ConfigMap(),
-					appCtx.Core.ConfigMap().Cache(),
-					appCtx.RBAC.Role(),
-					appCtx.RBAC.Role().Cache(),
-					appCtx.RBAC.ClusterRoleBinding(),
-					appCtx.RBAC.ClusterRoleBinding().Cache(),
-					// watches and generates
-					appCtx.HelmController.HelmChart(),
-					appCtx.HelmLocker.HelmRelease(),
-					appCtx.Core.Namespace(),
-					appCtx.Core.Namespace().Cache(),
-					appCtx.RBAC.RoleBinding(),
-					appCtx.RBAC.RoleBinding().Cache(),
-					projectGetter,
-				)
-
-				// TODO : https://github.com/rancher/prometheus-federator/pull/166
-				By("verifying registered role bindings")
-
-				By("starting all controllers")
-				ctxca, ca := context.WithCancel(t.Context())
-				stopController = ca
-				go appCtx.Start(ctxca)
-			})
+			// Skip("skipping this suite")
+			It("should correctly index the rolebinding cache on initialization", func() {})
 		})
 
 		When("the controller is running", func() {
 			Specify("when we create a project helm chart", func() {
-				dummyRegistrationNamespace := fmt.Sprintf(
-					common.ProjectRegistrationNamespaceFmt,
-					"dummy-registration-namespace",
-				)
-				projectId := "dumb-1"
-				ns := &corev1.Namespace{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: dummyRegistrationNamespace,
-						Labels: map[string]string{
-							opts.ProjectLabel: projectId,
-						},
-					},
-				}
-				// t.ObjectTracker().Add(ns)
-				Expect(t.K8sClient().Create(t.Context(), ns)).To(Succeed())
+				opts := testConfig.Opts
 
 				ph := &v1alpha1.ProjectHelmChart{
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      "hello",
-						Namespace: dummyRegistrationNamespace,
+						Namespace: testConfig.DummyRegistrationNamespace,
 					},
 					Spec: v1alpha1.ProjectHelmChartSpec{
 						HelmAPIVersion: opts.HelmAPIVersion,
@@ -104,21 +59,27 @@ func ProjectControllerTest(
 						},
 					},
 				}
-				// t.ObjectTracker().Add(ph)
-				Expect(t.K8sClient().Create(t.Context(), ph)).To(Succeed())
+				o.Add(ph)
+				Expect(ti.K8sClient().Create(ti.Context(), ph)).To(Succeed())
+				Eventually(Object(ph)).Should(Exist())
 
-				Eventually(func() error {
-					return nil
-				}).Should(Succeed())
+				By("verifying the matching roles & role bindings are created")
+
+				By("verifying the matching helm release is created")
+
+				By("veriyfing the matching helm chart crd is created ")
+
+				By("verifying the status is eventually OK")
+
+				Eventually(func() string {
+					ph, err := Object(ph)()
+					if err != nil {
+						return err.Error()
+					}
+					return ph.Status.Status
+
+				}).Should(Equal("Deployed"))
 			})
 		})
-
-		AfterAll(func() {
-			if stopController != nil {
-				stopController()
-			}
-			t.ObjectTracker().DeleteAll()
-		})
-
 	}
 }

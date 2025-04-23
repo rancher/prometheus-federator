@@ -116,7 +116,8 @@ func Register(
 	// To resolve this, we simply prefix the provided managedBy string to the generatingHandler controller's name only to ensure that the
 	// set ID specified will only target this particular controller
 	generatingHandlerName := fmt.Sprintf("%s-project-helm-chart-registration", opts.ControllerName)
-	helmprojectcontroller.RegisterProjectHelmChartGeneratingHandler(ctx,
+	helmprojectcontroller.RegisterProjectHelmChartGeneratingHandler(
+		ctx,
 		projectHelmCharts,
 		apply,
 		"",
@@ -124,7 +125,8 @@ func Register(
 		h.OnChange,
 		&generic.GeneratingHandlerOptions{
 			AllowClusterScoped: true,
-		})
+		},
+	)
 
 	remove.RegisterScopedOnRemoveHandler(ctx, projectHelmCharts, "on-project-helm-chart-remove",
 		func( /* key */ _ string, obj runtime.Object) (bool, error) {
@@ -189,7 +191,10 @@ func (h *handler) shouldManage(projectHelmChart *v1alpha1.ProjectHelmChart) bool
 	return true
 }
 
-func (h *handler) OnChange(projectHelmChart *v1alpha1.ProjectHelmChart, projectHelmChartStatus v1alpha1.ProjectHelmChartStatus) ([]runtime.Object, v1alpha1.ProjectHelmChartStatus, error) {
+func (h *handler) OnChange(
+	projectHelmChart *v1alpha1.ProjectHelmChart,
+	projectHelmChartStatus v1alpha1.ProjectHelmChartStatus,
+) ([]runtime.Object, v1alpha1.ProjectHelmChartStatus, error) {
 	logrus.Debugf("Handling ProjectHelmChart %s/%s.", projectHelmChart.Name, projectHelmChart.Namespace)
 
 	var objs []runtime.Object

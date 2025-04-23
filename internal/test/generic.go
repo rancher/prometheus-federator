@@ -24,6 +24,10 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 )
 
+const (
+	SystemNamespaceCollection = "system-namespaces"
+)
+
 var (
 	globalTestInterface TestInterface
 )
@@ -51,7 +55,7 @@ type TestInterface interface {
 	RestConfig() *rest.Config
 	Context() context.Context
 	ClientSet() *kubernetes.Clientset
-	ObjectTracker() ObjectTracker
+	ObjectTracker() ObjectTrackerBroker
 	ClientConfig() clientcmd.ClientConfig
 }
 
@@ -60,7 +64,7 @@ type testInterfaceImpl struct {
 	cfg       *rest.Config
 	testCtx   context.Context
 	clientSet *kubernetes.Clientset
-	o         ObjectTracker
+	o         ObjectTrackerBroker
 
 	clientC clientcmd.ClientConfig
 }
@@ -81,7 +85,7 @@ func (t *testInterfaceImpl) ClientSet() *kubernetes.Clientset {
 	return t.clientSet
 }
 
-func (t *testInterfaceImpl) ObjectTracker() ObjectTracker {
+func (t *testInterfaceImpl) ObjectTracker() ObjectTrackerBroker {
 	return t.o
 }
 
@@ -120,6 +124,7 @@ func Setup() {
 	DeferCleanup(func() {
 		ca()
 	})
+	logrus.SetLevel(logrus.DebugLevel)
 	logrus.SetOutput(GinkgoWriter)
 
 	niCfg := kubeconfig.GetNonInteractiveClientConfig(ts.Kubeconfig)
@@ -136,12 +141,15 @@ func Setup() {
 	newK8sClient, err := client.New(cfg, client.Options{})
 	Expect(err).NotTo(HaveOccurred(), "Could not initialize kubernetes client")
 	k8sClient := newK8sClient
-	var o ObjectTracker
+	var factoryF func() ObjectTracker
 	if ts.DisableCleanup {
-		o = NewNoopObjectTracker()
+		factoryF = NewNoopObjectTracker
 	} else {
-		o = NewObjectTracker(ctxCa, k8sClient)
+		factoryF = func() ObjectTracker {
+			return NewObjectTracker(ctxCa, k8sClient)
+		}
 	}
+	o := NewDefaultObjectTrackerBroker(factoryF)
 
 	DeferCleanup(func() {
 		o.DeleteAll()

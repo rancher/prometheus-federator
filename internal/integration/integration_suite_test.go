@@ -7,7 +7,12 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/rancher/prometheus-federator/internal/test"
+	"github.com/rancher/prometheus-federator/pkg/instrumentation"
 )
+
+func init() {
+	instrumentation.InitTracing("prometheus-federator-integration-tests")
+}
 
 func TestIntegration(t *testing.T) {
 	SetDefaultEventuallyTimeout(60 * time.Second)
@@ -20,3 +25,5 @@ func TestIntegration(t *testing.T) {
 
 // Initialize clients, object trackers and contexts used by the tests
 var _ = BeforeSuite(test.Setup)
+
+// var _ = SynchronizedBeforeSuite(test.Setup)

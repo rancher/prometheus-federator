@@ -12,6 +12,44 @@ type ObjectTracker interface {
 	DeleteAll()
 }
 
+type ObjectTrackerBroker interface {
+	ObjectTracker
+	ObjectTracker(collection string) ObjectTracker
+}
+
+type DefaultObjectTrackerBroker struct {
+	factoryF          func() ObjectTracker
+	defaultObjTracker ObjectTracker
+	collections       map[string]ObjectTracker
+}
+
+func NewDefaultObjectTrackerBroker(factoryF func() ObjectTracker) ObjectTrackerBroker {
+	return &DefaultObjectTrackerBroker{
+		factoryF:          factoryF,
+		defaultObjTracker: factoryF(),
+		collections:       map[string]ObjectTracker{},
+	}
+}
+
+func (b *DefaultObjectTrackerBroker) ObjectTracker(collection string) ObjectTracker {
+	if tracker, ok := b.collections[collection]; ok {
+		return tracker
+	}
+	b.collections[collection] = b.factoryF()
+	return b.collections[collection]
+}
+
+func (b *DefaultObjectTrackerBroker) Add(obj client.Object) {
+	b.defaultObjTracker.Add(obj)
+}
+
+func (b *DefaultObjectTrackerBroker) DeleteAll() {
+	b.defaultObjTracker.DeleteAll()
+	for _, tracker := range b.collections {
+		tracker.DeleteAll()
+	}
+}
+
 type DefaultObjectTracker struct {
 	mu        sync.Mutex
 	arr       []client.Object

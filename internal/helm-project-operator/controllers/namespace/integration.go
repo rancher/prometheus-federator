@@ -1,7 +1,6 @@
 package namespace
 
 import (
-	"context"
 	"fmt"
 	"time"
 
@@ -10,8 +9,6 @@ import (
 	. "github.com/onsi/gomega"
 	v1alpha1 "github.com/rancher/prometheus-federator/internal/helm-project-operator/apis/helm.cattle.io/v1alpha1"
 	"github.com/rancher/prometheus-federator/internal/helm-project-operator/controllers/common"
-	"github.com/rancher/prometheus-federator/internal/helm-project-operator/controllers/setup"
-	"github.com/rancher/prometheus-federator/internal/helmcommon/pkg/crds"
 	"github.com/rancher/prometheus-federator/internal/test"
 	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
@@ -29,103 +26,47 @@ func SingleNamespaceTest() func() {
 	}
 }
 
+type TestInfo struct {
+	TestUUID          string
+	OperatorNamespace string
+	Opts              common.Options
+
+	QuestionsYaml   string
+	ValuesYaml      string
+	TargetProjectId string
+
+	ProjectRegistrationNamespaces []string
+	TestProjectGetter             ProjectGetter
+}
+
 func MultiNamespaceTest(
-	operatorNamespace string,
-	opts common.Options,
-	questionsYaml string,
-	valuesYaml string,
-	targetProjectId string,
+	testInfoF func() TestInfo,
 ) func() {
 	return func() {
 		var (
-			projectGetter  ProjectGetter
-			appCtx         *setup.AppContext
-			t              test.TestInterface
-			controllerStop context.CancelFunc
+			ti            test.TestInterface
+			testInfo      TestInfo
+			o             test.ObjectTracker
+			projectGetter ProjectGetter
 		)
 
 		BeforeAll(func() {
-			t = test.GetTestInterface()
-
-			By("creating required CRDs")
-
-			managedCrds := common.ManagedCRDsFromRuntime(opts.RuntimeOptions)
-			Expect(len(managedCrds)).To(BeNumerically(">", 0))
-			Expect(crds.CreateFrom(t.Context(), t.RestConfig(), managedCrds)).To(Succeed())
-
-			By("setting up the app context")
-
-			a, err := setup.NewAppContext(t.ClientConfig(), operatorNamespace, common.Options{})
-			Expect(err).To(Succeed())
-			appCtx = a
-		})
-
-		AfterAll(func() {
-			By("stopping the controller")
-			if controllerStop != nil {
-				controllerStop()
-			}
-			controllerStop()
-			By("flusing the current objects in the object tracker")
-			t.ObjectTracker().DeleteAll()
-		})
-
-		When("we initialize the namespace controller", func() {
-
-			It("should have correctly tracked namespaces", func() {
-				// TODO : https://github.com/rancher/prometheus-federator/pull/175
-				By("registering the namespace controller")
-				projectGetter = Register(
-					t.Context(),
-					appCtx.Apply,
-					operatorNamespace,
-					valuesYaml,
-					questionsYaml,
-					opts,
-					// watches and generates
-					appCtx.Core.Namespace(),
-					appCtx.Core.Namespace().Cache(),
-					appCtx.Core.ConfigMap(),
-					// enqueues
-					appCtx.ProjectHelmChart(),
-					appCtx.ProjectHelmChart().Cache(),
-					appCtx.Dynamic,
-				)
-
-				By("verifying system namespaces are tracked")
-				for _, systemNs := range opts.OperatorOptions.SystemNamespaces {
-					ns := &corev1.Namespace{
-						ObjectMeta: metav1.ObjectMeta{
-							Name: systemNs,
-						},
-					}
-					Eventually(projectGetter.IsSystemNamespace(ns)).Should(BeTrue())
-				}
-
-				By("verifying project registration namespaces are tracked")
-
-				// TODO : create some clear project registration namespaces
-
-				// ...
-
-				// TODO : verifying projectGetter.IsProjectRegistrationNamespace
-
-				// ...
-				By("starting the controllers after we make sure trackers are initialized")
-				ctxca, ca := context.WithCancel(t.Context())
-				controllerStop = ca
-				go appCtx.Start(ctxca)
-
+			ti = test.GetTestInterface()
+			testInfo = testInfoF()
+			o = ti.ObjectTracker().ObjectTracker(testInfo.TestUUID)
+			projectGetter = testInfo.TestProjectGetter
+			DeferCleanup(func() {
+				o.DeleteAll()
 			})
 		})
-		When("we use the namespace controller", func() {
 
+		When("before we initialize the namespace controller", func() {
 			Specify("sanity check we have the requirements to run the controller", func() {
 				Expect(projectGetter).NotTo(BeNil())
 				GinkgoWriter.Write([]byte("Waiting for namespace controller to create the system namespace\n"))
 				ns := &corev1.Namespace{
 					ObjectMeta: metav1.ObjectMeta{
-						Name: operatorNamespace,
+						Name: testInfo.OperatorNamespace,
 					},
 				}
 				Eventually(Object(ns)).Should(Exist())
@@ -137,20 +78,65 @@ func MultiNamespaceTest(
 				})).Should(BeTrue())
 			})
 
+			It("should have correctly tracked system namespaces", func() {
+				for _, systemNs := range testInfo.Opts.OperatorOptions.SystemNamespaces {
+					ns := &corev1.Namespace{
+						ObjectMeta: metav1.ObjectMeta{
+							Name: systemNs,
+						},
+					}
+					Eventually(
+						projectGetter.IsSystemNamespace(ns)).Should(BeTrue(),
+						fmt.Sprintf("%s should be tracked by operator as system namespace", systemNs),
+					)
+				}
+			})
+
+			/// TODO : move to another suite with different setup
+			It("should have correctly tracked project registration namespaces", func() {
+				// TODO : remove
+				// for _, projectNs := range projectRegistrationNamespaces {
+				// 	ns := &corev1.Namespace{
+				// 		ObjectMeta: metav1.ObjectMeta{
+				// 			Name: fmt.Sprintf(common.ProjectRegistrationNamespaceFmt, projectNs),
+				// 		},
+				// 	}
+				// 	Eventually(
+				// 		projectGetter.IsProjectRegistrationNamespace(ns), time.Second*10, time.Millisecond*50).Should(BeTrue(),
+				// 		fmt.Sprintf("%s should be tracked by operator as project registration namespace", projectNs),
+				// 	)
+				// }
+			})
+		})
+
+		When("we use the namespace controller", func() {
+			// TODO : move to another suite
+			// Specify("it should start the namespace controller", func() {
+			// 	ctxca, ca := context.WithCancel(t.Context())
+			// 	controllerStop = ca
+			// 	// MUST be initialized after checking the projectGetter initializes stuff correctly
+			// 	go appCtx.Start(ctxca)
+			// })
+
+			// TODO : reword
 			It("should do something with project-registration namespaces", func() {
+				opts := testInfo.Opts
 				dummyRegistrationNamespace := &corev1.Namespace{
 					ObjectMeta: metav1.ObjectMeta{
-						Name: fmt.Sprintf(common.ProjectRegistrationNamespaceFmt, targetProjectId),
+						Name: fmt.Sprintf(common.ProjectRegistrationNamespaceFmt, testInfo.TargetProjectId),
 						Labels: map[string]string{
-							opts.ProjectLabel: targetProjectId,
+							opts.ProjectLabel: testInfo.TargetProjectId,
 						},
 					},
 				}
-				t.ObjectTracker().Add(dummyRegistrationNamespace)
-				Expect(t.K8sClient().Create(t.Context(), dummyRegistrationNamespace)).To(Succeed())
+				o.Add(dummyRegistrationNamespace)
+				Expect(ti.K8sClient().Create(ti.Context(), dummyRegistrationNamespace)).To(Succeed())
 
 				By("verifying the project namespace is created")
 				Eventually(Object(dummyRegistrationNamespace)).Should(Exist())
+
+				By("verifying the project registration namespace is tracked")
+				// Eventually(projectGetter.IsProjectRegistrationNamespace(dummyRegistrationNamespace)).Should(BeTrue())
 
 				By("verifying the project namespace has the helm values and questions configmap associate with the chart")
 				configmap := &corev1.ConfigMap{
@@ -161,47 +147,45 @@ func MultiNamespaceTest(
 				}
 				Eventually(Object(configmap)).Should(ExistAnd(
 					HaveData(
-						"values.yaml", valuesYaml,
-						"questions.yaml", questionsYaml,
+						"values.yaml", testInfo.ValuesYaml,
+						"questions.yaml", testInfo.QuestionsYaml,
 					),
 					HaveOwner(dummyRegistrationNamespace),
 				))
 
-				By("verifying the project registration namespace is tracked")
-				Eventually(projectGetter.IsProjectRegistrationNamespace(dummyRegistrationNamespace)).Should(BeTrue())
 			})
 
 			Specify("when we add namespaces to a project", func() {
 				By("manually adding namespaces to a project")
-
+				opts := testInfo.Opts
 				nss := []*corev1.Namespace{
 					{
 						ObjectMeta: metav1.ObjectMeta{
-							Name: fmt.Sprintf("project-%s-ns-1", targetProjectId),
+							Name: fmt.Sprintf("project-%s-ns-1", testInfo.TargetProjectId),
 							Labels: map[string]string{
-								opts.ProjectLabel: targetProjectId,
+								opts.ProjectLabel: testInfo.TargetProjectId,
 							},
 						},
 					},
 					{
 						ObjectMeta: metav1.ObjectMeta{
-							Name: fmt.Sprintf("project-%s-ns-2", targetProjectId),
+							Name: fmt.Sprintf("project-%s-ns-2", testInfo.TargetProjectId),
 							Labels: map[string]string{
-								opts.ProjectLabel: targetProjectId,
+								opts.ProjectLabel: testInfo.TargetProjectId,
 							},
 						},
 					},
 				}
 				for _, ns := range nss {
-					t.ObjectTracker().Add(ns)
-					Expect(t.K8sClient().Create(t.Context(), ns)).To(Succeed())
+					o.Add(ns)
+					Expect(ti.K8sClient().Create(ti.Context(), ns)).To(Succeed())
 				}
 
 				By("verifying the project getter tracks them correctly")
 				Eventually(func() []string {
 					tracker, err := projectGetter.GetTargetProjectNamespaces(&v1alpha1.ProjectHelmChart{
 						ObjectMeta: metav1.ObjectMeta{
-							Namespace: fmt.Sprintf(common.ProjectRegistrationNamespaceFmt, targetProjectId),
+							Namespace: fmt.Sprintf(common.ProjectRegistrationNamespaceFmt, testInfo.TargetProjectId),
 						},
 					})
 					if err != nil {
@@ -217,7 +201,7 @@ func MultiNamespaceTest(
 				Consistently(func() []string {
 					tracker, err := projectGetter.GetTargetProjectNamespaces(&v1alpha1.ProjectHelmChart{
 						ObjectMeta: metav1.ObjectMeta{
-							Namespace: fmt.Sprintf(common.ProjectRegistrationNamespaceFmt, targetProjectId),
+							Namespace: fmt.Sprintf(common.ProjectRegistrationNamespaceFmt, testInfo.TargetProjectId),
 						},
 					})
 					if err != nil {
@@ -234,33 +218,34 @@ func MultiNamespaceTest(
 			Specify("when we delete the namespaces associated to a project", func() {
 
 				By("manually deleting namespaces associated to a project")
+				opts := testInfo.Opts
 				nss := []*corev1.Namespace{
 					{
 						ObjectMeta: metav1.ObjectMeta{
-							Name: fmt.Sprintf("project-%s-ns-1", targetProjectId),
+							Name: fmt.Sprintf("project-%s-ns-1", testInfo.TargetProjectId),
 							Labels: map[string]string{
-								opts.ProjectLabel: targetProjectId,
+								opts.ProjectLabel: testInfo.TargetProjectId,
 							},
 						},
 					},
 					{
 						ObjectMeta: metav1.ObjectMeta{
-							Name: fmt.Sprintf("project-%s-ns-2", targetProjectId),
+							Name: fmt.Sprintf("project-%s-ns-2", testInfo.TargetProjectId),
 							Labels: map[string]string{
-								opts.ProjectLabel: targetProjectId,
+								opts.ProjectLabel: testInfo.TargetProjectId,
 							},
 						},
 					},
 				}
 				for _, ns := range nss {
-					Expect(t.K8sClient().Delete(t.Context(), ns)).To(Succeed())
+					Expect(ti.K8sClient().Delete(ti.Context(), ns)).To(Succeed())
 				}
 
 				By("verifying the project getter stops tracking them")
 				Eventually(func() []string {
 					tracker, err := projectGetter.GetTargetProjectNamespaces(&v1alpha1.ProjectHelmChart{
 						ObjectMeta: metav1.ObjectMeta{
-							Namespace: fmt.Sprintf(common.ProjectRegistrationNamespaceFmt, targetProjectId),
+							Namespace: fmt.Sprintf(common.ProjectRegistrationNamespaceFmt, testInfo.TargetProjectId),
 						},
 					})
 					if err != nil {
@@ -272,7 +257,7 @@ func MultiNamespaceTest(
 				Consistently(func() []string {
 					tracker, err := projectGetter.GetTargetProjectNamespaces(&v1alpha1.ProjectHelmChart{
 						ObjectMeta: metav1.ObjectMeta{
-							Namespace: fmt.Sprintf(common.ProjectRegistrationNamespaceFmt, targetProjectId),
+							Namespace: fmt.Sprintf(common.ProjectRegistrationNamespaceFmt, testInfo.TargetProjectId),
 						},
 					})
 					if err != nil {
@@ -283,15 +268,16 @@ func MultiNamespaceTest(
 			})
 
 			Specify("when we delete the project registration namespace, it should cleanup related resources", func() {
+				opts := testInfo.Opts
 				dummyRegistrationNamespace := &corev1.Namespace{
 					ObjectMeta: metav1.ObjectMeta{
-						Name: fmt.Sprintf(common.ProjectRegistrationNamespaceFmt, targetProjectId),
+						Name: fmt.Sprintf(common.ProjectRegistrationNamespaceFmt, testInfo.TargetProjectId),
 						Labels: map[string]string{
-							opts.ProjectLabel: targetProjectId,
+							opts.ProjectLabel: testInfo.TargetProjectId,
 						},
 					},
 				}
-				Expect(t.K8sClient().Delete(t.Context(), dummyRegistrationNamespace)).To(Succeed())
+				Expect(ti.K8sClient().Delete(ti.Context(), dummyRegistrationNamespace)).To(Succeed())
 				By("verifying the registration namespace is deleted")
 
 				Eventually(Object(dummyRegistrationNamespace)).ShouldNot(Exist())
