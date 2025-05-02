@@ -9,7 +9,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/hashicorp/go-multierror v1.1.1
 	github.com/k3s-io/helm-controller v0.16.4
-	github.com/kralicky/kmatch v0.0.0-20240603031752-4aaff7842056
+	github.com/kralicky/kmatch v0.0.0-20241208031153-01f2c564e46f
 	github.com/novln/docker-parser v1.0.0
 	github.com/onsi/ginkgo/v2 v2.22.2
 	github.com/onsi/gomega v1.36.2
