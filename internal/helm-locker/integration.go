@@ -28,19 +28,19 @@ const (
 )
 
 // TestInfo is the info required in setup that must be passed in for the test to function
-type TestInfo struct {
+type TestSpecE2E struct {
 	SystemNamespace string
 	NodeName        string
 	ControllerName  string
 	UUID            string
 }
 
-func E2eTest(testInfoClosture func() TestInfo) func() {
+func E2eTest(testInfoClosture func() TestSpecE2E) func() {
 	return func() {
 		var (
 			o        test.ObjectTracker
 			t        test.TestInterface
-			testInfo TestInfo
+			testInfo TestSpecE2E
 			// operatorName     = "helm-locker-" + uuid.New().String()
 			exampleReleaseName string
 			exampleReleaseNs   string

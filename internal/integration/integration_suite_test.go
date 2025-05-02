@@ -26,4 +26,9 @@ func TestIntegration(t *testing.T) {
 // Initialize clients, object trackers and contexts used by the tests
 var _ = BeforeSuite(test.Setup)
 
-// var _ = SynchronizedBeforeSuite(test.Setup)
+// var _ = SynchronizedBeforeSuite(
+// 	test.Setup,
+// 	func(data []byte) {
+// 		// this is invoked after the test suite, this could be things like an audit of which objects
+// 		// are created, etc..
+// 	})

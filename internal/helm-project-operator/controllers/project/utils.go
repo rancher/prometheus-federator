@@ -54,13 +54,17 @@ func (h *handler) getProjectNamespaceSelector(projectHelmChart *v1alpha1.Project
 
 // getReleaseNamespaceAndName returns the name of the Project Release namespace and the name of the Helm Release
 // that will be deployed into the Project Release namespace on behalf of the ProjectHelmChart
-func (h *handler) getReleaseNamespaceAndName(projectHelmChart *v1alpha1.ProjectHelmChart) (string, string) {
-	projectReleaseName := fmt.Sprintf("%s-%s", projectHelmChart.Name, h.opts.ReleaseName)
-	if h.opts.Singleton {
+func (h *handler) getReleaseNamespaceAndName(projectHelmChart *v1alpha1.ProjectHelmChart) (namespace string, name string) {
+	return getReleaseNamespaceAndNameRaw(projectHelmChart, h.opts)
+}
+
+func getReleaseNamespaceAndNameRaw(projectHelmChart *v1alpha1.ProjectHelmChart, opts common.Options) (namespace string, name string) {
+	projectReleaseName := fmt.Sprintf("%s-%s", projectHelmChart.Name, opts.ReleaseName)
+	if opts.Singleton {
 		// This changes the naming scheme of the deployed resources such that only one can every be created per namespace
-		projectReleaseName = fmt.Sprintf("%s-%s", projectHelmChart.Namespace, h.opts.ReleaseName)
+		projectReleaseName = fmt.Sprintf("%s-%s", projectHelmChart.Namespace, opts.ReleaseName)
 	}
-	if len(h.opts.ProjectLabel) == 0 || len(h.opts.ProjectReleaseLabelValue) == 0 {
+	if len(opts.ProjectLabel) == 0 || len(opts.ProjectReleaseLabelValue) == 0 {
 		// Underlying Helm releases will be created in the namespace where the ProjectHelmChart is registered (project registration namespace)
 		// The project registration namespace will either be the system namespace or auto-generated namespaces depending on the user values provided
 		return projectHelmChart.Namespace, projectReleaseName

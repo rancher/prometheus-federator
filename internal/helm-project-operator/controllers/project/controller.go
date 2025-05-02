@@ -185,7 +185,7 @@ func (h *handler) shouldManage(projectHelmChart *v1alpha1.ProjectHelmChart) bool
 	}
 	if projectHelmChart.Spec.HelmAPIVersion != h.opts.HelmAPIVersion {
 		// only watch resources with the HelmAPIVersion this controller was configured with
-		logrus.Debugf("ProjectHelmChart %s/%s has HelmAPIVersion %s. This controller will only manager resources with helmAPIVersion %s.", projectHelmChart.Name, projectHelmChart.Namespace, projectHelmChart.Spec.HelmAPIVersion, h.opts.HelmAPIVersion)
+		logrus.Debugf("ProjectHelmChart %s/%s has HelmAPIVersion %s. This controller will only manage resources with helmAPIVersion %s.", projectHelmChart.Name, projectHelmChart.Namespace, projectHelmChart.Spec.HelmAPIVersion, h.opts.HelmAPIVersion)
 		return false
 	}
 	return true

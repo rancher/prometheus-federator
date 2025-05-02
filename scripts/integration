@@ -16,4 +16,4 @@ go test -cover ./internal/helm-locker
 
 # expects the dev image $IMAGE to be available to the cluster pointed to by $KUBECONFIG
 echo "Running helm-project-operator integration tests with image : $IMAGE"
-IMAGE=$IMAGE go test -cover ./internal/helm-project-operator 
+IMAGE=$IMAGE go test -v -cover ./internal/helm-project-operator 

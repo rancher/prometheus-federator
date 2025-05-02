@@ -7,7 +7,6 @@ import (
 	"github.com/google/uuid"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	v1alpha1 "github.com/rancher/prometheus-federator/internal/helm-project-operator/apis/helm.cattle.io/v1alpha1"
 	"github.com/rancher/prometheus-federator/internal/helm-project-operator/controllers/common"
 	"github.com/rancher/prometheus-federator/internal/helm-project-operator/controllers/namespace"
 	"github.com/rancher/prometheus-federator/internal/helm-project-operator/controllers/project"
@@ -18,11 +17,12 @@ import (
 const helmProjectControllerNs = "cattle-helm-proj-system"
 
 var _ = Describe("HPO/Project", func() {
-	Describe("HPO/Project/TODO", HelmProjectTestSetup("HPO/Project/TODO", TestConfig{
+	// tests some expected default values
+	Describe("HPO/Project/Default", HelmProjectRunOperator("HPO/Project/TODO", TestConfig{
 		Opts: common.Options{
 			OperatorOptions: common.OperatorOptions{
-				HelmAPIVersion: "v1",
 				ReleaseName:    "test-1",
+				HelmAPIVersion: "v1",
 				// TODO : set this to a valid chart content
 				ChartContent: "",
 			},
@@ -30,106 +30,86 @@ var _ = Describe("HPO/Project", func() {
 				ProjectLabel: projectIdLabel,
 			},
 		},
+		ValuesOverride: map[string]interface{}{},
 	}))
-	// Describe("HPO/Project/TODO2", HelmProjectTestSetup("HPO/Project/TODO2", TestConfig{}))
+	// overrides projectIdLabel
+	// overrides values.yaml
+	Describe("HPO/Project/Override", HelmProjectRunOperator("HPO/Project/TODO2", TestConfig{
+		Opts: common.Options{
+			OperatorOptions: common.OperatorOptions{
+				ReleaseName:    "test-2",
+				HelmAPIVersion: "v1",
+				// TODO : set this to a valid chart content
+				ChartContent: "",
+			},
+			RuntimeOptions: common.RuntimeOptions{
+				ProjectLabel: "x.y.z/projectId",
+			},
+		},
+		ValuesOverride: map[string]interface{}{
+			"projectId": "proj-1",
+		},
+	}))
 })
 
 type TestConfig struct {
-	Opts common.Options
+	Opts           common.Options
+	ValuesOverride map[string]interface{}
 }
 
-func HelmProjectTestSetup(name string, config TestConfig) func() {
+func HelmProjectRunOperator(name string, config TestConfig) func() {
 	return func() {
 		var (
 			testUUID          string
-			projectTestConfig project.TestConfig
+			projectTestConfig project.TestSpecCRUD
 		)
 
 		BeforeEach(OncePerOrdered, func() {
+
 			testUUID = uuid.New().String()
-			ns := helmProjectControllerNs + "-" + testUUID
-			controllerName := "project-" + testUUID
-			// nodeName := "node-" + testUUID
-			dummyRegistrationNs := fmt.Sprintf(common.ProjectRegistrationNamespaceFmt, "prog-"+testUUID)
+			systemNs := helmProjectControllerNs + "-" + testUUID
+			projId := "proj-" + testUUID
+			dummyRegistrationNs := fmt.Sprintf(common.ProjectRegistrationNamespaceFmt, projId)
 			targetNs := fmt.Sprintf(common.ProjectRegistrationNamespaceFmt, "target-"+testUUID+"-1")
 			targetNs2 := fmt.Sprintf(common.ProjectRegistrationNamespaceFmt, "target-"+testUUID+"-2")
 
 			projectGetter := projectGetter(
 				[]string{dummyRegistrationNs},
 				[]string{"kube-system"},
-				map[string][]string{
-					dummyRegistrationNs: {targetNs, targetNs2},
+				[]string{
+					targetNs, targetNs2,
 				},
 			)
 
-			createNs(ns)
+			createNs(systemNs)
 			createNs(dummyRegistrationNs)
 			createNs(targetNs)
 			createNs(targetNs2)
 
-			startEmbeddedHelmProject(ns, controllerName, projectGetter)
+			startEmbeddedHelmProject(systemNs, projectGetter, config.Opts, config.ValuesOverride)
 
-			projectTestConfig = project.TestConfig{
+			projectTestConfig = project.TestSpecCRUD{
 				TestUUID:                   testUUID,
 				Opts:                       config.Opts,
 				DummyRegistrationNamespace: dummyRegistrationNs,
+				ProjectId:                  projId,
 				TestProjectGetter:          projectGetter,
+				SystemNamespace:            systemNs,
 			}
 		})
 
-		AfterEach(OncePerOrdered, func() {
-
-		})
-
-		Describe(name, Ordered, project.ProjectControllerTest(func() project.TestConfig {
+		Describe(name, Ordered, project.ProjectControllerTest(func() project.TestSpecCRUD {
 			return projectTestConfig
 		}))
 	}
 }
 
-var _ = Describe("HPO/FAKEprojectController", func() {
-	// OncePerOrdered ensures this is run once for each downstream node, without requiring
-	// that they are run one by one
-	BeforeEach(OncePerOrdered, func() {
-	})
-
-	AfterEach(OncePerOrdered, func() {
-		// optional cleanup
-	})
-
-	Describe("HPO/ProjectController", Ordered, project.ProjectControllerTest(
-		func() project.TestConfig {
-			return project.TestConfig{}
-		},
-		// "cattle-helm-system",
-		// common.Options{
-		// 	OperatorOptions: common.OperatorOptions{
-		// 		HelmAPIVersion: "v1",
-		// 		ReleaseName:    "test-1",
-		// 		// TODO : set this to a valid chart content
-		// 		ChartContent: "",
-		// 	},
-		// 	RuntimeOptions: common.RuntimeOptions{
-		// 		ProjectLabel: projectIdLabel,
-		// 	},
-		// },
-		// map[string]interface{}{
-		// 	"contents2": "alwaysOverriden",
-		// },
-		// projectGetter(
-		// 	[]string{},
-		// 	[]string{},
-		// 	map[string][]string{},
-		// ),
-	))
-})
-
 func startEmbeddedHelmProject(
-	systemNamespace, controllerName string,
+	systemNamespace string,
 	projectGetter namespace.ProjectGetter,
+	opts common.Options,
+	valuesOverride map[string]interface{},
 ) {
-	opts := common.Options{}
-
 	ti := test.GetTestInterface()
 	appCtx, err := setup.NewAppContext(ti.ClientConfig(), systemNamespace, common.Options{})
 	Expect(err).To(Succeed())
@@ -139,14 +119,11 @@ func startEmbeddedHelmProject(
 		ca()
 	})
 
-	valuesOverride := v1alpha1.GenericMap{}
-
 	project.Register(ctxca,
 		systemNamespace,
 		opts,
 		valuesOverride,
 		appCtx.Apply,
-		// watches
 		appCtx.ProjectHelmChart(),
 		appCtx.ProjectHelmChart().Cache(),
 		appCtx.Core.ConfigMap(),

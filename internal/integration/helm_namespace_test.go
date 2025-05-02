@@ -2,6 +2,7 @@ package integration
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/google/uuid"
 	. "github.com/onsi/ginkgo/v2"
@@ -10,12 +11,9 @@ import (
 	"github.com/rancher/prometheus-federator/internal/helm-project-operator/controllers/namespace"
 	"github.com/rancher/prometheus-federator/internal/helm-project-operator/controllers/setup"
 	"github.com/rancher/prometheus-federator/internal/test"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
-
-const projectIdLabel = "field.cattle.io/projectId"
-const overrideProjectLabel = "x.y.z/projectId"
-
-const image = "rancher/klipper-helm:v0.9.4-build20250113"
 
 const helmProjectNamespaceControllerNs = "cattle-helm-ns-system"
 
@@ -29,14 +27,24 @@ type TestNamespaceConfig struct {
 	ValuesYaml       string
 }
 
+type TestNamespaceInitConfig struct {
+	SystemNamespaces []string
+	ReleaseLabel     string
+	ProjectIdLabel   string
+	// These project IDs will have project registration namespaces created
+	ProjectIds []string
+	// These project IDs will not have valid associated project registration namespaces
+	IgnoreProjectIds []string
+}
+
 var _ = Describe("HPO/Namespace", func() {
 	// Runs these tests in parallel to make sure we can run scoped namespace controllers without conflict
 
 	Describe("HPO/Namespace/Single", Ordered, namespace.SingleNamespaceTest())
 	// Default project ID
-	// Has invalid yaml, this is validated before the controller is registered, but we
+	// Has invalid yaml, this is validated before the controller is registered, but if we
 	// decide to change that the test will fail
-	Describe("HPO/Namespace/Multi/Default", Ordered, HelmNamespaceTestSetup("InvalidYaml", TestNamespaceConfig{
+	Describe("HPO/Namespace/Multi/Default", Ordered, HelmNamespaceRunOperator("InvalidYaml", TestNamespaceConfig{
 		ProjectIdLabel:   projectIdLabel,
 		TargetProjectID:  "id-1",
 		KlipperImage:     image,
@@ -46,7 +54,7 @@ var _ = Describe("HPO/Namespace", func() {
 		QuestionsYaml:    "questions?",
 	}))
 	// Override project ID
-	Describe("HPO/Namespace/Multi/Override", Ordered, HelmNamespaceTestSetup("ValidYaml", TestNamespaceConfig{
+	Describe("HPO/Namespace/Multi/Override", Ordered, HelmNamespaceRunOperator("ValidYaml", TestNamespaceConfig{
 		ProjectIdLabel:   overrideProjectLabel,
 		TargetProjectID:  "id-2",
 		KlipperImage:     image,
@@ -55,16 +63,129 @@ var _ = Describe("HPO/Namespace", func() {
 		ValuesYaml:       validValuesYaml,
 		QuestionsYaml:    emptyQuestions,
 	}))
+
+	Describe("HPO/Namespace/Init/Default", Ordered, HelmNamespaceInitializeOperator("Init", TestNamespaceInitConfig{
+		SystemNamespaces: []string{"kube-system"},
+		ReleaseLabel:     "p-test-release",
+		ProjectIdLabel:   projectIdLabel,
+		ProjectIds: []string{
+			"test-1",
+		},
+		IgnoreProjectIds: []string{
+			"test-ignored-1",
+		},
+	}))
+
+	Describe("HPO/Namespace/Init/Override", Ordered, HelmNamespaceInitializeOperator("Init", TestNamespaceInitConfig{
+		SystemNamespaces: []string{"kube-system"},
+		ReleaseLabel:     "p-test-release",
+		ProjectIdLabel:   overrideProjectLabel,
+		ProjectIds: []string{
+			"test-2",
+		},
+		IgnoreProjectIds: []string{
+			"test-ignored-2",
+		},
+	}))
 })
 
-func HelmNamespaceTestSetup(suiteName string, config TestNamespaceConfig) func() {
+func HelmNamespaceInitializeOperator(suiteName string, config TestNamespaceInitConfig) func() {
 	return func() {
 		var (
-			testInfo namespace.TestInfo
+			testInfo namespace.TestSpecMultiNamespaceInit
 		)
 
 		BeforeEach(OncePerOrdered, func() {
-			testInfo = namespace.TestInfo{}
+			testUUID := uuid.New().String()
+
+			if len(config.ProjectIds) == 0 {
+				Fail("No project registration namespaces provided to test config, it is trivially true")
+			}
+			testNs := helmProjectNamespaceControllerNs + "-" + testUUID
+			commonOpts := common.Options{
+				OperatorOptions: common.OperatorOptions{
+					HelmAPIVersion:   "v1",
+					SystemNamespaces: config.SystemNamespaces,
+				},
+				RuntimeOptions: common.RuntimeOptions{
+					NamespaceRegistrationRetryMax:              5,
+					NamespaceRegistrationWorkers:               10,
+					NamespaceRegistrationRetryWaitMilliseconds: 200,
+					Namespace:                     testNs,
+					ControllerName:                testNs,
+					HelmJobImage:                  image,
+					ProjectLabel:                  config.ProjectIdLabel,
+					ProjectReleaseLabelValue:      config.ReleaseLabel,
+					DisableEmbeddedHelmLocker:     true,
+					DisableEmbeddedHelmController: true,
+				},
+			}
+			createNs(testNs)
+			expectedRegistrationNs := []string{}
+			for _, pid := range config.ProjectIds {
+				dummyRegistrationNamespace := &corev1.Namespace{
+					ObjectMeta: metav1.ObjectMeta{
+						Name: fmt.Sprintf(common.ProjectRegistrationNamespaceFmt, pid),
+						Labels: map[string]string{
+							commonOpts.ProjectLabel: pid,
+						},
+					},
+				}
+				createNsFull(dummyRegistrationNamespace)
+				expectedRegistrationNs = append(expectedRegistrationNs, dummyRegistrationNamespace.Name)
+			}
+			notRegistrationNs := []string{}
+			for _, pid := range config.IgnoreProjectIds {
+				notDummyRegistrationNamespace := &corev1.Namespace{
+					ObjectMeta: metav1.ObjectMeta{
+						Name: fmt.Sprintf(common.ProjectRegistrationNamespaceFmt, pid),
+						// specifically not setting the project label so it should not be registered
+					},
+				}
+				createNsFull(notDummyRegistrationNamespace)
+				notRegistrationNs = append(notRegistrationNs, notDummyRegistrationNamespace.Name)
+			}
+
+			appctx, err := setup.NewAppContext(test.GetTestInterface().ClientConfig(), testNs, commonOpts)
+			Expect(err).To(Succeed(), "Setting up App context failed")
+			ctxca, ca := context.WithCancel(test.GetTestInterface().Context())
+			DeferCleanup(func() {
+				ca()
+			})
+
+			projectGetter := initEmbeddedHelmNamespaceController(
+				appctx,
+				ctxca,
+				testNs,
+				"",
+				"",
+				commonOpts,
+			)
+
+			testInfo = namespace.TestSpecMultiNamespaceInit{
+				TestUUID:                              testUUID,
+				TestProjectGetter:                     projectGetter,
+				ExpectedProjectRegistrationNamespaces: expectedRegistrationNs,
+				NotProjectRegistrationNamespaces:      notRegistrationNs,
+			}
+		})
+
+		Describe(suiteName, Ordered, namespace.MultiNamespaceInitTest(func() namespace.TestSpecMultiNamespaceInit {
+			return testInfo
+		}))
+		// can describe more expected behaviour after initialization here
+	}
+}
+
+// HelmNamespaceRunOperator initializes a namespaced helm-project-namespace-operator and runs it.
+func HelmNamespaceRunOperator(suiteName string, config TestNamespaceConfig) func() {
+	return func() {
+		var (
+			testInfo namespace.TestSpecMultiNamespace
+		)
+
+		BeforeEach(OncePerOrdered, func() {
+			testInfo = namespace.TestSpecMultiNamespace{}
 			testUUID := uuid.New().String()
 			testNs := helmProjectNamespaceControllerNs + "-" + testUUID
 			commonOpts := common.Options{
@@ -93,7 +214,7 @@ func HelmNamespaceTestSetup(suiteName string, config TestNamespaceConfig) func()
 				commonOpts,
 			)
 
-			testInfo = namespace.TestInfo{
+			testInfo = namespace.TestSpecMultiNamespace{
 				TestUUID:          testUUID,
 				OperatorNamespace: testNs,
 				Opts:              commonOpts,
@@ -103,20 +224,42 @@ func HelmNamespaceTestSetup(suiteName string, config TestNamespaceConfig) func()
 				TargetProjectId: config.TargetProjectID,
 
 				TestProjectGetter: projectGetter,
-
-				// TODO
-				ProjectRegistrationNamespaces: []string{},
 			}
 		})
 
-		AfterEach(OncePerOrdered, func() {
-
-		})
-
-		Describe("", Ordered, namespace.MultiNamespaceTest(
-			func() namespace.TestInfo { return testInfo },
+		// === Here we can register specific tests for a running controller ===
+		Describe(suiteName, Ordered, namespace.MultiNamespaceTest(
+			func() namespace.TestSpecMultiNamespace { return testInfo },
 		))
+		// we can extend here to test other functionality of the operator that is not covered in previous tests, that will run in parallel
 	}
+}
+
+func initEmbeddedHelmNamespaceController(
+	appCtx *setup.AppContext,
+	ctx context.Context,
+	operatorNamespace string,
+	valuesYaml, questionsYaml string,
+	opts common.Options,
+) namespace.ProjectGetter {
+	projectGetter := namespace.Register(
+		ctx,
+		appCtx.Apply,
+		operatorNamespace,
+		valuesYaml,
+		questionsYaml,
+		opts,
+		// watches and generates
+		appCtx.Core.Namespace(),
+		appCtx.Core.Namespace().Cache(),
+		appCtx.Core.ConfigMap(),
+		// enqueues
+		appCtx.ProjectHelmChart(),
+		appCtx.ProjectHelmChart().Cache(),
+		appCtx.Dynamic,
+	)
+
+	return projectGetter
 }
 
 func startEmbeddedHelmNamespaceController(
@@ -133,25 +276,15 @@ func startEmbeddedHelmNamespaceController(
 	DeferCleanup(func() {
 		ca()
 	})
-	projectGetter := namespace.Register(
+	projectGetter := initEmbeddedHelmNamespaceController(
+		appCtx,
 		ctxca,
-		appCtx.Apply,
 		operatorNamespace,
 		valuesYaml,
 		questionsYaml,
 		opts,
-		// watches and generates
-		appCtx.Core.Namespace(),
-		appCtx.Core.Namespace().Cache(),
-		appCtx.Core.ConfigMap(),
-		// enqueues
-		appCtx.ProjectHelmChart(),
-		appCtx.ProjectHelmChart().Cache(),
-		appCtx.Dynamic,
 	)
-
 	Expect(appCtx.Start(ctxca)).To(Succeed(), "Starting controller failed")
-
 	return projectGetter
 }
 

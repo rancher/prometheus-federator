@@ -6,7 +6,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/rancher/wrangler/v3/pkg/schemes"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -18,7 +17,7 @@ import (
 )
 
 var _ = Describe("HelmLocker", func() {
-	// This tests the helm-locker is correctly namespaced and can run in parallel with another non-conflicting helm-locker
+	// This indirectly tests the helm-locker is correctly namespaced and can run in parallel with another non-conflicting helm-locker
 	Describe("| HelmLocker/e2e1 |", HelmLockerTestSetup("HelmLocker/e2e1"))
 	Describe("| HelmLocker/e2e2 |", HelmLockerTestSetup("HelmLocker/e2e2"))
 })
@@ -50,8 +49,8 @@ func HelmLockerTestSetup(name string) func() {
 
 		})
 
-		Describe(name, Ordered, helm_locker.E2eTest(func() helm_locker.TestInfo {
-			return helm_locker.TestInfo{
+		Describe(name, Ordered, helm_locker.E2eTest(func() helm_locker.TestSpecE2E {
+			return helm_locker.TestSpecE2E{
 				SystemNamespace: ns,
 				NodeName:        nodeName,
 				ControllerName:  controllerName,
@@ -59,25 +58,6 @@ func HelmLockerTestSetup(name string) func() {
 			}
 		}))
 	}
-}
-
-func createNs(name string) {
-	ti := test.GetTestInterface()
-	ns := &corev1.Namespace{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: name,
-		},
-	}
-	testSetupUid := uuid.New().String()
-	ti.ObjectTracker().ObjectTracker(testSetupUid).Add(ns)
-	Expect(ti.K8sClient().Create(
-		ti.Context(),
-		ns,
-	)).To(Succeed())
-
-	DeferCleanup(func() {
-		ti.ObjectTracker().ObjectTracker(testSetupUid).DeleteAll()
-	})
 }
 
 // starts a helm-locker controller process, and the hooks to clean it up
