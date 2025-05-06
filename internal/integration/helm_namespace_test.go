@@ -40,11 +40,11 @@ type TestNamespaceInitConfig struct {
 var _ = Describe("HPO/Namespace", func() {
 	// Runs these tests in parallel to make sure we can run scoped namespace controllers without conflict
 
-	Describe("HPO/Namespace/Single", Ordered, namespace.SingleNamespaceTest())
+	Describe("HPO/Namespace/Single", namespace.SingleNamespaceTest())
 	// Default project ID
 	// Has invalid yaml, this is validated before the controller is registered, but if we
 	// decide to change that the test will fail
-	Describe("HPO/Namespace/Multi/Default", Ordered, HelmNamespaceRunOperator("InvalidYaml", TestNamespaceConfig{
+	Describe("HPO/Namespace/Multi/Default", HelmNamespaceRunOperator("InvalidYaml", TestNamespaceConfig{
 		ProjectIdLabel:   projectIdLabel,
 		TargetProjectID:  "id-1",
 		KlipperImage:     image,
@@ -54,7 +54,7 @@ var _ = Describe("HPO/Namespace", func() {
 		QuestionsYaml:    "questions?",
 	}))
 	// Override project ID
-	Describe("HPO/Namespace/Multi/Override", Ordered, HelmNamespaceRunOperator("ValidYaml", TestNamespaceConfig{
+	Describe("HPO/Namespace/Multi/Override", HelmNamespaceRunOperator("ValidYaml", TestNamespaceConfig{
 		ProjectIdLabel:   overrideProjectLabel,
 		TargetProjectID:  "id-2",
 		KlipperImage:     image,
@@ -64,7 +64,7 @@ var _ = Describe("HPO/Namespace", func() {
 		QuestionsYaml:    emptyQuestions,
 	}))
 
-	Describe("HPO/Namespace/Init/Default", Ordered, HelmNamespaceInitializeOperator("Init", TestNamespaceInitConfig{
+	Describe("HPO/Namespace/Init/Default", HelmNamespaceInitializeOperator("Init", TestNamespaceInitConfig{
 		SystemNamespaces: []string{"kube-system"},
 		ReleaseLabel:     "p-test-release",
 		ProjectIdLabel:   projectIdLabel,
@@ -76,7 +76,7 @@ var _ = Describe("HPO/Namespace", func() {
 		},
 	}))
 
-	Describe("HPO/Namespace/Init/Override", Ordered, HelmNamespaceInitializeOperator("Init", TestNamespaceInitConfig{
+	Describe("HPO/Namespace/Init/Override", HelmNamespaceInitializeOperator("Init", TestNamespaceInitConfig{
 		SystemNamespaces: []string{"kube-system"},
 		ReleaseLabel:     "p-test-release",
 		ProjectIdLabel:   overrideProjectLabel,
@@ -173,7 +173,6 @@ func HelmNamespaceInitializeOperator(suiteName string, config TestNamespaceInitC
 		Describe(suiteName, Ordered, namespace.MultiNamespaceInitTest(func() namespace.TestSpecMultiNamespaceInit {
 			return testInfo
 		}))
-		// can describe more expected behaviour after initialization here
 	}
 }
 
