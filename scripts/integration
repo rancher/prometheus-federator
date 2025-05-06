@@ -9,9 +9,15 @@ fi
 
 TEST_FLAGS=${TEST_FLAGS:-""}
 
+FOCUS=${FOCUS:-""}
+
 COVER=${COVER:-""}
 if [ "$COVER" == "true" ]; then
   TEST_FLAGS="$TEST_FLAGS --cover --covermode=atomic --coverprofile=cover.out --coverpkg=github.com/rancher/prometheus-federator/..."
+fi
+
+if [ "$FOCUS" != "" ]; then
+  TEST_FLAGS="$TEST_FLAGS --focus=$FOCUS"
 fi
 
 ginkgo -p -tags=integration ${TEST_FLAGS} ./internal/integration/
