@@ -114,6 +114,29 @@ var (
 	ts = TestSpec{}
 )
 
+func SetupOnce() {
+	if os.Getenv("INTEGRATION") != "true" {
+		Skip("Skipping integration tests, use export INTEGRATION=true to run them")
+	}
+	Expect(env.Parse(&ts)).To(Succeed(), "Could not parse test spec from environment variables")
+	Expect(ts.Validate()).To(Succeed(), "Invalid input e2e test spec")
+	logrus.SetLevel(logrus.DebugLevel)
+	logrus.SetOutput(GinkgoWriter)
+	managedCrds := common.ManagedCRDsFromRuntime(common.RuntimeOptions{
+		DisableEmbeddedHelmLocker:     false,
+		DisableEmbeddedHelmController: false,
+	})
+	ctxCa, ca := context.WithCancel(context.Background())
+	DeferCleanup(func() {
+		ca()
+	})
+	niCfg := kubeconfig.GetNonInteractiveClientConfig(ts.Kubeconfig)
+	restConfig, err := niCfg.ClientConfig()
+	Expect(err).To(Succeed())
+
+	Expect(commoncrds.CreateFrom(ctxCa, restConfig, managedCrds)).To(Succeed(), "Failed to create required CRDs for e2e testing")
+}
+
 func Setup() {
 	if os.Getenv("INTEGRATION") != "true" {
 		Skip("Skipping integration tests, use export INTEGRATION=true to run them")
@@ -124,8 +147,6 @@ func Setup() {
 	DeferCleanup(func() {
 		ca()
 	})
-	logrus.SetLevel(logrus.DebugLevel)
-	logrus.SetOutput(GinkgoWriter)
 
 	niCfg := kubeconfig.GetNonInteractiveClientConfig(ts.Kubeconfig)
 	clientC := niCfg
@@ -154,13 +175,6 @@ func Setup() {
 	DeferCleanup(func() {
 		o.DeleteAll()
 	})
-
-	managedCrds := common.ManagedCRDsFromRuntime(common.RuntimeOptions{
-		DisableEmbeddedHelmLocker:     false,
-		DisableEmbeddedHelmController: false,
-	})
-
-	Expect(commoncrds.CreateFrom(ctxCa, restConfig, managedCrds)).To(Succeed(), "Failed to create required CRDs for e2e testing")
 
 	testInterface := &testInterfaceImpl{
 		testCtx:   ctxCa,
