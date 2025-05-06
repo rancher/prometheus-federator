@@ -22,6 +22,8 @@ You can run isolated test cases using
 KUBECONFIG=$KUBECONFIG FOCUS="HPO/Namespace" ./scripts/integration
 ```
 
+By default, for idempotency, the tests cleanup resrouces the create to be able to re-run tests without cleanup. To Disable cleanup you can pass the environment variable: `DISABLE_CLEANUP=true`, which will persist resources created by the tests for debugging potential problems/bugs.
+
 The entry point of the integration tests are in the `./internal/integration` package. 
 
 Matching integration suites are usually defined in particular sub-packages with the filename `integration.go`. This was originally done so we can re-use private methods of that package, and improve the DEV UX to developping inside the appropriate package when designing tests.
