@@ -21,3 +21,4 @@ Dockerfile.dapper*
 !Dockerfile.dapper
 /.debug
 *.log
+*.out

@@ -1,19 +1,17 @@
 #!/usr/bin/env bash
 set -e
+set -x
 
-# harcode since we expect to run integration tests against the helm-project-operator image
-BUILD_TARGET=helm-project-operator
+if ! hash ginkgo 2>/dev/null; then
+    echo "Ginkgo is not installed"
+    exit 1
+fi
 
-source $(dirname $0)/version
-cd $(dirname $0)/..
+TEST_FLAGS=${TEST_FLAGS:-""}
 
-echo "Starting integration tests"
-# we separate these two test suites since the embedded helm-locker in helm-project-operator can cause a race
-# condition that causes the helm-locker tests to fail, because either controller can acquire and harden a helm-release.
+COVER=${COVER:-""}
+if [ "$COVER" == "true" ]; then
+  TEST_FLAGS="$TEST_FLAGS --cover --covermode=atomic --coverprofile=cover.out --coverpkg=github.com/rancher/prometheus-federator/..."
+fi
 
-echo "Running helm-locker integration tests"
-go test -cover ./internal/helm-locker 
-
-# expects the dev image $IMAGE to be available to the cluster pointed to by $KUBECONFIG
-echo "Running helm-project-operator integration tests with image : $IMAGE"
-IMAGE=$IMAGE go test -v -cover ./internal/helm-project-operator 
+ginkgo -p -tags=integration ${TEST_FLAGS} ./internal/integration/
