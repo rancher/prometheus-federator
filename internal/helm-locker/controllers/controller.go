@@ -54,7 +54,7 @@ func Register(
 	ctx context.Context,
 	appCtx *AppContext,
 	systemNamespace, controllerName, nodeName string,
-	cfg clientcmd.ClientConfig,
+	_ clientcmd.ClientConfig,
 ) error {
 	if len(systemNamespace) == 0 {
 		return errors.New("cannot start controllers on system namespace: system namespace not provided")
