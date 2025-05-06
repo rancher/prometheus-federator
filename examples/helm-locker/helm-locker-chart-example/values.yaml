@@ -10,7 +10,7 @@ global:
   
   kubectl:
     repository: rancher/kubectl
-    tag: v1.25.16
+    tag: v1.31.8
     pullPolicy: IfNotPresent
 
   rbac:

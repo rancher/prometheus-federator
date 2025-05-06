@@ -5,7 +5,7 @@ FROM --platform=$BUILDPLATFORM registry.suse.com/bci/golang:1.23 AS builder
 ARG TARGETARCH
 ENV BUILD_TARGET="helm-project-operator"
 WORKDIR /usr/src/app
-ENV YQ_VERSION=v4.25.1
+ENV YQ_VERSION=v4.45.2
 RUN zypper -n install git curl wget make helm
 RUN export ARCH=$(go env GOHOSTARCH)
 RUN wget https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_${TARGETARCH} -O /usr/bin/yq && chmod +x /usr/bin/yq;
