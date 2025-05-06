@@ -41,7 +41,7 @@ func E2eTest(testInfoClosture func() TestSpecE2E) func() {
 	return func() {
 		var (
 			o        test.ObjectTracker
-			t        test.TestInterface
+			ti       test.TestInterface
 			testInfo TestSpecE2E
 			// operatorName     = "helm-locker-" + uuid.New().String()
 			exampleReleaseName string
@@ -49,11 +49,17 @@ func E2eTest(testInfoClosture func() TestSpecE2E) func() {
 		)
 
 		BeforeAll(func() {
-			t = test.GetTestInterface()
+			ti = test.GetTestInterface()
 			testInfo = testInfoClosture()
-			o = t.ObjectTracker().ObjectTracker(testInfo.UUID)
+			o = ti.ObjectTracker().ObjectTracker(testInfo.UUID)
 			exampleReleaseName = "foochart-" + testInfo.UUID
 			exampleReleaseNs = "foo-" + testInfo.UUID
+
+			o.Add(&corev1.Namespace{
+				ObjectMeta: metav1.ObjectMeta{
+					Name: exampleReleaseNs,
+				},
+			})
 		})
 
 		Context("test sanity checkup", func() {
@@ -92,7 +98,7 @@ func E2eTest(testInfoClosture func() TestSpecE2E) func() {
 		When("we use the helm locker operator", func() {
 			It("should install an example helm chart", func() {
 				cmd := exec.CommandContext(
-					t.Context(),
+					ti.Context(),
 					"helm",
 					"upgrade",
 					"--install",
@@ -150,7 +156,7 @@ func E2eTest(testInfoClosture func() TestSpecE2E) func() {
 						},
 					}
 					o.Add(release)
-					Expect(t.K8sClient().Create(t.Context(), release)).To(Succeed())
+					Expect(ti.K8sClient().Create(ti.Context(), release)).To(Succeed())
 
 					By("Verifing it has the appropriate annotations and finalizers")
 					Eventually(Object(release)).Should(Exist())
@@ -222,7 +228,7 @@ func E2eTest(testInfoClosture func() TestSpecE2E) func() {
 					Expect(origApplied).NotTo(BeEmpty(), "helm locker should manage the objectset applied annotation")
 
 					By("trying to update the helm locked resource")
-					Expect(t.K8sClient().Update(t.Context(), &corev1.ConfigMap{
+					Expect(ti.K8sClient().Update(ti.Context(), &corev1.ConfigMap{
 						ObjectMeta: metav1.ObjectMeta{
 							Name:      "foo-configmap",
 							Namespace: exampleReleaseNs,
@@ -295,7 +301,7 @@ func E2eTest(testInfoClosture func() TestSpecE2E) func() {
 
 					By("upgrading the helm resource using helm")
 					cmd := exec.CommandContext(
-						t.Context(),
+						ti.Context(),
 						"helm",
 						"upgrade",
 						"--install",
@@ -370,7 +376,7 @@ func E2eTest(testInfoClosture func() TestSpecE2E) func() {
 							Namespace: testInfo.SystemNamespace,
 						},
 					}
-					err := t.K8sClient().Delete(t.Context(), release)
+					err := ti.K8sClient().Delete(ti.Context(), release)
 					Expect(err).ToNot(HaveOccurred())
 
 					By("Verifing it has the appropriate annotations and finalizers")
@@ -378,7 +384,7 @@ func E2eTest(testInfoClosture func() TestSpecE2E) func() {
 				})
 
 				Specify("we should be able to edit and delete resources managed by the helm-chart", func() {
-					Expect(t.K8sClient().Update(t.Context(), &corev1.ConfigMap{
+					Expect(ti.K8sClient().Update(ti.Context(), &corev1.ConfigMap{
 						ObjectMeta: metav1.ObjectMeta{
 							Name:      "foo-configmap",
 							Namespace: exampleReleaseNs,
