@@ -117,9 +117,6 @@ var (
 )
 
 func SetupOnce() {
-	if os.Getenv("INTEGRATION") != "true" {
-		Skip("Skipping integration tests, use export INTEGRATION=true to run them")
-	}
 	Expect(env.Parse(&ts)).To(Succeed(), "Could not parse test spec from environment variables")
 	Expect(ts.Validate()).To(Succeed(), "Invalid input e2e test spec")
 	logrus.SetLevel(logrus.DebugLevel)
@@ -140,9 +137,6 @@ func SetupOnce() {
 }
 
 func Setup() {
-	if os.Getenv("INTEGRATION") != "true" {
-		Skip("Skipping integration tests, use export INTEGRATION=true to run them")
-	}
 	Expect(env.Parse(&ts)).To(Succeed(), "Could not parse test spec from environment variables")
 	Expect(ts.Validate()).To(Succeed(), "Invalid input e2e test spec")
 	ctxCa, ca := context.WithCancel(context.Background())
