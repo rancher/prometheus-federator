@@ -1,3 +1,5 @@
+//go:build integration
+
 package project
 
 import (
@@ -42,12 +44,6 @@ func ProjectControllerTest(
 			DeferCleanup(func() {
 				o.DeleteAll()
 			})
-		})
-
-		// TODO : move this to another suite
-		When("the controller is not yet initialized", func() {
-			// Skip("skipping this suite")
-			It("should correctly index the rolebinding cache on initialization", func() {})
 		})
 
 		When("the controller is running", func() {
@@ -218,7 +214,7 @@ func ProjectControllerTest(
 
 				By("verifying the object references the correct helm chart CR")
 				// Make sure it references the correct helm
-				// and has teh correct labels
+				// and has the correct labels
 				// TODO
 
 				Eventually(Object(hr)).Should(Exist())

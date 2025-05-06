@@ -1,3 +1,5 @@
+//go:build integration
+
 package namespace
 
 import (
@@ -52,14 +54,10 @@ func MultiNamespaceInitTest(
 	return func() {
 		var (
 			testConfig TestSpecMultiNamespaceInit
-			// ti         test.TestInterface
-			// o          test.ObjectTracker
 		)
 
 		BeforeAll(func() {
 			testConfig = testInfoF()
-			// ti = test.GetTestInterface()
-			// o = ti.ObjectTracker().ObjectTracker(testConfig.TestUUID)
 		})
 
 		When("the operator is initialized, before running it", func() {
@@ -170,7 +168,7 @@ func MultiNamespaceTest(
 				Eventually(Object(dummyRegistrationNamespace)).Should(Exist())
 
 				By("verifying the project registration namespace is tracked")
-				// TODO: I don't know why this fails. The collector configuration may be wrong.
+				// FIXME: this was occasionally failing, indicating that a race condition still exists
 				closure := func() bool {
 					return projectGetter.IsProjectRegistrationNamespace(dummyRegistrationNamespace)
 				}
