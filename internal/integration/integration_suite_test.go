@@ -17,13 +17,13 @@ func TestIntegration(t *testing.T) {
 	RegisterFailHandler(Fail)
 
 	// Dev : to debug specific suites, use the following
-	suiteConfig, reporterConfig := GinkgoConfiguration()
-	// suiteConfig.LabelFilter = "DEBUG"
-	suiteConfig.FocusStrings = []string{"HPO/Namespace/Init"}
-	RunSpecs(t, "Integration Suite", suiteConfig, reporterConfig)
+	// suiteConfig, reporterConfig := GinkgoConfiguration()
+	// // suiteConfig.LabelFilter = "DEBUG"
+	// suiteConfig.FocusStrings = []string{"HPO/Namespace/Init"}
+	// RunSpecs(t, "Integration Suite", suiteConfig, reporterConfig)
 
 	// comment out the following line to run only the specific suite
-	// RunSpecs(t, "Integration Suite")
+	RunSpecs(t, "Integration Suite")
 }
 
 var _ = SynchronizedBeforeSuite(func() []byte {
