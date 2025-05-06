@@ -1,4 +1,4 @@
-// TODO: remove me
+// instrumentation is a WIP package for enabling development around wrangler distributed tracing.
 package instrumentation
 
 import (
