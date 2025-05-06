@@ -18,6 +18,7 @@ type ObjectTrackerBroker interface {
 }
 
 type DefaultObjectTrackerBroker struct {
+	mu                *sync.Mutex
 	factoryF          func() ObjectTracker
 	defaultObjTracker ObjectTracker
 	collections       map[string]ObjectTracker
@@ -28,10 +29,13 @@ func NewDefaultObjectTrackerBroker(factoryF func() ObjectTracker) ObjectTrackerB
 		factoryF:          factoryF,
 		defaultObjTracker: factoryF(),
 		collections:       map[string]ObjectTracker{},
+		mu:                &sync.Mutex{},
 	}
 }
 
 func (b *DefaultObjectTrackerBroker) ObjectTracker(collection string) ObjectTracker {
+	b.mu.Lock()
+	defer b.mu.Unlock()
 	if tracker, ok := b.collections[collection]; ok {
 		return tracker
 	}
@@ -40,10 +44,14 @@ func (b *DefaultObjectTrackerBroker) ObjectTracker(collection string) ObjectTrac
 }
 
 func (b *DefaultObjectTrackerBroker) Add(obj client.Object) {
+	b.mu.Lock()
+	defer b.mu.Unlock()
 	b.defaultObjTracker.Add(obj)
 }
 
 func (b *DefaultObjectTrackerBroker) DeleteAll() {
+	b.mu.Lock()
+	defer b.mu.Unlock()
 	b.defaultObjTracker.DeleteAll()
 	for _, tracker := range b.collections {
 		tracker.DeleteAll()
@@ -88,6 +96,7 @@ func (o *DefaultObjectTracker) DeleteAll() {
 	o.mu.Lock()
 	defer o.mu.Unlock()
 	for _, obj := range o.arr {
-		_ = o.k8sClient.Delete(o.ctx, obj)
+		// ensures no race conditions between context being cancelled in specific test fixtures
+		_ = o.k8sClient.Delete(context.Background(), obj)
 	}
 }
