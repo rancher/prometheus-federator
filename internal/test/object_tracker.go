@@ -16,7 +16,7 @@ type ObjectTracker interface {
 
 type ObjectTrackerBroker interface {
 	ObjectTracker
-	ObjectTracker(collection string) ObjectTracker
+	Scoped(collection string) ObjectTracker
 }
 
 type DefaultObjectTrackerBroker struct {
@@ -35,7 +35,7 @@ func NewDefaultObjectTrackerBroker(factoryF func() ObjectTracker) ObjectTrackerB
 	}
 }
 
-func (b *DefaultObjectTrackerBroker) ObjectTracker(collection string) ObjectTracker {
+func (b *DefaultObjectTrackerBroker) Scoped(collection string) ObjectTracker {
 	b.mu.Lock()
 	defer b.mu.Unlock()
 	if tracker, ok := b.collections[collection]; ok {

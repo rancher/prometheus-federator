@@ -7,6 +7,7 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
+	. "github.com/kralicky/kmatch"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/rancher/prometheus-federator/internal/helm-project-operator/controllers/common"
@@ -135,6 +136,7 @@ func HelmNamespaceInitializeOperator(suiteName string, config TestNamespaceInitC
 				}
 				createNsFull(dummyRegistrationNamespace)
 				expectedRegistrationNs = append(expectedRegistrationNs, dummyRegistrationNamespace.Name)
+				Eventually(Object(dummyRegistrationNamespace)).Should(Exist())
 			}
 			notRegistrationNs := []string{}
 			for _, pid := range config.IgnoreProjectIds {
@@ -146,6 +148,7 @@ func HelmNamespaceInitializeOperator(suiteName string, config TestNamespaceInitC
 				}
 				createNsFull(notDummyRegistrationNamespace)
 				notRegistrationNs = append(notRegistrationNs, notDummyRegistrationNamespace.Name)
+				Eventually(Object(notDummyRegistrationNamespace)).Should(Exist())
 			}
 
 			appctx, err := setup.NewAppContext(test.GetTestInterface().ClientConfig(), testNs, commonOpts)

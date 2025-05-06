@@ -51,7 +51,7 @@ func E2eTest(testInfoClosture func() TestSpecE2E) func() {
 		BeforeAll(func() {
 			ti = test.GetTestInterface()
 			testInfo = testInfoClosture()
-			o = ti.ObjectTracker().ObjectTracker(testInfo.UUID)
+			o = ti.ObjectTracker().Scoped(testInfo.UUID)
 			exampleReleaseName = "foochart-" + testInfo.UUID
 			exampleReleaseNs = "foo-" + testInfo.UUID
 

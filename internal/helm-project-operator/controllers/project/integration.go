@@ -39,7 +39,7 @@ func ProjectControllerTest(
 		)
 		BeforeAll(func() {
 			ti = test.GetTestInterface()
-			o = ti.ObjectTracker().ObjectTracker("project-controller-test")
+			o = ti.ObjectTracker().Scoped("project-controller-test")
 			testConfig = testConfigF()
 			DeferCleanup(func() {
 				o.DeleteAll()

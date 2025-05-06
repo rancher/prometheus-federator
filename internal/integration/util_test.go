@@ -25,7 +25,7 @@ const image = "rancher/klipper-helm:v0.9.4-build20250113"
 func createNsFull(ns *corev1.Namespace) {
 	ti := test.GetTestInterface()
 	testSetupUid := uuid.New().String()
-	o := ti.ObjectTracker().ObjectTracker(testSetupUid)
+	o := ti.ObjectTracker().Scoped(testSetupUid)
 	o.Add(ns)
 	Expect(ti.K8sClient().Create(
 		ti.Context(),
@@ -45,7 +45,7 @@ func createNs(name string) {
 		},
 	}
 	testSetupUid := uuid.New().String()
-	o := ti.ObjectTracker().ObjectTracker(testSetupUid)
+	o := ti.ObjectTracker().Scoped(testSetupUid)
 	o.Add(ns)
 	Expect(ti.K8sClient().Create(
 		ti.Context(),

@@ -110,7 +110,7 @@ func MultiNamespaceTest(
 		BeforeAll(func() {
 			ti = test.GetTestInterface()
 			testInfo = testInfoF()
-			o = ti.ObjectTracker().ObjectTracker(testInfo.TestUUID)
+			o = ti.ObjectTracker().Scoped(testInfo.TestUUID)
 			projectGetter = testInfo.TestProjectGetter
 			DeferCleanup(func() {
 				o.DeleteAll()
