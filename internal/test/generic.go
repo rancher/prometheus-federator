@@ -143,6 +143,8 @@ func Setup() {
 	DeferCleanup(func() {
 		ca()
 	})
+	logrus.SetLevel(logrus.DebugLevel)
+	logrus.SetOutput(GinkgoWriter)
 
 	niCfg := kubeconfig.GetNonInteractiveClientConfig(ts.Kubeconfig)
 	clientC := niCfg

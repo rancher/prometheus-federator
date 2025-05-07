@@ -12,7 +12,7 @@ if ! hash helm 2>/dev/null; then
     exit 1
 fi
 
-TEST_FLAGS=${TEST_FLAGS:-""}
+TEST_FLAGS=${TEST_FLAGS:-"--output-interceptor-mode=none"}
 
 FOCUS=${FOCUS:-""}
 
