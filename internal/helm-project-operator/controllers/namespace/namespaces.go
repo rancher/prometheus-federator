@@ -6,6 +6,7 @@ import (
 	"github.com/sirupsen/logrus"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/util/retry"
 )
 
 // initSystemNamespaces initializes all System Namespaces on the Tracker
@@ -37,11 +38,12 @@ func (h *handler) initProjectRegistrationNamespaces() error {
 		// As a result, we explicitly call OnChange here to force the apply to happen and wait for it to finish
 		for _, ns := range namespaceList.Items {
 			logrus.Debugf("Processing namespace for controller initialization %s", ns.Name)
-			_, err := h.OnMultiNamespaceChange(ns.Name, &ns)
-			if err != nil {
-				// encountered some error, just fail to start
-				// Possible TODO: Perhaps we should add a backoff retry here?
-				return fmt.Errorf("unable to initialize projectRegistrationNamespaces before starting other handlers that utilize ProjectGetter: %s", err)
+			if err := retry.RetryOnConflict(retry.DefaultRetry, func() error {
+				_, err := h.OnMultiNamespaceChange(ns.Name, &ns)
+				logrus.Debugf("Error encountered while processing namespace %s for controller initialization : %s", ns.Name, err)
+				return err
+			}); err != nil {
+				return fmt.Errorf("unable to initialize projectRegistrationNamespaces: %s", err)
 			}
 		}
 	}
