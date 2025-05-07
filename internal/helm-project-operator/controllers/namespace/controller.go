@@ -13,6 +13,7 @@ import (
 	corecontroller "github.com/rancher/wrangler/v3/pkg/generated/controllers/core/v1"
 	"github.com/sirupsen/logrus"
 	corev1 "k8s.io/api/core/v1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/wait"
@@ -224,11 +225,14 @@ func (h *handler) applyProjectRegistrationNamespaceForNamespace(namespace *corev
 	projectID, inProject := h.getProjectIDFromNamespaceLabels(namespace)
 	logrus.Debugf("Found namespace %s to be part of the project %s. inProject = %v. Labels will be updated accordingly.", namespace.Name, projectID, inProject)
 
-	// update the namespace with the appropriate label on it
 	err := h.updateNamespaceWithHelmOperatorProjectLabel(namespace, projectID, inProject)
 	if err != nil {
-		logrus.Debugf("Error updating namespace %s with %s labels", namespace, projectID)
-		return nil
+		if apierrors.IsConflict(err) {
+			logrus.Debugf("Conflict while applying project label to namespace %s: %s", namespace.Name, err)
+			return err
+		}
+		logrus.Errorf("Error updating namespace %s with %s labels", namespace, projectID)
+		return err
 	}
 	if !inProject {
 		return nil
@@ -353,6 +357,7 @@ func (h *handler) applyProjectRegistrationNamespace(projectID string) error {
 }
 
 func (h *handler) updateNamespaceWithHelmOperatorProjectLabel(namespace *corev1.Namespace, projectID string, inProject bool) error {
+	applyHelmProjectLabel := common.HelmProjectOperatorProjectLabel
 	if namespace.DeletionTimestamp != nil {
 		// no need to update a namespace about to be deleted
 		return nil
@@ -366,11 +371,11 @@ func (h *handler) updateNamespaceWithHelmOperatorProjectLabel(namespace *corev1.
 		if namespace.Labels == nil {
 			return nil
 		}
-		if _, ok := namespace.Labels[common.HelmProjectOperatorProjectLabel]; !ok {
+		if _, ok := namespace.Labels[applyHelmProjectLabel]; !ok {
 			return nil
 		}
 		namespaceCopy := namespace.DeepCopy()
-		delete(namespaceCopy.Labels, common.HelmProjectOperatorProjectLabel)
+		delete(namespaceCopy.Labels, applyHelmProjectLabel)
 		_, err := h.namespaces.Update(namespaceCopy)
 		if err != nil {
 			return err
@@ -381,9 +386,9 @@ func (h *handler) updateNamespaceWithHelmOperatorProjectLabel(namespace *corev1.
 	if namespaceCopy.Labels == nil {
 		namespaceCopy.Labels = map[string]string{}
 	}
-	currLabel, ok := namespaceCopy.Labels[common.HelmProjectOperatorProjectLabel]
+	currLabel, ok := namespaceCopy.Labels[applyHelmProjectLabel]
 	if !ok || currLabel != projectID {
-		namespaceCopy.Labels[common.HelmProjectOperatorProjectLabel] = projectID
+		namespaceCopy.Labels[applyHelmProjectLabel] = projectID
 	}
 	_, err := h.namespaces.Update(namespaceCopy)
 	if err != nil {
