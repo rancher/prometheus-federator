@@ -172,6 +172,8 @@ func HelmNamespaceInitializeOperator(suiteName string, config TestNamespaceInitC
 				TestProjectGetter:                     projectGetter,
 				ExpectedProjectRegistrationNamespaces: expectedRegistrationNs,
 				NotProjectRegistrationNamespaces:      notRegistrationNs,
+				ExpectProjectIds:                      config.ProjectIds,
+				ExpectNotProjectIds:                   config.IgnoreProjectIds,
 			}
 		})
 

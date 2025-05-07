@@ -44,6 +44,8 @@ type TestSpecMultiNamespace struct {
 type TestSpecMultiNamespaceInit struct {
 	TestUUID                              string
 	ExpectedProjectRegistrationNamespaces []string
+	ExpectProjectIds                      []string
+	ExpectNotProjectIds                   []string
 	NotProjectRegistrationNamespaces      []string
 	TestProjectGetter                     ProjectGetter
 }
@@ -58,18 +60,23 @@ func MultiNamespaceInitTest(
 
 		BeforeAll(func() {
 			testConfig = testInfoF()
+			Expect(len(testConfig.ExpectProjectIds)).To(Equal(len(testConfig.ExpectedProjectRegistrationNamespaces)))
 		})
 
 		When("the operator is initialized, before running it", func() {
 			It("should have indexed the correct project registration namespaces", func() {
 				projectGetter := testConfig.TestProjectGetter
-				for _, projectNs := range testConfig.ExpectedProjectRegistrationNamespaces {
+				for i, projectNs := range testConfig.ExpectedProjectRegistrationNamespaces {
 					ns := &corev1.Namespace{
 						ObjectMeta: metav1.ObjectMeta{
 							Name: projectNs,
 						},
 					}
-					Eventually(Object(ns)).Should(Exist())
+					Eventually(Object(ns)).Should(ExistAnd(
+						HaveLabels(
+							common.HelmProjectOperatorProjectLabel, testConfig.ExpectProjectIds[i],
+						),
+					))
 					Eventually(
 						projectGetter.IsProjectRegistrationNamespace(ns)).Should(BeTrue(),
 						fmt.Sprintf(
@@ -83,13 +90,17 @@ func MultiNamespaceInitTest(
 
 			It("should ignore invalid project registration namespaces", func() {
 				projectGetter := testConfig.TestProjectGetter
-				for _, projectNs := range testConfig.NotProjectRegistrationNamespaces {
+				for i, projectNs := range testConfig.NotProjectRegistrationNamespaces {
 					ns := &corev1.Namespace{
 						ObjectMeta: metav1.ObjectMeta{
 							Name: projectNs,
 						},
 					}
-					Eventually(Object(ns)).Should(Exist())
+					Eventually(Object(ns)).Should(ExistAnd(
+						Not(HaveLabels(
+							common.HelmProjectOperatorProjectLabel, testConfig.ExpectNotProjectIds[i],
+						)),
+					))
 					Expect(
 						projectGetter.IsProjectRegistrationNamespace(ns)).To(BeFalse(),
 						fmt.Sprintf("%s should not be tracked by operator as project registration namespace", projectNs),
@@ -155,7 +166,7 @@ func MultiNamespaceTest(
 		})
 
 		When("we use the namespace controller", func() {
-			It("should do something with project-registration namespaces", func() {
+			It("should track project-registration namespaces", func() {
 				opts := testInfo.Opts
 				dummyRegistrationNamespace := &corev1.Namespace{
 					ObjectMeta: metav1.ObjectMeta{
@@ -172,11 +183,13 @@ func MultiNamespaceTest(
 				Eventually(Object(dummyRegistrationNamespace)).Should(Exist())
 
 				By("verifying the project registration namespace is tracked")
-				// FIXME: this was occasionally failing, indicating that a race condition still exists
-				closure := func() bool {
-					return projectGetter.IsProjectRegistrationNamespace(dummyRegistrationNamespace)
-				}
-				Eventually(closure).Should(BeTrue())
+				Eventually(projectGetter.IsProjectRegistrationNamespace(dummyRegistrationNamespace)).Should(BeTrue())
+				Eventually(Object(dummyRegistrationNamespace)).Should(ExistAnd(
+					HaveLabels(
+						opts.ProjectLabel, testInfo.TargetProjectId,
+						common.HelmProjectOperatorProjectLabel, testInfo.TargetProjectId,
+					),
+				))
 
 				By("verifying the project namespace has the helm values and questions configmap associate with the chart")
 				configmap := &corev1.ConfigMap{
