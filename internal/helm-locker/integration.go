@@ -1,0 +1,419 @@
+//go:build integration
+
+package helm_locker
+
+import (
+	"errors"
+	"fmt"
+	"os/exec"
+	"time"
+
+	. "github.com/kralicky/kmatch"
+	"github.com/rancher/prometheus-federator/internal/helm-locker/apis/helm.cattle.io/v1alpha1"
+	"github.com/rancher/prometheus-federator/internal/test"
+
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+)
+
+const (
+	objectSetHash = "objectset.rio.cattle.io/hash"
+
+	objectSetApplied  = "objectset.rio.cattle.io/applied"
+	objsetSetID       = "objectset.rio.cattle.io/id"
+	objectSetOnwerGVK = "objectset.rio.cattle.io/owner-gvk"
+	ownerName         = "objectset.rio.cattle.io/owner-name"
+	ownerNamespace    = "objectset.rio.cattle.io/owner-namespace"
+)
+
+// TestInfo is the info required in setup that must be passed in for the test to function
+type TestSpecE2E struct {
+	SystemNamespace string
+	NodeName        string
+	ControllerName  string
+	UUID            string
+}
+
+func E2eTest(testInfoClosture func() TestSpecE2E) func() {
+	return func() {
+		var (
+			o        test.ObjectTracker
+			ti       test.TestInterface
+			testInfo TestSpecE2E
+			// operatorName     = "helm-locker-" + uuid.New().String()
+			exampleReleaseName string
+			exampleReleaseNs   string
+		)
+
+		BeforeAll(func() {
+			ti = test.GetTestInterface()
+			testInfo = testInfoClosture()
+			o = ti.ObjectTracker().Scoped(testInfo.UUID)
+			exampleReleaseName = "foochart-" + testInfo.UUID
+			exampleReleaseNs = "foo-" + testInfo.UUID
+
+			o.Add(&corev1.Namespace{
+				ObjectMeta: metav1.ObjectMeta{
+					Name: exampleReleaseNs,
+				},
+			})
+		})
+
+		Context("test sanity checkup", func() {
+			Specify("Expect to find prerequisite CRDs in test cluster", func() {
+				// loosely checks that the embedded helm controller is installed
+				gvk := schema.GroupVersionKind{
+					Group:   "helm.cattle.io",
+					Version: "v1",
+					Kind:    "HelmChart",
+				}
+
+				Eventually(GVK(gvk)).Should(Exist())
+			})
+
+			It("Should have applied the helmrelease CRD during operator initialization", func() {
+				helmRelease := schema.GroupVersionKind{
+					Group:   "helm.cattle.io",
+					Version: "v1alpha1",
+					Kind:    "HelmRelease",
+				}
+
+				Eventually(GVK(helmRelease)).Should(Exist())
+			})
+
+			Specify("Expect the system namespace to exist", func() {
+				ns := &corev1.Namespace{
+					ObjectMeta: metav1.ObjectMeta{
+						Name: testInfo.SystemNamespace,
+					},
+				}
+				o.Add(ns)
+				Eventually(Object(ns), time.Second*2, time.Millisecond*50).Should(Exist())
+			})
+		})
+
+		When("we use the helm locker operator", func() {
+			It("should install an example helm chart", func() {
+				cmd := exec.CommandContext(
+					ti.Context(),
+					"helm",
+					"upgrade",
+					"--install",
+					"-n",
+					exampleReleaseNs,
+					"--create-namespace",
+					exampleReleaseName,
+					"./examples/foo-chart",
+					"--set",
+					"contents=\"abc\"",
+				)
+				err := cmd.Start()
+				Expect(err).NotTo(HaveOccurred(), "Failed to run helm command")
+				cmd.Stdout = GinkgoWriter
+				cmd.Stderr = GinkgoWriter
+				err = cmd.Wait()
+				Expect(err).NotTo(HaveOccurred(), "helm upgrade command had a non-zero exit code")
+
+				By("verifying the resource managed by the example chart exists")
+				cfg := &corev1.ConfigMap{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      "foo-configmap",
+						Namespace: exampleReleaseNs,
+					},
+				}
+				Eventually(Object(cfg)).Should(ExistAnd(
+					HaveLabels(
+						"app.kubernetes.io/managed-by",
+						"Helm",
+					),
+					HaveAnnotations(
+						"meta.helm.sh/release-name",
+						exampleReleaseName,
+						"meta.helm.sh/release-namespace",
+						exampleReleaseNs,
+					),
+					HaveData(
+						"contents", "abc",
+					),
+				))
+			})
+
+			When("we create a helm release", func() {
+				It("should create a helm release", func() {
+					release := &v1alpha1.HelmRelease{
+						ObjectMeta: metav1.ObjectMeta{
+							Name:      "test-release",
+							Namespace: testInfo.SystemNamespace,
+						},
+						Spec: v1alpha1.HelmReleaseSpec{
+							Release: v1alpha1.ReleaseKey{
+								Name:      exampleReleaseName,
+								Namespace: exampleReleaseNs,
+							},
+						},
+					}
+					o.Add(release)
+					Expect(ti.K8sClient().Create(ti.Context(), release)).To(Succeed())
+
+					By("Verifing it has the appropriate annotations and finalizers")
+					Eventually(Object(release)).Should(Exist())
+					Eventually(Object(release)).Should(
+						ExistAnd(
+							HaveAnnotations(
+								"helmreleases.cattle.io/managed-by", testInfo.ControllerName,
+							),
+							HaveFinalizers("wrangler.cattle.io/on-helm-release-remove"),
+						),
+					)
+
+					By("Verifying the helm-locker is consistently in the deployed state", func() {
+						extractState := func() string {
+							retRelease, err := Object(release)()
+							if err != nil {
+								return v1alpha1.UnknownState
+							}
+							return retRelease.Status.State
+						}
+						Eventually(extractState).Should(Equal(v1alpha1.DeployedState))
+						Consistently(extractState).Should(Equal(v1alpha1.DeployedState))
+					})
+				})
+
+				Specify("We should not be able to edit or delete resources managed by the helm-chart", func() {
+					By("verifying the config map has the correct objectset annotations and labels")
+					origHash := ""
+					origApplied := ""
+					cfg := &corev1.ConfigMap{
+						ObjectMeta: metav1.ObjectMeta{
+							Name:      "foo-configmap",
+							Namespace: exampleReleaseNs,
+						},
+						Data: map[string]string{
+							"contents": "Hello, World! Updated",
+						},
+					}
+					Eventually(func() error {
+						errs := []error{}
+
+						retCfg, err := Object(cfg)()
+						if err != nil {
+							return err
+						}
+
+						if val, ok := retCfg.Labels[objectSetHash]; !ok {
+							errs = append(errs, errors.New("objectset hash label not found"))
+						} else {
+							origHash = val
+						}
+
+						if val, ok := retCfg.Annotations[objectSetApplied]; !ok {
+							errs = append(errs, errors.New("objectset hash not found or incorrect"))
+						} else {
+							origApplied = val
+						}
+
+						if val, ok := retCfg.Annotations[objsetSetID]; !ok || val != "object-set-applier" {
+							errs = append(errs, fmt.Errorf("objectset id not found or incorrect: '%s'", val))
+						}
+						if val, ok := retCfg.Annotations[objectSetOnwerGVK]; !ok || val != "internal.cattle.io/v1alpha1, Kind=objectSetState" {
+							errs = append(errs, fmt.Errorf("objectset owner gvk not found or incorrect '%s'", val))
+						}
+						return errors.Join(errs...)
+					}).Should(Succeed())
+
+					Expect(origHash).NotTo(BeEmpty(), "helm locker should manage the objectset hash")
+					Expect(origApplied).NotTo(BeEmpty(), "helm locker should manage the objectset applied annotation")
+
+					By("trying to update the helm locked resource")
+					Expect(ti.K8sClient().Update(ti.Context(), &corev1.ConfigMap{
+						ObjectMeta: metav1.ObjectMeta{
+							Name:      "foo-configmap",
+							Namespace: exampleReleaseNs,
+						},
+						Data: map[string]string{
+							"contents": "Hello, World! Updated",
+						},
+					})).To(Succeed())
+
+					By("verifying the update was not applied")
+					Eventually(Object(cfg)).Should(ExistAnd(
+						HaveData(
+							"contents", "abc",
+						),
+						HaveAnnotations(
+							ownerName, exampleReleaseName,
+							ownerNamespace, exampleReleaseNs,
+						),
+					))
+					Eventually(func() error {
+						retCfg, err := Object(cfg)()
+						if err != nil {
+							return err
+						}
+						if val, ok := retCfg.Labels[objectSetHash]; !ok || val != origHash {
+							return fmt.Errorf("objectset hash label does not match the original one : '%s' vs '%s'", origHash, val)
+						}
+						if val, ok := retCfg.Annotations[objectSetApplied]; !ok || val != origApplied {
+							return fmt.Errorf("objectset applied annotation does not match the original one : '%s' vs '%s'", origApplied, val)
+						}
+						return nil
+					}).Should(Succeed())
+
+					Consistently(Object(cfg)).Should(ExistAnd(
+						HaveData(
+							"contents", "abc",
+						),
+						HaveAnnotations(
+							ownerName, exampleReleaseName,
+							ownerNamespace, exampleReleaseNs,
+						),
+					))
+				})
+
+				Specify("We should only be able to update resources managed by the helm chart through helm", func() {
+					cfg := &corev1.ConfigMap{
+						ObjectMeta: metav1.ObjectMeta{
+							Name:      "foo-configmap",
+							Namespace: exampleReleaseNs,
+						},
+					}
+					By("extracting the objectset hash before the helm update")
+					origHash := ""
+					origApplied := ""
+					Eventually(func() error {
+						retCfg, err := Object(cfg)()
+						if err != nil {
+							return err
+						}
+						if val, ok := retCfg.Labels[objectSetHash]; ok {
+							origHash = val
+						}
+						if val, ok := retCfg.Annotations[objectSetApplied]; ok {
+							origApplied = val
+						}
+						return nil
+					}).Should(Succeed())
+					Expect(origHash).NotTo(BeEmpty(), "helm locker should be managing the object set hash")
+					Expect(origApplied).NotTo(BeEmpty(), "helm locker should be managing the object set hash")
+
+					By("upgrading the helm resource using helm")
+					cmd := exec.CommandContext(
+						ti.Context(),
+						"helm",
+						"upgrade",
+						"--install",
+						"-n",
+						exampleReleaseNs,
+						"--create-namespace",
+						exampleReleaseName,
+						"./examples/foo-chart",
+						"--set",
+						"contents=\"Updated!\"",
+					)
+					err := cmd.Start()
+					Expect(err).NotTo(HaveOccurred(), "Failed to run helm command")
+
+					err = cmd.Wait()
+					Expect(err).NotTo(HaveOccurred(), "helm install command had a non-zero exit code")
+
+					By("verifying the resource managed by the example chart exists")
+					Eventually(Object(cfg)).Should(ExistAnd(
+						HaveLabels(
+							"app.kubernetes.io/managed-by",
+							"Helm",
+						),
+						HaveAnnotations(
+							"meta.helm.sh/release-name",
+							exampleReleaseName,
+							"meta.helm.sh/release-namespace",
+							exampleReleaseNs,
+						),
+						HaveData(
+							"contents", "Updated!",
+						),
+					))
+
+					Consistently(Object(cfg)).Should(ExistAnd(
+						HaveData(
+							"contents", "Updated!",
+						),
+					))
+
+					By("extracting the objectset hash after the helm update")
+					newHash := ""
+					newApplied := ""
+					Eventually(func() error {
+						retCfg, err := Object(cfg)()
+						if err != nil {
+							return err
+						}
+						if val, ok := retCfg.Labels[objectSetHash]; ok {
+							newHash = val
+						}
+						if val, ok := retCfg.Annotations[objectSetApplied]; ok {
+							newApplied = val
+						}
+						return nil
+					}).Should(Succeed())
+					Expect(newHash).NotTo(BeEmpty(), "helm locker should be managing the object set hash")
+					Expect(newApplied).NotTo(BeEmpty(), "helm locker should be managing the object set hash")
+					Expect(newHash).To(Equal(origHash), "objectset hash should not have changed after helm update, since no new resource keys are tracked")
+					Expect(newApplied).NotTo(
+						Equal(origApplied),
+						"objectset applied annotation should have changed after helm update",
+					)
+				})
+			})
+
+			When("we delete the helm release", func() {
+				It("should remove the helm release", func() {
+					release := &v1alpha1.HelmRelease{
+						ObjectMeta: metav1.ObjectMeta{
+							Name:      "test-release",
+							Namespace: testInfo.SystemNamespace,
+						},
+					}
+					err := ti.K8sClient().Delete(ti.Context(), release)
+					Expect(err).ToNot(HaveOccurred())
+
+					By("Verifing it has the appropriate annotations and finalizers")
+					Eventually(Object(release)).Should(Not(Exist()))
+				})
+
+				Specify("we should be able to edit and delete resources managed by the helm-chart", func() {
+					Expect(ti.K8sClient().Update(ti.Context(), &corev1.ConfigMap{
+						ObjectMeta: metav1.ObjectMeta{
+							Name:      "foo-configmap",
+							Namespace: exampleReleaseNs,
+						},
+						Data: map[string]string{
+							"contents": "Hello, World! Updated",
+						},
+					})).To(Succeed())
+
+					By("verifying the update was applied")
+					cfg := &corev1.ConfigMap{
+						ObjectMeta: metav1.ObjectMeta{
+							Name:      "foo-configmap",
+							Namespace: exampleReleaseNs,
+						},
+					}
+					Eventually(Object(cfg)).Should(ExistAnd(
+						HaveData(
+							"contents", "Hello, World! Updated",
+						),
+					))
+
+					Consistently(Object(cfg)).Should(ExistAnd(
+						HaveData(
+							"contents", "Hello, World! Updated",
+						),
+					))
+				})
+			})
+		})
+	}
+}
