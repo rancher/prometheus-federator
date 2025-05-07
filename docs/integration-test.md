@@ -22,7 +22,7 @@ You can run isolated test cases using
 KUBECONFIG=$KUBECONFIG FOCUS="HPO/Namespace" ./scripts/integration
 ```
 
-By default, for idempotency, the tests cleanup resrouces the create to be able to re-run tests without cleanup. To Disable cleanup you can pass the environment variable: `DISABLE_CLEANUP=true`, which will persist resources created by the tests for debugging potential problems/bugs.
+By default, for idempotency, the tests cleanup resources they create to be able to re-run tests without cleanup. To Disable cleanup you can pass the environment variable: `DISABLE_CLEANUP=true`, which will persist resources created by the tests for debugging potential problems/bugs.
 
 The entry point of the integration tests are in the `./internal/integration` package. 
 
