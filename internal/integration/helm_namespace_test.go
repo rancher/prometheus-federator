@@ -72,10 +72,10 @@ var _ = Describe("HPO/Namespace", func() {
 		ReleaseLabel:     "p-test-release",
 		ProjectIdLabel:   projectIdLabel,
 		ProjectIds: []string{
-			"test-1",
+			"init-1",
 		},
 		IgnoreProjectIds: []string{
-			"test-ignored-1",
+			"init-ignored-1",
 		},
 	}))
 
@@ -84,10 +84,10 @@ var _ = Describe("HPO/Namespace", func() {
 		ReleaseLabel:     "p-test-release",
 		ProjectIdLabel:   overrideProjectLabel,
 		ProjectIds: []string{
-			"test-2",
+			"init-2",
 		},
 		IgnoreProjectIds: []string{
-			"test-ignored-2",
+			"init-ignored-2",
 		},
 	}))
 })

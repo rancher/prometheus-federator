@@ -20,7 +20,7 @@ const helmProjectControllerNs = "cattle-helm-proj-system"
 
 var _ = Describe("HPO/Project", func() {
 	// tests some expected default values
-	Describe("HPO/Project/Default", HelmProjectRunOperator("HPO/Project/TODO", TestConfig{
+	Describe("HPO/Project/Default", HelmProjectRunOperator("Default", TestConfig{
 		Opts: common.Options{
 			OperatorOptions: common.OperatorOptions{
 				ReleaseName:    "test-1",
@@ -36,7 +36,7 @@ var _ = Describe("HPO/Project", func() {
 	}))
 	// overrides projectIdLabel
 	// overrides values.yaml
-	Describe("HPO/Project/Override", HelmProjectRunOperator("HPO/Project/TODO2", TestConfig{
+	Describe("HPO/Project/Override", HelmProjectRunOperator("Override", TestConfig{
 		Opts: common.Options{
 			OperatorOptions: common.OperatorOptions{
 				ReleaseName:    "test-2",
