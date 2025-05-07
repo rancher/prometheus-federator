@@ -34,5 +34,7 @@ var _ = SynchronizedBeforeSuite(func() []byte {
 	return []byte{}
 }, func(_ []byte) {
 	// setup across all downstream processes
+	PauseOutputInterception()
 	test.Setup()
+	ResumeOutputInterception()
 })

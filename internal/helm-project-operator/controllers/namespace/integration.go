@@ -72,7 +72,11 @@ func MultiNamespaceInitTest(
 					Eventually(Object(ns)).Should(Exist())
 					Eventually(
 						projectGetter.IsProjectRegistrationNamespace(ns)).Should(BeTrue(),
-						fmt.Sprintf("%s should be tracked by operator as project registration namespace", projectNs),
+						fmt.Sprintf(
+							"%s should be tracked by operator as project registration namespace %v",
+							projectNs,
+							testConfig.ExpectedProjectRegistrationNamespaces,
+						),
 					)
 				}
 			})
@@ -305,9 +309,10 @@ func MultiNamespaceTest(
 
 			Specify("when we delete the project registration namespace, it should cleanup related resources", func() {
 				opts := testInfo.Opts
+				name := fmt.Sprintf(common.ProjectRegistrationNamespaceFmt, testInfo.TargetProjectId)
 				dummyRegistrationNamespace := &corev1.Namespace{
 					ObjectMeta: metav1.ObjectMeta{
-						Name: fmt.Sprintf(common.ProjectRegistrationNamespaceFmt, testInfo.TargetProjectId),
+						Name: name,
 						Labels: map[string]string{
 							opts.ProjectLabel: testInfo.TargetProjectId,
 						},
@@ -320,7 +325,10 @@ func MultiNamespaceTest(
 				Consistently(Object(dummyRegistrationNamespace), 1*time.Millisecond*50).ShouldNot(Exist())
 
 				By("verifying the tracker eventually stops tracking the namespace")
-				Eventually(projectGetter.IsProjectRegistrationNamespace(dummyRegistrationNamespace)).Should(BeFalse())
+				Eventually(projectGetter.IsProjectRegistrationNamespace(dummyRegistrationNamespace)).Should(
+					BeFalse(),
+					fmt.Sprintf("%s should not be tracked as a project registration namespace", name),
+				)
 				Consistently(projectGetter.IsProjectRegistrationNamespace(dummyRegistrationNamespace), 1*time.Second, 10*time.Millisecond).Should(BeFalse())
 			})
 		})
