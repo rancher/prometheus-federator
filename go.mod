@@ -2,7 +2,7 @@ module github.com/rancher/prometheus-federator
 
 go 1.23.0
 
-toolchain go1.23.4
+toolchain go1.23.9
 
 require (
 	github.com/caarlos0/env/v11 v11.1.0
