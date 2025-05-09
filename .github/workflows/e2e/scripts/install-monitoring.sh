@@ -5,7 +5,7 @@ set -x
 source $(dirname $0)/entry
 
 HELM_REPO="rancher-charts"
-HELM_REPO_URL="https://charts.rancher.io"
+HELM_REPO_URL="https://raw.githubusercontent.com/rancher/charts/dev-v2.10"
 
 cd $(dirname $0)/../../../..
 
