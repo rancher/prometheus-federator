@@ -9,7 +9,7 @@ annotations:
 apiVersion: v2
 appVersion: 9999
 description: Prometheus Federator - installs rancher-project-monitoring in project namespaces.
-icon: https://raw.githubusercontent.com/rancher/prometheus-federator/main/assets/logos/prometheus-federator.svg
+icon: https://raw.githubusercontent.com/rancher/ob-team-charts/main/assets/logos/prometheus-federator.svg
 keywords:
   - prometheus
   - monitoring
