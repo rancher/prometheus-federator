@@ -5,6 +5,13 @@
 {{- end -}}
 {{- end -}}
 
+{{- define "helm-controller.imageRegistry" -}}
+{{- if and .Values.image .Values.image.registry }}{{- printf "%s/" .Values.image.registry -}}
+{{- else if .Values.helmProjectOperator.helmController.image.registry }}{{- printf "%s/" .Values.helmProjectOperator.helmController.image.registry -}}
+{{- else }}{{ template "system_default_registry" .  }}
+{{- end }}
+{{- end }}
+
 {{/* Define the image registry to use; either values, or systemdefault if set, or nothing */}}
 {{- define "prometheus-federator.imageRegistry" -}}
 {{- if and .Values.image .Values.image.registry }}{{- printf "%s/" .Values.image.registry -}}

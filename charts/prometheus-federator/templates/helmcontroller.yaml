@@ -1,0 +1,36 @@
+{{- if and (.Values.helmProjectOperator.helmController.enabled) (.Values.helmProjectOperator.helmController.deployment.enabled) }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus-federator-helm-controller
+  namespace: {{ template "prometheus-federator.namespace" . }}
+  labels:
+    app: prometheus-federator-helm-controller
+spec:
+  replicas: {{ .Values.helmProjectOperator.helmController.deployment.replicas }}
+  selector:
+    matchLabels:
+      app: prometheus-federator-helm-controller
+  template:
+    metadata:
+      labels:
+        app: prometheus-federator-helm-controller
+    spec:
+      # has to match cluster-admin service account
+      serviceAccountName : prometheus-federator-helm-controller
+      containers:
+      - name: helm-controller
+        image: {{ template "helm-controller.imageRegistry" . }} {{ .Values.helmProjectOperator.helmController.deployment.image.repository }}:{{ .Values.helmProjectOperator.helmController.deployment.image.tag }}
+        command: ["helm-controller"]
+        env:
+        - name: NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        # this sets the `managedBy` annotations, must match the ones in prometheus-federator
+        - name: JOB_CLUSTER_ROLE
+          value: {{ template "prometheus-federator.name" . }}
+        # this sets the `systemNamespace` for the helm-controller to watch, should match the one in prometheus-federator
+        - name: SYSTEM_NAMESPACE
+          value: {{ template "prometheus-federator.namespace" . }}
+{{ end }}

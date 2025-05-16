@@ -149,6 +149,13 @@ helmProjectOperator:
   helmController:
     # Note: should be disabled for RKE2 clusters since they already run Helm Controller to manage internal Kubernetes components
     enabled: true
+    deployment:
+      enabled : false
+      replicas : 1
+      image:
+        repository: rancher/helm-controller
+        tag: v0.16.10
+        pullPolicy: IfNotPresent
 
     job:
       image:

@@ -116,5 +116,24 @@ By default, the `rancher-project-monitoring` (the underlying chart deployed by P
 |`helmProjectOperator.releaseRoleBindings.clusterRoleRefs.<admin\|edit\|view>`| ClusterRoles to reference to discover subjects to create RoleBindings for in the Project Release Namespace for all corresponding Project Release Roles. See RBAC above for more information |
 |`helmProjectOperator.hardenedNamespaces.enabled`| Whether to automatically patch the default ServiceAccount with `automountServiceAccountToken: false` and create a default NetworkPolicy in all managed namespaces in the cluster; the default values ensure that the creation of the namespace does not break a CIS 1.16 hardened scan |
 |`helmProjectOperator.hardenedNamespaces.configuration`| The configuration to be supplied to the default ServiceAccount or auto-generated NetworkPolicy on managing a namespace |
-|`helmProjectOperator.helmController.enabled`| Whether to enable an embedded k3s-io/helm-controller instance within the Helm Project Operator. Should be disabled for RKE2/K3s clusters before v1.23.14 / v1.24.8 / v1.25.4 since RKE2/K3s clusters already run Helm Controller at a cluster-wide level to manage internal Kubernetes components |
+|`helmProjectOperator.helmController.enabled`| Whether to enable an embedded in process k3s-io/helm-controller instance within the Helm Project Operator. Should be disabled for RKE2/K3s clusters before v1.23.14 / v1.24.8 / v1.25.4 since RKE2/K3s clusters already run Helm Controller at a cluster-wide level to manage internal Kubernetes components |
 |`helmProjectOperator.helmLocker.enabled`| Whether to enable an embedded rancher/helm-locker instance within the Helm Project Operator. |
+
+### Advanced Vendored Helm Controller Configuration
+
+Prometheus Federator's underlying Helm Project Operator allows for running an embedded helm-controller in environments where it may not be readily available (usually Kubernetes distributions that are not `k3s` or `RKE2`).
+
+Another usecase for deploying a vendored helm controller is to scope the management of `HelmChart` CRs managed by prometheus federator to a specific helm-controller, and not the global one provided by `k3s` or `RKE2`, for example.
+
+However, it used to be only available with a specific version that is run in process via `helmProjectOperator.helmController.enabled` .
+
+running it as a deployment allows users to pin a specific version (and hence pin specific CRD versions for the operator) in order to prevent conflicts. and scale it up independently from prometheus-federator.
+
+|Value|Configuration|
+|---|---------------------------|
+| `helmProjectOperator.helmController.deployment.enabled` | When `helmProjectOperator.helmController.enabled` runs the vendored helm-controller as a deployment, as opposed to in process alongside prometheus-federator |
+| `helmProjectOperator.helmController.deployment.replicas` |  Scales the number of replicas for the helm-conttronller deployment |
+| `helmProjectOperator.helmController.deployment.registry` | Overrides the registry from which to pull the helm-controller container |
+| `helmProjectOperator.helmController.deployment.repository` | Overrides the repository from which to pull the helm-controller container |
+| `helmProjectOperator.helmController.deployment.tag` | Overrides the container tag for the helm-controller container |
+| `helmProjectOperator.helmController.deployment.pullPolicy` | Overrides the image pull policy for the helm-controller |
