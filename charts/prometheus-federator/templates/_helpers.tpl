@@ -7,7 +7,7 @@
 
 {{- define "helm-controller.imageRegistry" -}}
 {{- if and .Values.image .Values.image.registry }}{{- printf "%s/" .Values.image.registry -}}
-{{- else if .Values.helmProjectOperator.helmController.image.registry }}{{- printf "%s/" .Values.helmProjectOperator.helmController.image.registry -}}
+{{- else if .Values.helmProjectOperator.helmController.deployment.image.registry }}{{- printf "%s/" .Values.helmProjectOperator.helmController.deployment.image.registry -}}
 {{- else }}{{ template "system_default_registry" .  }}
 {{- end }}
 {{- end }}
