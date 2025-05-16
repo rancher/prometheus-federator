@@ -5,3 +5,4 @@ metadata:
   namespace: {{ .Release.Namespace }}
 data: 
   "contents" : {{ .Values.contents}}
+  "contents2" : {{ .Values.contents2}}
