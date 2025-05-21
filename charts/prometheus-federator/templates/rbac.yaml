@@ -30,7 +30,7 @@ imagePullSecrets: {{ toYaml .Values.global.imagePullSecrets | nindent 2 }}
 #
 # As a result, this ClusterRoleBinding will be left as a work-in-progress until changes are made in k3s-io/helm-controller to allow us to grant
 # only scoped down permissions to the Job that is deployed.
-{{- if and (.Values.helmProjectOperator.helmController.enabled) (.Values.helmProjectOperator.helmController.deployment.enabled) }}
+{{- if and (not .Values.helmProjectOperator.helmController.enabled) (.Values.helmController.deployment.enabled) }}
 # this authorizations have to match cluster-admin service account
 ---
 apiVersion: rbac.authorization.k8s.io/v1

@@ -125,15 +125,15 @@ Prometheus Federator's underlying Helm Project Operator allows for running an em
 
 Another usecase for deploying a vendored helm controller is to scope the management of `HelmChart` CRs managed by prometheus federator to a specific helm-controller, and not the global one provided by `k3s` or `RKE2`, for example.
 
-However, it used to be only available with a specific version that is run in process via `helmProjectOperator.helmController.enabled` .
+In previous versions, a vendored helm-controller was only available with a specific compile-time version that is run in process via `helmProjectOperator.helmController.enabled`, which could cause CRD conflicts.
 
-running it as a deployment allows users to pin a specific version (and hence pin specific CRD versions for the operator) in order to prevent conflicts. and scale it up independently from prometheus-federator.
+`helmController.deployment.enabled=true` allows running a vendored helm-controller as a deployment. The deployment allows users to pin a specific version (and hence pin specific CRD versions for the operator) in order to prevent conflicts. and scale it up independently from prometheus-federator. This vendored helm-controller only targets helm chart CRs managed by prometheus federator.
 
 |Value|Configuration|
 |---|---------------------------|
-| `helmProjectOperator.helmController.deployment.enabled` | When `helmProjectOperator.helmController.enabled` runs the vendored helm-controller as a deployment, as opposed to in process alongside prometheus-federator |
-| `helmProjectOperator.helmController.deployment.replicas` |  Scales the number of replicas for the helm-conttronller deployment |
-| `helmProjectOperator.helmController.deployment.registry` | Overrides the registry from which to pull the helm-controller container |
-| `helmProjectOperator.helmController.deployment.repository` | Overrides the repository from which to pull the helm-controller container |
-| `helmProjectOperator.helmController.deployment.tag` | Overrides the container tag for the helm-controller container |
-| `helmProjectOperator.helmController.deployment.pullPolicy` | Overrides the image pull policy for the helm-controller |
+| `helmController.deployment.enabled` | When `helmProjectOperator.helmController.enabled` is `false` and this flag is `true` runs the vendored helm-controller as a deployment, as opposed to in process alongside prometheus-federator |
+| `helmController.deployment.replicas` |  Scales the number of replicas for the helm-conttronller deployment |
+| `helmController.deployment.registry` | Overrides the registry from which to pull the helm-controller container |
+| `helmController.deployment.repository` | Overrides the repository from which to pull the helm-controller container |
+| `helmController.deployment.tag` | Overrides the container tag for the helm-controller container |
+| `helmController.deployment.pullPolicy` | Overrides the image pull policy for the helm-controller |
