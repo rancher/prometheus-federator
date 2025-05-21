@@ -33,7 +33,7 @@ echo "Checking installed crd version info:"
 helm list -n cattle-monitoring-system
 
 if [[ "${E2E_CI}" == "true" ]]; then
-    e2e_args="--set grafana.resources=null --set prometheus.prometheusSpec.resources=null --set alertmanager.alertmanagerSpec.resources=null"
+    e2e_args="--set grafana.resources=null --set prometheus.prometheusSpec.resources=null --set alertmanager.alertmanagerSpec.resources=null --set prometheus.prometheusSpec.maximumStartupDurationSeconds=3600"
 fi
 
 case "${KUBERNETES_DISTRIBUTION_TYPE}" in
