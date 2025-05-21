@@ -1,4 +1,4 @@
-{{- if and (.Values.helmProjectOperator.helmController.enabled) (.Values.helmProjectOperator.helmController.deployment.enabled) }}
+{{- if and (not .Values.helmProjectOperator.helmController.enabled) (.Values.helmController.deployment.enabled) }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -7,7 +7,7 @@ metadata:
   labels:
     app: prometheus-federator-helm-controller
 spec:
-  replicas: {{ .Values.helmProjectOperator.helmController.deployment.replicas }}
+  replicas: {{ .Values.helmController.deployment.replicas }}
   selector:
     matchLabels:
       app: prometheus-federator-helm-controller
@@ -20,7 +20,7 @@ spec:
       serviceAccountName : prometheus-federator-helm-controller
       containers:
       - name: helm-controller
-        image: {{ template "helm-controller.imageRegistry" . }} {{ .Values.helmProjectOperator.helmController.deployment.image.repository }}:{{ .Values.helmProjectOperator.helmController.deployment.image.tag }}
+        image: {{ template "helm-controller.imageRegistry" . }} {{ .Values.helmController.deployment.image.repository }}:{{ .Values.helmController.deployment.image.tag }}
         command: ["helm-controller"]
         env:
         - name: NODE_NAME

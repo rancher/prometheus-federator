@@ -84,7 +84,7 @@ spec:
           - --debug
           - --debug-level={{ .Values.helmProjectOperator.debugLevel }}
 {{- end }}
-{{- if and (not .Values.helmProjectOperator.helmController.enabled)  (.Values.helmProjectOperator.helmController.deployment.enabled) }}
+{{- if and (not .Values.helmProjectOperator.helmController.enabled)  (.Values.helmController.deployment.enabled) }}
           - --disable-embedded-helm-controller
 {{- else }}
           - --helm-job-image={{ template "system_default_registry" . }}{{ .Values.helmProjectOperator.helmController.job.image.repository }}:{{ .Values.helmProjectOperator.helmController.job.image.tag }}
