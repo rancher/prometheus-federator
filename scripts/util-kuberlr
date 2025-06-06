@@ -1,0 +1,63 @@
+#!/bin/bash
+
+GIT_ROOT=$(realpath $(dirname $0)/..)
+
+# Set DEBUG=true to enable Bash trace mode
+DEBUG="${DEBUG:-false}"
+if [[ "$DEBUG" == "true" ]]; then
+  set -x
+fi
+
+GITHUB_REPO="rancher/kuberlr-kubectl"
+GITHUB_API="https://api.github.com/repos/$GITHUB_REPO/releases"
+
+# Fetch tag names, optionally including prereleases
+function fetch_kuberlr_releases() {
+  local include_prerelease="$1"
+
+  if [[ "$include_prerelease" == "true" ]]; then
+    curl -s "$GITHUB_API" | jq -r '.[].tag_name'
+  else
+    curl -s "$GITHUB_API" | jq -r '.[] | select(.prerelease == false) | .tag_name'
+  fi
+}
+
+# Finds the latest release matching prefix, with optional prereleases
+# Usage: find_latest_release <version-prefix> [include_prerelease]
+function find_latest_kuberlr_release() {
+  local prefix="$1"
+  local include_prerelease="${2:-false}"
+
+  if [[ -z "$prefix" ]]; then
+    echo "Usage: find_latest_release <version-prefix> [include_prerelease]" >&2
+    return 1
+  fi
+
+  fetch_kuberlr_releases "$include_prerelease" | \
+    grep -E "^$prefix(\.|$)" | \
+    sed 's/^v//' | \
+    sort -Vr | \
+    head -n1 | \
+    sed 's/^/v/'
+}
+
+# CLI interface - mainly for testing
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+  prefix="$1"
+  include_prerelease="${2:-false}"
+
+  if [[ -z "$prefix" ]]; then
+    echo "Usage: $0 <version-prefix> [include_prerelease]" >&2
+    echo "  Example: $0 v5          # Latest stable v5 release" >&2
+    echo "  Example: $0 v3.4 true   # Latest v3.4 including prereleases" >&2
+    exit 1
+  fi
+
+  latest=$(find_latest_kuberlr_release "$prefix" "$include_prerelease")
+  if [[ -n "$latest" ]]; then
+    echo "$latest"
+  else
+    echo "No matching releases found for prefix '$prefix'" >&2
+    exit 2
+  fi
+fi
