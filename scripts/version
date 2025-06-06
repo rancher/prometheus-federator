@@ -46,6 +46,7 @@ ROOT_DIR=$(dirname "$(realpath "$(dirname "${BASH_SOURCE[0]}")")")
 BUILD_YAML_PATH="$ROOT_DIR/build.yaml"
 RANCHER_PROJECT_MONITORING=${RANCHER_PROJECT_MONITORING:-$(grep 'rancherProjectMonitoringVersion' "$BUILD_YAML_PATH"|cut -d: -f2|tr -d ' ')}
 RANCHER_MONITORING=${RANCHER_MONITORING:-$(grep 'rancherMonitoringVersion' "$BUILD_YAML_PATH"|cut -d: -f2|tr -d ' ')}
+KUBERLR_TARGET=${KUBERLR_TARGET:-$(grep 'kuberlrVersion' "$BUILD_YAML_PATH"|cut -d: -f2|tr -d ' ')}
 
 function print_version_debug() {
     echo "DIRTY: $DIRTY"
@@ -58,5 +59,6 @@ function print_version_debug() {
     echo "BUILD_YAML_PATH: $BUILD_YAML_PATH"
     echo "RANCHER PROJECT MONITORING: $RANCHER_PROJECT_MONITORING"
     echo "RANCHER MONITORING: $RANCHER_MONITORING"
+    echo "KUBERLR TARGET: $KUBERLR_TARGET"
 }
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then print_version_debug "$1"; fi
