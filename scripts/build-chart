@@ -37,7 +37,8 @@ if [ "$BUILD_TARGET" == "prometheus-federator" ]; then
   echo "Kuberlr Stable Target: $KUBERLR_STABLE"
   echo "Will modify Project Monitoring to use desired kuberlr version."
   expression=".global.kubectl.tag = \"${KUBERLR_STABLE}\""
-  modify_helm_chart_values $CHART_DESTINATION "$expression"
+  # TODO: Enable this when 2.9 gets the backported Monitoring version that uses Kuberlr
+  #modify_helm_chart_values $CHART_DESTINATION "$expression"
 
   # Prepare chart for embedding location
   base64 -i $CHART_DESTINATION > "cmd/prometheus-federator/fs/${CHART}.tgz.base64"
