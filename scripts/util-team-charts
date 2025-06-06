@@ -1,6 +1,4 @@
 #!/usr/bin/env bash
-set -x
-
 
 CHARTS_REPO="https://raw.githubusercontent.com/rancher/ob-team-charts"
 CHARTS_BRANCH="main"

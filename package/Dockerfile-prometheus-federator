@@ -5,13 +5,17 @@ FROM registry.suse.com/bci/golang:1.23 AS builder
 
 # Allow chart version config
 ARG TARGETPLATFORM
+ARG TARGETARCH
 ARG RANCHER_PROJECT_MONITORING=''
 ARG TAG=''
 ARG REPO=''
+ARG YQ_VERSION='v4.25.1'
 ENV RANCHER_PROJECT_MONITORING=$RANCHER_PROJECT_MONITORING TAG=$TAG REPO=$REPO
 
 WORKDIR /usr/src/app
-RUN zypper -n install git vim less file curl wget patch helm
+RUN zypper -n install git vim less file curl wget patch helm jq
+RUN wget https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_${TARGETARCH} -O /usr/bin/yq \
+    && chmod +x /usr/bin/yq
 COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
