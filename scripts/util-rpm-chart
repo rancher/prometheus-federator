@@ -1,0 +1,54 @@
+#!/usr/bin/env bash
+
+source $(dirname "$0")/util-chart
+
+CHART_NAME="rancher-project-monitoring"
+CHART_VALUES_PATH="$CHART_NAME/values.yaml"
+
+# unpacks the chart to provided temp dir
+function unpack_chart() {
+  local chart_file="$1"
+  local temp_dir="$2"
+
+  mkdir -p "$temp_dir"
+  tar -xzf "$chart_file" -C "$temp_dir"
+}
+
+# modify the chart's values file via yq expression
+function modify_values_yaml() {
+  local chart_dir="$1"
+  local yq_expression="$2"
+
+  local values_file="$chart_dir/$CHART_VALUES_PATH"
+
+  if [[ ! -f "$values_file" ]]; then
+    echo "Error: $CHART_VALUES_PATH not found." >&2
+    return 1
+  fi
+
+  yq -i "$yq_expression" "$values_file"
+}
+
+# warps the modification process into a single function
+function modify_helm_chart_values() {
+  local chart_file="$1"
+  local yq_expression="$2"
+
+  if [[ ! -f "$chart_file" || -z "$yq_expression" ]]; then
+    echo "Usage: modify_helm_chart_values <chart.tgz> <yq_expression>" >&2
+    return 1
+  fi
+
+  local temp_dir
+  temp_dir=$(mktemp -d)
+
+  unpack_chart "$chart_file" "$temp_dir"
+  modify_values_yaml "$temp_dir" "$yq_expression"
+
+  # Extracted chart dir (e.g., /tmp/tmp.XYZ/rancher-project-monitoring)
+  local chart_dir="$temp_dir/$CHART_NAME"
+
+  package-chart "$chart_dir" "$(dirname "$chart_file")"
+
+  rm -rf "$temp_dir"
+}
