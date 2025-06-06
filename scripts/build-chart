@@ -6,6 +6,8 @@ set -e
 
 source $(dirname $0)/version
 source $(dirname $0)/util-chart
+source $(dirname $0)/util-rpm-chart
+source $(dirname $0)/util-kuberlr
 source $(dirname $0)/util-team-charts
 
 # We don't do this for helm-locker
@@ -29,6 +31,13 @@ if [ "$BUILD_TARGET" == "prometheus-federator" ]; then
   # Fetch asset from github OB charts repo
   fetch-team-chart "rancher-project-monitoring" "$RANCHER_PROJECT_MONITORING"
   CHART_DESTINATION="./build/charts/${CHART}-${CHART_VERSION}.tgz"
+
+  echo "RPM Chart fetched, now preparing for PromFed..."
+  KUBERLR_STABLE=$(find_latest_kuberlr_release $KUBERLR_TARGET)
+  echo "Kuberlr Stable Target: $KUBERLR_STABLE"
+  echo "Will modify Project Monitoring to use desired kuberlr version."
+  expression=".global.kubectl.tag = \"${KUBERLR_STABLE}\""
+  modify_helm_chart_values $CHART_DESTINATION "$expression"
 
   # Prepare chart for embedding location
   base64 -i $CHART_DESTINATION > "cmd/prometheus-federator/fs/${CHART}.tgz.base64"

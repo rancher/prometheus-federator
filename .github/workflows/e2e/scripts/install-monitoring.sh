@@ -4,12 +4,18 @@ set -x
 
 source $(dirname $0)/entry
 
-HELM_REPO="rancher-charts"
+# Use a non-default name for making local E2E testing not clobber things
+HELM_REPO="e2e-rancher-charts"
 HELM_REPO_URL="https://charts.rancher.io"
 
 cd $(dirname $0)/../../../..
 
 helm version
+
+# Fix for local e2e testing, remove repo before adding it to fix testing across branches
+set +x
+helm repo remove ${HELM_REPO} > /dev/null 2>&1 || true
+set -x
 
 helm repo add ${HELM_REPO} $HELM_REPO_URL
 helm repo update
