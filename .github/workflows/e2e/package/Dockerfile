@@ -6,7 +6,7 @@ RUN make -C /helm
 FROM registry.suse.com/bci/golang:1.24
 
 ARG ARCH=amd64
-ENV KUBECTL_VERSION v1.21.8
+ENV KUBECTL_VERSION=v1.32.0
 
 # Install dependencies
 RUN zypper -n install awk git docker curl wget nodejs sudo
