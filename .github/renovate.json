@@ -4,7 +4,7 @@
     "group:allNonMajor",
     "helpers:pinGitHubActionDigests"
   ],
-  "baseBranches": [
+  "baseBranchPatterns": [
     "main",
     "release/v3.x",
     "release/v2.x",
@@ -19,20 +19,36 @@
   ],
   "packageRules": [
     {
-      "matchBaseBranches" : ["main"],
-      "extends" : ["github>rancher/renovate-config:rancher-main#release"]
+      "matchBaseBranches": [
+        "main"
+      ],
+      "extends": [
+        "github>rancher/renovate-config:rancher-main#release"
+      ]
     },
     {
-      "matchBaseBranches" : ["release/v3.x"],
-      "extends" : ["github>rancher/renovate-config:rancher-2.11#release"]
+      "matchBaseBranches": [
+        "release/v3.x"
+      ],
+      "extends": [
+        "github>rancher/renovate-config:rancher-2.11#release"
+      ]
     },
     {
-      "matchBaseBranches" : ["release/v2.x"],
-      "extends" : ["github>rancher/renovate-config:rancher-2.10#release"]
+      "matchBaseBranches": [
+        "release/v2.x"
+      ],
+      "extends": [
+        "github>rancher/renovate-config:rancher-2.10#release"
+      ]
     },
     {
-      "matchBaseBranches": ["release/v1.x"],
-      "extends" : ["github>rancher/renovate-config:rancher-2.9#release"]
+      "matchBaseBranches": [
+        "release/v1.x"
+      ],
+      "extends": [
+        "github>rancher/renovate-config:rancher-2.9#release"
+      ]
     },
     {
       "groupName": "GitHub Workflow Actions",
