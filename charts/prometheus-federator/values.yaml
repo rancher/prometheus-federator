@@ -189,17 +189,18 @@ helmProjectOperator:
     #   memory: 100Mi
     #   cpu: 100m
 
-  containerSecurityContext: { }
-    # allowPrivilegeEscalation: false
-    # capabilities:
-    #   drop:
-    #   - ALL
-    # privileged: false
-    # readOnlyRootFilesystem: true
+  containerSecurityContext:
+    allowPrivilegeEscalation: false
+    privileged: false
+    capabilities:
+      drop:
+      - all
 
-  securityContext: { }
-    # runAsGroup: 1000
-    # runAsUser: 1000
+  securityContext:
+    readOnlyRootFilesystem: true
+    runAsNonRoot: true
+    runAsUser: 1000
+    runAsGroup: 1000
     # supplementalGroups:
     # - 1000
 
@@ -226,17 +227,18 @@ helmProjectOperator:
     #   value: "value"
     #   effect: "NoSchedule"
 
-    containerSecurityContext: { }
-      # allowPrivilegeEscalation: false
-      # capabilities:
-      #   drop:
-      #   - ALL
-      # privileged: false
-      # readOnlyRootFilesystem: true
+    containerSecurityContext:
+      allowPrivilegeEscalation: false
+      privileged: false
+      capabilities:
+        drop:
+        - all
 
     securityContext:
-      runAsNonRoot: false
-      runAsUser: 0
+      readOnlyRootFilesystem: true
+      runAsNonRoot: true
+      runAsUser: 1000
+      runAsGroup: 1000
 
     resources: { }
       # limits:
