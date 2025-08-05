@@ -41,7 +41,7 @@ jobs:
     - name : Checkout repository
       uses : actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
     - name: Install go
-      uses: actions/setup-go@f111f3307d8850f501ac008e886eec1fd1932a34 # v5
+      uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5 # v5
       with:
         go-version: 1.24
     - name : Install helm
@@ -49,7 +49,7 @@ jobs:
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
     - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2 # v3
+      uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435 # v3
     - name : Install k3d
       run : ./.github/workflows/e2e/scripts/install-k3d.sh
     - name : Setup test environment
