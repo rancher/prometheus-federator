@@ -1,4 +1,4 @@
-FROM --platform=$BUILDPLATFORM registry.suse.com/bci/golang:1.23 AS builder
+FROM --platform=$BUILDPLATFORM registry.suse.com/bci/golang:1.24 AS builder
 WORKDIR /usr/src/app
 RUN zypper -n install git vim less file curl wget
 COPY go.mod go.sum ./
