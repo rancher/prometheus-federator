@@ -119,6 +119,8 @@ jobs:
       contents : read
       id-token: write
     steps:
+      - name : Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
       - name: "Read Secrets"
         if: github.repository == 'rancher/prometheus-federator'
         uses: rancher-eio/read-vault-secrets@main
@@ -129,7 +131,6 @@ jobs:
             secret/data/github/repo/${{ github.repository }}/rancher-prime-stg-registry/credentials password |  PRIME_STG_REGISTRY_PASSWORD;
             secret/data/github/repo/${{ github.repository }}/dockerhub/rancher/credentials username | DOCKER_USERNAME ;
             secret/data/github/repo/${{ github.repository }}/dockerhub/rancher/credentials password | DOCKER_PASSWORD
-
         # This encapsulates: login, qemu, build/push
       - name: Build and push prometheus-federator image (dockerhub and prime stg)
         uses: rancher/ecm-distro-tools/actions/publish-image@master
