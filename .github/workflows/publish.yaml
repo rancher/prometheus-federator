@@ -7,8 +7,9 @@ on:
 
 env:
   GHCR_REGISTRY: ghcr.io
-  REGISTRY: docker.io
-  IMAGE_NAME: ${{ github.repository }}
+  PUBLIC_REGISTRY: docker.io
+  REPO: rancher
+  IMAGE: 'prometheus-federator'
   YQ_VERSION: v4.44.3
 
 jobs:
@@ -95,7 +96,7 @@ jobs:
         id: meta-hpo
         uses: docker/metadata-action@902fa8ec7d6ecbf8d84d538b9b233a880e428804 # v5
         with:
-          images: ${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}/helm-project-operator
+          images: ${{ env.GHCR_REGISTRY }}/${{ env.REPO }}/${{ env.IMAGE }}/helm-project-operator
       - name: Build Helm-Project-Operator image
         uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4 # v6
         with:
@@ -105,7 +106,6 @@ jobs:
           tags: ${{ steps.meta-hpo.outputs.tags }}
           labels: ${{ steps.meta-hpo.outputs.labels }}
           platforms: linux/amd64,linux/arm64
-
   publish-images:
     name: Publish prometheus-federator image
     runs-on: ubuntu-latest
@@ -124,30 +124,28 @@ jobs:
         uses: rancher-eio/read-vault-secrets@main
         with:
           secrets: |
+            secret/data/github/repo/${{ github.repository }}/rancher-prime-stg-registry/credentials registry |  PRIME_STG_REGISTRY;
+            secret/data/github/repo/${{ github.repository }}/rancher-prime-stg-registry/credentials username |  PRIME_STG_REGISTRY_USERNAME;
+            secret/data/github/repo/${{ github.repository }}/rancher-prime-stg-registry/credentials password |  PRIME_STG_REGISTRY_PASSWORD;
             secret/data/github/repo/${{ github.repository }}/dockerhub/rancher/credentials username | DOCKER_USERNAME ;
             secret/data/github/repo/${{ github.repository }}/dockerhub/rancher/credentials password | DOCKER_PASSWORD
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+
+        # This encapsulates: login, qemu, build/push
+      - name: Build and push prometheus-federator image (dockerhub and prime stg)
+        uses: rancher/ecm-distro-tools/actions/publish-image@master
         with:
-          fetch-depth: 0
-      - name: Log in to the Container registry
-        uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ env.DOCKER_USERNAME }}
-          password: ${{ env.DOCKER_PASSWORD }}
-      - name : Export image version
-        env:
-          GIT_TAG: ${{ github.ref_name }}
-        run : |
-          source ./scripts/version
-          echo IMAGE=$IMAGE >> $GITHUB_ENV
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2 # v3 
-      - name: Build Prometheus Federator image 
-        uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4 # v6
-        with:
-          context: .
-          file: ./package/Dockerfile-prometheus-federator
-          push: true
-          tags: ${{ env.IMAGE }}
-          platforms: linux/amd64,linux/arm64
+          image: ${{ env.IMAGE }}
+          tag: ${{ github.ref_name }}
+          make-target: package
+
+          public-registry: ${{ env.PUBLIC_REGISTRY }}
+          public-repo: ${{ env.REPO }}
+          public-username: ${{ env.DOCKER_USERNAME || vars.DOCKER_USERNAME || github.repository_owner }}
+          public-password: ${{ env.DOCKER_PASSWORD || secrets.DOCKER_PASSWORD }}
+
+          push-to-prime: ${{ github.repository == 'rancher/prometheus-federator' }}
+          prime-registry: ${{ env.PRIME_STG_REGISTRY }}
+          prime-repo: ${{ env.REPO }}
+          prime-username: ${{ env.PRIME_STG_REGISTRY_USERNAME }}
+          prime-password: ${{ env.PRIME_STG_REGISTRY_PASSWORD }}
+          identity-registry: ${{ env.PRIME_REGISTRY }}
