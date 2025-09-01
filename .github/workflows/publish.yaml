@@ -9,7 +9,7 @@ env:
   GHCR_REGISTRY: ghcr.io
   PUBLIC_REGISTRY: docker.io
   REPO: rancher
-  IMAGE: 'prometheus-federator'
+  IMAGE_NAME: 'prometheus-federator'
   YQ_VERSION: v4.44.3
 
 jobs:
@@ -96,7 +96,7 @@ jobs:
         id: meta-hpo
         uses: docker/metadata-action@902fa8ec7d6ecbf8d84d538b9b233a880e428804 # v5
         with:
-          images: ${{ env.GHCR_REGISTRY }}/${{ env.REPO }}/${{ env.IMAGE }}/helm-project-operator
+          images: ${{ env.GHCR_REGISTRY }}/${{ env.REPO }}/${{ env.IMAGE_NAME }}/helm-project-operator
       - name: Build Helm-Project-Operator image
         uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4 # v6
         with:
@@ -134,9 +134,8 @@ jobs:
       - name: Build and push prometheus-federator image (dockerhub and prime stg)
         uses: rancher/ecm-distro-tools/actions/publish-image@master
         with:
-          image: ${{ env.IMAGE }}
+          image: ${{ env.IMAGE_NAME }}
           tag: ${{ github.ref_name }}
-          make-target: package
 
           public-registry: ${{ env.PUBLIC_REGISTRY }}
           public-repo: ${{ env.REPO }}
