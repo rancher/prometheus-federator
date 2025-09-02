@@ -121,6 +121,10 @@ jobs:
     steps:
       - name : Checkout repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - name: Prepare helm charts (needed for build)
+        run: |
+          GIT_TAG=${{ github.ref_name }} BUILD_TARGET=prometheus-federator make package-helm && echo "pf: release chart prepared"
+          BUILD_TARGET=prometheus-federator make build-chart && echo "pf: embedded project-monitoring chart prepared"
       - name: "Read Secrets"
         if: github.repository == 'rancher/prometheus-federator'
         uses: rancher-eio/read-vault-secrets@main
