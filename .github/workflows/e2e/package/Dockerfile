@@ -1,12 +1,12 @@
 FROM registry.suse.com/bci/golang:1.24 AS helm
 RUN zypper -n install git
-RUN git -C / clone --branch release-v3.9.0 --depth=1 https://github.com/rancher/helm
+RUN git -C / clone --branch release-v3.11.3 --depth=1 https://github.com/rancher/helm
 RUN make -C /helm
 
 FROM registry.suse.com/bci/golang:1.24
 
 ARG ARCH=amd64
-ENV KUBECTL_VERSION=v1.32.0
+ENV KUBECTL_VERSION=v1.34.0
 
 # Install dependencies
 RUN zypper -n install awk git docker curl wget nodejs sudo
