@@ -13,8 +13,8 @@ require (
 	github.com/novln/docker-parser v1.0.0
 	github.com/onsi/ginkgo/v2 v2.22.2
 	github.com/onsi/gomega v1.36.2
-	github.com/rancher/lasso v0.0.0-20250109193533-00757eec2dbd
-	github.com/rancher/wrangler/v3 v3.2.0-rc.2
+	github.com/rancher/lasso v0.2.5
+	github.com/rancher/wrangler/v3 v3.3.1
 	github.com/samber/lo v1.47.0
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/cobra v1.8.1
