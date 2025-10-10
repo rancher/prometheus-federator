@@ -2,7 +2,7 @@ rancherProjectMonitoringVersion: 0.6.7
 rancherMonitoringVersion : latest
 k3sTestingMaxVersion: v1.34.1+k3s1
 k3sTestingMinVersion: v1.32.9+k3s1
-kuberlrVersion: v5
+kuberlrVersion: v6
 
 # Dev use only
 # devChartsSource: https://github.com/{Dev}/ob-team-charts
