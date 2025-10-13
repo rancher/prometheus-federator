@@ -25,6 +25,7 @@ import (
 type MockNodeInterface struct {
 	ctrl     *gomock.Controller
 	recorder *MockNodeInterfaceMockRecorder
+	isgomock struct{}
 }
 
 // MockNodeInterfaceMockRecorder is the mock recorder for MockNodeInterface.
@@ -45,113 +46,113 @@ func (m *MockNodeInterface) EXPECT() *MockNodeInterfaceMockRecorder {
 }
 
 // Apply mocks base method.
-func (m *MockNodeInterface) Apply(arg0 context.Context, arg1 *v11.NodeApplyConfiguration, arg2 v10.ApplyOptions) (*v1.Node, error) {
+func (m *MockNodeInterface) Apply(ctx context.Context, node *v11.NodeApplyConfiguration, opts v10.ApplyOptions) (*v1.Node, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Apply", arg0, arg1, arg2)
+	ret := m.ctrl.Call(m, "Apply", ctx, node, opts)
 	ret0, _ := ret[0].(*v1.Node)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Apply indicates an expected call of Apply.
-func (mr *MockNodeInterfaceMockRecorder) Apply(arg0, arg1, arg2 any) *gomock.Call {
+func (mr *MockNodeInterfaceMockRecorder) Apply(ctx, node, opts any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Apply", reflect.TypeOf((*MockNodeInterface)(nil).Apply), arg0, arg1, arg2)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Apply", reflect.TypeOf((*MockNodeInterface)(nil).Apply), ctx, node, opts)
 }
 
 // ApplyStatus mocks base method.
-func (m *MockNodeInterface) ApplyStatus(arg0 context.Context, arg1 *v11.NodeApplyConfiguration, arg2 v10.ApplyOptions) (*v1.Node, error) {
+func (m *MockNodeInterface) ApplyStatus(ctx context.Context, node *v11.NodeApplyConfiguration, opts v10.ApplyOptions) (*v1.Node, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ApplyStatus", arg0, arg1, arg2)
+	ret := m.ctrl.Call(m, "ApplyStatus", ctx, node, opts)
 	ret0, _ := ret[0].(*v1.Node)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // ApplyStatus indicates an expected call of ApplyStatus.
-func (mr *MockNodeInterfaceMockRecorder) ApplyStatus(arg0, arg1, arg2 any) *gomock.Call {
+func (mr *MockNodeInterfaceMockRecorder) ApplyStatus(ctx, node, opts any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ApplyStatus", reflect.TypeOf((*MockNodeInterface)(nil).ApplyStatus), arg0, arg1, arg2)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ApplyStatus", reflect.TypeOf((*MockNodeInterface)(nil).ApplyStatus), ctx, node, opts)
 }
 
 // Create mocks base method.
-func (m *MockNodeInterface) Create(arg0 context.Context, arg1 *v1.Node, arg2 v10.CreateOptions) (*v1.Node, error) {
+func (m *MockNodeInterface) Create(ctx context.Context, node *v1.Node, opts v10.CreateOptions) (*v1.Node, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Create", arg0, arg1, arg2)
+	ret := m.ctrl.Call(m, "Create", ctx, node, opts)
 	ret0, _ := ret[0].(*v1.Node)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Create indicates an expected call of Create.
-func (mr *MockNodeInterfaceMockRecorder) Create(arg0, arg1, arg2 any) *gomock.Call {
+func (mr *MockNodeInterfaceMockRecorder) Create(ctx, node, opts any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockNodeInterface)(nil).Create), arg0, arg1, arg2)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockNodeInterface)(nil).Create), ctx, node, opts)
 }
 
 // Delete mocks base method.
-func (m *MockNodeInterface) Delete(arg0 context.Context, arg1 string, arg2 v10.DeleteOptions) error {
+func (m *MockNodeInterface) Delete(ctx context.Context, name string, opts v10.DeleteOptions) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Delete", arg0, arg1, arg2)
+	ret := m.ctrl.Call(m, "Delete", ctx, name, opts)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Delete indicates an expected call of Delete.
-func (mr *MockNodeInterfaceMockRecorder) Delete(arg0, arg1, arg2 any) *gomock.Call {
+func (mr *MockNodeInterfaceMockRecorder) Delete(ctx, name, opts any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockNodeInterface)(nil).Delete), arg0, arg1, arg2)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockNodeInterface)(nil).Delete), ctx, name, opts)
 }
 
 // DeleteCollection mocks base method.
-func (m *MockNodeInterface) DeleteCollection(arg0 context.Context, arg1 v10.DeleteOptions, arg2 v10.ListOptions) error {
+func (m *MockNodeInterface) DeleteCollection(ctx context.Context, opts v10.DeleteOptions, listOpts v10.ListOptions) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "DeleteCollection", arg0, arg1, arg2)
+	ret := m.ctrl.Call(m, "DeleteCollection", ctx, opts, listOpts)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // DeleteCollection indicates an expected call of DeleteCollection.
-func (mr *MockNodeInterfaceMockRecorder) DeleteCollection(arg0, arg1, arg2 any) *gomock.Call {
+func (mr *MockNodeInterfaceMockRecorder) DeleteCollection(ctx, opts, listOpts any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteCollection", reflect.TypeOf((*MockNodeInterface)(nil).DeleteCollection), arg0, arg1, arg2)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteCollection", reflect.TypeOf((*MockNodeInterface)(nil).DeleteCollection), ctx, opts, listOpts)
 }
 
 // Get mocks base method.
-func (m *MockNodeInterface) Get(arg0 context.Context, arg1 string, arg2 v10.GetOptions) (*v1.Node, error) {
+func (m *MockNodeInterface) Get(ctx context.Context, name string, opts v10.GetOptions) (*v1.Node, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Get", arg0, arg1, arg2)
+	ret := m.ctrl.Call(m, "Get", ctx, name, opts)
 	ret0, _ := ret[0].(*v1.Node)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Get indicates an expected call of Get.
-func (mr *MockNodeInterfaceMockRecorder) Get(arg0, arg1, arg2 any) *gomock.Call {
+func (mr *MockNodeInterfaceMockRecorder) Get(ctx, name, opts any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockNodeInterface)(nil).Get), arg0, arg1, arg2)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockNodeInterface)(nil).Get), ctx, name, opts)
 }
 
 // List mocks base method.
-func (m *MockNodeInterface) List(arg0 context.Context, arg1 v10.ListOptions) (*v1.NodeList, error) {
+func (m *MockNodeInterface) List(ctx context.Context, opts v10.ListOptions) (*v1.NodeList, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "List", arg0, arg1)
+	ret := m.ctrl.Call(m, "List", ctx, opts)
 	ret0, _ := ret[0].(*v1.NodeList)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // List indicates an expected call of List.
-func (mr *MockNodeInterfaceMockRecorder) List(arg0, arg1 any) *gomock.Call {
+func (mr *MockNodeInterfaceMockRecorder) List(ctx, opts any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "List", reflect.TypeOf((*MockNodeInterface)(nil).List), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "List", reflect.TypeOf((*MockNodeInterface)(nil).List), ctx, opts)
 }
 
 // Patch mocks base method.
-func (m *MockNodeInterface) Patch(arg0 context.Context, arg1 string, arg2 types.PatchType, arg3 []byte, arg4 v10.PatchOptions, arg5 ...string) (*v1.Node, error) {
+func (m *MockNodeInterface) Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v10.PatchOptions, subresources ...string) (*v1.Node, error) {
 	m.ctrl.T.Helper()
-	varargs := []any{arg0, arg1, arg2, arg3, arg4}
-	for _, a := range arg5 {
+	varargs := []any{ctx, name, pt, data, opts}
+	for _, a := range subresources {
 		varargs = append(varargs, a)
 	}
 	ret := m.ctrl.Call(m, "Patch", varargs...)
@@ -161,68 +162,68 @@ func (m *MockNodeInterface) Patch(arg0 context.Context, arg1 string, arg2 types.
 }
 
 // Patch indicates an expected call of Patch.
-func (mr *MockNodeInterfaceMockRecorder) Patch(arg0, arg1, arg2, arg3, arg4 any, arg5 ...any) *gomock.Call {
+func (mr *MockNodeInterfaceMockRecorder) Patch(ctx, name, pt, data, opts any, subresources ...any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	varargs := append([]any{arg0, arg1, arg2, arg3, arg4}, arg5...)
+	varargs := append([]any{ctx, name, pt, data, opts}, subresources...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Patch", reflect.TypeOf((*MockNodeInterface)(nil).Patch), varargs...)
 }
 
 // PatchStatus mocks base method.
-func (m *MockNodeInterface) PatchStatus(arg0 context.Context, arg1 string, arg2 []byte) (*v1.Node, error) {
+func (m *MockNodeInterface) PatchStatus(ctx context.Context, nodeName string, data []byte) (*v1.Node, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "PatchStatus", arg0, arg1, arg2)
+	ret := m.ctrl.Call(m, "PatchStatus", ctx, nodeName, data)
 	ret0, _ := ret[0].(*v1.Node)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // PatchStatus indicates an expected call of PatchStatus.
-func (mr *MockNodeInterfaceMockRecorder) PatchStatus(arg0, arg1, arg2 any) *gomock.Call {
+func (mr *MockNodeInterfaceMockRecorder) PatchStatus(ctx, nodeName, data any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PatchStatus", reflect.TypeOf((*MockNodeInterface)(nil).PatchStatus), arg0, arg1, arg2)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PatchStatus", reflect.TypeOf((*MockNodeInterface)(nil).PatchStatus), ctx, nodeName, data)
 }
 
 // Update mocks base method.
-func (m *MockNodeInterface) Update(arg0 context.Context, arg1 *v1.Node, arg2 v10.UpdateOptions) (*v1.Node, error) {
+func (m *MockNodeInterface) Update(ctx context.Context, node *v1.Node, opts v10.UpdateOptions) (*v1.Node, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Update", arg0, arg1, arg2)
+	ret := m.ctrl.Call(m, "Update", ctx, node, opts)
 	ret0, _ := ret[0].(*v1.Node)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Update indicates an expected call of Update.
-func (mr *MockNodeInterfaceMockRecorder) Update(arg0, arg1, arg2 any) *gomock.Call {
+func (mr *MockNodeInterfaceMockRecorder) Update(ctx, node, opts any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockNodeInterface)(nil).Update), arg0, arg1, arg2)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockNodeInterface)(nil).Update), ctx, node, opts)
 }
 
 // UpdateStatus mocks base method.
-func (m *MockNodeInterface) UpdateStatus(arg0 context.Context, arg1 *v1.Node, arg2 v10.UpdateOptions) (*v1.Node, error) {
+func (m *MockNodeInterface) UpdateStatus(ctx context.Context, node *v1.Node, opts v10.UpdateOptions) (*v1.Node, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateStatus", arg0, arg1, arg2)
+	ret := m.ctrl.Call(m, "UpdateStatus", ctx, node, opts)
 	ret0, _ := ret[0].(*v1.Node)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // UpdateStatus indicates an expected call of UpdateStatus.
-func (mr *MockNodeInterfaceMockRecorder) UpdateStatus(arg0, arg1, arg2 any) *gomock.Call {
+func (mr *MockNodeInterfaceMockRecorder) UpdateStatus(ctx, node, opts any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateStatus", reflect.TypeOf((*MockNodeInterface)(nil).UpdateStatus), arg0, arg1, arg2)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateStatus", reflect.TypeOf((*MockNodeInterface)(nil).UpdateStatus), ctx, node, opts)
 }
 
 // Watch mocks base method.
-func (m *MockNodeInterface) Watch(arg0 context.Context, arg1 v10.ListOptions) (watch.Interface, error) {
+func (m *MockNodeInterface) Watch(ctx context.Context, opts v10.ListOptions) (watch.Interface, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Watch", arg0, arg1)
+	ret := m.ctrl.Call(m, "Watch", ctx, opts)
 	ret0, _ := ret[0].(watch.Interface)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Watch indicates an expected call of Watch.
-func (mr *MockNodeInterfaceMockRecorder) Watch(arg0, arg1 any) *gomock.Call {
+func (mr *MockNodeInterfaceMockRecorder) Watch(ctx, opts any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Watch", reflect.TypeOf((*MockNodeInterface)(nil).Watch), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Watch", reflect.TypeOf((*MockNodeInterface)(nil).Watch), ctx, opts)
 }
