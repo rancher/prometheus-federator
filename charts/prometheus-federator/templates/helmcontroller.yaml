@@ -28,7 +28,9 @@ spec:
             fieldRef:
               fieldPath: spec.nodeName
         - name: JOB_CLUSTER_ROLE
-          value: prometheus-federator-helm-controller
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.serviceAccountName
         # this sets the `managedBy` annotations, must match the ones in prometheus-federator
         - name: CONTROLLER_NAME
           value: {{ template "prometheus-federator.name" . }}
