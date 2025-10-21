@@ -264,9 +264,16 @@ namespaceRegistration:
 
 helmController:
   deployment:
-    enabled : false
-    replicas : 1
+    enabled: false
+    replicas: 1
     image:
       repository: rancher/helm-controller
       tag: v0.16.10
       pullPolicy: IfNotPresent
+
+## externalHelmControllerName defines a custom external helm controller name to set as the HelmChart CR manager
+## This should only be used when all are true:
+##   - `helmController.deployment.enabled` is false,
+##   - `helmProjectOperator.helmController.enabled` is false, AND
+##   - the external helm-controller you will use is not the default global `helm-controller`
+#externalHelmControllerName: "my-helm-controller"

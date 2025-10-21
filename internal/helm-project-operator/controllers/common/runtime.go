@@ -95,9 +95,12 @@ type RuntimeOptions struct {
 	// DisableEmbeddedHelmLocker determines whether to disable embedded Helm Locker controller in favor of external Helm Locker
 	DisableEmbeddedHelmLocker bool `usage:"Whether to disable embedded Helm Locker controller in favor of external Helm Locker" env:"DISABLE_EMBEDDED_HELM_LOCKER"`
 
-	// DisableEmbeddedHelmController determines whether to disable embedded Helm Controller controller in favor of external Helm Controller
+	// DisableEmbeddedHelmController determines whether to disable embedded Helm Controller in favor of an external Helm Controller
 	// This should be the default in most RKE2 clusters since the RKE2 server binary already embeds a Helm Controller instance that manages HelmCharts
 	DisableEmbeddedHelmController bool `usage:"Whether to disable embedded Helm Controller controller in favor of external Helm Controller (recommended for RKE2 clusters)" env:"DISABLE_EMBEDDED_HELM_CONTROLLER"`
+
+	// ExternalHelmControllerName determines the name of the external Helm Controller to declare as managing the HelmCharts that PromFed creates
+	ExternalHelmControllerName string `usage:"Set the external Helm Controller's name to manage which controller will own the HelmCharts created by this operator" default:"helm-controller" env:"EXTERNAL_HELM_CONTROLLER_NAME"`
 
 	// NamespaceRegistrationWorkers sets the number of workers to be run in the Namespace Controller
 	// Useful in large clusters or high-latency environments that reach the operator initialization timeout before all namespaces have been registered
