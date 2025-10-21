@@ -27,10 +27,12 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: spec.nodeName
-        # this sets the `managedBy` annotations, must match the ones in prometheus-federator
         - name: JOB_CLUSTER_ROLE
+          value: prometheus-federator-helm-controller
+        # this sets the `managedBy` annotations, must match the ones in prometheus-federator
+        - name: CONTROLLER_NAME
           value: {{ template "prometheus-federator.name" . }}
         # this sets the `systemNamespace` for the helm-controller to watch, should match the one in prometheus-federator
-        - name: SYSTEM_NAMESPACE
+        - name: NAMESPACE
           value: {{ template "prometheus-federator.namespace" . }}
 {{ end }}
