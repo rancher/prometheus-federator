@@ -2,22 +2,22 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: prometheus-federator-helm-controller
+  name: {{ template "prometheus-federator.name" . }}-helm-controller
   namespace: {{ template "prometheus-federator.namespace" . }}
   labels:
-    app: prometheus-federator-helm-controller
+    app: {{ template "prometheus-federator.name" . }}-helm-controller
 spec:
   replicas: {{ .Values.helmController.deployment.replicas }}
   selector:
     matchLabels:
-      app: prometheus-federator-helm-controller
+      app: {{ template "prometheus-federator.name" . }}-helm-controller
   template:
     metadata:
       labels:
-        app: prometheus-federator-helm-controller
+        app: {{ template "prometheus-federator.name" . }}-helm-controller
     spec:
       # has to match cluster-admin service account
-      serviceAccountName : prometheus-federator-helm-controller
+      serviceAccountName : {{ template "prometheus-federator.name" . }}-helm-controller
       containers:
       - name: helm-controller
         image: {{ template "helm-controller.imageRegistry" . }} {{ .Values.helmController.deployment.image.repository }}:{{ .Values.helmController.deployment.image.tag }}
@@ -33,7 +33,7 @@ spec:
               fieldPath: spec.serviceAccountName
         # this sets the `managedBy` annotations, must match the ones in prometheus-federator
         - name: CONTROLLER_NAME
-          value: {{ template "prometheus-federator.name" . }}
+          value: {{ template "prometheus-federator.name" . }}-helm-controller
         # this sets the `systemNamespace` for the helm-controller to watch, should match the one in prometheus-federator
         - name: NAMESPACE
           value: {{ template "prometheus-federator.namespace" . }}
