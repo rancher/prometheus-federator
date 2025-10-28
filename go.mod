@@ -2,27 +2,27 @@ module github.com/rancher/prometheus-federator
 
 go 1.24.0
 
-toolchain go1.24.4
+toolchain go1.24.9
 
 require (
-	github.com/caarlos0/env/v11 v11.1.0
+	github.com/caarlos0/env/v11 v11.3.1
 	github.com/google/uuid v1.6.0
 	github.com/hashicorp/go-multierror v1.1.1
-	github.com/k3s-io/helm-controller v0.16.6
+	github.com/k3s-io/helm-controller v0.16.15
 	github.com/kralicky/kmatch v0.0.0-20240603031752-4aaff7842056
 	github.com/novln/docker-parser v1.0.0
-	github.com/onsi/ginkgo/v2 v2.22.2
-	github.com/onsi/gomega v1.36.2
+	github.com/onsi/ginkgo/v2 v2.27.2
+	github.com/onsi/gomega v1.38.2
 	github.com/rancher/lasso v0.2.5
 	github.com/rancher/wrangler/v3 v3.3.1
-	github.com/samber/lo v1.47.0
+	github.com/samber/lo v1.52.0
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/cobra v1.10.1
 	github.com/spf13/viper v1.21.0
 	github.com/stretchr/testify v1.11.1
 	go.uber.org/mock v0.6.0
-	golang.org/x/mod v0.28.0
-	golang.org/x/text v0.29.0
+	golang.org/x/mod v0.29.0
+	golang.org/x/text v0.30.0
 	gopkg.in/yaml.v2 v2.4.0
 	gopkg.in/yaml.v3 v3.0.1
 	helm.sh/helm/v3 v3.19.0
