@@ -141,6 +141,7 @@ jobs:
         with:
           image: ${{ env.IMAGE_NAME }}
           tag: ${{ github.ref_name }}
+          identity-registry: ${{ env.PRIME_STG_REGISTRY }}
 
           public-registry: ${{ env.PUBLIC_REGISTRY }}
           public-repo: ${{ env.REPO }}
@@ -152,4 +153,3 @@ jobs:
           prime-repo: ${{ env.REPO }}
           prime-username: ${{ env.PRIME_STG_REGISTRY_USERNAME }}
           prime-password: ${{ env.PRIME_STG_REGISTRY_PASSWORD }}
-          identity-registry: ${{ env.PRIME_REGISTRY }}
