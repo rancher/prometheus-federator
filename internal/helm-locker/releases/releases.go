@@ -4,9 +4,9 @@ import (
 	"sync"
 
 	"github.com/sirupsen/logrus"
-	rspb "helm.sh/helm/v3/pkg/release"
-	"helm.sh/helm/v3/pkg/storage"
-	"helm.sh/helm/v3/pkg/storage/driver"
+	rspb "helm.sh/helm/v4/pkg/release"
+	"helm.sh/helm/v4/pkg/storage"
+	"helm.sh/helm/v4/pkg/storage/driver"
 	"k8s.io/client-go/kubernetes"
 )
 
