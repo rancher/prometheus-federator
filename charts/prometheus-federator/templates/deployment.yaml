@@ -84,10 +84,15 @@ spec:
           - --debug
           - --debug-level={{ .Values.helmProjectOperator.debugLevel }}
 {{- end }}
-{{- if not .Values.helmProjectOperator.helmController.enabled }}
+{{- if or (not .Values.helmProjectOperator.helmController.enabled)  (.Values.helmController.deployment.enabled) }}
           - --disable-embedded-helm-controller
 {{- else }}
           - --helm-job-image={{ template "system_default_registry" . }}{{ .Values.helmProjectOperator.helmController.job.image.repository }}:{{ .Values.helmProjectOperator.helmController.job.image.tag }}
+{{- end }}
+{{- if and (not .Values.helmProjectOperator.helmController.enabled)  (.Values.helmController.deployment.enabled) }}
+          - --external-helm-controller-name={{ include "prometheus-federator.name" .  }}-helm-controller
+{{- else if and (not .Values.helmProjectOperator.helmController.enabled)  (not .Values.helmController.deployment.enabled) (hasKey .Values "externalHelmControllerName") }}
+          - --external-helm-controller-name={{ .Values.externalHelmControllerName | quote }}
 {{- end }}
 {{- if not .Values.helmProjectOperator.helmLocker.enabled }}
           - --disable-embedded-helm-locker
@@ -132,11 +137,11 @@ spec:
 {{- if .Values.helmProjectOperator.securityContext }}
       securityContext: {{ toYaml .Values.helmProjectOperator.securityContext | nindent 8 }}
 {{- end }}
-      nodeSelector: {{ include "linux-node-selector" . | nindent 8 }} 
+      nodeSelector: {{ include "linux-node-selector" . | nindent 8 }}
 {{- if .Values.helmProjectOperator.nodeSelector }}
 {{- toYaml .Values.helmProjectOperator.nodeSelector | nindent 8 }}
 {{- end }}
-      tolerations: {{ include "linux-node-tolerations" . | nindent 8 }} 
+      tolerations: {{ include "linux-node-tolerations" . | nindent 8 }}
 {{- if .Values.helmProjectOperator.tolerations }}
 {{- toYaml .Values.helmProjectOperator.tolerations | nindent 8 }}
 {{- end }}
