@@ -6,9 +6,10 @@
   ],
   "baseBranchPatterns": [
     "main",
+    "release/v5.x",
+    "release/v4.x",
     "release/v3.x",
-    "release/v2.x",
-    "release/v1.x"
+    "release/v2.x"
   ],
   "enabledManagers": [
     "dockerfile",
@@ -28,6 +29,22 @@
     },
     {
       "matchBaseBranches": [
+        "release/v5.x"
+      ],
+      "extends": [
+        "github>rancher/renovate-config:rancher-2.13#release"
+      ]
+    },
+    {
+      "matchBaseBranches": [
+        "release/v4.x"
+      ],
+      "extends": [
+        "github>rancher/renovate-config:rancher-2.12#release"
+      ]
+    },
+    {
+      "matchBaseBranches": [
         "release/v3.x"
       ],
       "extends": [
@@ -40,14 +57,6 @@
       ],
       "extends": [
         "github>rancher/renovate-config:rancher-2.10#release"
-      ]
-    },
-    {
-      "matchBaseBranches": [
-        "release/v1.x"
-      ],
-      "extends": [
-        "github>rancher/renovate-config:rancher-2.9#release"
       ]
     },
     {
