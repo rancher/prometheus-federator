@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"os"
+	"os/exec"
+	"strings"
 	"testing"
 	"time"
 
@@ -62,6 +64,14 @@ func (t *TestSpec) Validate() error {
 }
 
 var _ = BeforeSuite(func() {
+	By("verifying helm CLI is version 3")
+	cmd := exec.Command("helm", "version", "--short")
+	output, err := cmd.CombinedOutput()
+	Expect(err).NotTo(HaveOccurred(), "Failed to execute helm version command")
+
+	versionStr := strings.TrimSpace(string(output))
+	Expect(versionStr).To(ContainSubstring("v3."), "Helm v3 is required, got: %s", versionStr)
+
 	ts := TestSpec{}
 	Expect(env.Parse(&ts)).To(Succeed(), "Could not parse test spec from environment variables")
 	Expect(ts.Validate()).To(Succeed(), "Invalid input e2e test spec")
