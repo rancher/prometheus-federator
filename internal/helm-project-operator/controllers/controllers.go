@@ -190,7 +190,6 @@ func Register(ctx context.Context, systemNamespace string, cfg clientcmd.ClientC
 		logrus.Infof("Registering embedded Helm Controller...")
 		chart.Register(ctx,
 			systemNamespace,
-			// this corresponds to the managedBy annotation for helm charts
 			opts.ControllerName,
 			// this has to be cluster-admin for k3s reasons
 			"cluster-admin",
