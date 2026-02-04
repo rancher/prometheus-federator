@@ -29,7 +29,7 @@ jobs:
     steps:
       # Checkout the code at the head of the specified PR
       - name: Checkout the repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - name: Get Pull Request Head SHA
         id: get_head_sha
         run: |
@@ -56,7 +56,7 @@ jobs:
     steps:
       # Checkout the code at the head of the specified PR
       - name: Checkout PR Head
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           ref: ${{ needs.prepare_pr_info.outputs.head_sha }}
       # Proceed to build images
@@ -99,7 +99,7 @@ jobs:
     steps:
       # Checkout the code at the head of the specified PR
       - name: Checkout PR Head
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           ref: ${{ needs.prepare_pr_info.outputs.head_sha }}
       # Proceed to build images
@@ -141,7 +141,7 @@ jobs:
       pull-requests: write
     steps:
       - name: Comment on PR with image details
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
         env:
           # meta-helm-locker: ${{ needs.build_dev_helm_locker.outputs.tags }}
           meta-helm-project-operator: ${{ needs.build_dev_helm_project_operator.outputs.tags }}

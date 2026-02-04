@@ -39,9 +39,9 @@ jobs:
     runs-on: ${{ github.repository == 'rancher/prometheus-federator' && format('runs-on,image=ubuntu22-full-{1},runner=4cpu-linux-{1},run-id={0}', github.run_id, matrix.arch) || 'ubuntu-latest' }}
     steps:
     - name : Checkout repository
-      uses : actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      uses : actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
     - name: Install go
-      uses: actions/setup-go@f111f3307d8850f501ac008e886eec1fd1932a34 # v5
+      uses: actions/setup-go@7a3fe6cf4cb3a834922a1244abfce67bcef6a0c5 # v6
       with:
         go-version: 1.24
     - name : Install helm
