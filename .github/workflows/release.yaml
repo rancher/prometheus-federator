@@ -56,7 +56,7 @@ jobs:
       - name : Install helm
         uses: azure/setup-helm@b9e51907a09c216f16ebe8536097933489208112 # v4
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          version: 'v3.19.5'
       - name: Prepare helm charts (needed for build)
         run: |
           GIT_TAG=${{ github.ref_name }} BUILD_TARGET=prometheus-federator make package-helm && echo "pf: release chart prepared"
