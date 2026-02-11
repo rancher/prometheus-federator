@@ -21,16 +21,19 @@ helm repo add ${HELM_REPO} $HELM_REPO_URL
 helm repo update
 
 echo "Create required \`cattle-fleet-system\` namespace"
-kubectl create namespace cattle-fleet-system
+kubectl create namespace cattle-fleet-system 2>/dev/null || true
 
-echo "Installing rancher monitoring crd with :\n"
+echo "Installing rancher monitoring crd with :"
 
 helm search repo ${HELM_REPO}/rancher-monitoring-crd --versions --max-col-width=0 | head -n 2
 
 helm upgrade --install --create-namespace -n cattle-monitoring-system ${RANCHER_MONITORING_VERSION_HELM_ARGS} rancher-monitoring-crd ${HELM_REPO}/rancher-monitoring-crd
 
+echo "Checking installed crd version info:"
+helm list -n cattle-monitoring-system
+
 if [[ "${E2E_CI}" == "true" ]]; then
-    e2e_args="--set grafana.resources=null --set prometheus.prometheusSpec.resources=null --set alertmanager.alertmanagerSpec.resources=null"
+    e2e_args="--set-json "grafana.resources={}" --set prometheus.prometheusSpec.resources=null --set alertmanager.alertmanagerSpec.resources=null --set prometheus.prometheusSpec.maximumStartupDurationSeconds=3600"
 fi
 
 case "${KUBERNETES_DISTRIBUTION_TYPE}" in
@@ -48,9 +51,12 @@ case "${KUBERNETES_DISTRIBUTION_TYPE}" in
     exit 1
 esac
 
-echo "Installing rancher monitoring with :\n"
+echo "Installing rancher monitoring with :"
 
 helm search repo ${HELM_REPO}/rancher-monitoring --versions --max-col-width=0 | head -n 2
 helm upgrade --install --create-namespace -n cattle-monitoring-system rancher-monitoring ${cluster_args} ${e2e_args} ${RANCHER_HELM_ARGS} ${HELM_REPO}/rancher-monitoring
+
+echo "Checking installed rancher monitoring versions :"
+helm list -n cattle-monitoring-system
 
 echo "PASS: Rancher Monitoring has been installed"
