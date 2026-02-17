@@ -261,19 +261,3 @@ namespaceRegistration:
   ## namespaceRegistration.retryWaitMilliseconds sets the time between each retry performed during the Namespace Controller initialization to make sure all Project Registration Namespaces are tracked
   ## If the pod is failing to initialize due to a timout in registering namespaces, tweaking this setting and NamespaceRegistrationRetryMax should fix it
   retryWaitMilliseconds: 5000
-
-helmController:
-  deployment:
-    enabled: false
-    replicas: 1
-    image:
-      repository: rancher/helm-controller
-      tag: v0.16.10
-      pullPolicy: IfNotPresent
-
-## externalHelmControllerName defines a custom external helm controller name to set as the HelmChart CR manager
-## This should only be used when all are true:
-##   - `helmController.deployment.enabled` is false,
-##   - `helmProjectOperator.helmController.enabled` is false, AND
-##   - the external helm-controller you will use is not the default global `helm-controller`
-#externalHelmControllerName: "my-helm-controller"
