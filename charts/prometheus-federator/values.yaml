@@ -210,7 +210,7 @@ helmProjectOperator:
   cleanup:
     image:
       repository: rancher/kuberlr-kubectl
-      tag: v6.0.0
+      tag: v6.0.1
       pullPolicy: IfNotPresent
 
     ## Define which Nodes the Pods are scheduled on.
@@ -268,7 +268,7 @@ helmController:
     replicas: 1
     image:
       repository: rancher/helm-controller
-      tag: v0.16.10
+      tag: v0.16.18
       pullPolicy: IfNotPresent
 
 ## externalHelmControllerName defines a custom external helm controller name to set as the HelmChart CR manager
