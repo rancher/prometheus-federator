@@ -57,6 +57,6 @@ jobs:
       - name : Install helm
         uses: azure/setup-helm@b9e51907a09c216f16ebe8536097933489208112 # v4
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          version: 'v3.19.5'
       - name: Run CI
         run: make ci
