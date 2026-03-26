@@ -47,7 +47,7 @@ jobs:
     - name : Install helm
       uses: azure/setup-helm@b9e51907a09c216f16ebe8536097933489208112 # v4
       with:
-        token: ${{ secrets.GITHUB_TOKEN }}
+        version: 'v3.19.5'
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2 # v3
     - name : Install k3d
@@ -57,7 +57,7 @@ jobs:
         CLUSTER_NAME=test-cluster K3S_VERSION=${{ matrix.K3S_VERSION }} ./.github/workflows/e2e/scripts/setup-cluster.sh
         k3d kubeconfig get test-cluster > kubeconfig.yaml
     - name : Debug kubeconfig
-      run : cat kubeconfig.yaml 
+      run : cat kubeconfig.yaml
     - name : Build helm-project-operator
       run : BUILD_TARGET=helm-project-operator ./scripts/build
     - name : Validate build
@@ -67,7 +67,7 @@ jobs:
         BUILD_TARGET=helm-project-operator ./scripts/package
         BUILD_TARGET=helm-project-operator source ./scripts/version
         k3d image import -c test-cluster $IMAGE
-    - name : Debug k3d images 
+    - name : Debug k3d images
       run : docker exec k3d-test-cluster-server-0 crictl images
     - name : Run e2e tests
       run : |
