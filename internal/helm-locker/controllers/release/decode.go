@@ -7,7 +7,7 @@ import (
 	"encoding/json"
 	"io"
 
-	rspb "helm.sh/helm/v3/pkg/release"
+	rspb "helm.sh/helm/v4/pkg/release"
 )
 
 // decodeRelease decodes the bytes of data into a release

@@ -2,7 +2,7 @@ package release
 
 import (
 	v1alpha1 "github.com/rancher/prometheus-federator/internal/helm-locker/apis/helm.cattle.io/v1alpha1"
-	rspb "helm.sh/helm/v3/pkg/release"
+	rspb "helm.sh/helm/v4/pkg/release"
 )
 
 func newReleaseInfo(release *rspb.Release) *releaseInfo {
