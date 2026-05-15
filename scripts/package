@@ -12,9 +12,9 @@ DOCKERFILE=package/Dockerfile${DOCKER_TARGET}
 echo "Building \`${IMAGE}\` from \`${DOCKERFILE}\`:";
 
 if [[ ${USE_DOCKER_BUILDX} -eq 1 ]]; then
-  docker buildx build --platform linux/amd64,linux/arm64 -f "${DOCKERFILE}" --build-arg RANCHER_PROJECT_MONITORING=$RANCHER_PROJECT_MONITORING --build-arg YQ_CHECKSUM_AMD64=$YQ_CHECKSUM_AMD64 --build-arg YQ_CHECKSUM_ARM64=$YQ_CHECKSUM_ARM64 -t "${IMAGE}" .
+  docker buildx build --platform linux/amd64,linux/arm64 -f "${DOCKERFILE}" --build-arg RANCHER_PROJECT_MONITORING=$RANCHER_PROJECT_MONITORING -t "${IMAGE}" .
 else
-  docker build -f "${DOCKERFILE}" --build-arg RANCHER_PROJECT_MONITORING=$RANCHER_PROJECT_MONITORING --build-arg YQ_CHECKSUM_AMD64=$YQ_CHECKSUM_AMD64 --build-arg YQ_CHECKSUM_ARM64=$YQ_CHECKSUM_ARM64 -t "${IMAGE}" .
+  docker build -f "${DOCKERFILE}" --build-arg RANCHER_PROJECT_MONITORING=$RANCHER_PROJECT_MONITORING -t "${IMAGE}" .
 fi
 
 echo "Completed building ${IMAGE} container image"

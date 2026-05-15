@@ -7,7 +7,5 @@ cd $(dirname $0)/..
 
 docker buildx build -f package/Dockerfile-prometheus-federator \
 	--build-arg RANCHER_PROJECT_MONITORING=${RANCHER_PROJECT_MONITORING} ${IID_FILE_FLAG} \
-	--build-arg YQ_CHECKSUM_AMD64=${YQ_CHECKSUM_AMD64} \
-	--build-arg YQ_CHECKSUM_ARM64=${YQ_CHECKSUM_ARM64} \
 	--platform="linux/amd64,linux/arm64" \
 	-t ${IMAGE} --push .

@@ -3,19 +3,17 @@ FROM --platform=$BUILDPLATFORM rancher/mirrored-tonistiigi-xx:1.5.0 AS xx
 
 FROM registry.suse.com/bci/golang:1.26 AS builder
 ARG TARGETARCH
-ARG YQ_CHECKSUM_AMD64
-ARG YQ_CHECKSUM_ARM64
+
 ENV BUILD_TARGET="helm-project-operator"
-ENV YQ_CHECKSUM_AMD64=${YQ_CHECKSUM_AMD64}
-ENV YQ_CHECKSUM_ARM64=${YQ_CHECKSUM_ARM64}
+
 WORKDIR /usr/src/app
-ENV YQ_VERSION=v4.44.3
 RUN zypper -n install git curl wget make helm
 RUN export ARCH=$(go env GOHOSTARCH)
-RUN wget https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_${TARGETARCH} -O /usr/bin/yq \
-    && if [ "${TARGETARCH}" = "amd64" ]; then echo "${YQ_CHECKSUM_AMD64}  /usr/bin/yq" | sha256sum -c - ; fi \
-    && if [ "${TARGETARCH}" = "arm64" ]; then echo "${YQ_CHECKSUM_ARM64}  /usr/bin/yq" | sha256sum -c - ; fi \
-    && chmod +x /usr/bin/yq
+
+COPY ./package/install-yq.sh /tmp/install-yq.sh
+RUN chmod +x /tmp/install-yq.sh && /tmp/install-yq.sh && rm /tmp/install-yq.sh
+
+
 COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
