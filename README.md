@@ -24,6 +24,7 @@ This is the current branch strategy for `rancher/prometheus-federator`, it may c
 | Branch         | Tag      | Rancher                |
 |----------------|----------|------------------------|
 | `main`         | `head`   | `main` branch (`head`) |
+| `release/v6.x` | `v6.x.x` | `v2.14.x`              |
 | `release/v5.x` | `v5.x.x` | `v2.13.x`              |
 | `release/v4.x` | `v4.x.x` | `v2.12.x`              |
 | `release/v3.x` | `v3.x.x` | `v2.11.x`              |
