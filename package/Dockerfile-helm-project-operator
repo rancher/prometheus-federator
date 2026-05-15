@@ -1,7 +1,7 @@
 # Image that provides cross compilation tooling.
 FROM --platform=$BUILDPLATFORM rancher/mirrored-tonistiigi-xx:1.5.0 AS xx
 
-FROM --platform=$BUILDPLATFORM registry.suse.com/bci/golang:1.25 AS builder
+FROM rancher/hardened-build-base:v1.26.3b1 AS builder
 ARG TARGETARCH
 ARG YQ_CHECKSUM_AMD64
 ARG YQ_CHECKSUM_ARM64
