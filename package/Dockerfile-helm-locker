@@ -1,4 +1,4 @@
-FROM rancher/hardened-build-base:v1.26.3b1 AS builder
+FROM registry.suse.com/bci/golang:1.26 AS builder
 WORKDIR /usr/src/app
 RUN zypper -n install git vim less file curl wget
 COPY go.mod go.sum ./
