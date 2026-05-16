@@ -6,6 +6,7 @@
   ],
   "baseBranchPatterns": [
     "main",
+    "release/v6.x",
     "release/v5.x",
     "release/v4.x",
     "release/v3.x",
@@ -25,6 +26,14 @@
       ],
       "extends": [
         "github>rancher/renovate-config:rancher-main#release"
+      ]
+    },
+    {
+      "matchBaseBranches": [
+        "release/v6.x"
+      ],
+      "extends": [
+        "github>rancher/renovate-config:rancher-2.14#release"
       ]
     },
     {
