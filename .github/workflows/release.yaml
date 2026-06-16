@@ -34,7 +34,7 @@ jobs:
           fetch-depth: 0
       - run: git fetch --force --tags
       - name : setup Go
-        uses : actions/setup-go@f111f3307d8850f501ac008e886eec1fd1932a34 # v5
+        uses : actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6
         with:
           go-version: 1.26
       - name: Check if yq is installed
@@ -59,7 +59,7 @@ jobs:
       - name: Prepare helm charts (needed for build)
         run: |
           GIT_TAG=${{ github.ref_name }} BUILD_TARGET=prometheus-federator make package-helm && echo "pf: release chart prepared"
-      - uses: goreleaser/goreleaser-action@90a3faa9d0182683851fbfa97ca1a2cb983bfca3 # v6
+      - uses: goreleaser/goreleaser-action@5daf1e915a5f0af01ddbcd89a43b8061ff4f1a89 # v7
         with:
           distribution: goreleaser
           version: latest
