@@ -6,9 +6,15 @@ if ! hash helm 2>/dev/null; then
     exit 1
 fi
 
+if ! hash yq 2>/dev/null; then
+    echo "yq is not installed"
+    exit 1
+fi
+
 source "$(dirname "$0")/version"
 source "$(dirname "$0")/util-chart"
 source "$(dirname "$0")/util-team-charts"
+source "$(dirname "$0")/util-kuberlr"
 
 cd "$(dirname "$0")/.."
 
@@ -37,6 +43,11 @@ if [[ "$REPO" != "rancher" ]]; then
 else
   edit-chart ./build/charts/prometheus-federator/Chart.yaml "${HELM_CHART_VERSION}" "${HELM_IMAGE_TAG}"
 fi
+
+KUBERLR_STABLE=$(find_latest_kuberlr_release $KUBERLR_TARGET)
+echo "Setting prometheus-federator cleanup image tag to ${KUBERLR_STABLE}"
+yq -i ".helmProjectOperator.cleanup.image.tag = \"${KUBERLR_STABLE}\"" ./build/charts/prometheus-federator/values.yaml
+
 if ! package-chart ./build/charts/prometheus-federator ./build/charts ; then
   echo "package-chart failed..."
   exit 1
