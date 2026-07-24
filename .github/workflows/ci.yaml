@@ -7,7 +7,7 @@ on:
       - 'docs/**'
       - '*.md'
       - '.gitignore'
-      - 'CODEOWNERS'
+      - '../CODEOWNERS'
       - 'LICENSE'
       - 'Makefile'
   push:
@@ -19,7 +19,7 @@ on:
       - 'docs/**'
       - '*.md'
       - '.gitignore'
-      - 'CODEOWNERS'
+      - '../CODEOWNERS'
       - 'LICENSE'
 
 env:
