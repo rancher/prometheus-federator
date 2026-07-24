@@ -1,0 +1,15 @@
+name: Install yq
+description: Installs yq if it isn't already present, verifying the download checksum
+
+runs:
+  using: composite
+  steps:
+    - name: Install yq
+      shell: bash
+      run: |
+        if command -v yq &> /dev/null; then
+          echo "yq is already installed"
+          yq --version
+        else
+          "${{ github.action_path }}/install-yq.sh"
+        fi
