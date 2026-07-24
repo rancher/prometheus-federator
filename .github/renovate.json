@@ -1,0 +1,86 @@
+{
+  "extends": [
+    "github>rancher/renovate-config#release",
+    "group:allNonMajor",
+    "helpers:pinGitHubActionDigests"
+  ],
+  "baseBranchPatterns": [
+    "main",
+    "release/v6.x",
+    "release/v5.x",
+    "release/v4.x",
+    "release/v3.x",
+    "release/v2.x"
+  ],
+  "enabledManagers": [
+    "dockerfile",
+    "github-actions",
+    "helm-values",
+    "custom.regex",
+    "gomod"
+  ],
+  "packageRules": [
+    {
+      "matchBaseBranches": [
+        "main"
+      ],
+      "extends": [
+        "github>rancher/renovate-config:rancher-main#release"
+      ]
+    },
+    {
+      "matchBaseBranches": [
+        "release/v6.x"
+      ],
+      "extends": [
+        "github>rancher/renovate-config:rancher-2.14#release"
+      ]
+    },
+    {
+      "matchBaseBranches": [
+        "release/v5.x"
+      ],
+      "extends": [
+        "github>rancher/renovate-config:rancher-2.13#release"
+      ]
+    },
+    {
+      "matchBaseBranches": [
+        "release/v4.x"
+      ],
+      "extends": [
+        "github>rancher/renovate-config:rancher-2.12#release"
+      ]
+    },
+    {
+      "matchBaseBranches": [
+        "release/v3.x"
+      ],
+      "extends": [
+        "github>rancher/renovate-config:rancher-2.11#release"
+      ]
+    },
+    {
+      "matchBaseBranches": [
+        "release/v2.x"
+      ],
+      "extends": [
+        "github>rancher/renovate-config:rancher-2.10#release"
+      ]
+    },
+    {
+      "groupName": "GitHub Workflow Actions",
+      "groupSlug": "gha-deps",
+      "matchManagers": [
+        "github-actions"
+      ]
+    },
+    {
+      "groupName": "Docker File Deps",
+      "groupSlug": "docker-bumps",
+      "matchManagers": [
+        "dockerfile"
+      ]
+    }
+  ]
+}

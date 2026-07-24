@@ -1,0 +1,16 @@
+#!/bin/bash
+
+source "$(dirname "$0")/util-chart"
+
+echo "Cleaning old chart artifacts..."
+clean-old-charts
+
+if [[ -d ./build/bin ]]; then
+  echo "Cleaning old binaries..."
+  rm -rf ./build/bin
+fi
+
+if [[ -d ./.debug ]]; then
+  echo "Cleaning chart debug artifacts..."
+  rm -rf ./.debug
+fi

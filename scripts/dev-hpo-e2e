@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+set -e
+
+# Check if k3d binary exists
+if ! command -v k3d &> /dev/null; then
+    echo "Error: k3d binary not found. Please install k3d before proceeding."
+    exit 1
+fi
+
+# Check if k3d binary exists
+if ! command -v yq &> /dev/null; then
+    echo "Error: yq binary not found. Please install yq before proceeding."
+    exit 1
+fi
+
+export E2E_CI=true
+export REPO=dev
+export K3S_VERSION=v1.27.9-k3s1
+export CLUSTER_NAME=e2e-ci-helm-project-operator
+export TAG=v0.0.0-dev.1
+
+echo "Checking if pre-e2e cleanup is required..."
+if k3d cluster list | grep -q $CLUSTER_NAME; then
+    echo "Cluster $CLUSTER_NAME already exists, deleting before creating new one..."
+    k3d cluster delete $CLUSTER_NAME
+fi
+
+echo "Performing pre-e2e prebuild of binary and images."
+BUILD_TARGET=helm-project-operator ./scripts/build;
+BUILD_TARGET=helm-project-operator ./scripts/package;
+
+echo "Creating cluster..." && \
+/usr/bin/env bash ./.github/workflows/e2e/scripts/setup-cluster.sh && \
+
+echo "Import Images Into k3d" && \
+k3d image import ${REPO}/helm-project-operator:${TAG} -c "$CLUSTER_NAME" && \
+
+echo "Setup kubectl context" && \
+kubectl config use-context "k3d-$CLUSTER_NAME" && \
+
+echo "Install Helm Project Operator" && \
+/usr/bin/env bash ./.github/workflows/e2e/scripts/hpo-install-helm-project-operator.sh && \
+
+echo "Check if Helm Project Operator is up" && \
+/usr/bin/env bash ./.github/workflows/e2e/scripts/hpo-validate-helm-project-operator.sh && \
+
+echo "Check if Project Registration Namespace is auto-created on namespace detection" && \
+/usr/bin/env bash ./.github/workflows/e2e/scripts/hpo-create-project-namespace.sh && \
+
+echo "Deploy Example Chart via ProjectHelmChart CR" && \
+/usr/bin/env bash ./.github/workflows/e2e/scripts/hpo-create-projecthelmchart.sh;
+
+echo "Delete Example Chart"
+/usr/bin/env bash ./.github/workflows/e2e/scripts/hpo-delete-projecthelmchart.sh;
+
+echo "Uninstall Helm Project Operator"
+/usr/bin/env bash ./.github/workflows/e2e/scripts/hpo-uninstall-helm-project-operator.sh;
+
+echo "Delete k3d cluster"
+k3d cluster delete "$CLUSTER_NAME";
