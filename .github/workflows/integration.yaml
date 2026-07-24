@@ -14,14 +14,14 @@ on:
       - 'docs/**'
       - '*.md'
       - '.gitignore'
-      - 'CODEOWNERS'
+      - '../CODEOWNERS'
       - 'LICENSE'
   pull_request:
     paths-ignore:
     - 'docs/**'
     - '*.md'
     - '.gitignore'
-    - 'CODEOWNERS'
+    - '../CODEOWNERS'
     - 'LICENSE'
 
 jobs:
@@ -56,7 +56,7 @@ jobs:
         CLUSTER_NAME=test-cluster K3S_VERSION=${{ matrix.K3S_VERSION }} ./.github/workflows/e2e/scripts/setup-cluster.sh
         k3d kubeconfig get test-cluster > kubeconfig.yaml
     - name : Debug kubeconfig
-      run : cat kubeconfig.yaml 
+      run : cat kubeconfig.yaml
     - name : Build helm-project-operator
       run : BUILD_TARGET=helm-project-operator ./scripts/build
     - name : Validate build
@@ -66,7 +66,7 @@ jobs:
         BUILD_TARGET=helm-project-operator ./scripts/package
         BUILD_TARGET=helm-project-operator source ./scripts/version
         k3d image import -c test-cluster $IMAGE
-    - name : Debug k3d images 
+    - name : Debug k3d images
       run : docker exec k3d-test-cluster-server-0 crictl images
     - name : Run e2e tests
       run : |
