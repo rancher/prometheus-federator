@@ -1,17 +1,13 @@
 name: golangci-lint
 on:
-  pull_request:
-    paths-ignore:
-    - 'docs/**'
-    - '*.md'
-    - '.gitignore'
-    - 'CODEOWNERS'
-    - 'LICENSE'
+  workflow_call:
+    inputs:
+      helm-version:
+        required: true
+        type: string
 
 permissions:
   contents: read
-  # Optional: allow read access to pull request. Use with `only-new-issues` option.
-  # pull-requests: read
 
 jobs:
   golangci:
@@ -25,8 +21,8 @@ jobs:
       - name : Install helm
         uses: azure/setup-helm@dda3372f752e03dde6b3237bc9431cdc2f7a02a2 # v5.0.0
         with:
-          version: 'v4.2.0'
-      - name: Package embedded example chart
-        run: BUILD_TARGET=helm-project-operator ./scripts/build-chart
+          version: ${{ inputs.helm-version }}
+      - name: Package helm chart
+        run: ./scripts/build-chart && BUILD_TARGET=helm-project-operator ./scripts/build-chart
       - name: golangci-lint
         uses: golangci/golangci-lint-action@1e7e51e771db61008b38414a730f564565cf7c20 # v9.2.0
