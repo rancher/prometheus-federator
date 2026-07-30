@@ -16,8 +16,8 @@ require (
 	github.com/k3s-io/helm-controller v0.16.6
 	github.com/kralicky/kmatch v0.0.0-20240603031752-4aaff7842056
 	github.com/novln/docker-parser v1.0.0
-	github.com/onsi/ginkgo/v2 v2.28.0
-	github.com/onsi/gomega v1.39.1
+	github.com/onsi/ginkgo/v2 v2.32.0
+	github.com/onsi/gomega v1.42.1
 	github.com/rancher/lasso v0.2.9
 	github.com/rancher/wrangler/v3 v3.7.0
 	github.com/samber/lo v1.47.0
@@ -61,7 +61,7 @@ require (
 	github.com/go-viper/mapstructure/v2 v2.4.0 // indirect
 	github.com/google/gnostic-models v0.7.0 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
-	github.com/google/pprof v0.0.0-20260115054156-294ebfa9ad83 // indirect
+	github.com/google/pprof v0.0.0-20260402051712-545e8a4df936 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/jmoiron/sqlx v1.4.0 // indirect
