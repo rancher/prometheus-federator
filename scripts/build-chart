@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+set -e
+
+# Prepares the example-chart for compile-time embedding into the helm-project-operator example binary.
+# The prometheus-federator binary no longer embeds a chart and uses --managed-chart-* flags instead.
+
+if [[ "${BUILD_TARGET}" != "helm-project-operator" ]]; then
+  echo "No embedded chart to build for BUILD_TARGET=${BUILD_TARGET}; skipping."
+  exit 0
+fi
+
+source $(dirname $0)/version
+source $(dirname $0)/util-chart
+
+cd $(dirname $0)/..
+
+CHART=${CHART:-"example-chart"}
+
+clean-old-charts "$CHART"
+cp -rf "examples/${BUILD_TARGET}/${CHART}" build/charts/
+CHART_DESTINATION="./build/charts/${CHART}-${HELM_CHART_VERSION}.tgz"
+edit-chart "build/charts/${CHART}/Chart.yaml" "${HELM_CHART_VERSION}" "${HELM_IMAGE_TAG}"
+package-chart "./build/charts/${CHART}" ./build/charts
+base64 -i "$CHART_DESTINATION" > "cmd/helm-project-operator/fs/${CHART}.tgz.base64"
+
+echo "Completed ${CHART} (ver: ${HELM_CHART_VERSION:-"n/a"}) chart build process."
