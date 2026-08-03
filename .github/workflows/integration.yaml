@@ -12,6 +12,18 @@ on:
       k3s-versions:
         required: true
         type: string
+      yq-checksum-amd64:
+        required: false
+        type: string
+        default: ''
+      yq-checksum-arm64:
+        required: false
+        type: string
+        default: ''
+
+env:
+  YQ_CHECKSUM_AMD64: ${{ inputs.yq-checksum-amd64 }}
+  YQ_CHECKSUM_ARM64: ${{ inputs.yq-checksum-arm64 }}
 
 jobs:
   test:

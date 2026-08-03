@@ -15,6 +15,14 @@ on:
         description: "Version of k3s to use for the underlying cluster, should exist in https://hub.docker.com/r/rancher/k3s/tags"
         required: false
         type: string
+      yq-checksum-amd64:
+        required: false
+        type: string
+        default: ''
+      yq-checksum-arm64:
+        required: false
+        type: string
+        default: ''
 
 env:
   GOARCH: amd64
@@ -27,6 +35,8 @@ env:
   KUBECTL_WAIT_TIMEOUT: 300s
   DEBUG: ${{ inputs.debug || false }}
   CLUSTER_NAME: 'e2e-ci-prometheus-federator'
+  YQ_CHECKSUM_AMD64: ${{ inputs.yq-checksum-amd64 }}
+  YQ_CHECKSUM_ARM64: ${{ inputs.yq-checksum-arm64 }}
 
 permissions:
   contents: write
