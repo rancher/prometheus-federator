@@ -7,6 +7,14 @@ on:
         description: 'Pull Request Number to build image for'
         required: true
         type: number
+      yq-checksum-amd64:
+        required: false
+        type: string
+        default: ''
+      yq-checksum-arm64:
+        required: false
+        type: string
+        default: ''
 
 env:
   GHCR_REGISTRY: ghcr.io
@@ -81,6 +89,9 @@ jobs:
           tags: ${{ steps.meta-helm-project-operator.outputs.tags }}
           labels: ${{ steps.meta-helm-project-operator.outputs.labels }}
           platforms: linux/amd64,linux/arm64
+          build-args: |
+            YQ_CHECKSUM_AMD64=${{ inputs.yq-checksum-amd64 }}
+            YQ_CHECKSUM_ARM64=${{ inputs.yq-checksum-arm64 }}
   build_dev_prometheus_federator:
     name: Build and push prometheus-federator
     runs-on: ${{ github.repository == 'rancher/prometheus-federator' && format('runs-on,image=ubuntu22-full-x64,runner=4cpu-linux-x64,run-id={0}', github.run_id) || 'ubuntu-latest' }}
@@ -124,6 +135,9 @@ jobs:
           tags: ${{ steps.meta-prometheus-federator.outputs.tags }}
           labels: ${{ steps.meta-prometheus-federator.outputs.labels }}
           platforms: linux/amd64,linux/arm64
+          build-args: |
+            YQ_CHECKSUM_AMD64=${{ inputs.yq-checksum-amd64 }}
+            YQ_CHECKSUM_ARM64=${{ inputs.yq-checksum-arm64 }}
 
   comment-on-pr:
     name: Comment on PR with image details
