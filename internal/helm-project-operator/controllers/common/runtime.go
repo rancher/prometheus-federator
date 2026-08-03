@@ -22,7 +22,7 @@ type RuntimeOptions struct {
 	// so that multiple iterations of this operator in the same namespace do not try to manage the same HelmChart and HelmRelease objects
 	ControllerName string `usage:"Unique name to identify this controller that is added to all HelmCharts tracked by this controller" default:"helm-project-operator" env:"CONTROLLER_NAME"`
 
-	// HelmJobImage is the job image to use to run the HelmChart job (default rancher/klipper-helm:v0.9.4-build20250113)
+	// HelmJobImage is the job image to use to run the HelmChart job (default rancher/klipper-helm:v0.13.3-build20260727)
 	// Generally, this HelmJobImage can be left undefined, but may be necessary to be set if you are running with a non-default image
 	HelmJobImage string `usage:"Job image to use to perform helm operations on HelmChart creation" env:"HELM_JOB_IMAGE"`
 
