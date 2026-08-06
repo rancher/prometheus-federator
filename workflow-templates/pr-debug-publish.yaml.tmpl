@@ -1,0 +1,174 @@
+name: Produce PR dev images (on Request)
+
+on:
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'Pull Request Number to build image for'
+        required: true
+        type: number
+
+permissions:
+  contents: read
+  packages: write
+  attestations: write
+  id-token: write
+  pull-requests: write
+
+env:
+  GHCR_REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  prepare_pr_info:
+    name: Identify PR Info
+    runs-on: ${{ github.repository == 'rancher/prometheus-federator' && format('runs-on,image=ubuntu22-full-x64,runner=4cpu-linux-x64,run-id={0}', github.run_id) || 'ubuntu-latest' }}
+    outputs:
+      head_sha: ${{ steps.get_head_sha.outputs.head_sha }}
+      head_sha_short: ${{ steps.get_head_sha.outputs.head_sha_short }}
+    steps:
+      # Checkout the code at the head of the specified PR
+      - name: Checkout the repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Get Pull Request Head SHA
+        id: get_head_sha
+        run: |
+          pr_number=${{ inputs.pr_number }}
+          echo "Fetching details for PR #$pr_number"
+          pr_response=$(gh api repos/${{ github.repository }}/pulls/$pr_number)
+          head_sha=$(echo "$pr_response" | jq -r '.head.sha')
+          echo "head_sha=${head_sha}" >> $GITHUB_OUTPUT
+          echo "head_sha_short=${head_sha:0:7}" >> $GITHUB_OUTPUT
+          echo "PR ${pr_number}" >> $GITHUB_STEP_SUMMARY
+          echo "PR SHA: ${head_sha:0:7}" >> $GITHUB_STEP_SUMMARY
+          echo "PR SHA FULL: ${head_sha}" >> $GITHUB_STEP_SUMMARY
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+  build_dev_helm_project_operator:
+    name: Build and push helm-project-operator
+    runs-on: ${{ github.repository == 'rancher/prometheus-federator' && format('runs-on,image=ubuntu22-full-x64,runner=4cpu-linux-x64,run-id={0}', github.run_id) || 'ubuntu-latest' }}
+    needs: prepare_pr_info
+    outputs:
+      tags: ${{ steps.build.outputs.tags }}
+    steps:
+      # Checkout the code at the head of the specified PR
+      - name: Checkout PR Head
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: ${{ needs.prepare_pr_info.outputs.head_sha }}
+      - name: Build and push image
+        id: build
+        uses: rancher/prometheus-federator/.github/actions/build-and-push-image{{AUTOMATION_CORE_REF}}
+        with:
+          image: ${{ env.IMAGE_NAME }}/helm-project-operator
+          dockerfile: ./package/Dockerfile-helm-project-operator
+          tags: |
+            type=raw,value=pr-${{ inputs.pr_number }}-${{ needs.prepare_pr_info.outputs.head_sha_short }}
+            type=raw,value=pr-${{ inputs.pr_number }}
+          registry-password: ${{ secrets.GITHUB_TOKEN }}
+          yq-checksum-amd64: '{{YQ_CHECKSUM_AMD64}}'
+          yq-checksum-arm64: '{{YQ_CHECKSUM_ARM64}}'
+
+      # SLSA attestation stays on the release branch (OIDC binding requirement)
+      - name: Attest build provenance
+        uses: actions/attest-build-provenance@0f67c3f4856b2e3261c31976d6725780e5e4c373 # v4.1.1
+        with:
+          subject-name: ${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}/helm-project-operator
+          subject-digest: ${{ steps.build.outputs.digest }}
+          push-to-registry: true
+
+  build_dev_prometheus_federator:
+    name: Build and push prometheus-federator
+    runs-on: ${{ github.repository == 'rancher/prometheus-federator' && format('runs-on,image=ubuntu22-full-x64,runner=4cpu-linux-x64,run-id={0}', github.run_id) || 'ubuntu-latest' }}
+    needs: prepare_pr_info
+    outputs:
+      tags: ${{ steps.build.outputs.tags }}
+    steps:
+      # Checkout the code at the head of the specified PR
+      - name: Checkout PR Head
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: ${{ needs.prepare_pr_info.outputs.head_sha }}
+      - name: Build and push image
+        id: build
+        uses: rancher/prometheus-federator/.github/actions/build-and-push-image{{AUTOMATION_CORE_REF}}
+        with:
+          image: ${{ env.IMAGE_NAME }}
+          dockerfile: ./package/Dockerfile-prometheus-federator
+          tags: |
+            type=raw,value=pr-${{ inputs.pr_number }}-${{ needs.prepare_pr_info.outputs.head_sha_short }}
+            type=raw,value=pr-${{ inputs.pr_number }}
+          registry-password: ${{ secrets.GITHUB_TOKEN }}
+          yq-checksum-amd64: '{{YQ_CHECKSUM_AMD64}}'
+          yq-checksum-arm64: '{{YQ_CHECKSUM_ARM64}}'
+
+      # SLSA attestation stays on the release branch (OIDC binding requirement)
+      - name: Attest build provenance
+        uses: actions/attest-build-provenance@0f67c3f4856b2e3261c31976d6725780e5e4c373 # v4.1.1
+        with:
+          subject-name: ${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}
+          subject-digest: ${{ steps.build.outputs.digest }}
+          push-to-registry: true
+
+  comment-on-pr:
+    name: Comment on PR with image details
+    runs-on: ${{ github.repository == 'rancher/prometheus-federator' && format('runs-on,image=ubuntu22-full-x64,runner=4cpu-linux-x64,run-id={0}', github.run_id) || 'ubuntu-latest' }}
+    needs:
+      - prepare_pr_info
+      - build_dev_helm_project_operator
+      - build_dev_prometheus_federator
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Comment on PR with image details
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          meta-helm-project-operator: ${{ needs.build_dev_helm_project_operator.outputs.tags }}
+          meta-prometheus-federator: ${{ needs.build_dev_prometheus_federator.outputs.tags }}
+          prNumber: ${{ inputs.pr_number }}
+          shortSha: ${{ needs.prepare_pr_info.outputs.head_sha_short }}
+        with:
+          script: |
+            const prNumber = process.env.prNumber;
+            const images = [
+              {
+                name: 'Helm Project Operator',
+                key: 'meta-helm-project-operator',
+                url: `https://github.com/${{ github.repository }}/pkgs/container/prometheus-federator%2Fhelm-project-operator`
+              },
+              {
+                name: 'Prometheus Federator',
+                key: 'meta-prometheus-federator',
+                url: `https://github.com/${{ github.repository }}/pkgs/container/prometheus-federator`
+              }
+            ];
+
+            const prepareContainerImageText = function(imageInfo) {
+              const rawTags = process.env[imageInfo.key];
+              const tags = rawTags.split(' ')
+                .map(tag => `\t- \`${tag}\``)
+                .join('\n');
+
+              return `- [**${imageInfo.name}**](${imageInfo.url}) - Tags:\n${tags}`;
+            }
+            const commentBody = images
+              .map(prepareContainerImageText)
+              .join('\n');
+
+            const helmDebugValues = `#### Helm Debug Values:
+            \`\`\`yaml
+              image:
+                pullPolicy: Always
+                registry: ghcr.io
+                repository: rancher/prometheus-federator
+                tag: pr-${process.env.prNumber}-${process.env.shortSha}
+            \`\`\`\n`;
+            const fullCommentBody = `${commentBody}\n\n${helmDebugValues}`;
+
+            github.rest.issues.createComment({
+              issue_number: prNumber,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `### Images built for PR #${prNumber}:\n\n${fullCommentBody}`
+            });
