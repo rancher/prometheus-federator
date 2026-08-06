@@ -1,0 +1,34 @@
+name : Integration test
+
+permissions:
+  contents : read
+
+on:
+  workflow_call:
+  push:
+    branches:
+      - main
+      - release/v[0-9]+.(0|x)
+      - release/v[0-9]+.[0-9]+.[0-9]+
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+      - '.gitignore'
+      - 'CODEOWNERS'
+      - 'LICENSE'
+  pull_request:
+    paths-ignore:
+    - 'docs/**'
+    - '*.md'
+    - '.gitignore'
+    - 'CODEOWNERS'
+    - 'LICENSE'
+
+jobs:
+  test:
+    uses: rancher/prometheus-federator/.github/workflows/integration.yaml{{AUTOMATION_CORE_REF}}
+    with:
+      helm-version: '{{HELM_VERSION}}'
+      k3s-versions: '{{K3S_VERSIONS}}'
+      yq-checksum-amd64: '{{YQ_CHECKSUM_AMD64}}'
+      yq-checksum-arm64: '{{YQ_CHECKSUM_ARM64}}'
