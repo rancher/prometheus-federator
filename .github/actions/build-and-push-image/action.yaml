@@ -1,0 +1,70 @@
+name: Build and push image
+description: Builds a multi-arch image with buildx and pushes it to a registry, exposing the digest for provenance attestation in the caller
+
+inputs:
+  registry:
+    description: Registry to push to
+    required: false
+    default: ghcr.io
+  image:
+    description: 'Image path under the registry, e.g. "rancher/prometheus-federator/helm-project-operator"'
+    required: true
+  dockerfile:
+    description: Path to the Dockerfile to build
+    required: true
+  registry-username:
+    description: Username to log in to the registry with
+    required: false
+    default: ${{ github.actor }}
+  registry-password:
+    description: Password/token to log in to the registry with
+    required: true
+  tags:
+    description: Extra tags to pass to docker/metadata-action (one per line). Leave empty to use its default tagging rules.
+    required: false
+    default: ''
+  yq-checksum-amd64:
+    required: false
+    default: ''
+  yq-checksum-arm64:
+    required: false
+    default: ''
+
+outputs:
+  digest:
+    description: Digest of the pushed image
+    value: ${{ steps.build.outputs.digest }}
+  tags:
+    description: Tags applied to the pushed image
+    value: ${{ steps.meta.outputs.tags }}
+
+runs:
+  using: composite
+  steps:
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd # v4.0.0
+    - name: Log in to the registry
+      uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v4.1.0
+      with:
+        registry: ${{ inputs.registry }}
+        username: ${{ inputs.registry-username }}
+        password: ${{ inputs.registry-password }}
+    - name: Extract metadata (tags, labels)
+      id: meta
+      uses: docker/metadata-action@030e881283bb7a6894de51c315a6bfe6a94e05cf # v6.0.0
+      with:
+        images: ${{ inputs.registry }}/${{ inputs.image }}
+        tags: ${{ inputs.tags }}
+    - name: Build and push image
+      id: build
+      uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f # v7.1.0
+      with:
+        context: .
+        file: ${{ inputs.dockerfile }}
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        platforms: linux/amd64,linux/arm64
+        build-args: |
+          YQ_CHECKSUM_AMD64=${{ inputs.yq-checksum-amd64 }}
+          YQ_CHECKSUM_ARM64=${{ inputs.yq-checksum-arm64 }}
