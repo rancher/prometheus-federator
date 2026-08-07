@@ -1,0 +1,19 @@
+name: golangci-lint
+
+on:
+  pull_request:
+    paths-ignore:
+    - 'docs/**'
+    - '*.md'
+    - '.gitignore'
+    - 'CODEOWNERS'
+    - 'LICENSE'
+
+permissions:
+  contents: read
+
+jobs:
+  golangci:
+    uses: rancher/prometheus-federator/.github/workflows/lint.yaml{{AUTOMATION_CORE_REF}}
+    with:
+      helm-version: '{{HELM_VERSION}}'

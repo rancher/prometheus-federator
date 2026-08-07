@@ -1,0 +1,45 @@
+name: "[prom-fed] E2E CI"
+
+on:
+  workflow_call:
+  workflow_dispatch:
+    inputs:
+      debug:
+        description: "Enable debug logs"
+        required: false
+        default: "false"
+      k3s_version:
+        description: "Version of k3s to use for the underlying cluster, should exist in https://hub.docker.com/r/rancher/k3s/tags"
+        required: false
+  pull_request:
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+      - '.gitignore'
+      - 'CODEOWNERS'
+      - 'LICENSE'
+      - 'Makefile'
+  push:
+    branches:
+      - main
+      - release/v[0-9]+.x
+      - release/v[0-9]+.[0-9]+.[0-9]+
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+      - '.gitignore'
+      - 'CODEOWNERS'
+      - 'LICENSE'
+
+permissions:
+  contents: write
+
+jobs:
+  e2e-prometheus-federator:
+    uses: rancher/prometheus-federator/.github/workflows/prom-fed-e2e-ci.yaml{{AUTOMATION_CORE_REF}}
+    with:
+      helm-version: '{{HELM_VERSION}}'
+      debug: ${{ inputs.debug }}
+      k3s_version: ${{ inputs.k3s_version }}
+      yq-checksum-amd64: '{{YQ_CHECKSUM_AMD64}}'
+      yq-checksum-arm64: '{{YQ_CHECKSUM_ARM64}}'
