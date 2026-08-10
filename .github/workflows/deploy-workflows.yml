@@ -1,0 +1,134 @@
+name: Deploy Workflows
+
+on:
+  workflow_dispatch:
+    inputs:
+      targetBranch:
+        description: "The branch to deploy workflows to (e.g., 'main', 'release/v6.x')"
+        required: true
+        type: string
+      helmVersion:
+        description: "Helm version this branch installs (e.g., 'v4.2.0', 'v3.19.5')"
+        required: true
+        type: string
+      k3sVersions:
+        description: "JSON array of K3S versions for integration tests (e.g., '[\"v1.34.7-k3s1\", \"v1.36.0-k3s1\"]')"
+        required: true
+        type: string
+      yqChecksumAmd64:
+        description: "sha256 checksum of the amd64 yq binary this branch's Dockerfiles expect (only release/v6.x+ needs this)"
+        required: false
+        default: ""
+        type: string
+      yqChecksumArm64:
+        description: "sha256 checksum of the arm64 yq binary this branch's Dockerfiles expect (only release/v6.x+ needs this)"
+        required: false
+        default: ""
+        type: string
+      automationCoreRef:
+        description: "Automation-core ref to pin the deployed workflows to (default: 'automation-core', or a tag like 'v1')"
+        required: false
+        default: "automation-core"
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout automation-core
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: ${{ github.ref }}
+          persist-credentials: false
+          path: automation-core
+
+      - name: Checkout target branch
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: ${{ inputs.targetBranch }}
+          persist-credentials: false
+          path: target-repo
+
+      - name: Create branch, apply templates, and create PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TARGET_BRANCH: ${{ inputs.targetBranch }}
+          HELM_VERSION: ${{ inputs.helmVersion }}
+          K3S_VERSIONS: ${{ inputs.k3sVersions }}
+          YQ_CHECKSUM_AMD64: ${{ inputs.yqChecksumAmd64 }}
+          YQ_CHECKSUM_ARM64: ${{ inputs.yqChecksumArm64 }}
+          AUTOMATION_CORE_REF: ${{ inputs.automationCoreRef }}
+        run: |
+          set -euo pipefail
+
+          DEPLOY_BRANCH="deploy-workflows-$(date +%Y-%m-%d-%H-%M-%S)"
+
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+
+          # Create staging directory for templates
+          STAGING_DIR=$(mktemp -d)
+
+          for tmpl in ci lint integration prom-fed-e2e-ci pr-debug-publish release; do
+            sed \
+              -e "s|{{HELM_VERSION}}|${HELM_VERSION}|g" \
+              -e "s|{{K3S_VERSIONS}}|${K3S_VERSIONS}|g" \
+              -e "s|{{YQ_CHECKSUM_AMD64}}|${YQ_CHECKSUM_AMD64}|g" \
+              -e "s|{{YQ_CHECKSUM_ARM64}}|${YQ_CHECKSUM_ARM64}|g" \
+              -e "s|{{AUTOMATION_CORE_REF}}|@${AUTOMATION_CORE_REF}|g" \
+              "automation-core/workflow-templates/${tmpl}.yaml.tmpl" \
+              > "${STAGING_DIR}/${tmpl}.yaml"
+          done
+
+          echo "Validating generated workflow files..."
+          for workflow in "${STAGING_DIR}"/*.yaml; do
+            echo "  Validating $(basename "$workflow")..."
+            yq eval '.' "$workflow" > /dev/null || {
+              echo "ERROR: Invalid YAML in $(basename "$workflow")"
+              exit 1
+            }
+          done
+          echo "All workflow files are valid YAML"
+
+          cd target-repo
+          git checkout -b "${DEPLOY_BRANCH}"
+
+          mkdir -p .github/workflows
+          cp "${STAGING_DIR}"/*.yaml .github/workflows/
+          git add .github/workflows/
+
+          if git diff --cached --quiet; then
+            echo "No changes to commit - workflows are already up to date"
+            exit 0
+          fi
+
+          bash ../automation-core/.github/scripts/generate-commit-msg.sh \
+            "${TARGET_BRANCH}" "${HELM_VERSION}" "${K3S_VERSIONS}" "${AUTOMATION_CORE_REF}" "${GITHUB_SHA}" > /tmp/commit_msg
+
+          git commit -F /tmp/commit_msg
+          git push origin "${DEPLOY_BRANCH}"
+
+          bash ../automation-core/.github/scripts/generate-pr-body.sh \
+            "${TARGET_BRANCH}" "${HELM_VERSION}" "${K3S_VERSIONS}" "${AUTOMATION_CORE_REF}" "${GITHUB_SHA}" "${GITHUB_ACTOR}" > /tmp/pr_body
+
+          CREATED_PR=$(gh pr create \
+            -R "${{ github.repository }}" \
+            --title "Deploy automation-core workflows to ${TARGET_BRANCH}" \
+            --body-file /tmp/pr_body \
+            --base "${TARGET_BRANCH}" \
+            --head "${DEPLOY_BRANCH}")
+
+          {
+            echo "## Deployment Summary"
+            echo ""
+            echo "**Target branch**: \`${TARGET_BRANCH}\`"
+            echo "**Helm version**: \`${HELM_VERSION}\`"
+            echo "**K3S versions**: \`${K3S_VERSIONS}\`"
+            echo "**Automation-core ref**: \`@${AUTOMATION_CORE_REF}\`"
+            echo ""
+            echo "**Created PR**: ${CREATED_PR}"
+          } >> "$GITHUB_STEP_SUMMARY"
