@@ -21,7 +21,7 @@ PACKAGE_YAML="$CHARTS_DIR/packages/$PACKAGE/package.yaml"
 
 # Extract old prometheus-federator version from current URL and strip any prerelease suffix
 CURRENT_URL=$(yq e '.url' "$PACKAGE_YAML")
-OLD_VERSION=$(echo "$CURRENT_URL" | sed 's|.*/${CHART_NAME}-||' | sed 's|\.tgz$||')
+OLD_VERSION=$(echo "$CURRENT_URL" | sed "s|.*/${CHART_NAME}-||" | sed 's|\.tgz$||')
 OLD_BASE=$(echo "$OLD_VERSION" | sed 's/-.*//')
 
 # New base version (strip prerelease)

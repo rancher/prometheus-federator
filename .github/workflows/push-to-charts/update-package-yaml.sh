@@ -33,7 +33,7 @@ NEW_URL="${PF_REPO_URL}/releases/download/${TAG}/${CHART_NAME}-${TAG_NO_V}.tgz"
 # --- Compute new charts version ---
 # Read old prometheus-federator version from the current URL and strip any prerelease suffix
 CURRENT_URL=$(yq e '.url' "$PACKAGE_YAML")
-OLD_VERSION=$(echo "$CURRENT_URL" | sed 's|.*/${CHART_NAME}-||' | sed 's|\.tgz$||')
+OLD_VERSION=$(echo "$CURRENT_URL" | sed "s|.*/${CHART_NAME}-||" | sed 's|\.tgz$||')
 OLD_BASE=$(echo "$OLD_VERSION" | sed 's/-.*//')
 
 # New base version (strip prerelease)
