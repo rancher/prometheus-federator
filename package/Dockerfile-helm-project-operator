@@ -1,7 +1,7 @@
 # Image that provides cross compilation tooling.
 FROM --platform=$BUILDPLATFORM rancher/mirrored-tonistiigi-xx:1.6.1 AS xx
 
-FROM registry.suse.com/bci/golang:1.26 AS builder
+FROM registry.suse.com/bci/golang:1.27 AS builder
 ARG TARGETARCH
 
 ENV BUILD_TARGET="helm-project-operator"
@@ -19,7 +19,7 @@ RUN go mod download
 COPY . .
 RUN make build
 
-FROM registry.suse.com/bci/bci-micro:latest
+FROM registry.suse.com/bci/bci-micro:16.1
 RUN echo 'helmprojectoperator:x:1000:1000::/home/helmprojectoperator:/bin/bash' >> /etc/passwd && \
     echo 'helmprojectoperator:x:1000:' >> /etc/group && \
     mkdir /home/helmprojectoperator && \
