@@ -1,7 +1,9 @@
+ARG GO_IMAGE=rancher/hardened-build-base:v1.26.7b2
+
 # Image that provides cross compilation tooling.
 FROM --platform=$BUILDPLATFORM rancher/mirrored-tonistiigi-xx:1.6.1 AS xx
 
-FROM rancher/hardened-build-base:v1.26.7b2 AS builder
+FROM ${GO_IMAGE} AS builder
 
 # Allow chart version config
 ARG TARGETPLATFORM
