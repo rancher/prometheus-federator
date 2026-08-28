@@ -1,7 +1,7 @@
 # Image that provides cross compilation tooling.
-FROM --platform=$BUILDPLATFORM rancher/mirrored-tonistiigi-xx:1.5.0 AS xx
+FROM --platform=$BUILDPLATFORM rancher/mirrored-tonistiigi-xx:1.6.1 AS xx
 
-FROM registry.suse.com/bci/golang:1.25 AS builder
+FROM rancher/hardened-build-base:v1.26.7b2 AS builder
 
 # Allow chart version config
 ARG TARGETPLATFORM
@@ -13,7 +13,7 @@ ARG YQ_VERSION='v4.25.1'
 ENV RANCHER_PROJECT_MONITORING=$RANCHER_PROJECT_MONITORING TAG=$TAG REPO=$REPO
 
 WORKDIR /usr/src/app
-RUN zypper -n install git vim less file curl wget patch helm jq
+RUN apk add git vim less file curl wget patch helm jq
 RUN wget https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_${TARGETARCH} -O /usr/bin/yq \
     && chmod +x /usr/bin/yq
 COPY go.mod go.sum ./
@@ -21,7 +21,7 @@ RUN go mod download
 COPY . .
 RUN ./scripts/build
 
-FROM registry.suse.com/bci/bci-micro:latest
+FROM registry.suse.com/bci/bci-micro:16.0
 RUN echo 'prometheus:x:1000:1000::/home/prometheus:/bin/bash' >> /etc/passwd && \
     echo 'prometheus:x:1000:' >> /etc/group && \
     mkdir /home/prometheus && \
