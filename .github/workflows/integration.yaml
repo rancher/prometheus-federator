@@ -26,7 +26,7 @@ on:
 
 jobs:
   test:
-    uses: rancher/prometheus-federator/.github/workflows/integration.yaml@automation-core
+    uses: rancher/prometheus-federator/.github/workflows/integration.yaml@35be137f458fb12ba55466e58a60ecbbe94fa2a7 # automation-core
     with:
       helm-version: 'v4.2.0'
       k3s-versions: '["v1.34.7-k3s1","v1.36.0-k3s1"]'

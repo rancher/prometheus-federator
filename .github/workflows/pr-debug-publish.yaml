@@ -17,6 +17,6 @@ permissions:
 
 jobs:
   produce-pr-images:
-    uses: rancher/prometheus-federator/.github/workflows/pr-debug-publish.yaml@automation-core
+    uses: rancher/prometheus-federator/.github/workflows/pr-debug-publish.yaml@35be137f458fb12ba55466e58a60ecbbe94fa2a7 # automation-core
     with:
       pr_number: ${{ inputs.pr_number }}
