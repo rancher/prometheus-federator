@@ -16,8 +16,8 @@ require (
 	github.com/k3s-io/helm-controller v0.16.6
 	github.com/kralicky/kmatch v0.0.0-20240603031752-4aaff7842056
 	github.com/novln/docker-parser v1.0.0
-	github.com/onsi/ginkgo/v2 v2.32.0
-	github.com/onsi/gomega v1.42.1
+	github.com/onsi/ginkgo/v2 v2.32.1
+	github.com/onsi/gomega v1.43.0
 	github.com/rancher/lasso v0.2.9
 	github.com/rancher/wrangler/v3 v3.7.1
 	github.com/samber/lo v1.47.0
