@@ -46,16 +46,33 @@ jobs:
           persist-credentials: false
           path: automation-core
 
+      - name: Read GitHub App Credentials from Vault
+        uses: rancher-eio/read-vault-secrets@0da85151ad1f19ed7986c41587e45aac1ace74b6 # v3
+        with:
+          secrets: |
+            secret/data/github/repo/${{ github.repository }}/github/workflow-dispatcher/app-credentials appId | APP_ID ;
+            secret/data/github/repo/${{ github.repository }}/github/workflow-dispatcher/app-credentials privateKey | PRIVATE_KEY ;
+
+      - name: Generate GitHub App Token
+        id: generate_token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          app-id: ${{ env.APP_ID }}
+          private-key: ${{ env.PRIVATE_KEY }}
+          repositories: ${{ github.event.repository.name }}
+
       - name: Checkout target branch
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           ref: ${{ inputs.targetBranch }}
-          persist-credentials: false
+          token: ${{ steps.generate_token.outputs.token }}
+          persist-credentials: true
           path: target-repo
 
       - name: Create branch, apply templates, and create PR
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ steps.generate_token.outputs.token }}
+          APP_USER: ${{ steps.generate_token.outputs.app-slug }}[bot]
           TARGET_BRANCH: ${{ inputs.targetBranch }}
           HELM_VERSION: ${{ inputs.helmVersion }}
           K3S_VERSIONS: ${{ inputs.k3sVersions }}
@@ -67,8 +84,8 @@ jobs:
 
           DEPLOY_BRANCH="deploy-workflows-$(date +%Y-%m-%d-%H-%M-%S)"
 
-          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git config --global user.name "github-actions[bot]"
+          git config --global user.email "${APP_USER}@users.noreply.github.com"
+          git config --global user.name "${APP_USER}"
 
           # Create staging directory for templates
           STAGING_DIR=$(mktemp -d)
