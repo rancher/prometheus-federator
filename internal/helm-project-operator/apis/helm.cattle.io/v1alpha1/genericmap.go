@@ -1,7 +1,7 @@
 package v1alpha1
 
 import (
-	"go.yaml.in/yaml/v2"
+	"go.yaml.in/yaml/v3"
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
