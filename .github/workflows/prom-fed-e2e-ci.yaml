@@ -16,7 +16,7 @@ on:
       - 'docs/**'
       - '*.md'
       - '.gitignore'
-      - '../CODEOWNERS'
+      - 'CODEOWNERS'
       - 'LICENSE'
       - 'Makefile'
   push:
@@ -28,7 +28,7 @@ on:
       - 'docs/**'
       - '*.md'
       - '.gitignore'
-      - '../CODEOWNERS'
+      - 'CODEOWNERS'
       - 'LICENSE'
 
 permissions:
@@ -36,8 +36,10 @@ permissions:
 
 jobs:
   e2e-prometheus-federator:
-    uses: rancher/prometheus-federator/.github/workflows/prom-fed-e2e-ci.yaml@35be137f458fb12ba55466e58a60ecbbe94fa2a7 # automation-core
+    uses: rancher/prometheus-federator/.github/workflows/prom-fed-e2e-ci.yaml@automation-core
     with:
       helm-version: 'v4.2.0'
       debug: ${{ inputs.debug }}
       k3s_version: ${{ inputs.k3s_version }}
+      yq-checksum-amd64: ''
+      yq-checksum-arm64: ''
