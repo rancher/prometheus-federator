@@ -83,6 +83,18 @@ jobs:
         run: |
           set -euo pipefail
 
+          strip_quotes() {
+            local val="$1"
+            val="${val#\'}"; val="${val%\'}"
+            val="${val#\"}"; val="${val%\"}"
+            printf '%s' "$val"
+          }
+          HELM_VERSION="$(strip_quotes "$HELM_VERSION")"
+          K3S_VERSIONS="$(strip_quotes "$K3S_VERSIONS")"
+          YQ_CHECKSUM_AMD64="$(strip_quotes "$YQ_CHECKSUM_AMD64")"
+          YQ_CHECKSUM_ARM64="$(strip_quotes "$YQ_CHECKSUM_ARM64")"
+          AUTOMATION_CORE_REF="$(strip_quotes "$AUTOMATION_CORE_REF")"
+
           DEPLOY_BRANCH="deploy-workflows-$(date +%Y-%m-%d-%H-%M-%S)"
 
           git config --global user.email "${APP_USER}@users.noreply.github.com"
