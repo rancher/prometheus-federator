@@ -4,26 +4,8 @@ on:
   workflow_dispatch:
     inputs:
       targetBranch:
-        description: "The branch to deploy workflows to (e.g., 'main', 'release/v6.x')"
+        description: "The branch to deploy workflows to (e.g., 'main', 'release/v6.x'). Must have an entry in deploy-config.yaml"
         required: true
-        type: string
-      helmVersion:
-        description: "Helm version this branch installs (e.g., 'v4.2.0', 'v3.19.5')"
-        required: true
-        type: string
-      k3sVersions:
-        description: "JSON array of K3S versions for integration tests (e.g., '[\"v1.34.7-k3s1\", \"v1.36.0-k3s1\"]')"
-        required: true
-        type: string
-      yqChecksumAmd64:
-        description: "sha256 checksum of the amd64 yq binary this branch's Dockerfiles expect (only release/v6.x+ needs this)"
-        required: false
-        default: ""
-        type: string
-      yqChecksumArm64:
-        description: "sha256 checksum of the arm64 yq binary this branch's Dockerfiles expect (only release/v6.x+ needs this)"
-        required: false
-        default: ""
         type: string
       automationCoreRef:
         description: "Automation-core ref to pin the deployed workflows to (default: 'automation-core', or a tag like 'v1')"
@@ -75,10 +57,6 @@ jobs:
           GH_TOKEN: ${{ steps.generate_token.outputs.token }}
           APP_USER: ${{ steps.generate_token.outputs.app-slug }}[bot]
           TARGET_BRANCH: ${{ inputs.targetBranch }}
-          HELM_VERSION: ${{ inputs.helmVersion }}
-          K3S_VERSIONS: ${{ inputs.k3sVersions }}
-          YQ_CHECKSUM_AMD64: ${{ inputs.yqChecksumAmd64 }}
-          YQ_CHECKSUM_ARM64: ${{ inputs.yqChecksumArm64 }}
           AUTOMATION_CORE_REF: ${{ inputs.automationCoreRef }}
         run: |
           set -euo pipefail
@@ -89,11 +67,18 @@ jobs:
             val="${val#\"}"; val="${val%\"}"
             printf '%s' "$val"
           }
-          HELM_VERSION="$(strip_quotes "$HELM_VERSION")"
-          K3S_VERSIONS="$(strip_quotes "$K3S_VERSIONS")"
-          YQ_CHECKSUM_AMD64="$(strip_quotes "$YQ_CHECKSUM_AMD64")"
-          YQ_CHECKSUM_ARM64="$(strip_quotes "$YQ_CHECKSUM_ARM64")"
+          TARGET_BRANCH="$(strip_quotes "$TARGET_BRANCH")"
           AUTOMATION_CORE_REF="$(strip_quotes "$AUTOMATION_CORE_REF")"
+
+          CONFIG_FILE="automation-core/deploy-config.yaml"
+          if [ "$(yq eval ".[\"${TARGET_BRANCH}\"]" "$CONFIG_FILE")" = "null" ]; then
+            echo "ERROR: no entry for branch '${TARGET_BRANCH}' in deploy-config.yaml"
+            exit 1
+          fi
+          HELM_VERSION=$(yq eval ".[\"${TARGET_BRANCH}\"].helmVersion" "$CONFIG_FILE")
+          K3S_VERSIONS=$(yq eval -o=json -I=0 ".[\"${TARGET_BRANCH}\"].k3sVersions" "$CONFIG_FILE")
+          YQ_CHECKSUM_AMD64=$(yq eval ".[\"${TARGET_BRANCH}\"].yqChecksumAmd64 // \"\"" "$CONFIG_FILE")
+          YQ_CHECKSUM_ARM64=$(yq eval ".[\"${TARGET_BRANCH}\"].yqChecksumArm64 // \"\"" "$CONFIG_FILE")
 
           DEPLOY_BRANCH="deploy-workflows-$(date +%Y-%m-%d-%H-%M-%S)"
 
