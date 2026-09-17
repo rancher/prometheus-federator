@@ -41,3 +41,5 @@ jobs:
       helm-version: 'v3.19.5'
       debug: ${{ inputs.debug }}
       k3s_version: ${{ inputs.k3s_version }}
+      yq-checksum-amd64: ''
+      yq-checksum-arm64: ''

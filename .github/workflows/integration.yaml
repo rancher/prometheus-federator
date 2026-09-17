@@ -30,3 +30,5 @@ jobs:
     with:
       helm-version: 'v3.19.5'
       k3s-versions: '["v1.31.9-k3s1","v1.33.1-k3s1"]'
+      yq-checksum-amd64: ''
+      yq-checksum-arm64: ''
