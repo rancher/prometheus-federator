@@ -25,7 +25,7 @@ jobs:
     uses: rancher/prometheus-federator/.github/workflows/integration.yaml@automation-core
     with:
       helm-version: 'v4.2.0'
-      k3s-versions: '["v1.34.7-k3s1", "v1.36.0-k3s1"]'
+      k3s-versions: '["v1.34.7-k3s1","v1.36.0-k3s1"]'
       yq-checksum-amd64: ''
       yq-checksum-arm64: ''
     permissions:
