@@ -10,117 +10,97 @@ env:
   PUBLIC_REGISTRY: docker.io
   REPO: rancher
   IMAGE_NAME: 'prometheus-federator'
-  YQ_VERSION: v4.44.3
 
 jobs:
   ci:
-    uses: ./.github/workflows/ci.yaml
+    uses: rancher/prometheus-federator/.github/workflows/ci.yaml@automation-core
+    with:
+      helm-version: 'v3.19.5'
+      yq-checksum-amd64: ''
+      yq-checksum-arm64: ''
+    permissions:
+      contents: read
+
   integration:
-    uses: ./.github/workflows/integration.yaml
+    uses: rancher/prometheus-federator/.github/workflows/integration.yaml@automation-core
+    with:
+      helm-version: 'v3.19.5'
+      k3s-versions: '["v1.32.9-k3s1","v1.34.1-k3s1"]'
+      yq-checksum-amd64: ''
+      yq-checksum-arm64: ''
+    permissions:
+      contents: read
+
   e2e:
-    uses : ./.github/workflows/prom-fed-e2e-ci.yaml
+    uses: rancher/prometheus-federator/.github/workflows/prom-fed-e2e-ci.yaml@automation-core
+    with:
+      helm-version: 'v3.19.5'
+      yq-checksum-amd64: ''
+      yq-checksum-arm64: ''
+    permissions:
+      contents: write
+
   goreleaser:
     name: Build go binaries and helm chart
+    needs: [ ci, integration ]
     runs-on: ${{ github.repository == 'rancher/prometheus-federator' && format('runs-on,image=ubuntu22-full-x64,runner=4cpu-linux-x64,run-id={0}', github.run_id) || 'ubuntu-latest' }}
-    needs: [
-      ci,
-      integration,
-    ]
-    env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      GORELEASER_CURRENT_TAG: ${{ github.ref_name }}
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - uses: rancher/prometheus-federator/.github/actions/run-goreleaser@automation-core
         with:
-          fetch-depth: 0
-      - run: git fetch --force --tags
-      - name : setup Go
-        uses : actions/setup-go@f111f3307d8850f501ac008e886eec1fd1932a34 # v5
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          helm-version: 'v3.19.5'
+
+      # SLSA attestation stays on the release branch (OIDC binding requirement)
+      - name: Attest build provenance
+        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
         with:
-          go-version: 1.22
-      - name: Check if yq is installed
-        id: check_yq
-        run: |
-          if ! command -v yq &> /dev/null; then
-            echo "yq not found, installing..."
-            echo "::set-output name=install_yq::true"
-          else
-            echo "yq is already installed"
-            echo "::set-output name=install_yq::false"
-          fi
-      - name : Install YQ
-        if: steps.check_yq.outputs.install_yq == 'true'
-        run: |
-          sudo wget https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_amd64 -O /usr/bin/yq && sudo chmod +x /usr/bin/yq;
-      - uses: azure/setup-kubectl@3e0aec4d80787158d308d7b364cb1b702e7feb7f # v4
-      - name : Install helm
-        uses: azure/setup-helm@b9e51907a09c216f16ebe8536097933489208112 # v4
-        with:
-          version: 'v3.19.5'
-      - name: Prepare helm charts (needed for build)
-        run: |
-          GIT_TAG=${{ github.ref_name }} BUILD_TARGET=prometheus-federator make package-helm && echo "pf: release chart prepared"
-          BUILD_TARGET=prometheus-federator make build-chart && echo "pf: embedded project-monitoring chart prepared"
-      - uses: goreleaser/goreleaser-action@90a3faa9d0182683851fbfa97ca1a2cb983bfca3 # v6
-        with:
-          distribution: goreleaser
-          version: latest
-          args: release --clean
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GORELEASER_CURRENT_TAG: ${{ github.ref_name }}
+          subject-path: dist/prometheus-federator-*, dist/checksums.txt, build/charts/*.tgz
+
   push-dev-images:
-    name : Build and push helm-locker & Helm-Project-Operator images
+    name: Build and push Helm-Project-Operator image
+    needs: [ ci, integration ]
     runs-on: ${{ github.repository == 'rancher/prometheus-federator' && format('runs-on,image=ubuntu22-full-x64,runner=4cpu-linux-x64,run-id={0}', github.run_id) || 'ubuntu-latest' }}
-    needs: [
-      ci,
-      integration,
-    ]
     permissions:
       contents: read
       packages: write
       attestations: write
       id-token: write
     steps:
-      - name : Checkout repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2 # v3
-      - name: Log in to the Container registry
-        uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Build and push Helm-Project-Operator image
+        id: build
+        uses: rancher/prometheus-federator/.github/actions/build-and-push-image@automation-core
         with:
-          registry: ${{ env.GHCR_REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Extract metadata (tags, labels) for Helm-Project-Operator image
-        id: meta-hpo
-        uses: docker/metadata-action@902fa8ec7d6ecbf8d84d538b9b233a880e428804 # v5
+          image: ${{ env.REPO }}/${{ env.IMAGE_NAME }}/helm-project-operator
+          dockerfile: ./package/Dockerfile-helm-project-operator
+          registry-password: ${{ secrets.GITHUB_TOKEN }}
+          yq-checksum-amd64: ''
+          yq-checksum-arm64: ''
+
+      # SLSA attestation stays on the release branch (OIDC binding requirement)
+      - name: Attest build provenance
+        uses: actions/attest-build-provenance@0f67c3f4856b2e3261c31976d6725780e5e4c373 # v4.1.1
         with:
-          images: ${{ env.GHCR_REGISTRY }}/${{ env.REPO }}/${{ env.IMAGE_NAME }}/helm-project-operator
-      - name: Build Helm-Project-Operator image
-        uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4 # v6
-        with:
-          context: .
-          file: ./package/Dockerfile-helm-project-operator
-          push: true
-          tags: ${{ steps.meta-hpo.outputs.tags }}
-          labels: ${{ steps.meta-hpo.outputs.labels }}
-          platforms: linux/amd64,linux/arm64
+          subject-name: ${{ env.GHCR_REGISTRY }}/${{ env.REPO }}/${{ env.IMAGE_NAME }}/helm-project-operator
+          subject-digest: ${{ steps.build.outputs.digest }}
+          push-to-registry: true
+
   publish-images:
     name: Publish prometheus-federator image
     runs-on: ubuntu-latest
     continue-on-error: true
-    needs: [
-      ci,
-      integration,
-      e2e,
-    ]
+    needs: [ ci, integration, e2e ]
     permissions:
-      contents : read
+      contents: read
       id-token: write
     steps:
-      - name : Checkout repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: Prepare helm charts (needed for build)
         run: |
           GIT_TAG=${{ github.ref_name }} BUILD_TARGET=prometheus-federator make package-helm && echo "pf: release chart prepared"
@@ -135,14 +115,12 @@ jobs:
             secret/data/github/repo/${{ github.repository }}/rancher-prime-stg-registry/credentials password |  PRIME_STG_REGISTRY_PASSWORD;
             secret/data/github/repo/${{ github.repository }}/dockerhub/rancher/credentials username | DOCKER_USERNAME ;
             secret/data/github/repo/${{ github.repository }}/dockerhub/rancher/credentials password | DOCKER_PASSWORD
-        # This encapsulates: login, qemu, build/push
       - name: Build and push prometheus-federator image (dockerhub and prime stg)
-        uses: rancher/ecm-distro-tools/actions/publish-image@575bb831c67edd950bfedb59d41dd127bd0005d6 # v0.65.2
+        uses: rancher/ecm-distro-tools/actions/publish-image@a7a867a6376bf4a1cee397558f3c85393769f069 # v0.69.4
         with:
           image: ${{ env.IMAGE_NAME }}
           tag: ${{ github.ref_name }}
           identity-registry: ${{ env.PRIME_STG_REGISTRY }}
-
           public-registry: ${{ env.PUBLIC_REGISTRY }}
           public-repo: ${{ env.REPO }}
           public-username: ${{ env.DOCKER_USERNAME || vars.DOCKER_USERNAME || github.repository_owner }}
@@ -153,3 +131,26 @@ jobs:
           prime-repo: ${{ env.REPO }}
           prime-username: ${{ env.PRIME_STG_REGISTRY_USERNAME }}
           prime-password: ${{ env.PRIME_STG_REGISTRY_PASSWORD }}
+      - name: Check SemVer Characteristics
+        id: semver_check
+        run: bash ./.github/scripts/check-semver "${{ github.ref_name }}" >> "$GITHUB_OUTPUT"
+      - name: "Read prime prod secrets"
+        if: ${{github.repository == 'rancher/prometheus-federator' && steps.semver_check.outputs.HAS_PRERELEASE == 'false'}}
+        uses: rancher-eio/read-vault-secrets@0da85151ad1f19ed7986c41587e45aac1ace74b6 # v3
+        with:
+          secrets: |
+            secret/data/github/repo/${{ github.repository }}/rancher-prime-registry/credentials registry |  PRIME_REGISTRY;
+            secret/data/github/repo/${{ github.repository }}/rancher-prime-registry/credentials username |  PRIME_REGISTRY_USERNAME;
+            secret/data/github/repo/${{ github.repository }}/rancher-prime-registry/credentials password |  PRIME_REGISTRY_PASSWORD;
+      - name: Build and push prometheus-federator image (prod)
+        if: ${{github.repository == 'rancher/prometheus-federator' && steps.semver_check.outputs.HAS_PRERELEASE == 'false'}}
+        uses: rancher/ecm-distro-tools/actions/publish-image@a7a867a6376bf4a1cee397558f3c85393769f069 # v0.69.4
+        with:
+          image: ${{ env.IMAGE_NAME }}
+          tag: ${{ github.ref_name }}
+          push-to-public: false
+          push-to-prime: true
+          prime-registry: ${{ env.PRIME_REGISTRY }}
+          prime-repo: rancher
+          prime-username: ${{ env.PRIME_REGISTRY_USERNAME }}
+          prime-password: ${{ env.PRIME_REGISTRY_PASSWORD }}
