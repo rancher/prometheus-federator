@@ -16,8 +16,8 @@ require (
 	github.com/k3s-io/helm-controller v0.16.6
 	github.com/kralicky/kmatch v0.0.0-20240603031752-4aaff7842056
 	github.com/novln/docker-parser v1.0.0
-	github.com/onsi/ginkgo/v2 v2.32.1
-	github.com/onsi/gomega v1.43.0
+	github.com/onsi/ginkgo/v2 v2.33.0
+	github.com/onsi/gomega v1.43.1
 	github.com/rancher/lasso v0.2.9
 	github.com/rancher/wrangler/v3 v3.7.1
 	github.com/samber/lo v1.47.0
@@ -27,7 +27,7 @@ require (
 	github.com/stretchr/testify v1.11.1
 	go.uber.org/mock v0.6.0
 	go.yaml.in/yaml/v2 v2.4.3
-	go.yaml.in/yaml/v3 v3.0.4
+	go.yaml.in/yaml/v3 v3.0.5
 	golang.org/x/mod v0.40.0
 	golang.org/x/text v0.41.0
 	helm.sh/helm/v4 v4.2.0
