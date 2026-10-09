@@ -8,9 +8,9 @@ import (
 	"strings"
 	"time"
 
-	. "github.com/kralicky/kmatch"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	. "github.com/rancher/prometheus-federator/internal/test/k8smatch"
 	"golang.org/x/mod/semver"
 
 	corev1 "k8s.io/api/core/v1"
