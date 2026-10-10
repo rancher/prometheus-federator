@@ -38,7 +38,7 @@ jobs:
   e2e-prometheus-federator:
     uses: rancher/prometheus-federator/.github/workflows/prom-fed-e2e-ci.yaml@automation-core
     with:
-      helm-version: 'v4.2.0'
+      helm-version: 'v4.3.0'
       debug: ${{ inputs.debug }}
       k3s_version: ${{ inputs.k3s_version }}
       yq-checksum-amd64: ''
