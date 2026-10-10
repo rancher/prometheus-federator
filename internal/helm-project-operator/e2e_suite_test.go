@@ -19,7 +19,7 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 
 	env "github.com/caarlos0/env/v11"
-	"github.com/kralicky/kmatch"
+	"github.com/rancher/prometheus-federator/internal/test/k8smatch"
 	"k8s.io/client-go/kubernetes"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
@@ -98,5 +98,5 @@ var _ = BeforeSuite(func() {
 	v1alpha1.AddToScheme(k8sClient.Scheme())
 	k3shelmv1.AddToScheme(k8sClient.Scheme())
 	lockerv1alpha1.AddToScheme(k8sClient.Scheme())
-	kmatch.SetDefaultObjectClient(k8sClient)
+	k8smatch.SetDefaultObjectClient(k8sClient)
 })
