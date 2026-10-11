@@ -6,7 +6,6 @@ replace (
 	gopkg.in/yaml.v2 v2.2.2 => go.yaml.in/yaml/v2 v2.2.2
 	gopkg.in/yaml.v2 v2.2.8 => go.yaml.in/yaml/v2 v2.2.8
 	gopkg.in/yaml.v2 v2.4.0 => go.yaml.in/yaml/v2 v2.4.0
-	gopkg.in/yaml.v3 => go.yaml.in/yaml/v3 v3.0.1
 )
 
 require (
