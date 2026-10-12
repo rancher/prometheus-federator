@@ -6,6 +6,6 @@ const (
 	K3sTestingMaxVersion            = "v1.32.1+k3s1"
 	K3sTestingMinVersion            = "v1.30.9+k3s1"
 	KuberlrVersion                  = "v4"
-	RancherMonitoringVersion        = "latest"
-	RancherProjectMonitoringVersion = "0.6.7"
+	RancherMonitoringVersion        = "106.1.4+up69.8.2-rancher.23"
+	RancherProjectMonitoringVersion = "0.6.8"
 )
