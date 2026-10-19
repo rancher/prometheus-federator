@@ -22,6 +22,7 @@ if ! kubectl wait --for=condition=complete --timeout="${KUBECTL_WAIT_TIMEOUT}" -
     echo "ERROR: Helm Install Job for Project Monitoring Stack never completed after ${KUBECTL_WAIT_TIMEOUT} seconds"
     exit 1
 fi
-kubectl logs job/helm-install-cattle-project-p-example-monitoring -n cattle-monitoring-system
+
+kubectl logs job/helm-install-cattle-project-p-example-monitoring -n cattle-monitoring-system || true
 
 echo "PASS: Adding ProjectHelmChart successfully installed Project Prometheus Stack"
