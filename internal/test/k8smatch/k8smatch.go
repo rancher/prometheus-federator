@@ -141,11 +141,11 @@ func (m imageMatcher) Match(target interface{}) (bool, error) {
 	return match, nil
 }
 
-func (m imageMatcher) FailureMessage(target interface{}) string {
+func (m imageMatcher) FailureMessage(_ interface{}) string {
 	return fmt.Sprintf("expected container to have image %s", m.image)
 }
 
-func (m imageMatcher) NegatedFailureMessage(target interface{}) string {
+func (m imageMatcher) NegatedFailureMessage(_ interface{}) string {
 	return fmt.Sprintf("expected container not to have image %s", m.image)
 }
 
