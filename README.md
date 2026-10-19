@@ -5,13 +5,13 @@ This repo contains a set of three interlinked projects:
 
 - The **Prometheus Federator** is a k8s Operator that manages deploying Project Monitoring Stacks.
 - The **Helm Project Operator** is a generic design for a Kubernetes Operator that acts on `ProjectHelmChart` CRs.
-  - This project depends heavily on and expands functionality of `helm-controller`. 
+  - This project depends heavily on and expands functionality of `helm-controller`.
 - **Helm Locker** is a Kubernetes operator that prevents resource drift on (i.e. "locks") Kubernetes objects that are tracked by Helm 3 releases.
 
 > [!NOTE]
 > The last two project (helm-project-operator and helm-locker) are not intended or supported for standalone use.
 
-For more info on _Helm Project Operator_, see the [dedicated README file](cmd/helm-project-operator/README.md).  
+For more info on _Helm Project Operator_, see the [dedicated README file](cmd/helm-project-operator/README.md).
 For more info on _Helm Locker_, see the [dedicated README file](cmd/helm-locker/README.md).
 
 ## Getting Started
@@ -24,6 +24,7 @@ This is the current branch strategy for `rancher/prometheus-federator`, it may c
 | Branch         | Tag      | Rancher                |
 |----------------|----------|------------------------|
 | `main`         | `head`   | `main` branch (`head`) |
+| `release/v7.x` | `v7.x.x` | `v2.15.x`              |
 | `release/v6.x` | `v6.x.x` | `v2.14.x`              |
 | `release/v5.x` | `v5.x.x` | `v2.13.x`              |
 | `release/v4.x` | `v4.x.x` | `v2.12.x`              |
@@ -40,7 +41,7 @@ Prometheus Federator is an operator (powered by [`rancher/helm-project-operator`
 - Default PrometheusRules and Grafana dashboards based on the collection of community-curated resources from [kube-prometheus](https://github.com/prometheus-operator/kube-prometheus/)
 - Default ServiceMonitors that watch the deployed Prometheus, Grafana, and Alertmanager
 
-A user can specify that they would like to deploy a Project Monitoring Stack by creating a `ProjectHelmChart` CR in a Project Registration Namespace (`cattle-project-<id>`) with `spec.helmApiVersion: monitoring.cattle.io/v1alpha1`, which will deploy the Project Monitoring Stack in a Project Release Namespace (`cattle-project-<id>-monitoring`). 
+A user can specify that they would like to deploy a Project Monitoring Stack by creating a `ProjectHelmChart` CR in a Project Registration Namespace (`cattle-project-<id>`) with `spec.helmApiVersion: monitoring.cattle.io/v1alpha1`, which will deploy the Project Monitoring Stack in a Project Release Namespace (`cattle-project-<id>-monitoring`).
 
 Cluster admins now need to provide an operator-controlled chart source for those project releases by setting `helmProjectOperator.chartSource.name`, `helmProjectOperator.chartSource.repo`, and `helmProjectOperator.chartSource.version` on the `prometheus-federator` chart (or the corresponding `--managed-chart-*` flags on the binary).
 
@@ -83,7 +84,7 @@ Check `build.yaml` on the target branch/tag you are curious about, then configur
 > We are starting our new Branch strategy officially in 2.10, the prior Rancher versions will receive updates to their new versions once cleared for backporting.
 > Once we fully adopt this branching and release process, we will remove this note.
 
-While this repository does maintain a standalone Helm repository for vanilla Helm users to consume directly, users of Rancher will see forked versions of these chart releases available on Rancher's Apps & Marketplace; the forked chart releases are maintained in the [`rancher/charts`](https://github.com/rancher/charts) repository on being released from a `dev-vX.X` branch to a `release-vX.X` branch, where `X.X` corresponds to the Rancher `${Major}.${Minor}` version that the users is using (i.e. Rancher `2.7`). 
+While this repository does maintain a standalone Helm repository for vanilla Helm users to consume directly, users of Rancher will see forked versions of these chart releases available on Rancher's Apps & Marketplace; the forked chart releases are maintained in the [`rancher/charts`](https://github.com/rancher/charts) repository on being released from a `dev-vX.X` branch to a `release-vX.X` branch, where `X.X` corresponds to the Rancher `${Major}.${Minor}` version that the users is using (i.e. Rancher `2.7`).
 
 **The chart in rancher/charts is generally the version that is intended for use in production since that is the chart that will be tested by Rancher's QA team.** Generally, these charts will match stable versions of charts available in this repository, so non-Rancher users **should** be able to safely use those versions in this repository for production use cases (at their own risk).
 
