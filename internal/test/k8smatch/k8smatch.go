@@ -105,11 +105,30 @@ func objectName(target interface{}) string {
 type nameMatcher struct{ name string }
 
 func (m nameMatcher) Match(target interface{}) (bool, error) {
-	obj, ok := target.(client.Object)
-	if !ok {
-		return false, fmt.Errorf("%w %T in HaveName (allowed types: client.Object)", ErrUnsupportedObjectType, target)
+	if obj, ok := target.(client.Object); ok {
+		return obj.GetName() == m.name, nil
 	}
-	return obj.GetName() == m.name, nil
+	val := reflect.ValueOf(target)
+	nameField := val.FieldByName("Name")
+	if nameField.IsValid() {
+		var name string
+		if nameField.Kind() == reflect.Pointer {
+			name = nameField.Elem().String()
+		} else {
+			name = nameField.String()
+		}
+		return name == m.name, nil
+	}
+	objectMetaField := val.FieldByName("ObjectMeta")
+	if objectMetaField.IsValid() {
+		nameField := objectMetaField.FieldByName("Name")
+		if nameField.IsValid() {
+			return nameField.String() == m.name, nil
+		}
+	}
+	return false, fmt.Errorf(
+		"%w %T in NameMatcher (allowed types: client.Object)",
+		ErrUnsupportedObjectType, target)
 }
 
 func (m nameMatcher) FailureMessage(target interface{}) string {
