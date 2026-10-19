@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"os/exec"
 
-	. "github.com/kralicky/kmatch"
 	"github.com/rancher/prometheus-federator/internal/helm-locker/apis/helm.cattle.io/v1alpha1"
 	lockercrd "github.com/rancher/prometheus-federator/internal/helm-locker/crd"
 	"github.com/rancher/prometheus-federator/internal/helm-locker/operator"
+	. "github.com/rancher/prometheus-federator/internal/test/k8smatch"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	. "github.com/onsi/ginkgo/v2"
