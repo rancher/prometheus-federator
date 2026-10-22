@@ -102,6 +102,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: Prepare helm charts (needed for build)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           GIT_TAG=${{ github.ref_name }} BUILD_TARGET=prometheus-federator make package-helm && echo "pf: release chart prepared"
           BUILD_TARGET=prometheus-federator make build-chart && echo "pf: embedded project-monitoring chart prepared"
