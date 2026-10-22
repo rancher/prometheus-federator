@@ -14,11 +14,22 @@ GITHUB_API="https://api.github.com/repos/$GITHUB_REPO/releases"
 # Fetch tag names, optionally including prereleases
 function fetch_kuberlr_releases() {
   local include_prerelease="$1"
+  local token="${GITHUB_TOKEN:-${GH_TOKEN:-}}"
+  local auth_header=()
+  if [[ -n "$token" ]]; then
+    auth_header=(-H "Authorization: Bearer $token")
+  fi
+
+  local response
+  if ! response=$(curl -sf "${auth_header[@]}" "$GITHUB_API"); then
+    echo "Failed to fetch releases from $GITHUB_API" >&2
+    return 1
+  fi
 
   if [[ "$include_prerelease" == "true" ]]; then
-    curl -s "$GITHUB_API" | jq -r '.[].tag_name'
+    printf '%s' "$response" | jq -r '.[].tag_name'
   else
-    curl -s "$GITHUB_API" | jq -r '.[] | select(.prerelease == false) | .tag_name'
+    printf '%s' "$response" | jq -r '.[] | select(.prerelease == false) | .tag_name'
   fi
 }
 
@@ -33,12 +44,25 @@ function find_latest_kuberlr_release() {
     return 1
   fi
 
-  fetch_kuberlr_releases "$include_prerelease" | \
+  local releases
+  if ! releases=$(fetch_kuberlr_releases "$include_prerelease"); then
+    return 1
+  fi
+
+  local latest
+  latest=$(echo "$releases" | \
     grep -E "^$prefix(\.|$)" | \
     sed 's/^v//' | \
     sort -Vr | \
     head -n1 | \
-    sed 's/^/v/'
+    sed 's/^/v/')
+
+  if [[ -z "$latest" ]]; then
+    echo "No matching kuberlr-kubectl release found for prefix '$prefix'" >&2
+    return 1
+  fi
+
+  echo "$latest"
 }
 
 # CLI interface - mainly for testing
