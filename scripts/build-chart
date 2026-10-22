@@ -33,7 +33,10 @@ if [ "$BUILD_TARGET" == "prometheus-federator" ]; then
   CHART_DESTINATION="./build/charts/${CHART}-${CHART_VERSION}.tgz"
 
   echo "RPM Chart fetched, now preparing for PromFed..."
-  KUBERLR_STABLE=$(find_latest_kuberlr_release $KUBERLR_TARGET)
+  if ! KUBERLR_STABLE=$(find_latest_kuberlr_release $KUBERLR_TARGET) || [[ -z "$KUBERLR_STABLE" ]]; then
+    echo "ERROR: Could not resolve a kuberlr-kubectl release for target '$KUBERLR_TARGET'" >&2
+    exit 1
+  fi
   echo "Kuberlr Stable Target: $KUBERLR_STABLE"
   echo "Will modify Project Monitoring to use desired kuberlr version."
   expression=".global.kubectl.tag = \"${KUBERLR_STABLE}\""
