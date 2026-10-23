@@ -20,7 +20,7 @@ require (
 	github.com/onsi/ginkgo/v2 v2.32.1
 	github.com/onsi/gomega v1.43.0
 	github.com/rancher/lasso v0.2.10
-	github.com/rancher/wrangler/v3 v3.7.2
+	github.com/rancher/wrangler/v3 v3.8.0-rc.3
 	github.com/samber/lo v1.47.0
 	github.com/sirupsen/logrus v1.10.2
 	github.com/spf13/cobra v1.10.2
@@ -38,7 +38,7 @@ require (
 	k8s.io/client-go v0.37.1
 	k8s.io/klog v1.0.0
 	k8s.io/utils v0.0.0-20260707023825-cf1189d6abe3
-	sigs.k8s.io/controller-runtime v0.25.1
+	sigs.k8s.io/controller-runtime v0.25.2
 )
 
 require (
