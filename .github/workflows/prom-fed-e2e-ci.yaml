@@ -36,7 +36,7 @@ permissions:
 
 jobs:
   e2e-prometheus-federator:
-    uses: rancher/prometheus-federator/.github/workflows/prom-fed-e2e-ci.yaml@automation-core
+    uses: rancher/prometheus-federator/.github/workflows/prom-fed-e2e-ci.yaml@67377410d8d2b9507402e8c51bb8f39a36761d71 # automation-core
     with:
       helm-version: 'v4.3.0'
       debug: ${{ inputs.debug }}
