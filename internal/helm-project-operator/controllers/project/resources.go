@@ -34,13 +34,9 @@ func (h *handler) getHelmChart(projectID string, valuesContent string, projectHe
 		},
 	})
 	helmChart.SetLabels(common.GetHelmResourceLabels(projectID, projectHelmChart.Spec.HelmAPIVersion))
-	managedBy := h.opts.ControllerName
-	if h.opts.DisableEmbeddedHelmController {
-		// ExternalHelmControllerName defaults to `helm-controller`, but can be customized
-		managedBy = h.opts.ExternalHelmControllerName
-	}
 	helmChart.SetAnnotations(map[string]string{
-		chart.ManagedBy: managedBy,
+		// ExternalHelmControllerName defaults to `helm-controller`, but can be customized
+		chart.ManagedBy: h.opts.ExternalHelmControllerName,
 	})
 	return helmChart
 }
