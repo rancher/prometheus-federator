@@ -12,29 +12,9 @@ import (
 
 var _ = Describe("runtime crd tests", Label("unit"), func() {
 	When("we construct a list of managed crds", func() {
-		It("should manage all crds if all embedded controllers are running", func() {
+		It("should manage all crds it owns when the embedded helm-locker is running", func() {
 			managedCrds := common.ManagedCRDsFromRuntime(common.RuntimeOptions{
-				DisableEmbeddedHelmLocker:     false,
-				DisableEmbeddedHelmController: false,
-			})
-
-			ret := lo.Map(managedCrds, func(i crd.CRD, _ int) string {
-				return strings.Join([]string{i.GVK.Version, i.GVK.Group, i.GVK.Kind}, ".")
-			})
-			Expect(ret).To(ConsistOf(
-				[]string{
-					"v1alpha1.helm.cattle.io.ProjectHelmChart",
-					"v1alpha1.helm.cattle.io.HelmRelease",
-					"v1.helm.cattle.io.HelmChart",
-					"v1.helm.cattle.io.HelmChartConfig",
-				},
-			))
-		})
-
-		It("should not manage helm-controller crds if it does not run the helm-controller itself", func() {
-			managedCrds := common.ManagedCRDsFromRuntime(common.RuntimeOptions{
-				DisableEmbeddedHelmLocker:     false,
-				DisableEmbeddedHelmController: true,
+				DisableEmbeddedHelmLocker: false,
 			})
 
 			ret := lo.Map(managedCrds, func(i crd.CRD, _ int) string {
@@ -50,8 +30,7 @@ var _ = Describe("runtime crd tests", Label("unit"), func() {
 
 		It("should not manage helm-locker crds if it does not run the helm-locker itself", func() {
 			managedCrds := common.ManagedCRDsFromRuntime(common.RuntimeOptions{
-				DisableEmbeddedHelmLocker:     true,
-				DisableEmbeddedHelmController: false,
+				DisableEmbeddedHelmLocker: true,
 			})
 
 			ret := lo.Map(managedCrds, func(i crd.CRD, _ int) string {
@@ -60,8 +39,6 @@ var _ = Describe("runtime crd tests", Label("unit"), func() {
 			Expect(ret).To(ConsistOf(
 				[]string{
 					"v1alpha1.helm.cattle.io.ProjectHelmChart",
-					"v1.helm.cattle.io.HelmChart",
-					"v1.helm.cattle.io.HelmChartConfig",
 				},
 			))
 		})
