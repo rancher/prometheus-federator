@@ -8,13 +8,13 @@ cd $(dirname $0)/../../../..
 
 case "${KUBERNETES_DISTRIBUTION_TYPE}" in
 "k3s")
-    cluster_args="--set helmProjectOperator.helmController.enabled=false"
+    cluster_args=""
     ;;
 "rke")
     cluster_args=""
     ;;
 "rke2")
-    cluster_args="--set helmProjectOperator.helmController.enabled=false"
+    cluster_args=""
     ;;
 *)
     echo "KUBERNETES_DISTRIBUTION_TYPE=${KUBERNETES_DISTRIBUTION_TYPE} is unknown"
