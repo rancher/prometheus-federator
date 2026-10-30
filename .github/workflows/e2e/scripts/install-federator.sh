@@ -15,7 +15,7 @@ helm upgrade --install ${HELM_EXTRA_FLAGS} --create-namespace -n cattle-monitori
   --set helmProjectOperator.image.tag=${TAG:-dev} \
   --set helmProjectOperator.chartSource.name='rancher-project-monitoring' \
   --set helmProjectOperator.chartSource.repo='https://raw.githubusercontent.com/rancher/ob-team-charts/refs/heads/main' \
-  --set helmProjectOperator.chartSource.version='1.0.0' \
+  --set helmProjectOperator.chartSource.version=${RANCHER_PROJECT_MONITORING} \
   --set helmProjectOperator.valuesOverride.grafana.image.repository='rancher/appco-grafana' \
   --set helmProjectOperator.valuesOverride.grafana.image.tag='12.3.1-1.12' \
   --set helmProjectOperator.valuesOverride.grafana.downloadDashboardsImage.repository='rancher/appco-curl' \
