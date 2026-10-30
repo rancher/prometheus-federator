@@ -142,8 +142,7 @@ helmProjectOperator:
     job:
       image:
         repository: rancher/klipper-helm
-        tag: v0.13.3-build20260909
-
+        tag: v0.13.3-build20261021
   helmLocker:
     enabled: true
 
@@ -199,7 +198,7 @@ helmProjectOperator:
   cleanup:
     image:
       repository: rancher/kuberlr-kubectl
-      tag: 9999
+      tag: v6.0.0
       pullPolicy: IfNotPresent
 
     ## Define which Nodes the Pods are scheduled on.
