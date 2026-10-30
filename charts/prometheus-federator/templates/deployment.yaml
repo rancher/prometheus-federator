@@ -93,14 +93,10 @@ spec:
           - --debug
           - --debug-level={{ .Values.helmProjectOperator.debugLevel }}
 {{- end }}
-{{- if or (not .Values.helmProjectOperator.helmController.enabled)  (.Values.helmController.deployment.enabled) }}
-          - --disable-embedded-helm-controller
-{{- else }}
-          - --helm-job-image={{ template "system_default_registry" . }}{{ .Values.helmProjectOperator.helmController.job.image.repository }}:{{ .Values.helmProjectOperator.helmController.job.image.tag }}
-{{- end }}
-{{- if and (not .Values.helmProjectOperator.helmController.enabled)  (.Values.helmController.deployment.enabled) }}
+          - "--helm-job-image={{ template "system_default_registry" . }}{{ .Values.helmProjectOperator.helmController.job.image.repository }}:{{ .Values.helmProjectOperator.helmController.job.image.tag }}"
+{{- if .Values.helmController.deployment.enabled }}
           - --external-helm-controller-name={{ include "prometheus-federator.name" .  }}-helm-controller
-{{- else if and (not .Values.helmProjectOperator.helmController.enabled)  (not .Values.helmController.deployment.enabled) (hasKey .Values "externalHelmControllerName") }}
+{{- else if hasKey .Values "externalHelmControllerName" }}
           - --external-helm-controller-name={{ .Values.externalHelmControllerName | quote }}
 {{- end }}
 {{- if not .Values.helmProjectOperator.helmLocker.enabled }}
@@ -124,10 +120,6 @@ spec:
             value: {{ .Values.helmProjectOperator.valuesOverride | toYaml | sha256sum }}
           {{- if .Values.helmProjectOperator.crdManagement.update }}
           - name: MANAGE_CRD_UPDATES
-            value: "true"
-          {{- end }}
-          {{- if .Values.helmProjectOperator.crdManagement.detectK3sRke2 }}
-          - name: DETECT_K3S_RKE2
             value: "true"
           {{- end }}
 {{- if .Values.helmProjectOperator.resources }}

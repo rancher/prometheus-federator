@@ -1,7 +1,6 @@
 package hack_test
 
 import (
-	"fmt"
 	"testing"
 
 	helmcontrollercrd "github.com/k3s-io/helm-controller/pkg/crd"
@@ -14,10 +13,8 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
-	corev1 "k8s.io/api/core/v1"
 	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
@@ -115,102 +112,4 @@ func TestFilterMissingCRDsError(t *testing.T) {
 	crdSet, err := hack.FilterMissingCRDs(client, crds)
 	require.Error(t, err)
 	require.Len(t, crdSet, 0)
-}
-
-func TestIdentifyKubernetesRuntimeType(t *testing.T) {
-	ctrl := gomock.NewController(t)
-	node := mock.NewMockNodeInterface(ctrl)
-
-	node.EXPECT().List(gomock.Any(), gomock.Any()).Return(
-		&corev1.NodeList{
-			Items: []corev1.Node{
-				{
-					ObjectMeta: metav1.ObjectMeta{
-						Labels: map[string]string{
-							"node.kubernetes.io/instance-type": "k3s",
-						},
-					},
-				},
-			},
-		},
-		nil,
-	).AnyTimes()
-
-	rType, err := hack.IdentifyKubernetesRuntimeType(node)
-	require.NoError(t, err)
-	require.Equal(t, rType, "k3s")
-
-	node2 := mock.NewMockNodeInterface(ctrl)
-
-	node2.EXPECT().List(gomock.Any(), gomock.Any()).Return(
-		&corev1.NodeList{
-			Items: []corev1.Node{
-				{
-					ObjectMeta: metav1.ObjectMeta{
-						Labels: map[string]string{
-							"node.kubernetes.io/instance-type": "rke2",
-						},
-					},
-				},
-			},
-		},
-		nil,
-	).AnyTimes()
-
-	rType2, err := hack.IdentifyKubernetesRuntimeType(node2)
-	require.NoError(t, err)
-	require.Equal(t, rType2, "rke2")
-
-	node3 := mock.NewMockNodeInterface(ctrl)
-
-	node3.EXPECT().List(gomock.Any(), gomock.Any()).Return(
-		&corev1.NodeList{
-			Items: []corev1.Node{
-				{
-					ObjectMeta: metav1.ObjectMeta{
-						Labels: map[string]string{
-							"node.kubernetes.io/instance-type": "rke2",
-						},
-					},
-				},
-				{},
-				{},
-			},
-		},
-		nil,
-	).AnyTimes()
-	rType3, err := hack.IdentifyKubernetesRuntimeType(node3)
-	require.NoError(t, err)
-	require.Equal(t, rType3, "rke2")
-}
-
-func TestIdentifyKubernetesRuntimeTypeError(t *testing.T) {
-	ctrl := gomock.NewController(t)
-	node := mock.NewMockNodeInterface(ctrl)
-	node.EXPECT().List(gomock.Any(), gomock.Any()).Return(
-		nil,
-		fmt.Errorf("any error"),
-	).AnyTimes()
-
-	_, err := hack.IdentifyKubernetesRuntimeType(node)
-	require.Error(t, err)
-
-	node2 := mock.NewMockNodeInterface(ctrl)
-
-	node2.EXPECT().List(
-		gomock.Any(),
-		gomock.Any(),
-	).Return(
-		&corev1.NodeList{
-			Items: []corev1.Node{
-				{},
-				{},
-			},
-		},
-		nil,
-	)
-
-	_, err = hack.IdentifyKubernetesRuntimeType(node2)
-	require.Error(t, err)
-	require.ErrorContains(t, err, "cannot identify k8s runtime type")
 }

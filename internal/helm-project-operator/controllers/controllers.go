@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/k3s-io/helm-controller/pkg/controllers/chart"
 	k3shelm "github.com/k3s-io/helm-controller/pkg/generated/controllers/helm.cattle.io"
 	k3shelmcontroller "github.com/k3s-io/helm-controller/pkg/generated/controllers/helm.cattle.io/v1"
 	"github.com/rancher/lasso/pkg/cache"
@@ -23,8 +22,6 @@ import (
 	helmproject "github.com/rancher/prometheus-federator/internal/helm-project-operator/generated/controllers/helm.cattle.io"
 	helmprojectcontroller "github.com/rancher/prometheus-federator/internal/helm-project-operator/generated/controllers/helm.cattle.io/v1alpha1"
 	"github.com/rancher/wrangler/v3/pkg/apply"
-	batch "github.com/rancher/wrangler/v3/pkg/generated/controllers/batch"
-	batchcontroller "github.com/rancher/wrangler/v3/pkg/generated/controllers/batch/v1"
 	"github.com/rancher/wrangler/v3/pkg/generated/controllers/core"
 	corecontroller "github.com/rancher/wrangler/v3/pkg/generated/controllers/core/v1"
 	"github.com/rancher/wrangler/v3/pkg/generated/controllers/networking.k8s.io"
@@ -61,7 +58,6 @@ type appContext struct {
 	ObjectSetHandler  *controller.SharedHandler
 
 	HelmController k3shelmcontroller.Interface
-	Batch          batchcontroller.Interface
 	RBAC           rbaccontroller.Interface
 
 	Apply            apply.Apply
@@ -195,31 +191,6 @@ func Register(ctx context.Context, systemNamespace string, cfg clientcmd.ClientC
 		)
 	}
 
-	if !opts.DisableEmbeddedHelmController {
-		logrus.Infof("Registering embedded Helm Controller...")
-		chart.Register(ctx,
-			systemNamespace,
-			// this corresponds to the managedBy annotation for helm charts
-			opts.ControllerName,
-			// this has to be cluster-admin for k3s reasons
-			"cluster-admin",
-			"6443",
-			appCtx.K8s,
-			appCtx.Apply,
-			recorder,
-			appCtx.HelmController.HelmChart(),
-			appCtx.HelmController.HelmChart().Cache(),
-			appCtx.HelmController.HelmChartConfig(),
-			appCtx.HelmController.HelmChartConfig().Cache(),
-			appCtx.Batch.Job(),
-			appCtx.Batch.Job().Cache(),
-			appCtx.RBAC.ClusterRoleBinding(),
-			appCtx.Core.ServiceAccount(),
-			appCtx.Core.ConfigMap(),
-			appCtx.Core.Secret(),
-		)
-	}
-
 	leader.RunOrDie(ctx, systemNamespace, fmt.Sprintf("helm-project-operator-%s-lock", opts.ReleaseName), appCtx.K8s, func(ctx context.Context) {
 		if err := appCtx.start(ctx); err != nil {
 			logrus.Fatal(err)
@@ -332,15 +303,6 @@ func newContext(cfg clientcmd.ClientConfig, systemNamespace string, opts common.
 	}
 	helmv := helm.Helm().V1()
 
-	batch, err := batch.NewFactoryFromConfigWithOptions(client, &generic.FactoryOptions{
-		SharedControllerFactory: scf,
-		Namespace:               systemNamespace,
-	})
-	if err != nil {
-		return nil, err
-	}
-	batchv := batch.Batch().V1()
-
 	rbac, err := rbac.NewFactoryFromConfigWithOptions(client, &generic.FactoryOptions{
 		SharedControllerFactory: scf,
 		Namespace:               systemNamespace,
@@ -363,7 +325,6 @@ func newContext(cfg clientcmd.ClientConfig, systemNamespace string, opts common.
 		ObjectSetHandler:  objectSetHandler,
 
 		HelmController: helmv,
-		Batch:          batchv,
 		RBAC:           rbacv,
 
 		Apply:            apply.WithSetOwnerReference(false, false),
@@ -373,7 +334,6 @@ func newContext(cfg clientcmd.ClientConfig, systemNamespace string, opts common.
 		starters: []start.Starter{
 			core,
 			networking,
-			batch,
 			rbac,
 			helm,
 			objectSet,
