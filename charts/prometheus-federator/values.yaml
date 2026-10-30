@@ -146,18 +146,7 @@ helmProjectOperator:
     # When false, only missing CRDs will be installed, and existing ones will not be updated.
     update: true
 
-    # !! EXPERIMENTAL OPTION !! - Use this feature with caution and careful consideration.
-    # This feature is a stopgap solution and is already expected to be removed in the future.
-    #
-    # Specify whether the operator should detect K3s and RKE2 clusters and exclude `helm-controller` CRDs from management.
-    # When true, `helm-controller` CRDs will not be managed by the operator in these environments, as K3s/RKE2 handle them internally.
-    # When false, the operator will manage `helm-controller` CRDs regardless of the runtime environment.
-    detectK3sRke2: false
-
   helmController:
-    # Note: should be disabled for RKE2 clusters since they already run Helm Controller to manage internal Kubernetes components
-    enabled: true
-
     job:
       image:
         repository: rancher/klipper-helm
@@ -280,7 +269,6 @@ helmController:
 
 ## externalHelmControllerName defines a custom external helm controller name to set as the HelmChart CR manager
 ## This should only be used when all are true:
-##   - `helmController.deployment.enabled` is false,
-##   - `helmProjectOperator.helmController.enabled` is false, AND
+##   - `helmController.deployment.enabled` is false, AND
 ##   - the external helm-controller you will use is not the default global `helm-controller`
 #externalHelmControllerName: "my-helm-controller"
