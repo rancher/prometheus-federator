@@ -93,7 +93,7 @@ spec:
           - --debug
           - --debug-level={{ .Values.helmProjectOperator.debugLevel }}
 {{- end }}
-          - --helm-job-image="{{ template "system_default_registry" . }}{{ .Values.helmProjectOperator.helmController.job.image.repository }}:{{ .Values.helmProjectOperator.helmController.job.image.tag }}"
+          - "--helm-job-image={{ template "system_default_registry" . }}{{ .Values.helmProjectOperator.helmController.job.image.repository }}:{{ .Values.helmProjectOperator.helmController.job.image.tag }}"
 {{- if .Values.helmController.deployment.enabled }}
           - --external-helm-controller-name={{ include "prometheus-federator.name" .  }}-helm-controller
 {{- else if hasKey .Values "externalHelmControllerName" }}

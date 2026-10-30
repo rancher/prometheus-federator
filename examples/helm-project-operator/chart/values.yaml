@@ -167,7 +167,7 @@ helmController:
   job:
     image:
       repository: rancher/klipper-helm
-      tag: v0.13.3-build20260909
+      tag: v0.13.3-build20261021
 
 helmLocker:
   enabled: true

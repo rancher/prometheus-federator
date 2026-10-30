@@ -84,7 +84,7 @@ spec:
           - --debug
           - --debug-level={{ .Values.debugLevel }}
 {{- end }}
-          - --helm-job-image="{{ template "system_default_registry" . }}{{ .Values.helmController.job.image.repository }}:{{ .Values.helmController.job.image.tag }}"
+          - "--helm-job-image={{ template "system_default_registry" . }}{{ .Values.helmController.job.image.repository }}:{{ .Values.helmController.job.image.tag }}"
 {{- if not .Values.helmLocker.enabled }}
           - --disable-embedded-helm-locker
 {{- end }}
