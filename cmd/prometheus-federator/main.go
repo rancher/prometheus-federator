@@ -18,7 +18,6 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
-	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 )
 
@@ -59,7 +58,6 @@ func (f *PrometheusFederator) Run(cmd *cobra.Command, _ []string) error {
 	// but end-users experiencing the same issues will be unaffected without using these values
 
 	update := os.Getenv("MANAGE_CRD_UPDATES") == "true"
-	autoDetect := os.Getenv("DETECT_K3S_RKE2") == "true"
 	clientConfig, err := cfg.ClientConfig()
 	if err != nil {
 		logrus.Fatalf("Failed to get client config from runtime : %s", err)
@@ -68,27 +66,6 @@ func (f *PrometheusFederator) Run(cmd *cobra.Command, _ []string) error {
 	// by default only include crds required by the runtime
 	managedCrds := common.ManagedCRDsFromRuntime(f.RuntimeOptions)
 
-	// dynamically read instance type to override the crds required by automatically identifying them
-	// and always disable helm controller crd management since the cluster-scoped one should always manage those
-	if autoDetect {
-		clientset, err := kubernetes.NewForConfig(clientConfig)
-		if err != nil {
-			return err
-		}
-		client := clientset.CoreV1().Nodes()
-		k8sRuntimeType, err := hack.IdentifyKubernetesRuntimeType(client)
-		if err != nil {
-			logrus.Fatalf("Failed to dynamically identify kuberntes runtime : %s", err)
-		}
-		onK3sRke2 := k8sRuntimeType == "k3s" || k8sRuntimeType == "rke2"
-		if onK3sRke2 {
-			logrus.Debug("the cluster is running on k3s (or rke2), `helm-controller` CRDs will not be managed by `prometheus-federator`")
-			managedCrds = common.ManagedCRDsFromRuntime(common.RuntimeOptions{
-				DisableEmbeddedHelmLocker:     f.RuntimeOptions.DisableEmbeddedHelmLocker,
-				DisableEmbeddedHelmController: true,
-			})
-		}
-	}
 	// if users turn off crd management, no new crds will be applied if a matching CRD with the same GVK
 	// and version already exists
 	if !update {
