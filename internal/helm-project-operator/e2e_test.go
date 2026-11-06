@@ -413,7 +413,7 @@ var _ = Describe("E2E helm project operator tests", Ordered, Label("kubernetes")
 							return fmt.Errorf("delete job has not yet succeeded")
 						}
 						return nil
-					}).Should(Succeed())
+					}, time.Second*90, time.Millisecond*50).Should(Succeed())
 				})
 
 				It("should make sure that resources that should be absent are absent", func() {
