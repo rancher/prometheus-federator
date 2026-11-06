@@ -21,6 +21,7 @@ CHART_NAME="prometheus-federator"
 # Map of prometheus-federator major version → rancher/charts target branch.
 # Add a new entry here when a new prometheus-federator/Rancher version pair is created.
 declare -A CHARTS_BRANCH_MAP=(
+  ["8"]="dev-v2.16"
   ["7"]="dev-v2.15"
   ["6"]="dev-v2.14"
   ["5"]="dev-v2.13"
