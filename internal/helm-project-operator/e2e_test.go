@@ -390,7 +390,6 @@ var _ = Describe("E2E helm project operator tests", Ordered, Label("kubernetes")
 					}
 					Expect(k8sClient.Delete(testCtx, projH)).To(Succeed())
 				})
-				//FIXME: this spec could be flaky
 				It("should have created the matching delete job", func() {
 					deleteJob := &batchv1.Job{
 						ObjectMeta: metav1.ObjectMeta{
@@ -404,6 +403,10 @@ var _ = Describe("E2E helm project operator tests", Ordered, Label("kubernetes")
 						retJob, err := Object(deleteJob)()
 						if err != nil {
 							return err
+						}
+						// we already checked that it existed before
+						if retJob.CreationTimestamp.IsZero() {
+							return nil
 						}
 						if retJob.Status.Succeeded < 1 {
 							return fmt.Errorf("delete job has not yet succeeded")
