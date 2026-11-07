@@ -22,26 +22,15 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - name: Read App Credentials from Vault
-        uses: rancher-eio/read-vault-secrets@0da85151ad1f19ed7986c41587e45aac1ace74b6 # v3
+      - uses: rancher-eio/read-vault-secrets@v3
         with:
           secrets: |
-            secret/data/github/repo/${{ github.repository }}/github/app-credentials appId | APPID;
-            secret/data/github/repo/${{ github.repository }}/github/app-credentials privateKey | PRIVATEKEY
-
-      - name: Generate GitHub App Token
-        id: generate_token
-        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
-        with:
-          app-id: ${{ env.APPID }}
-          private-key: ${{ env.PRIVATEKEY }}
-          owner: ${{ github.repository_owner }}
-          repositories: charts
+            github/token/rancher--charts--pull_requests--write token | GH_TOKEN
 
       - name: Push chart update to rancher/charts
         env:
           TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
-          GH_TOKEN: ${{ steps.generate_token.outputs.token }}
+          GH_TOKEN: ${{ env.GH_TOKEN }}
           SOURCE_REPO: ${{ github.repository }}
           PF_DIR: ${{ github.workspace }}
           CHARTS_DIR: ${{ github.workspace }}/charts-repo
