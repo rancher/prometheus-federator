@@ -34,11 +34,11 @@ else
   HELM_CHART_VERSION=${HELM_IMAGE_TAG/v/}
 fi
 
-#if echo "$TAG" | grep -q dirty; then
-#    TAG="v0.0.0-dev.1-${COMMIT}"
-#    HELM_IMAGE_TAG=$TAG
-#    HELM_CHART_VERSION=${HELM_CHART_VERSION_DEV:-${HELM_IMAGE_TAG/v/}}
-#fi
+if echo "$TAG" | grep -q dirty; then
+    TAG="v0.0.0-dev.1-${COMMIT}"
+    HELM_IMAGE_TAG=$TAG
+    HELM_CHART_VERSION=${HELM_CHART_VERSION_DEV:-${HELM_IMAGE_TAG/v/}}
+fi
 IMAGE=${IMAGE:-"$REPO/${BUILD_TARGET}:${TAG}"}
 
 # Fetch build.yaml path and constant defined in it
