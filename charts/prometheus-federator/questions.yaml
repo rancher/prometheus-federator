@@ -60,6 +60,12 @@ questions:
   type: string
   required: false
   group: Project Monitoring Chart
+- variable: helmProjectOperator.chartSource.authSecretName
+  label: Project Monitoring Chart Repository Credentials
+  description: Optional. Name of a basic-auth Secret in the Prometheus Federator namespace. The Secret must contain username and password for the Helm repository.
+  type: string
+  required: false
+  group: Project Monitoring Chart
 - variable: helmProjectOperator.valuesOverride.grafana.image.repository
   label: Grafana image
   description: Required. Grafana image to be deployed.

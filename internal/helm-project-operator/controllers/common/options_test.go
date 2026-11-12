@@ -52,6 +52,27 @@ func TestOptionsValidateChartSource(t *testing.T) {
 			}(),
 			wantErr: true,
 		},
+		{
+			name: "managed chart repository credentials are valid with a complete reference",
+			options: func() Options {
+				opts := base
+				opts.ManagedChartName = "rancher-project-monitoring"
+				opts.ManagedChartRepo = "https://charts.example.test"
+				opts.ManagedChartVersion = "1.2.3"
+				opts.ManagedChartAuthSecret = "project-monitoring-chart-repo"
+				return opts
+			}(),
+		},
+		{
+			name: "repository credentials require a complete managed chart reference",
+			options: func() Options {
+				opts := base
+				opts.ChartContent = "embedded-chart"
+				opts.ManagedChartAuthSecret = "project-monitoring-chart-repo"
+				return opts
+			}(),
+			wantErr: true,
+		},
 	}
 
 	for _, tt := range tests {

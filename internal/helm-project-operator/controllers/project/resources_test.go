@@ -88,4 +88,46 @@ func TestGetHelmChartUsesManagedChartReferenceWhenConfigured(t *testing.T) {
 	if helmChart.Spec.ChartContent != "" {
 		t.Fatalf("expected chart content to be omitted for managed chart reference, got %q", helmChart.Spec.ChartContent)
 	}
+	if helmChart.Spec.AuthSecret != nil {
+		t.Fatalf("expected no chart repo credentials, got %#v", helmChart.Spec.AuthSecret)
+	}
+}
+
+func TestGetHelmChartSetsManagedChartAuthSecret(t *testing.T) {
+	t.Parallel()
+
+	h := &handler{
+		systemNamespace: "cattle-monitoring-system",
+		opts: common.Options{
+			OperatorOptions: common.OperatorOptions{
+				ReleaseName:    "monitoring",
+				HelmAPIVersion: "monitoring.cattle.io/v1alpha1",
+			},
+			RuntimeOptions: common.RuntimeOptions{
+				ManagedChartName:       "project-monitoring-contract",
+				ManagedChartRepo:       "https://charts.example.test",
+				ManagedChartVersion:    "0.7.0",
+				ManagedChartAuthSecret: "project-monitoring-chart-repo",
+			},
+		},
+	}
+
+	projectHelmChart := &v1alpha1.ProjectHelmChart{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "project-monitoring",
+			Namespace: "cattle-project-p1",
+		},
+		Spec: v1alpha1.ProjectHelmChartSpec{
+			HelmAPIVersion: "monitoring.cattle.io/v1alpha1",
+		},
+	}
+
+	helmChart := h.getHelmChart("p1", "values: {}", projectHelmChart)
+
+	if helmChart.Namespace != "cattle-monitoring-system" {
+		t.Fatalf("expected HelmChart in the operator namespace, got %q", helmChart.Namespace)
+	}
+	if helmChart.Spec.AuthSecret == nil || helmChart.Spec.AuthSecret.Name != "project-monitoring-chart-repo" {
+		t.Fatalf("expected auth secret project-monitoring-chart-repo, got %#v", helmChart.Spec.AuthSecret)
+	}
 }
