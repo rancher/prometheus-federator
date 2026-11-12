@@ -209,8 +209,7 @@ var _ = Describe("E2E helm project operator tests", Ordered, Label("kubernetes")
 			// 		Singleton:        false,
 			// 	},
 			// 	RuntimeOptions: common.RuntimeOptions{
-			// 		Namespace:                     "cattle-helm-system",
-			// 		DisableEmbeddedHelmController: true,
+			// 		Namespace: "cattle-helm-system",
 			// 	},
 			// })
 			// if err != nil {

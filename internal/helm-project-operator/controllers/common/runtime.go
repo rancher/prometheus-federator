@@ -22,7 +22,7 @@ type RuntimeOptions struct {
 	// so that multiple iterations of this operator in the same namespace do not try to manage the same HelmChart and HelmRelease objects
 	ControllerName string `usage:"Unique name to identify this controller that is added to all HelmCharts tracked by this controller" default:"helm-project-operator" env:"CONTROLLER_NAME"`
 
-	// HelmJobImage is the job image to use to run the HelmChart job (default rancher/klipper-helm:v0.13.3-build20260909)
+	// HelmJobImage is the job image to use to run the HelmChart job (default rancher/klipper-helm:v0.13.3-build20261021)
 	// Generally, this HelmJobImage can be left undefined, but may be necessary to be set if you are running with a non-default image
 	HelmJobImage string `usage:"Job image to use to perform helm operations on HelmChart creation" env:"HELM_JOB_IMAGE"`
 
@@ -105,10 +105,6 @@ type RuntimeOptions struct {
 
 	// DisableEmbeddedHelmLocker determines whether to disable embedded Helm Locker controller in favor of external Helm Locker
 	DisableEmbeddedHelmLocker bool `usage:"Whether to disable embedded Helm Locker controller in favor of external Helm Locker" env:"DISABLE_EMBEDDED_HELM_LOCKER"`
-
-	// DisableEmbeddedHelmController determines whether to disable embedded Helm Controller in favor of an external Helm Controller
-	// This should be the default in most RKE2 clusters since the RKE2 server binary already embeds a Helm Controller instance that manages HelmCharts
-	DisableEmbeddedHelmController bool `usage:"Whether to disable embedded Helm Controller controller in favor of external Helm Controller (recommended for RKE2 clusters)" env:"DISABLE_EMBEDDED_HELM_CONTROLLER"`
 
 	// ExternalHelmControllerName determines the name of the external Helm Controller to declare as managing the HelmCharts that PromFed creates
 	ExternalHelmControllerName string `usage:"Set the external Helm Controller's name to manage which controller will own the HelmCharts created by this operator" default:"helm-controller" env:"EXTERNAL_HELM_CONTROLLER_NAME"`
