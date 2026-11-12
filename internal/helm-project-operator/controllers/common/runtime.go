@@ -50,6 +50,11 @@ type RuntimeOptions struct {
 	// ManagedChartVersion identifies the approved version to use for ManagedChartName.
 	ManagedChartVersion string `usage:"Approved chart version to use for the managed chart" env:"MANAGED_CHART_VERSION"`
 
+	// ManagedChartAuthSecret is the name of a kubernetes.io/basic-auth Secret in the operator namespace.
+	// When set, generated HelmCharts reference it so the Helm job can authenticate to ManagedChartRepo.
+	// The Secret data keys must be username and password. Git credentials are not used.
+	ManagedChartAuthSecret string `usage:"Name of a basic-auth Secret in the operator namespace for the managed chart repository" env:"MANAGED_CHART_AUTH_SECRET"`
+
 	// ProjectLabel is the label that identifies projects
 	// Note: this field is optional and ensures that ProjectHelmCharts auto-infer their spec.projectNamespaceSelector
 	// If provided, any spec.projectNamespaceSelector provided will be ignored
@@ -154,6 +159,10 @@ func (opts RuntimeOptions) Validate() error {
 
 	if len(opts.ManagedChartName) > 0 || len(opts.ManagedChartRepo) > 0 || len(opts.ManagedChartVersion) > 0 {
 		logrus.Infof("Using approved managed chart reference %s from %s at version %s", opts.ManagedChartName, opts.ManagedChartRepo, opts.ManagedChartVersion)
+	}
+
+	if len(opts.ManagedChartAuthSecret) > 0 {
+		logrus.Infof("Using Secret %s to authenticate to the managed chart repository", opts.ManagedChartAuthSecret)
 	}
 
 	if opts.DisableHardening {

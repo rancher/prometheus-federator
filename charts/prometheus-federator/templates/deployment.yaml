@@ -42,6 +42,9 @@ spec:
 {{- if .Values.helmProjectOperator.chartSource.version }}
           - --managed-chart-version={{ .Values.helmProjectOperator.chartSource.version }}
 {{- end }}
+{{- if .Values.helmProjectOperator.chartSource.authSecret }}
+          - --managed-chart-auth-secret={{ .Values.helmProjectOperator.chartSource.authSecret }}
+{{- end }}
 {{- if .Values.global.cattle.projectLabel }}
           - --project-label={{ .Values.global.cattle.projectLabel }}
 {{- end }}

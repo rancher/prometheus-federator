@@ -63,10 +63,12 @@ valuesOverride:
       tag: 'v5.1.0'
 ## chartSource selects the approved chart source used for managed ProjectHelmChart releases.
 ## Embedded charts are no longer shipped by the example operator image.
+## authSecret is optional and names a kubernetes.io/basic-auth Secret in this release's namespace.
 chartSource:
   name: "rancher-project-monitoring"
   repo: "https://raw.githubusercontent.com/rancher/ob-team-charts/refs/heads/main"
   version: "1.0.0"
+  authSecret: ""
 
 ## projectReleaseNamespaces are auto-generated namespaces that are created to host Helm Releases
 ## managed by this operator on behalf of a ProjectHelmChart
