@@ -2,7 +2,7 @@ module github.com/rancher/prometheus-federator
 
 go 1.27.0
 
-toolchain go1.27.3
+toolchain go1.27.4
 
 replace (
 	gopkg.in/yaml.v2 v2.2.2 => go.yaml.in/yaml/v2 v2.2.2
