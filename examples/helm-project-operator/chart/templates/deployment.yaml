@@ -42,8 +42,8 @@ spec:
 {{- if .Values.chartSource.version }}
           - --managed-chart-version={{ .Values.chartSource.version }}
 {{- end }}
-{{- if .Values.chartSource.authSecret }}
-          - --managed-chart-auth-secret={{ .Values.chartSource.authSecret }}
+{{- if .Values.chartSource.authSecretName }}
+          - --managed-chart-auth-secret={{ .Values.chartSource.authSecretName }}
 {{- end }}
 {{- if .Values.global.cattle.projectLabel }}
           - --project-label={{ .Values.global.cattle.projectLabel }}

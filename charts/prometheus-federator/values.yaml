@@ -46,13 +46,13 @@ helmProjectOperator:
   ## chartSource selects the operator-approved chart source used for project monitoring releases.
   ## Embedded compatibility charts are no longer shipped by this repository.
   ## name, repo, and version must all be set to let the operator deploy an approved project monitoring chart.
-  ## authSecret is optional. It names a kubernetes.io/basic-auth Secret in this release's namespace.
+  ## authSecretName is optional. It names a kubernetes.io/basic-auth Secret in this release's namespace.
   ## The Secret data keys must be username and password. The Helm job uses them for the Helm repository only.
   chartSource:
     name: ""
     repo: ""
     version: ""
-    authSecret: ""
+    authSecretName: ""
 
   ## projectReleaseNamespaces are auto-generated namespaces that are created to host Helm Releases
   ## managed by this operator on behalf of a ProjectHelmChart

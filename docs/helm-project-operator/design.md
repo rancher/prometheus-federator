@@ -20,7 +20,7 @@ Generally, the best way to think about the ProjectHelmChart model is by comparin
 
 ### Configuring the Helm release created by a ProjectHelmChart
 
-The `spec.values` of this ProjectHelmChart resources will correspond to the `values.yaml` override supplied to the approved chart deployed by the operator on the user's behalf. Configure that approved chart source with `chartSource.name`, `chartSource.repo`, and `chartSource.version`. Set `chartSource.authSecret` when that Helm repository requires basic authentication.
+The `spec.values` of this ProjectHelmChart resources will correspond to the `values.yaml` override supplied to the approved chart deployed by the operator on the user's behalf. Configure that approved chart source with `chartSource.name`, `chartSource.repo`, and `chartSource.version`. Set `chartSource.authSecretName` when that Helm repository requires basic authentication.
 
 ### Namespaces
 
