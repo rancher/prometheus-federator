@@ -2,7 +2,6 @@ package hack
 
 import (
 	"context"
-	"errors"
 	"slices"
 	"strings"
 
@@ -10,15 +9,10 @@ import (
 	"github.com/rancher/wrangler/v3/pkg/crd"
 	"github.com/rancher/wrangler/v3/pkg/name"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
-	nodev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 
 	"github.com/sirupsen/logrus"
 	apiextensionv1 "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset/typed/apiextensions/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-)
-
-const (
-	nodeLabel = "node.kubernetes.io/instance-type"
 )
 
 type CRDManagementConfig struct {
@@ -57,36 +51,4 @@ func FilterMissingCRDs(client apiextensionv1.CustomResourceDefinitionInterface, 
 		}
 	}
 	return ret, nil
-}
-
-// IdentifyKubernetesRuntimeType provides the k8s runtime used on nodes in the cluster.
-// Deprecated: This feature is a stop gap not expected to be maintained long-term.
-// A more robust solution should be implemented, either in the `helm-controller` or in `wrangler` CRD frameworks.
-func IdentifyKubernetesRuntimeType(client nodev1.NodeInterface) (string, error) {
-	nodes, err := client.List(context.TODO(), metav1.ListOptions{})
-	if err != nil {
-		logrus.Errorf("Failed to list nodes: %v", err)
-		return "", err
-	}
-	instanceTypes := make(map[string]int)
-	for _, node := range nodes.Items {
-		instanceType, exists := node.Labels[nodeLabel]
-		if exists {
-			instanceTypes[instanceType]++
-		} else {
-			logrus.Debugf("Cannot find `%s` label on node `%s`", nodeLabel, node.Name)
-		}
-	}
-
-	if len(instanceTypes) == 0 {
-		return "", errors.New("cannot identify k8s runtime type; no nodes in cluster have expected label")
-	}
-
-	var k8sRuntimeType string
-	for instanceType := range instanceTypes {
-		k8sRuntimeType = instanceType
-		break
-	}
-
-	return k8sRuntimeType, nil
 }
