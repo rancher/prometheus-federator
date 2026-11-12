@@ -12,26 +12,26 @@ replace (
 )
 
 require (
-	github.com/caarlos0/env/v11 v11.1.0
+	github.com/caarlos0/env/v11 v11.4.2
 	github.com/google/uuid v1.6.0
 	github.com/hashicorp/go-multierror v1.1.1
-	github.com/k3s-io/helm-controller v0.16.6
+	github.com/k3s-io/helm-controller v0.17.9
 	github.com/novln/docker-parser v1.0.0
 	github.com/onsi/ginkgo/v2 v2.32.1
 	github.com/onsi/gomega v1.43.0
 	github.com/rancher/lasso v0.2.10
 	github.com/rancher/wrangler/v3 v3.7.2
-	github.com/samber/lo v1.47.0
+	github.com/samber/lo v1.53.0
 	github.com/sirupsen/logrus v1.10.2
 	github.com/spf13/cobra v1.10.2
 	github.com/spf13/viper v1.21.0
 	github.com/stretchr/testify v1.12.1
 	go.uber.org/mock v0.6.0
-	go.yaml.in/yaml/v2 v2.4.4
-	go.yaml.in/yaml/v3 v3.0.5
+	go.yaml.in/yaml/v2 v2.4.5
+	go.yaml.in/yaml/v3 v3.0.6
 	golang.org/x/mod v0.41.0
 	golang.org/x/text v0.42.0
-	helm.sh/helm/v4 v4.3.0
+	helm.sh/helm/v4 v4.3.1
 	k8s.io/api v0.37.1
 	k8s.io/apiextensions-apiserver v0.37.1
 	k8s.io/apimachinery v0.37.1
