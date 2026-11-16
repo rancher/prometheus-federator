@@ -11,14 +11,14 @@ name: Stage charts
 #   gh workflow run stage-charts.yaml --ref main -f tag=v8.0.0-rc.1
 #
 # The version comes from the GitHub release of the tag, which must be published
-# and have its chart archives: the release is made public after the images are
-# pushed, so the charts are never staged for an image that is not there. The
-# charts are the ones in the repository at the tag. The script of the branch that
-# is run prepares them, so a tag that is older than the script can be staged.
-# The ship-family-staged action of rancher/charts stamps, checks, packages and
-# pushes them, and then starts the chart-staged workflow of rancher/charts, which
-# ships the charts and opens a pull request that adds them to the index.yaml of
-# its staging branch.
+# and have its chart archive: the release is made public after the images are
+# pushed, so the charts are never staged for an image that is not there. The chart
+# is the one scripts/package-helm already built and stamped for that release, so
+# it is downloaded and extracted as it is, not rebuilt from the repository. The
+# ship-family-staged action of rancher/charts stamps, checks, packages and
+# pushes it, and then starts the chart-staged workflow of rancher/charts, which
+# ships the chart and opens a pull request that adds it to the index.yaml of its
+# staging branch.
 #
 # The action is pinned to a commit of the chart-owners branch of rancher/charts,
 # which holds only the shared actions, so it moves only when they change.
@@ -57,17 +57,11 @@ jobs:
           tag=$(./.github/workflows/scripts/read-release.sh "$TAG")
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
 
-      - name: Check out the release tag
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          ref: refs/tags/${{ steps.release.outputs.tag }}
-          path: release
-          persist-credentials: false
-
-      - name: Prepare the charts
+      - name: Download the chart
         env:
+          GH_TOKEN: ${{ github.token }}
           TAG: ${{ steps.release.outputs.tag }}
-        run: ./.github/workflows/scripts/prepare-charts.sh "$TAG" release "$RUNNER_TEMP/charts"
+        run: ./.github/workflows/scripts/download-chart.sh "$TAG" "$RUNNER_TEMP/charts"
 
       - name: Stage the charts and notify rancher/charts
         uses: rancher/charts/.github/actions/ship-family-staged@chart-owners # chart-owners
