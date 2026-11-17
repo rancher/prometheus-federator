@@ -1,6 +1,6 @@
 {
   "extends": [
-    "github>rancher/renovate-config#release",
+    "github>rancher/renovate-config//default#release",
     "group:allNonMajor",
     "helpers:pinGitHubActionDigests"
   ],
@@ -9,9 +9,7 @@
     "release/v7.x",
     "release/v6.x",
     "release/v5.x",
-    "release/v4.x",
-    "release/v3.x",
-    "release/v2.x"
+    "release/v4.x"
   ],
   "enabledManagers": [
     "dockerfile",
@@ -59,22 +57,6 @@
       ],
       "extends": [
         "github>rancher/renovate-config:rancher-2.12#release"
-      ]
-    },
-    {
-      "matchBaseBranches": [
-        "release/v3.x"
-      ],
-      "extends": [
-        "github>rancher/renovate-config:rancher-2.11#release"
-      ]
-    },
-    {
-      "matchBaseBranches": [
-        "release/v2.x"
-      ],
-      "extends": [
-        "github>rancher/renovate-config:rancher-2.10#release"
       ]
     },
     {
