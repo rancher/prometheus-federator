@@ -14,6 +14,16 @@ on:
         required: false
         type: string
         default: ''
+      fail-on-vulnerabilities:
+        description: "Fail when the image built here has HIGH or CRITICAL vulnerabilities with a fix available"
+        required: false
+        type: boolean
+        default: true
+      chart-values:
+        description: "values.yaml of the chart whose third party images are scanned, empty to skip them"
+        required: false
+        type: string
+        default: 'charts/prometheus-federator/values.yaml'
 
 env:
   CGO_ENABLED : 0
@@ -42,3 +52,84 @@ jobs:
           version: ${{ inputs.helm-version }}
       - name: Run CI
         run: make ci
+      # scripts/package tags the image with the commit, or the tag, so look it up
+      # instead of rebuilding the name here
+      - name: Find the image
+        id: image
+        run: |
+          image=$(docker images rancher/prometheus-federator --format '{{.Repository}}:{{.Tag}}' | head -n 1)
+          if [ -z "$image" ]; then
+            echo "::error::make ci did not build a rancher/prometheus-federator image"
+            exit 1
+          fi
+          echo "image=$image" >> "$GITHUB_OUTPUT"
+      # Only what can be fixed fails the build. Accepted findings go in a .trivyignore
+      # at the root of the repository, with an expiry, e.g.
+      #   CVE-2026-12345 exp:2026-12-31
+      - name: Scan the image
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: ${{ steps.image.outputs.image }}
+          scanners: vuln
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: ${{ inputs.fail-on-vulnerabilities && '1' || '0' }}
+
+  chart-images:
+    if: inputs.chart-values != ''
+    runs-on: ubuntu-latest
+    outputs:
+      images: ${{ steps.images.outputs.images }}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Install yq
+        uses: rancher/prometheus-federator/.github/actions/install-yq@automation-core
+      # Every repository/tag pair in the values
+      - name: List the images
+        id: images
+        env:
+          VALUES: ${{ inputs.chart-values }}
+        run: |
+          images=$(yq -o=json -I=0 '[.. | select(tag == "!!map" and has("repository") and has("tag")) | select(.tag != "" and .tag != null) | .repository + ":" + .tag] | unique' "$VALUES")
+          echo "Images: $images"
+          echo "images=$images" >> "$GITHUB_OUTPUT"
+
+  # These images come from other projects/upstream
+  # they are reported as warnings instead of failing the build
+  scan-chart-images:
+    needs: chart-images
+    if: needs.chart-images.outputs.images != '[]'
+    strategy:
+      fail-fast: false
+      matrix:
+        image: ${{ fromJSON(needs.chart-images.outputs.images) }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Scan ${{ matrix.image }}
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: ${{ matrix.image }}
+          scanners: vuln
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          format: json
+          output: trivy.json
+          exit-code: '0'
+      - name: Report
+        env:
+          IMAGE: ${{ matrix.image }}
+        run: |
+          count=$(jq '[.Results[]?.Vulnerabilities[]?] | length' trivy.json)
+          {
+            echo "### $IMAGE"
+            if [ "$count" -eq 0 ]; then
+              echo "No HIGH or CRITICAL vulnerabilities with a fix available."
+            else
+              echo "| Severity | Target | Package | Installed | Fixed | ID |"
+              echo "|---|---|---|---|---|---|"
+              jq -r '.Results[]? | .Target as $t | .Vulnerabilities[]? | "| \(.Severity) | \($t) | \(.PkgName) | \(.InstalledVersion) | \(.FixedVersion) | \(.VulnerabilityID) |"' trivy.json | sort -u
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+          if [ "$count" -gt 0 ]; then
+            echo "::warning title=Vulnerable chart image::$IMAGE has $count HIGH or CRITICAL vulnerabilities with a fix available, see the job summary"
+          fi
