@@ -11,7 +11,7 @@ if [[ "${E2E_CI}" == "true" ]]; then
 else
     kubectl delete -f ./examples/prometheus-federator/project-helm-chart.yaml
 fi
-if kubectl get -n cattle-monitoring-system job/helm-delete-cattle-project-p-example-monitoring --ignore-not-found; then
+if [[ -n $(kubectl get -n cattle-monitoring-system job/helm-delete-cattle-project-p-example-monitoring --ignore-not-found -o name) ]]; then
     if ! kubectl wait --for=condition=complete --timeout="${KUBECTL_WAIT_TIMEOUT}" -n cattle-monitoring-system job/helm-delete-cattle-project-p-example-monitoring; then
         echo "ERROR: Helm Uninstall Job for Project Monitoring Stack never completed after ${KUBECTL_WAIT_TIMEOUT}"
         kubectl logs job/helm-delete-cattle-project-p-example-monitoring -n cattle-monitoring-system
