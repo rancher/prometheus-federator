@@ -90,6 +90,21 @@
       "matchManagers": [
         "dockerfile"
       ]
+    },
+    {
+      "description": "klipper-helm tags end in -buildYYYYMMDD, which the docker versioning takes as a compatibility suffix, so a newer build was never proposed",
+      "matchPackageNames": [
+        "rancher/klipper-helm"
+      ],
+      "versioning": "regex:^v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)-build(?<build>\\d+)$"
+    },
+    {
+      "matchBaseBranches": [
+        "main"
+      ],
+      "extends": [
+        "github>rancher/renovate-config:automerge#release"
+      ]
     }
   ]
 }
