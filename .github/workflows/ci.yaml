@@ -24,7 +24,7 @@ on:
 
 jobs:
   build:
-    uses: rancher/prometheus-federator/.github/workflows/ci.yaml@ac472c740fb206f745c181e426388b678873ab02 # automation-core
+    uses: rancher/prometheus-federator/.github/workflows/ci.yaml@c3031c2c1baaa7646532f1df5551ec1e88e881f9 # automation-core
     with:
       helm-version: 'v4.3.0'
       yq-checksum-amd64: ''
