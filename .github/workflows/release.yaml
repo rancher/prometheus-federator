@@ -13,7 +13,7 @@ env:
 
 jobs:
   ci:
-    uses: rancher/prometheus-federator/.github/workflows/ci.yaml@67377410d8d2b9507402e8c51bb8f39a36761d71 # automation-core
+    uses: rancher/prometheus-federator/.github/workflows/ci.yaml@c3031c2c1baaa7646532f1df5551ec1e88e881f9 # automation-core
     with:
       helm-version: 'v4.3.0'
       yq-checksum-amd64: ''
@@ -22,7 +22,7 @@ jobs:
       contents: read
 
   integration:
-    uses: rancher/prometheus-federator/.github/workflows/integration.yaml@67377410d8d2b9507402e8c51bb8f39a36761d71 # automation-core
+    uses: rancher/prometheus-federator/.github/workflows/integration.yaml@c3031c2c1baaa7646532f1df5551ec1e88e881f9 # automation-core
     with:
       helm-version: 'v4.3.0'
       k3s-versions: '["v1.35.9-k3s1","v1.37.1-k3s1"]'
@@ -32,7 +32,7 @@ jobs:
       contents: read
 
   e2e:
-    uses: rancher/prometheus-federator/.github/workflows/prom-fed-e2e-ci.yaml@67377410d8d2b9507402e8c51bb8f39a36761d71 # automation-core
+    uses: rancher/prometheus-federator/.github/workflows/prom-fed-e2e-ci.yaml@c3031c2c1baaa7646532f1df5551ec1e88e881f9 # automation-core
     with:
       helm-version: 'v4.3.0'
       yq-checksum-amd64: ''
@@ -49,7 +49,7 @@ jobs:
       id-token: write
       attestations: write
     steps:
-      - uses: rancher/prometheus-federator/.github/actions/run-goreleaser@67377410d8d2b9507402e8c51bb8f39a36761d71 # automation-core
+      - uses: rancher/prometheus-federator/.github/actions/run-goreleaser@c3031c2c1baaa7646532f1df5551ec1e88e881f9 # automation-core
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           helm-version: 'v4.3.0'
@@ -74,7 +74,7 @@ jobs:
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
       - name: Build and push Helm-Project-Operator image
         id: build
-        uses: rancher/prometheus-federator/.github/actions/build-and-push-image@67377410d8d2b9507402e8c51bb8f39a36761d71 # automation-core
+        uses: rancher/prometheus-federator/.github/actions/build-and-push-image@c3031c2c1baaa7646532f1df5551ec1e88e881f9 # automation-core
         with:
           image: ${{ env.REPO }}/${{ env.IMAGE_NAME }}/helm-project-operator
           dockerfile: ./package/Dockerfile-helm-project-operator
