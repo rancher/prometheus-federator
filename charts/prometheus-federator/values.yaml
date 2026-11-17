@@ -142,7 +142,7 @@ helmProjectOperator:
     job:
       image:
         repository: rancher/klipper-helm
-        tag: v0.13.3-build20261021
+        tag: v0.14.0-build20261106
   helmLocker:
     enabled: true
 
