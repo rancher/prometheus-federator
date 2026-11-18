@@ -63,7 +63,7 @@ In Prometheus Federator, a Project is a group of namespaces that can be identifi
 
 ### Configuring the Helm release created by a ProjectHelmChart
 
-The `spec.values` of this ProjectHelmChart resources will correspond to the `values.yaml` override supplied to the approved project monitoring chart deployed by the operator on the user's behalf. Configure that approved chart source with `helmProjectOperator.chartSource.name`, `helmProjectOperator.chartSource.repo`, and `helmProjectOperator.chartSource.version`.
+The `spec.values` of this ProjectHelmChart resources will correspond to the `values.yaml` override supplied to the approved project monitoring chart deployed by the operator on the user's behalf. Configure that approved chart source with `helmProjectOperator.chartSource.name`, `helmProjectOperator.chartSource.repo`, and `helmProjectOperator.chartSource.version`. Set `helmProjectOperator.chartSource.authSecretName` when that Helm repository requires basic authentication.
 
 ### Namespaces
 

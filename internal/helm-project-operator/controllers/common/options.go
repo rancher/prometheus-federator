@@ -24,6 +24,10 @@ func (opts Options) Validate() error {
 
 	// Cross option checks
 
+	if len(opts.ManagedChartAuthSecret) > 0 && (len(opts.ManagedChartName) == 0 || len(opts.ManagedChartRepo) == 0 || len(opts.ManagedChartVersion) == 0) {
+		return errors.New("must provide --managed-chart-name, --managed-chart-repo, and --managed-chart-version when --managed-chart-auth-secret is set")
+	}
+
 	if opts.UsesManagedChartReference() {
 		switch {
 		case len(opts.ManagedChartName) == 0:
