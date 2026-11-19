@@ -1,4 +1,4 @@
-rancherProjectMonitoringVersion: 1.0.1
+rancherProjectMonitoringVersion: 1.0.3
 rancherMonitoringVersion : 110.0.2+up80.9.1-rancher.22
 k3sTestingMaxVersion: v1.37.2+k3s1
 k3sTestingMinVersion: v1.35.10+k3s1
