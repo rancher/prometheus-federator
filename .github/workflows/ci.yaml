@@ -99,13 +99,14 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: Install yq
         uses: rancher/prometheus-federator/.github/actions/install-yq@automation-core
-      # Every repository/tag pair in the values
+      # Every repository/tag pair in the values. 9999 is the placeholder for tags
+      # that scripts/package-helm fills in when packaging, so there is no such image.
       - name: List the images
         id: images
         env:
           VALUES: ${{ inputs.chart-values }}
         run: |
-          images=$(yq -o=json -I=0 '[.. | select(tag == "!!map" and has("repository") and has("tag")) | select(.tag != "" and .tag != null) | .repository + ":" + .tag] | unique' "$VALUES")
+          images=$(yq -o=json -I=0 '[.. | select(tag == "!!map" and has("repository") and has("tag")) | select(.tag != "" and .tag != null and .tag != "9999") | .repository + ":" + .tag] | unique' "$VALUES")
           echo "Images: $images"
           echo "images=$images" >> "$GITHUB_OUTPUT"
 
@@ -120,7 +121,9 @@ jobs:
         image: ${{ fromJSON(needs.chart-images.outputs.images) }}
     runs-on: ubuntu-latest
     steps:
+      # an image that can't be scanned is reported below, it doesn't fail the build
       - name: Scan ${{ matrix.image }}
+        continue-on-error: true
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
           image-ref: ${{ matrix.image }}
@@ -134,6 +137,12 @@ jobs:
         env:
           IMAGE: ${{ matrix.image }}
         run: |
+          if ! jq -e . trivy.json >/dev/null 2>&1; then
+            echo "### $IMAGE" >> "$GITHUB_STEP_SUMMARY"
+            echo "Could not be scanned, see the scan step." >> "$GITHUB_STEP_SUMMARY"
+            echo "::warning title=Chart image not scanned::$IMAGE could not be scanned, see the scan step"
+            exit 0
+          fi
           count=$(jq '[.Results[]?.Vulnerabilities[]?] | length' trivy.json)
           {
             echo "### $IMAGE"
