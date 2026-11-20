@@ -42,7 +42,7 @@ jobs:
 
   goreleaser:
     name: Build go binaries and helm chart
-    needs: [ ci, integration ]
+    needs: [ ci, integration, e2e ]
     runs-on: ${{ github.repository == 'rancher/prometheus-federator' && format('runs-on,image=ubuntu22-full-x64,runner=4cpu-linux-x64,run-id={0}', github.run_id) || 'ubuntu-latest' }}
     permissions:
       contents: write
