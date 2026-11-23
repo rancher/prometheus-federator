@@ -4,10 +4,10 @@ on:
   # As soon as CI finishes on a Renovate branch, the schedule is a fallback
   workflow_run:
     workflows:
-    - "[prom-fed] ci"
+    - '\[prom-fed\] ci'
     - golangci-lint
     - Integration test
-    - "[prom-fed] E2E CI"
+    - '\[prom-fed\] E2E CI'
     types:
     - completed
   schedule:
