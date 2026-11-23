@@ -1,6 +1,6 @@
 {
   "extends": [
-    "github>rancher/renovate-config#release",
+    "github>rancher/renovate-config//default#release",
     "group:allNonMajor",
     "helpers:pinGitHubActionDigests"
   ],
@@ -9,9 +9,7 @@
     "release/v7.x",
     "release/v6.x",
     "release/v5.x",
-    "release/v4.x",
-    "release/v3.x",
-    "release/v2.x"
+    "release/v4.x"
   ],
   "enabledManagers": [
     "dockerfile",
@@ -62,22 +60,6 @@
       ]
     },
     {
-      "matchBaseBranches": [
-        "release/v3.x"
-      ],
-      "extends": [
-        "github>rancher/renovate-config:rancher-2.11#release"
-      ]
-    },
-    {
-      "matchBaseBranches": [
-        "release/v2.x"
-      ],
-      "extends": [
-        "github>rancher/renovate-config:rancher-2.10#release"
-      ]
-    },
-    {
       "groupName": "GitHub Workflow Actions",
       "groupSlug": "gha-deps",
       "matchManagers": [
@@ -99,6 +81,22 @@
       "versioning": "regex:^v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)-build(?<build>\\d+)$"
     },
     {
+      "description": "The images the chart ships get their own PR: a group only automerges when every update in it can, so in the all non-major group a CVE fix would wait on unrelated updates",
+      "matchManagers": [
+        "helm-values"
+      ],
+      "matchFileNames": [
+        "charts/prometheus-federator/values.yaml"
+      ],
+      "matchUpdateTypes": [
+        "patch",
+        "minor"
+      ],
+      "groupName": "chart images",
+      "groupSlug": "chart-images"
+    },
+    {
+      "description": "Patch and minor updates automerge, Kubernetes minors and every major stay manual",
       "matchBaseBranches": [
         "main"
       ],
