@@ -10,7 +10,13 @@ RUN mkdir /chroot
 COPY --from=xx / /chroot
 ARG TARGETPLATFORM
 RUN zypper -n refresh
-RUN zypper -n --installroot /chroot install --no-recommends git grep util-linux file
+
+RUN zypper ar -f https://rpm.rancher.io/pkgs/prime pkgs && \
+    rpm --root /chroot --import https://raw.githubusercontent.com/rancher/rancher/refs/heads/main/rancher-rpm-pkgs.key && \
+    zypper --installroot /chroot -n in -r pkgs helm4 yq
+RUN cp /chroot/usr/bin/helm4 /chroot/usr/bin/helm
+RUN zypper -n --installroot /chroot install --no-recommends git grep util-linux file curl gawk jq sed tar gzip
+
 RUN zypper --installroot /chroot clean -a
 RUN rm -rf /chroot/var/cache/zypp/* /chroot/var/log/zypp/* /chroot/etc/zypp/ /chroot/run/zypp.pid
 
