@@ -33,6 +33,12 @@ func (h *handler) getHelmChart(projectID string, valuesContent string, projectHe
 		spec.Chart = h.opts.ManagedChartName
 		spec.Repo = h.opts.ManagedChartRepo
 		spec.Version = h.opts.ManagedChartVersion
+		if len(h.opts.ManagedChartAuthSecret) > 0 {
+			spec.AuthSecret = &v1.LocalObjectReference{Name: h.opts.ManagedChartAuthSecret}
+		}
+		if len(h.opts.ManagedChartRepoCAConfigMap) > 0 && h.opts.ManagedChartRepoUsesHTTPS() {
+			spec.RepoCAConfigMap = &v1.LocalObjectReference{Name: h.opts.ManagedChartRepoCAConfigMap}
+		}
 	} else {
 		spec.Chart = releaseName
 		spec.ChartContent = h.opts.ChartContent

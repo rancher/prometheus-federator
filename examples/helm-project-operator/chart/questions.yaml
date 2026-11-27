@@ -33,6 +33,18 @@ questions:
   type: string
   required: false
   group: Managed Chart
+- variable: chartSource.authSecretName
+  label: Chart Repository Credentials
+  description: Optional. Name of a basic-auth Secret in the operator namespace. The Secret must contain username and password for the Helm repository.
+  type: string
+  required: false
+  group: Managed Chart
+- variable: chartSource.repoCAConfigMapName
+  label: Chart Repository CA
+  description: Optional. Name of a ConfigMap in the operator namespace containing the private CA for an https Helm repository. Leave empty for an http repository.
+  type: string
+  required: false
+  group: Managed Chart
 - variable: releaseRoleBindings.clusterRoleRefs.admin
   label: Admin ClusterRole
   description: By default, admin selects Project Owners. This can be overridden to a different ClusterRole (e.g. rt-xxxxx)

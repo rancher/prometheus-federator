@@ -42,6 +42,12 @@ spec:
 {{- if .Values.chartSource.version }}
           - --managed-chart-version={{ .Values.chartSource.version }}
 {{- end }}
+{{- if .Values.chartSource.authSecretName }}
+          - --managed-chart-auth-secret={{ .Values.chartSource.authSecretName }}
+{{- end }}
+{{- if .Values.chartSource.repoCAConfigMapName }}
+          - --managed-chart-repo-ca-config-map={{ .Values.chartSource.repoCAConfigMapName }}
+{{- end }}
 {{- if .Values.global.cattle.projectLabel }}
           - --project-label={{ .Values.global.cattle.projectLabel }}
 {{- end }}
