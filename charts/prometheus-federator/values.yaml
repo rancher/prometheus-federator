@@ -48,11 +48,14 @@ helmProjectOperator:
   ## name, repo, and version must all be set to let the operator deploy an approved project monitoring chart.
   ## authSecretName is optional. It names a kubernetes.io/basic-auth Secret in this release's namespace.
   ## The Secret data keys must be username and password. The Helm job uses them for the Helm repository only.
+  ## repoCAConfigMapName is optional. It names a ConfigMap in this namespace that holds the private CA
+  ## for an https chart repository. It is not applied when repo is http.
   chartSource:
     name: ""
     repo: ""
     version: ""
     authSecretName: ""
+    repoCAConfigMapName: ""
 
   ## projectReleaseNamespaces are auto-generated namespaces that are created to host Helm Releases
   ## managed by this operator on behalf of a ProjectHelmChart

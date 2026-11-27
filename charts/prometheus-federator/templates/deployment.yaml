@@ -45,6 +45,9 @@ spec:
 {{- if .Values.helmProjectOperator.chartSource.authSecretName }}
           - --managed-chart-auth-secret={{ .Values.helmProjectOperator.chartSource.authSecretName }}
 {{- end }}
+{{- if .Values.helmProjectOperator.chartSource.repoCAConfigMapName }}
+          - --managed-chart-repo-ca-config-map={{ .Values.helmProjectOperator.chartSource.repoCAConfigMapName }}
+{{- end }}
 {{- if .Values.global.cattle.projectLabel }}
           - --project-label={{ .Values.global.cattle.projectLabel }}
 {{- end }}

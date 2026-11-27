@@ -61,6 +61,12 @@ questions:
   type: string
   required: false
   group: Project Monitoring Chart
+- variable: helmProjectOperator.chartSource.repoCAConfigMapName
+  label: Project Monitoring Chart Repository CA
+  description: Optional. Name of a ConfigMap in the Prometheus Federator namespace containing the private CA for an https Helm repository. Leave empty for an http repository.
+  type: string
+  required: false
+  group: Project Monitoring Chart
 - variable: helmProjectOperator.valuesOverride.grafana.image.repository
   label: Grafana image
   description: Required. Grafana image to be deployed.

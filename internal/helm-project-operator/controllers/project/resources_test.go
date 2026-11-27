@@ -130,4 +130,61 @@ func TestGetHelmChartSetsManagedChartAuthSecret(t *testing.T) {
 	if helmChart.Spec.AuthSecret == nil || helmChart.Spec.AuthSecret.Name != "project-monitoring-chart-repo" {
 		t.Fatalf("expected auth secret project-monitoring-chart-repo, got %#v", helmChart.Spec.AuthSecret)
 	}
+	if helmChart.Spec.RepoCAConfigMap != nil {
+		t.Fatalf("expected no repo CA, got %#v", helmChart.Spec.RepoCAConfigMap)
+	}
+}
+
+func TestGetHelmChartSetsRepoCAForHTTPSRepository(t *testing.T) {
+	t.Parallel()
+
+	projectHelmChart := &v1alpha1.ProjectHelmChart{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "project-monitoring",
+			Namespace: "cattle-project-p1",
+		},
+		Spec: v1alpha1.ProjectHelmChartSpec{
+			HelmAPIVersion: "monitoring.cattle.io/v1alpha1",
+		},
+	}
+
+	httpsChart := (&handler{
+		systemNamespace: "cattle-monitoring-system",
+		opts: common.Options{
+			OperatorOptions: common.OperatorOptions{
+				ReleaseName:    "monitoring",
+				HelmAPIVersion: "monitoring.cattle.io/v1alpha1",
+			},
+			RuntimeOptions: common.RuntimeOptions{
+				ManagedChartName:            "project-monitoring-contract",
+				ManagedChartRepo:            "https://charts.example.test",
+				ManagedChartVersion:         "0.7.0",
+				ManagedChartRepoCAConfigMap: "project-monitoring-repo-ca",
+			},
+		},
+	}).getHelmChart("p1", "values: {}", projectHelmChart)
+
+	if httpsChart.Spec.RepoCAConfigMap == nil || httpsChart.Spec.RepoCAConfigMap.Name != "project-monitoring-repo-ca" {
+		t.Fatalf("expected repo CA configmap for https repository, got %#v", httpsChart.Spec.RepoCAConfigMap)
+	}
+
+	httpChart := (&handler{
+		systemNamespace: "cattle-monitoring-system",
+		opts: common.Options{
+			OperatorOptions: common.OperatorOptions{
+				ReleaseName:    "monitoring",
+				HelmAPIVersion: "monitoring.cattle.io/v1alpha1",
+			},
+			RuntimeOptions: common.RuntimeOptions{
+				ManagedChartName:            "project-monitoring-contract",
+				ManagedChartRepo:            "http://charts.example.test",
+				ManagedChartVersion:         "0.7.0",
+				ManagedChartRepoCAConfigMap: "project-monitoring-repo-ca",
+			},
+		},
+	}).getHelmChart("p1", "values: {}", projectHelmChart)
+
+	if httpChart.Spec.RepoCAConfigMap != nil {
+		t.Fatalf("expected no repo CA for http repository, got %#v", httpChart.Spec.RepoCAConfigMap)
+	}
 }

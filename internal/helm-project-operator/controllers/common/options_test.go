@@ -73,6 +73,29 @@ func TestOptionsValidateChartSource(t *testing.T) {
 			}(),
 			wantErr: true,
 		},
+		{
+			name: "https repository accepts a private CA configmap",
+			options: func() Options {
+				opts := base
+				opts.ManagedChartName = "rancher-project-monitoring"
+				opts.ManagedChartRepo = "https://charts.example.test"
+				opts.ManagedChartVersion = "1.2.3"
+				opts.ManagedChartRepoCAConfigMap = "project-monitoring-repo-ca"
+				return opts
+			}(),
+		},
+		{
+			name: "private CA is rejected for an http repository",
+			options: func() Options {
+				opts := base
+				opts.ManagedChartName = "rancher-project-monitoring"
+				opts.ManagedChartRepo = "http://charts.example.test"
+				opts.ManagedChartVersion = "1.2.3"
+				opts.ManagedChartRepoCAConfigMap = "project-monitoring-repo-ca"
+				return opts
+			}(),
+			wantErr: true,
+		},
 	}
 
 	for _, tt := range tests {

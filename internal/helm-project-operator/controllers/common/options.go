@@ -2,6 +2,7 @@ package common
 
 import (
 	"errors"
+	"net/url"
 
 	"github.com/sirupsen/logrus"
 )
@@ -26,6 +27,14 @@ func (opts Options) Validate() error {
 
 	if len(opts.ManagedChartAuthSecret) > 0 && (len(opts.ManagedChartName) == 0 || len(opts.ManagedChartRepo) == 0 || len(opts.ManagedChartVersion) == 0) {
 		return errors.New("must provide --managed-chart-name, --managed-chart-repo, and --managed-chart-version when --managed-chart-auth-secret is set")
+	}
+
+	if len(opts.ManagedChartRepoCAConfigMap) > 0 && (len(opts.ManagedChartName) == 0 || len(opts.ManagedChartRepo) == 0 || len(opts.ManagedChartVersion) == 0) {
+		return errors.New("must provide --managed-chart-name, --managed-chart-repo, and --managed-chart-version when --managed-chart-repo-ca-config-map is set")
+	}
+
+	if len(opts.ManagedChartRepoCAConfigMap) > 0 && !opts.ManagedChartRepoUsesHTTPS() {
+		return errors.New("--managed-chart-repo-ca-config-map is only used when --managed-chart-repo is an https URL")
 	}
 
 	if opts.UsesManagedChartReference() {
@@ -60,4 +69,12 @@ func (opts Options) Validate() error {
 
 func (opts Options) UsesManagedChartReference() bool {
 	return len(opts.ManagedChartName) > 0 || len(opts.ManagedChartRepo) > 0 || len(opts.ManagedChartVersion) > 0
+}
+
+// ManagedChartRepoUsesHTTPS reports whether the managed chart repository is served over TLS.
+// A private CA is only sent to the Helm job for https repositories.
+func (opts Options) ManagedChartRepoUsesHTTPS() bool {
+	parsed, err := url.Parse(opts.ManagedChartRepo)
+
+	return err == nil && parsed.Scheme == "https"
 }

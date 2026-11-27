@@ -55,6 +55,10 @@ type RuntimeOptions struct {
 	// The Secret data keys must be username and password. Git credentials are not used.
 	ManagedChartAuthSecret string `usage:"Name of a basic-auth Secret in the operator namespace for the managed chart repository" env:"MANAGED_CHART_AUTH_SECRET"`
 
+	// ManagedChartRepoCAConfigMap is the name of a ConfigMap in the operator namespace that holds
+	// the private CA used to verify an https managed chart repository.
+	ManagedChartRepoCAConfigMap string `usage:"Name of a ConfigMap in the operator namespace containing the CA for an https managed chart repository" env:"MANAGED_CHART_REPO_CA_CONFIG_MAP"`
+
 	// ProjectLabel is the label that identifies projects
 	// Note: this field is optional and ensures that ProjectHelmCharts auto-infer their spec.projectNamespaceSelector
 	// If provided, any spec.projectNamespaceSelector provided will be ignored
@@ -159,6 +163,10 @@ func (opts RuntimeOptions) Validate() error {
 
 	if len(opts.ManagedChartAuthSecret) > 0 {
 		logrus.Infof("Using Secret %s to authenticate to the managed chart repository", opts.ManagedChartAuthSecret)
+	}
+
+	if len(opts.ManagedChartRepoCAConfigMap) > 0 {
+		logrus.Infof("Using ConfigMap %s as the CA for the https managed chart repository", opts.ManagedChartRepoCAConfigMap)
 	}
 
 	if opts.DisableHardening {
